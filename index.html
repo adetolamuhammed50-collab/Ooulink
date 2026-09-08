@@ -35,17 +35,41 @@
       font-weight: 800;
       color: #16834b;
     }
-<div class="location" onclick="showLocations()">📍 <span id="selectedLocation">Choose your location</span></div>
 
-<div id="locationMenu" class="location-menu">
-  <div class="location-title">Choose your location</div>
+    .location {
+      margin-top: 5px;
+      color: #777;
+      font-size: 14px;
+      cursor: pointer;
+    }
 
-  <button onclick="selectLocation('OOU — Ago-Iwoye')">📍 OOU — Ago-Iwoye</button>
-  <button onclick="selectLocation('OOU — Ibogun Campus')">📍 OOU — Ibogun Campus</button>
-  <button onclick="selectLocation('Sagamu')">📍 Sagamu</button>
-  <button onclick="selectLocation('Ayetoro')">📍 Ayetoro</button>
-  <button onclick="selectLocation('Other')">📍 Other</button>
-</div>
+    .location-menu {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      background: white;
+      border: 1px solid #e8ece9;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    .location-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .location-menu button {
+      width: 100%;
+      display: block;
+      padding: 12px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 10px;
+      background: #f5f7f6;
+      color: #17201b;
+      text-align: left;
+      font-size: 14px;
+    }
 
     .hero {
       margin: 20px;
@@ -81,16 +105,15 @@
     }
 
     .post {
-background: white;
-color: #16834b;
-display: inline-block;
-text-decoration: none;
-text-align: center;
-padding: 12px 18px;
-border-radius: 12px;
-font-weight: bold;
-font-size: 14px;
-}
+      background: white;
+      color: #16834b;
+      display: inline-block;
+      text-decoration: none;
+      text-align: center;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 14px;
     }
 
     .find {
@@ -187,7 +210,34 @@ font-size: 14px;
 
   <header>
     <div class="logo">OOULink</div>
-    <div class="location">📍 Choose your location</div>
+
+    <div class="location" onclick="showLocations()">
+      📍 <span id="selectedLocation">Choose your location</span>
+    </div>
+
+    <div id="locationMenu" class="location-menu">
+      <div class="location-title">Choose your location</div>
+
+      <button onclick="selectLocation('OOU — Ago-Iwoye')">
+        📍 OOU — Ago-Iwoye
+      </button>
+
+      <button onclick="selectLocation('OOU — Ibogun Campus')">
+        📍 OOU — Ibogun Campus
+      </button>
+
+      <button onclick="selectLocation('Sagamu')">
+        📍 Sagamu
+      </button>
+
+      <button onclick="selectLocation('Ayetoro')">
+        📍 Ayetoro
+      </button>
+
+      <button onclick="selectLocation('Other')">
+        📍 Other
+      </button>
+    </div>
   </header>
 
   <section class="hero">
@@ -262,3 +312,6 @@ font-size: 14px;
     document.getElementById("locationMenu").style.display = "none";
   }
 </script>
+
+</body>
+</html>
