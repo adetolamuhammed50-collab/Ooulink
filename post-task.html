@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post a Task — OOULink</title>  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f5f7f6;
+      color: #17201b;
+    }
+
+    .app {
+      max-width: 480px;
+      min-height: 100vh;
+      margin: auto;
+      background: white;
+      padding-bottom: 30px;
+    }
+
+    header {
+      padding: 22px 20px 15px;
+      border-bottom: 1px solid #e8ece9;
+    }
+
+    .back {
+      display: inline-block;
+      text-decoration: none;
+      color: #16834b;
+      font-size: 15px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 25px;
+      margin-bottom: 7px;
+    }
+
+    .subtitle {
+      color: #6b756f;
+      font-size: 14px;
+    }
+
+    .form {
+      padding: 22px 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid #d9dfdb;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 20px;
+      background: white;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #16834b;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .row > div {
+      flex: 1;
+    }
+
+    .post-button {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      background: #16834b;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    .post-button:active {
+      transform: scale(0.98);
+    }
+
+    .note {
+      margin-top: 15px;
+      padding: 13px;
+      background: #f0f8f3;
+      border-radius: 10px;
+      color: #416050;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+  </style></head><body>  <div class="app"><header>
+  <a href="index.html" class="back">← Back</a>
+
+  <h1>Post a Task</h1>
+
+  <p class="subtitle">
+    Tell people around you what you need done.
+  </p>
+</header>
+
+<main class="form">
+
+  <label for="title">What do you need done?</label>
+  <input
+    type="text"
+    id="title"
+    placeholder="e.g. Print & Deliver Assignment"
+  >
+
+  <label for="description">Describe the task</label>
+  <textarea
+    id="description"
+    placeholder="Give runners enough information to understand what you need..."
+  ></textarea>
+
+  <label for="category">Category</label>
+  <select id="category">
+    <option value="">Select a category</option>
+    <option>Errands</option>
+    <option>Physical Help</option>
+    <option>Digital Work</option>
+    <option>Creative Skills</option>
+    <option>Academic Support</option>
+    <option>Campus Services</option>
+    <option>Other</option>
+  </select>
+
+  <label for="location">Where should it be done?</label>
+  <input
+    type="text"
+    id="location"
+    placeholder="e.g. Ibogun Campus"
+  >
+
+  <div class="row">
+
+    <div>
+      <label for="budget">Budget (₦)</label>
+      <input
+        type="number"
+        id="budget"
+        placeholder="1000"
+        min="0"
+      >
+    </div>
+
+    <div>
+      <label for="deadline">Deadline</label>
+      <input
+        type="datetime-local"
+        id="deadline"
+      >
+    </div>
+
+  </div>
+
+  <button class="post-button" onclick="postTask()">
+    POST TASK
+  </button>
+
+  <div class="note">
+    💡 After posting, we'll eventually connect this to OOULink's
+    payment system so the task can be funded before a runner accepts it.
+  </div>
+
+</main>
+
+  </div>  <script>
+    function postTask() {
+
+      const title = document.getElementById("title").value.trim();
+      const description = document.getElementById("description").value.trim();
+      const category = document.getElementById("category").value;
+      const location = document.getElementById("location").value.trim();
+      const budget = document.getElementById("budget").value;
+      const deadline = document.getElementById("deadline").value;
+
+      if (!title || !description || !category || !location || !budget || !deadline) {
+        alert("Please fill in all the task details.");
+        return;
+      }
+
+      alert(
+        "Task details captured! 🚀\n\n" +
+        "Next step: connect this form to Supabase so the task is actually saved."
+      );
+    }
+  </script></body>
+</html>
