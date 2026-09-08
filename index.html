@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OOULink</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f6f8f7;
+      color: #17231d;
+    }
+
+    .app {
+      max-width: 480px;
+      min-height: 100vh;
+      margin: auto;
+      background: white;
+      padding-bottom: 90px;
+    }
+
+    header {
+      padding: 25px 20px 10px;
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: 800;
+      color: #16834b;
+    }
+
+    .location {
+      margin-top: 5px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    .hero {
+      margin: 20px;
+      padding: 25px 20px;
+      border-radius: 20px;
+      background: #16834b;
+      color: white;
+    }
+
+    .hero h1 {
+      font-size: 28px;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      opacity: .9;
+      margin-bottom: 20px;
+    }
+
+    .buttons {
+      display: grid;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .post {
+      background: white;
+      color: #16834b;
+    }
+
+    .find {
+      background: #0d6238;
+      color: white;
+    }
+
+    .section {
+      padding: 5px 20px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .section-title h2 {
+      font-size: 19px;
+    }
+
+    .section-title span {
+      color: #16834b;
+      font-size: 14px;
+    }
+
+    .task {
+      border: 1px solid #e5e8e6;
+      border-radius: 15px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .task h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .task p {
+      color: #777;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .task-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .price {
+      font-weight: 800;
+      color: #16834b;
+    }
+
+    .tag {
+      background: #edf7f1;
+      color: #16834b;
+      padding: 6px 9px;
+      border-radius: 8px;
+      font-size: 11px;
+    }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: white;
+      border-top: 1px solid #e5e8e6;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 5px;
+    }
+
+    nav div {
+      text-align: center;
+      font-size: 11px;
+      color: #777;
+    }
+
+    nav .active {
+      color: #16834b;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header>
+    <div class="logo">OOULink</div>
+    <div class="location">📍 Ibogun Campus</div>
+  </header>
+
+  <section class="hero">
+    <h1>What do you need done?</h1>
+    <p>Get help from people around you.</p>
+
+    <div class="buttons">
+      <button class="post">🙋 POST A TASK</button>
+      <button class="find">🏃 FIND TASKS</button>
+    </div>
+  </section>
+
+  <section class="section">
+
+    <div class="section-title">
+      <h2>Nearby Tasks</h2>
+      <span>See all</span>
+    </div>
+
+    <div class="task">
+      <h3>🖨️ Print & Deliver Assignment</h3>
+      <p>📍 Ibogun Campus • Due today</p>
+
+      <div class="task-bottom">
+        <span class="price">₦1,000</span>
+        <span class="tag">Printing</span>
+      </div>
+    </div>
+
+    <div class="task">
+      <h3>🍱 Pick Up Food</h3>
+      <p>📍 Ibogun Campus • Due in 1 hour</p>
+
+      <div class="task-bottom">
+        <span class="price">₦700</span>
+        <span class="tag">Errand</span>
+      </div>
+    </div>
+
+    <div class="task">
+      <h3>⌨️ Type Assignment</h3>
+      <p>📍 Ibogun Campus • Due tomorrow</p>
+
+      <div class="task-bottom">
+        <span class="price">₦1,500</span>
+        <span class="tag">Digital</span>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<nav>
+  <div class="active">🏠<br>Home</div>
+  <div>📋<br>My Tasks</div>
+  <div>➕<br>Post</div>
+  <div>🔔<br>Alerts</div>
+  <div>👤<br>Profile</div>
+</nav>
+
+</body>
+</html>
