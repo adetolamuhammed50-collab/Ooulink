@@ -450,20 +450,18 @@
           .is("runner_id", null)
           .select()
           .single();
+if (updateError || !updatedTask) {
+  console.error("ACCEPT TASK ERROR:", updateError);
 
-      if (updateError || !updatedTask) {
+  alert(
+    "Accept failed:\n\n" +
+    (updateError?.message || "No task was updated.") +
+    "\n\nCode: " +
+    (updateError?.code || "unknown")
+  );
 
-        console.error(updateError);
-
-        button.disabled = false;
-        button.textContent = "ACCEPT TASK";
-
-        alert(
-          "Sorry, this task may have already been accepted by someone else."
-        );
-
-        return;
-      }
+  return;
+}
 
       /*
        * Notify the task uploader.
