@@ -3,967 +3,339 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>OOULink — Connect. Get things done. Earn.</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Post a Task — OOULink</title>
 
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
     }
 
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f7f5;
-      color: #222;
-      padding-bottom: 80px;
+      background: #f5f7f6;
+      color: #17201b;
     }
 
     .app {
-      width: 100%;
       max-width: 480px;
       min-height: 100vh;
       margin: auto;
-      background: #fff;
+      background: white;
+      padding-bottom: 30px;
     }
-
-    /* HEADER */
 
     header {
-      padding: 18px 16px 14px;
-      border-bottom: 1px solid #e7ebe8;
-      position: relative;
-      background: white;
+      padding: 22px 20px 15px;
+      border-bottom: 1px solid #e8ece9;
     }
 
-    .top-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .logo {
-      font-size: 23px;
-      font-weight: 800;
-      color: #16834b;
-    }
-
-    .location {
-      margin-top: 10px;
+    .back {
       display: inline-block;
-      background: #f0f6f2;
-      color: #16834b;
-      padding: 8px 11px;
-      border-radius: 9px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .auth-buttons {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .auth-buttons a {
-      text-decoration: none;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 8px 9px;
-      border-radius: 8px;
-    }
-
-    .signup {
-      color: #16834b;
-      border: 1px solid #16834b;
-      background: white;
-    }
-
-    .login {
-      color: white;
-      background: #16834b;
-    }
-
-    .profile-btn {
       text-decoration: none;
       color: #16834b;
-      border: 1px solid #16834b;
-      background: white;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 10px;
-      font-weight: 700;
-    }
-
-    .logout-btn {
-      border: none;
-      color: white;
-      background: #d9534f;
-      padding: 8px 9px;
-      border-radius: 8px;
-      font-size: 10px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    /* LOCATION MENU */
-
-    .location-menu {
-      display: none;
-      position: absolute;
-      top: 105px;
-      left: 16px;
-      right: 16px;
-      background: white;
-      border: 1px solid #dfe5e1;
-      border-radius: 13px;
-      padding: 10px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-      z-index: 2000;
-    }
-
-    .location-title {
-      font-size: 13px;
-      font-weight: 700;
-      padding: 8px;
-      color: #333;
-    }
-
-    .location-menu button {
-      width: 100%;
-      border: none;
-      background: white;
-      text-align: left;
-      padding: 12px 9px;
-      border-radius: 8px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .location-menu button:hover {
-      background: #f0f6f2;
-    }
-
-    /* HERO */
-
-    .hero {
-      padding: 28px 18px 22px;
-      background: linear-gradient(135deg, #16834b, #0d6238);
-      color: white;
-    }
-
-    .hero h1 {
-      margin: 0 0 9px;
-      font-size: 29px;
-      line-height: 1.15;
-    }
-
-    .hero p {
-      margin: 0;
-      font-size: 14px;
-      line-height: 1.5;
-      opacity: 0.92;
-    }
-
-    .hero-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .post,
-    .find {
-      display: block;
-      text-decoration: none;
-      text-align: center;
-      padding: 14px 10px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .post {
-      background: white;
-      color: #16834b;
-      border: 1px solid #16834b;
-    }
-
-    .find {
-      background: #0a4d2c;
-      color: white;
-    }
-
-    /* CONTENT */
-
-    .section {
-      padding: 22px 16px 5px;
-    }
-
-    .section-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 13px;
-    }
-
-    .section-heading h2 {
-      margin: 0;
-      font-size: 18px;
-    }
-
-    .section-heading a {
-      color: #16834b;
-      font-size: 12px;
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    /* TASK CARDS */
-
-    .task-card {
-      border: 1px solid #e3e8e5;
-      border-radius: 14px;
-      padding: 15px;
-      margin-bottom: 12px;
-      background: white;
-    }
-
-    .task-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .task-title {
       font-size: 15px;
-      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 25px;
       margin-bottom: 7px;
     }
 
-    .task-price {
-      color: #16834b;
+    .subtitle {
+      color: #6b756f;
+      font-size: 14px;
+    }
+
+    .form {
+      padding: 22px 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid #d9dfdb;
+      border-radius: 12px;
+      padding: 14px;
       font-size: 15px;
-      font-weight: 800;
-      white-space: nowrap;
+      outline: none;
+      margin-bottom: 20px;
+      background: white;
     }
 
-    .task-info {
-      color: #777;
-      font-size: 12px;
-      line-height: 1.7;
+    textarea {
+      min-height: 110px;
+      resize: vertical;
     }
 
-    .tag {
-      display: inline-block;
-      margin-top: 8px;
-      background: #edf7f1;
-      color: #16834b;
-      padding: 5px 8px;
-      border-radius: 6px;
-      font-size: 10px;
-      font-weight: 700;
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #16834b;
     }
 
-    /* HOW IT WORKS */
+    .row {
+      display: flex;
+      gap: 12px;
+    }
 
-    .how {
-      margin: 20px 16px;
-      padding: 18px;
-      background: #f4f8f5;
+    .row > div {
+      flex: 1;
+    }
+
+    .post-button {
+      width: 100%;
+      border: none;
       border-radius: 14px;
-    }
-
-    .how h2 {
-      margin: 0 0 15px;
-      font-size: 17px;
-    }
-
-    .step {
-      display: flex;
-      gap: 11px;
-      margin-bottom: 14px;
-    }
-
-    .step:last-child {
-      margin-bottom: 0;
-    }
-
-    .step-number {
-      min-width: 27px;
-      height: 27px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 16px;
       background: #16834b;
       color: white;
-      border-radius: 50%;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 5px;
     }
 
-    .step-text strong {
-      display: block;
+    .post-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .note {
+      margin-top: 15px;
+      padding: 13px;
+      background: #f0f8f3;
+      border-radius: 10px;
+      color: #416050;
       font-size: 13px;
-      margin-bottom: 3px;
-    }
-
-    .step-text span {
-      color: #777;
-      font-size: 11px;
-      line-height: 1.4;
-    }
-
-    /* FOOTER NAV */
-
-    nav {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 480px;
-      background: white;
-      border-top: 1px solid #e5e8e6;
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 5px;
-      z-index: 1000;
-    }
-
-    nav a {
-      text-align: center;
-      font-size: 11px;
-      color: #777;
-      text-decoration: none;
-    }
-
-    nav a.active {
-      color: #16834b;
-      font-weight: 700;
-    }
-
-    /* LOGIN STATUS */
-
-    .welcome {
-      display: none;
-      padding: 10px 16px 0;
-      color: #555;
-      font-size: 12px;
-    }
-
-    @media (max-width: 360px) {
-      .logo {
-        font-size: 20px;
-      }
-
-      .auth-buttons a,
-      .logout-btn,
-      .profile-btn {
-        font-size: 9px;
-        padding: 7px;
-      }
-
-      .hero h1 {
-        font-size: 26px;
-      }
+      line-height: 1.5;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="app">
+<div class="app">
 
-    <!-- HEADER -->
+  <header>
+    <a href="index.html" class="back">← Back</a>
 
-    <header>
+    <h1>Post a Task</h1>
 
-      <div class="top-row">
+    <p class="subtitle">
+      Tell people around you what you need done.
+    </p>
+  </header>
 
-        <div class="logo">
-          OOULink
-        </div>
+  <main class="form">
 
-        <!-- LOGGED OUT -->
-        <div class="auth-buttons" id="loggedOutButtons">
-
-          <a href="signup.html" class="signup">
-            SIGN UP
-          </a>
-
-          <a href="login.html" class="login">
-            LOG IN
-          </a>
-
-        </div>
-
-        <!-- LOGGED IN -->
-        <div class="auth-buttons" id="loggedInButtons" style="display:none;">
-
-          <a href="profile.html" class="profile-btn">
-            👤 PROFILE
-          </a>
-
-          <button class="logout-btn" id="logoutButton">
-            LOG OUT
-          </button>
-
-        </div>
-
-      </div>
-
-      <div
-        class="location"
-        onclick="showLocations()"
-      >
-        📍 <span id="selectedLocation">
-          Choose your location
-        </span>
-      </div>
-
-      <!-- LOCATION MENU -->
-
-      <div id="locationMenu" class="location-menu">
-
-        <div class="location-title">
-          Choose your location
-        </div>
-
-        <button onclick="selectLocation('OOU — Ago-Iwoye')">
-          📍 OOU — Ago-Iwoye
-        </button>
-
-        <button onclick="selectLocation('OOU — Ibogun Campus')">
-          📍 OOU — Ibogun Campus
-        </button>
-
-        <button onclick="selectLocation('Sagamu')">
-          📍 Sagamu
-        </button>
-
-        <button onclick="selectLocation('Ayetoro')">
-          📍 Ayetoro
-        </button>
-
-        <button onclick="selectLocation('Other')">
-          📍 Other
-        </button>
-
-      </div>
-
-    </header>
-
-    <!-- WELCOME -->
-
-    <div class="welcome" id="welcomeMessage"></div>
-
-    <!-- HERO -->
-
-    <section class="hero">
-
-      <h1>
-        What do you need done?
-      </h1>
-
-      <p>
-        Get help from people around you.
-        Complete tasks, earn money and get things done.
-      </p>
-
-      <div class="hero-buttons">
-
-        <a
-          href="post-task.html"
-          class="post"
-        >
-          🙋 POST A TASK
-        </a>
-
-        <a
-          href="find-tasks.html"
-          class="find"
-        >
-          🏃 FIND TASKS
-        </a>
-
-      </div>
-
-    </section>
-
-    <!-- NEARBY TASKS -->
-
-    <section class="section">
-
-      <div class="section-heading">
-
-        <h2>
-          Nearby Tasks
-        </h2>
-
-        <a href="find-tasks.html">
-          See all
-        </a>
-
-      </div>
-
-      <!-- TASK 1 -->
-
-      <div class="task-card">
-
-        <div class="task-top">
-
-          <div>
-            <div class="task-title">
-              🖨️ Print & Deliver Assignment
-            </div>
-
-            <div class="task-info">
-              📍 OOU — Ibogun Campus<br>
-              ⏰ Due today
-            </div>
-          </div>
-
-          <div class="task-price">
-            ₦1,000
-          </div>
-
-        </div>
-
-        <span class="tag">
-          Printing
-        </span>
-
-      </div>
-
-      <!-- TASK 2 -->
-
-      <div class="task-card">
-
-        <div class="task-top">
-
-          <div>
-            <div class="task-title">
-              🍱 Pick Up Food
-            </div>
-
-            <div class="task-info">
-              📍 OOU — Ibogun Campus<br>
-              ⏰ Due in 1 hour
-            </div>
-          </div>
-
-          <div class="task-price">
-            ₦700
-          </div>
-
-        </div>
-
-        <span class="tag">
-          Errand
-        </span>
-
-      </div>
-
-      <!-- TASK 3 -->
-
-      <div class="task-card">
-
-        <div class="task-top">
-
-          <div>
-            <div class="task-title">
-              ⌨️ Type Assignment
-            </div>
-
-            <div class="task-info">
-              📍 OOU — Ibogun Campus<br>
-              ⏰ Due tomorrow
-            </div>
-          </div>
-
-          <div class="task-price">
-            ₦1,500
-          </div>
-
-        </div>
-
-        <span class="tag">
-          Digital
-        </span>
-
-      </div>
-
-    </section>
-
-    <!-- HOW IT WORKS -->
-
-    <section class="how">
-
-      <h2>
-        How OOULink Works
-      </h2>
-
-      <div class="step">
-
-        <div class="step-number">
-          1
-        </div>
-
-        <div class="step-text">
-
-          <strong>
-            Post a task
-          </strong>
-
-          <span>
-            Tell people what you need done,
-            where and your budget.
-          </span>
-
-        </div>
-
-      </div>
-
-      <div class="step">
-
-        <div class="step-number">
-          2
-        </div>
-
-        <div class="step-text">
-
-          <strong>
-            Find someone
-          </strong>
-
-          <span>
-            A nearby person accepts your task
-            and gets to work.
-          </span>
-
-        </div>
-
-      </div>
-
-      <div class="step">
-
-        <div class="step-number">
-          3
-        </div>
-
-        <div class="step-text">
-
-          <strong>
-            Get it done
-          </strong>
-
-          <span>
-            Confirm completion and leave a rating.
-          </span>
-
-        </div>
-
-      </div>
-
-      <div class="step">
-
-        <div class="step-number">
-          4
-        </div>
-
-        <div class="step-text">
-
-          <strong>
-            Earn
-          </strong>
-
-          <span>
-            Complete tasks for others and earn money.
-          </span>
-
-        </div>
-
-      </div>
-
-    </section>
-
-  </div>
-
-  <!-- BOTTOM NAV -->
-
-  <nav>
-
-    <a
-      href="index.html"
-      class="active"
+    <label for="title">What do you need done?</label>
+    <input
+      type="text"
+      id="title"
+      placeholder="e.g. Print & Deliver Assignment"
     >
-      🏠<br>
-      Home
-    </a>
 
-    <a href="my-tasks.html">
-      📋<br>
-      My Tasks
-    </a>
+    <label for="description">Describe the task</label>
+    <textarea
+      id="description"
+      placeholder="Give runners enough information to understand what you need..."
+    ></textarea>
 
-    <a href="post-task.html">
-      ➕<br>
-      Post
-    </a>
+    <label for="category">Category</label>
+    <select id="category">
+      <option value="">Select a category</option>
+      <option>Errands</option>
+      <option>Physical Help</option>
+      <option>Digital Work</option>
+      <option>Creative Skills</option>
+      <option>Academic Support</option>
+      <option>Campus Services</option>
+      <option>Other</option>
+    </select>
 
-    <a href="alerts.html">
-      🔔<br>
-      Alerts
-    </a>
+    <label for="location">Where should it be done?</label>
+    <input
+      type="text"
+      id="location"
+      placeholder="e.g. Ibogun Campus"
+    >
 
-    <a href="profile.html">
-      👤<br>
-      Profile
-    </a>
+    <div class="row">
 
-  </nav>
+      <div>
+        <label for="budget">Budget (₦)</label>
+        <input
+          type="number"
+          id="budget"
+          placeholder="1000"
+          min="1"
+        >
+      </div>
+
+      <div>
+        <label for="deadline">Deadline</label>
+        <input
+          type="datetime-local"
+          id="deadline"
+        >
+      </div>
+
+    </div>
+
+    <button class="post-button" id="postButton" onclick="postTask()">
+      POST TASK
+    </button>
+
+    <div class="note">
+      💡 Payment will be connected later. For now, your task will be saved
+      securely so runners can see it.
+    </div>
+
+  </main>
+
+</div>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+  const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+
+  const supabaseClient =
+    supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-  <!-- SUPABASE + OOULINK LOGIC -->
+  async function postTask() {
 
-  <script>
+    const title =
+      document.getElementById("title").value.trim();
 
-    /* =========================
-       SUPABASE CONFIG
-    ========================= */
+    const description =
+      document.getElementById("description").value.trim();
 
-    const SUPABASE_URL =
-      "https://dthvdxgxesomltlruogp.supabase.co";
+    const category =
+      document.getElementById("category").value;
 
-    const SUPABASE_KEY =
-      "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+    const location =
+      document.getElementById("location").value.trim();
 
-    const supabaseClient =
-      supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
+    const budget =
+      document.getElementById("budget").value;
+
+    const deadline =
+      document.getElementById("deadline").value;
+
+    const button =
+      document.getElementById("postButton");
+
+
+    /* Check fields */
+
+    if (
+      !title ||
+      !description ||
+      !category ||
+      !location ||
+      !budget ||
+      !deadline
+    ) {
+      alert("Please fill in all the task details.");
+      return;
+    }
+
+
+    /* Check login */
+
+    const {
+      data: { session }
+    } = await supabaseClient.auth.getSession();
+
+
+    if (!session) {
+
+      alert(
+        "You need to be logged in to post a task."
       );
 
+      window.location.href = "login.html";
 
-    /* =========================
-       LOCATION
-    ========================= */
-
-    function showLocations() {
-
-      const menu =
-        document.getElementById("locationMenu");
-
-      if (menu.style.display === "block") {
-
-        menu.style.display = "none";
-
-      } else {
-
-        menu.style.display = "block";
-
-      }
-
+      return;
     }
 
 
-    function selectLocation(location) {
+    /* Prevent double submission */
 
-      document.getElementById(
-        "selectedLocation"
-      ).textContent = location;
-
-      localStorage.setItem(
-        "ooulink_location",
-        location
-      );
-
-      document.getElementById(
-        "locationMenu"
-      ).style.display = "none";
-
-    }
+    button.disabled = true;
+    button.textContent = "POSTING...";
 
 
-    /* Load saved location */
+    /* Save task */
 
-    const savedLocation =
-      localStorage.getItem(
-        "ooulink_location"
-      );
-
-    if (savedLocation) {
-
-      document.getElementById(
-        "selectedLocation"
-      ).textContent = savedLocation;
-
-    }
-
-
-    /* Close location menu when tapping outside */
-
-    document.addEventListener(
-      "click",
-      function(event) {
-
-        const menu =
-          document.getElementById(
-            "locationMenu"
-          );
-
-        const locationButton =
-          document.querySelector(
-            ".location"
-          );
-
-        if (
-          !menu.contains(event.target) &&
-          !locationButton.contains(event.target)
-        ) {
-
-          menu.style.display = "none";
-
-        }
-
-      }
-    );
-
-
-    /* =========================
-       AUTH STATE
-    ========================= */
-
-    async function updateAuthUI() {
-
-      const {
-        data: {
-          session
-        }
-      } =
-        await supabaseClient.auth.getSession();
-
-
-      const loggedOutButtons =
-        document.getElementById(
-          "loggedOutButtons"
-        );
-
-      const loggedInButtons =
-        document.getElementById(
-          "loggedInButtons"
-        );
-
-      const welcomeMessage =
-        document.getElementById(
-          "welcomeMessage"
-        );
-
-
-      if (session) {
-
-        loggedOutButtons.style.display =
-          "none";
-
-        loggedInButtons.style.display =
-          "flex";
-
-        const user =
-          session.user;
-
-        const fullName =
-          user.user_metadata?.full_name;
-
-
-        if (fullName) {
-
-          welcomeMessage.textContent =
-            "Welcome back, " +
-            fullName +
-            " 👋";
-
-        } else {
-
-          welcomeMessage.textContent =
-            "Welcome back 👋";
-
-        }
-
-        welcomeMessage.style.display =
-          "block";
-
-      } else {
-
-        loggedOutButtons.style.display =
-          "flex";
-
-        loggedInButtons.style.display =
-          "none";
-
-        welcomeMessage.style.display =
-          "none";
-
-      }
-
-    }
-
-
-    /* Check login immediately */
-
-    updateAuthUI();
-
-
-    /* Watch for login/logout */
-
-    supabaseClient.auth.onAuthStateChange(
-      function(event, session) {
-
-        updateAuthUI();
-
-      }
-    );
-
-
-    /* =========================
-       LOGOUT
-    ========================= */
-
-    document
-      .getElementById("logoutButton")
-      .addEventListener(
-        "click",
-        async function() {
-
-          const {
-            error
-          } =
-            await supabaseClient.auth.signOut();
-
-
-          if (error) {
-
-            alert(
-              "Logout failed: " +
-              error.message
-            );
-
-            return;
-
+    const { data, error } =
+      await supabaseClient
+        .from("tasks")
+        .insert([
+          {
+            user_id: session.user.id,
+            title: title,
+            description: description,
+            category: category,
+            location: location,
+            budget: Number(budget),
+            deadline: new Date(deadline).toISOString(),
+            status: "open"
           }
+        ])
+        .select()
+        .single();
 
 
-          window.location.href =
-            "index.html";
+    /* Handle error */
 
-        }
+    if (error) {
+
+      console.error(error);
+
+      alert(
+        "Could not post your task.\n\n" +
+        error.message
       );
 
-  </script>
+      button.disabled = false;
+      button.textContent = "POST TASK";
+
+      return;
+    }
+
+
+    /* Success */
+
+    alert(
+      "Task posted successfully! 🎉\n\n" +
+      "Your task is now available for runners to find."
+    );
+
+    window.location.href =
+      "find-tasks.html";
+
+  }
+
+</script>
 
 </body>
 </html>
