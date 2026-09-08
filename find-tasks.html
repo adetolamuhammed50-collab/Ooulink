@@ -5,135 +5,161 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Find Tasks - OOULink</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
     }
 
     body {
-      background: #f6f8f7;
-      color: #17231d;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      color: #172033;
     }
 
     .app {
       max-width: 480px;
-      min-height: 100vh;
       margin: auto;
+      min-height: 100vh;
       background: white;
-      padding-bottom: 30px;
+      padding-bottom: 75px;
     }
 
     header {
-      padding: 25px 20px 15px;
-      border-bottom: 1px solid #e5e8e6;
+      padding: 20px;
+      border-bottom: 1px solid #eee;
     }
 
     .back {
-      color: #16834b;
       text-decoration: none;
+      color: #555;
       font-size: 14px;
     }
 
     h1 {
-      margin-top: 15px;
-      font-size: 25px;
+      margin: 15px 0 5px;
+      font-size: 26px;
     }
 
     .subtitle {
-      margin-top: 6px;
       color: #777;
       font-size: 14px;
+      margin-bottom: 18px;
     }
 
-    .filters {
-      padding: 15px 20px 5px;
-    }
-
-    .filter {
+    .search-box {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #e5e8e6;
-      border-radius: 10px;
-      background: white;
-      font-size: 14px;
+      padding: 14px 15px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 12px;
     }
 
-    .task-list {
+    .search-box:focus {
+      border-color: #111;
+    }
+
+    select {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      background: white;
+      font-size: 15px;
+      outline: none;
+    }
+
+    #tasks {
       padding: 15px 20px;
     }
 
     .task {
-      border: 1px solid #e5e8e6;
+      border: 1px solid #e6e6e6;
       border-radius: 15px;
       padding: 16px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       cursor: pointer;
+      transition: 0.15s;
     }
 
-    .task h2 {
-      font-size: 16px;
+    .task:active {
+      transform: scale(0.98);
+    }
+
+    .category {
+      display: inline-block;
+      font-size: 12px;
+      background: #f0f0f0;
+      padding: 5px 9px;
+      border-radius: 20px;
       margin-bottom: 8px;
+    }
+
+    .task h3 {
+      margin: 3px 0 8px;
+      font-size: 17px;
     }
 
     .task p {
-      color: #777;
+      margin: 6px 0;
+      color: #666;
       font-size: 13px;
-      margin-bottom: 8px;
       line-height: 1.4;
     }
 
-    .task-description {
-      color: #555 !important;
-      margin-top: 5px;
+    .budget {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 10px;
     }
 
-    .task-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 12px;
-    }
-
-    .price {
-      font-weight: 800;
-      color: #16834b;
-    }
-
-    .tag {
-      background: #edf7f1;
-      color: #16834b;
-      padding: 6px 9px;
-      border-radius: 8px;
-      font-size: 11px;
-    }
-
-    .accept {
-      margin-top: 12px;
+    .view-btn {
       width: 100%;
       border: none;
-      border-radius: 10px;
-      padding: 12px;
-      background: #16834b;
+      background: #111;
       color: white;
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 12px;
       font-weight: bold;
       cursor: pointer;
     }
 
-    .empty {
+    .message {
       text-align: center;
-      padding: 45px 20px;
+      padding: 30px 10px;
       color: #777;
       font-size: 14px;
     }
 
-    .loading {
-      text-align: center;
-      padding: 35px 20px;
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: white;
+      border-top: 1px solid #eee;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+
+    nav a {
+      text-decoration: none;
       color: #777;
-      font-size: 14px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    nav a.active {
+      color: #111;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -146,12 +172,18 @@
     <a href="index.html" class="back">← Back</a>
 
     <h1>Find Tasks</h1>
-    <p class="subtitle">Find tasks you can complete and earn.</p>
-  </header>
+    <div class="subtitle">Find tasks you can complete and earn.</div>
 
-  <div class="filters">
-    <select class="filter" id="categoryFilter">
-      <option value="All">All categories</option>
+    <input
+      type="text"
+      id="searchInput"
+      class="search-box"
+      placeholder="🔎 Search tasks..."
+      oninput="filterTasks()"
+    >
+
+    <select id="categoryFilter" onchange="filterTasks()">
+      <option value="all">All Categories</option>
       <option value="Errands">Errands</option>
       <option value="Physical Help">Physical Help</option>
       <option value="Digital Work">Digital Work</option>
@@ -160,22 +192,24 @@
       <option value="Campus Services">Campus Services</option>
       <option value="Other">Other</option>
     </select>
-  </div>
+  </header>
 
-  <section class="task-list" id="taskList">
-    <div class="loading">
-      Loading available tasks...
-    </div>
-  </section>
+  <div id="tasks">
+    <div class="message">Loading tasks...</div>
+  </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<nav>
+  <a href="index.html">🏠<br>Home</a>
+  <a href="my-tasks.html">📋<br>My Tasks</a>
+  <a href="post-task.html">➕<br>Post</a>
+  <a href="alerts.html">🔔<br>Alerts</a>
+  <a href="profile.html">👤<br>Profile</a>
+</nav>
 
 <script>
-
-  const SUPABASE_URL =
-    "https://dthvdxgxesomltlruogp.supabase.co";
+  const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
 
   const SUPABASE_KEY =
     "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
@@ -183,164 +217,108 @@
   const supabaseClient =
     supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-
   let allTasks = [];
 
-
   async function loadTasks() {
-
-    const taskList =
-      document.getElementById("taskList");
 
     const {
       data: { session }
     } = await supabaseClient.auth.getSession();
 
-
     if (!session) {
-
-      taskList.innerHTML = `
-        <div class="empty">
-
-          <h3>Please log in</h3>
-
-          <p style="margin-top:8px;">
-            You need an account to find tasks.
-          </p>
-
-          <button
-            onclick="window.location.href='login.html'"
-            style="
-              margin-top:15px;
-              border:none;
-              border-radius:10px;
-              padding:12px 20px;
-              background:#16834b;
-              color:white;
-              font-weight:bold;
-            "
-          >
-            LOG IN
-          </button>
-
-        </div>
-      `;
-
+      window.location.href = "login.html";
       return;
     }
 
-
-    const {
-      data,
-      error
-    } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from("tasks")
       .select("*")
       .eq("status", "open")
       .order("created_at", { ascending: false });
 
-
     if (error) {
-
+      document.getElementById("tasks").innerHTML =
+        `<div class="message">Unable to load tasks.</div>`;
       console.error(error);
-
-      taskList.innerHTML = `
-        <div class="empty">
-
-          <h3>Couldn't load tasks</h3>
-
-          <p style="margin-top:8px;">
-            ${escapeHtml(error.message)}
-          </p>
-
-        </div>
-      `;
-
       return;
     }
-
 
     allTasks = data || [];
 
-    displayTasks(allTasks);
+    filterTasks();
   }
 
+  function filterTasks() {
+
+    const search =
+      document.getElementById("searchInput")
+        .value
+        .trim()
+        .toLowerCase();
+
+    const category =
+      document.getElementById("categoryFilter").value;
+
+    const filtered = allTasks.filter(task => {
+
+      const matchesSearch =
+        !search ||
+        (task.title || "").toLowerCase().includes(search) ||
+        (task.description || "").toLowerCase().includes(search) ||
+        (task.location || "").toLowerCase().includes(search);
+
+      const matchesCategory =
+        category === "all" ||
+        task.category === category;
+
+      return matchesSearch && matchesCategory;
+    });
+
+    displayTasks(filtered);
+  }
 
   function displayTasks(tasks) {
 
-    const taskList =
-      document.getElementById("taskList");
-
+    const container = document.getElementById("tasks");
 
     if (!tasks.length) {
-
-      taskList.innerHTML = `
-        <div class="empty">
-
-          <h3>No tasks available yet</h3>
-
-          <p style="margin-top:8px;">
-            Check back later for new tasks.
-          </p>
-
-        </div>
-      `;
-
+      container.innerHTML =
+        `<div class="message">No tasks found.</div>`;
       return;
     }
 
-
-    taskList.innerHTML = tasks.map(task => {
-
-      const deadline =
-        new Date(task.deadline);
-
-
-      const formattedDeadline =
-        deadline.toLocaleString([], {
-          dateStyle: "medium",
-          timeStyle: "short"
-        });
-
+    container.innerHTML = tasks.map(task => {
 
       return `
-        <div
-          class="task"
-          onclick="openTask('${task.id}')"
-        >
+        <div class="task" onclick="openTask('${task.id}')">
 
-          <h2>
+          <span class="category">
+            ${escapeHtml(task.category)}
+          </span>
+
+          <h3>
             ${escapeHtml(task.title)}
-          </h2>
+          </h3>
 
           <p>
             📍 ${escapeHtml(task.location)}
           </p>
 
           <p>
-            ⏰ ${formattedDeadline}
+            🕒 ${formatDate(task.deadline)}
           </p>
 
-          <p class="task-description">
+          <p>
             ${escapeHtml(task.description)}
           </p>
 
-          <div class="task-bottom">
-
-            <span class="price">
-              ₦${Number(task.budget).toLocaleString()}
-            </span>
-
-            <span class="tag">
-              ${escapeHtml(task.category)}
-            </span>
-
+          <div class="budget">
+            ₦${Number(task.budget).toLocaleString()}
           </div>
 
           <button
-            class="accept"
-            onclick="event.stopPropagation(); openTask('${task.id}')"
-          >
+            class="view-btn"
+            onclick="event.stopPropagation(); openTask('${task.id}')">
             VIEW TASK
           </button>
 
@@ -350,59 +328,30 @@
     }).join("");
   }
 
-
   function openTask(taskId) {
-
     window.location.href =
       "task-details.html?id=" +
       encodeURIComponent(taskId);
-
   }
 
+  function formatDate(date) {
 
-  function filterTasks() {
+    if (!date) return "No deadline";
 
-    const selected =
-      document.getElementById("categoryFilter").value;
-
-
-    if (selected === "All") {
-
-      displayTasks(allTasks);
-
-      return;
-    }
-
-
-    const filtered =
-      allTasks.filter(
-        task => task.category === selected
-      );
-
-
-    displayTasks(filtered);
+    return new Date(date).toLocaleString();
   }
 
+  function escapeHtml(text) {
 
-  function escapeHtml(value) {
-
-    return String(value ?? "")
+    return String(text || "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
-
   }
 
-
-  document
-    .getElementById("categoryFilter")
-    .addEventListener("change", filterTasks);
-
-
   loadTasks();
-
 </script>
 
 </body>
