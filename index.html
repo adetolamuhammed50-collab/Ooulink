@@ -35,12 +35,17 @@
       font-weight: 800;
       color: #16834b;
     }
+<div class="location" onclick="showLocations()">📍 <span id="selectedLocation">Choose your location</span></div>
 
-    .location {
-      margin-top: 5px;
-      color: #777;
-      font-size: 14px;
-    }
+<div id="locationMenu" class="location-menu">
+  <div class="location-title">Choose your location</div>
+
+  <button onclick="selectLocation('OOU — Ago-Iwoye')">📍 OOU — Ago-Iwoye</button>
+  <button onclick="selectLocation('OOU — Ibogun Campus')">📍 OOU — Ibogun Campus</button>
+  <button onclick="selectLocation('Sagamu')">📍 Sagamu</button>
+  <button onclick="selectLocation('Ayetoro')">📍 Ayetoro</button>
+  <button onclick="selectLocation('Other')">📍 Other</button>
+</div>
 
     .hero {
       margin: 20px;
@@ -244,5 +249,16 @@ font-size: 14px;
   <div>👤<br>Profile</div>
 </nav>
 
-</body>
-</html> 
+<script>
+  function showLocations() {
+    const menu = document.getElementById("locationMenu");
+
+    menu.style.display =
+      menu.style.display === "block" ? "none" : "block";
+  }
+
+  function selectLocation(location) {
+    document.getElementById("selectedLocation").textContent = location;
+    document.getElementById("locationMenu").style.display = "none";
+  }
+</script>
