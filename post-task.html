@@ -1,8 +1,11 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Post a Task — OOULink</title>  <style>
+  <title>Post a Task — OOULink</title>
+
+  <style>
     * {
       box-sizing: border-box;
       margin: 0;
@@ -103,8 +106,9 @@
       margin-top: 5px;
     }
 
-    .post-button:active {
-      transform: scale(0.98);
+    .post-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .note {
@@ -116,102 +120,222 @@
       font-size: 13px;
       line-height: 1.5;
     }
-  </style></head><body>  <div class="app"><header>
-  <a href="index.html" class="back">← Back</a>
+  </style>
+</head>
 
-  <h1>Post a Task</h1>
+<body>
 
-  <p class="subtitle">
-    Tell people around you what you need done.
-  </p>
-</header>
+<div class="app">
 
-<main class="form">
+  <header>
+    <a href="index.html" class="back">← Back</a>
 
-  <label for="title">What do you need done?</label>
-  <input
-    type="text"
-    id="title"
-    placeholder="e.g. Print & Deliver Assignment"
-  >
+    <h1>Post a Task</h1>
 
-  <label for="description">Describe the task</label>
-  <textarea
-    id="description"
-    placeholder="Give runners enough information to understand what you need..."
-  ></textarea>
+    <p class="subtitle">
+      Tell people around you what you need done.
+    </p>
+  </header>
 
-  <label for="category">Category</label>
-  <select id="category">
-    <option value="">Select a category</option>
-    <option>Errands</option>
-    <option>Physical Help</option>
-    <option>Digital Work</option>
-    <option>Creative Skills</option>
-    <option>Academic Support</option>
-    <option>Campus Services</option>
-    <option>Other</option>
-  </select>
+  <main class="form">
 
-  <label for="location">Where should it be done?</label>
-  <input
-    type="text"
-    id="location"
-    placeholder="e.g. Ibogun Campus"
-  >
+    <label for="title">What do you need done?</label>
+    <input
+      type="text"
+      id="title"
+      placeholder="e.g. Print & Deliver Assignment"
+    >
 
-  <div class="row">
+    <label for="description">Describe the task</label>
+    <textarea
+      id="description"
+      placeholder="Give runners enough information to understand what you need..."
+    ></textarea>
 
-    <div>
-      <label for="budget">Budget (₦)</label>
-      <input
-        type="number"
-        id="budget"
-        placeholder="1000"
-        min="0"
-      >
+    <label for="category">Category</label>
+    <select id="category">
+      <option value="">Select a category</option>
+      <option>Errands</option>
+      <option>Physical Help</option>
+      <option>Digital Work</option>
+      <option>Creative Skills</option>
+      <option>Academic Support</option>
+      <option>Campus Services</option>
+      <option>Other</option>
+    </select>
+
+    <label for="location">Where should it be done?</label>
+    <input
+      type="text"
+      id="location"
+      placeholder="e.g. Ibogun Campus"
+    >
+
+    <div class="row">
+
+      <div>
+        <label for="budget">Budget (₦)</label>
+        <input
+          type="number"
+          id="budget"
+          placeholder="1000"
+          min="1"
+        >
+      </div>
+
+      <div>
+        <label for="deadline">Deadline</label>
+        <input
+          type="datetime-local"
+          id="deadline"
+        >
+      </div>
+
     </div>
 
-    <div>
-      <label for="deadline">Deadline</label>
-      <input
-        type="datetime-local"
-        id="deadline"
-      >
+    <button class="post-button" id="postButton" onclick="postTask()">
+      POST TASK
+    </button>
+
+    <div class="note">
+      💡 Payment will be connected later. For now, your task will be saved
+      securely so runners can see it.
     </div>
 
-  </div>
+  </main>
 
-  <button class="post-button" onclick="postTask()">
-    POST TASK
-  </button>
+</div>
 
-  <div class="note">
-    💡 After posting, we'll eventually connect this to OOULink's
-    payment system so the task can be funded before a runner accepts it.
-  </div>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-</main>
+<script>
 
-  </div>  <script>
-    function postTask() {
+  const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
 
-      const title = document.getElementById("title").value.trim();
-      const description = document.getElementById("description").value.trim();
-      const category = document.getElementById("category").value;
-      const location = document.getElementById("location").value.trim();
-      const budget = document.getElementById("budget").value;
-      const deadline = document.getElementById("deadline").value;
+  const SUPABASE_KEY =
+    "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
 
-      if (!title || !description || !category || !location || !budget || !deadline) {
-        alert("Please fill in all the task details.");
-        return;
-      }
+  const supabaseClient =
+    supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+  async function postTask() {
+
+    const title =
+      document.getElementById("title").value.trim();
+
+    const description =
+      document.getElementById("description").value.trim();
+
+    const category =
+      document.getElementById("category").value;
+
+    const location =
+      document.getElementById("location").value.trim();
+
+    const budget =
+      document.getElementById("budget").value;
+
+    const deadline =
+      document.getElementById("deadline").value;
+
+    const button =
+      document.getElementById("postButton");
+
+
+    /* Check fields */
+
+    if (
+      !title ||
+      !description ||
+      !category ||
+      !location ||
+      !budget ||
+      !deadline
+    ) {
+      alert("Please fill in all the task details.");
+      return;
+    }
+
+
+    /* Check login */
+
+    const {
+      data: { session }
+    } = await supabaseClient.auth.getSession();
+
+
+    if (!session) {
 
       alert(
-        "Task details captured! 🚀\n\n" +
-        "Next step: connect this form to Supabase so the task is actually saved."
+        "You need to be logged in to post a task."
       );
+
+      window.location.href = "login.html";
+
+      return;
     }
-  </script></body>
+
+
+    /* Prevent double submission */
+
+    button.disabled = true;
+    button.textContent = "POSTING...";
+
+
+    /* Save task */
+
+    const { data, error } =
+      await supabaseClient
+        .from("tasks")
+        .insert([
+          {
+            user_id: session.user.id,
+            title: title,
+            description: description,
+            category: category,
+            location: location,
+            budget: Number(budget),
+            deadline: new Date(deadline).toISOString(),
+            status: "open"
+          }
+        ])
+        .select()
+        .single();
+
+
+    /* Handle error */
+
+    if (error) {
+
+      console.error(error);
+
+      alert(
+        "Could not post your task.\n\n" +
+        error.message
+      );
+
+      button.disabled = false;
+      button.textContent = "POST TASK";
+
+      return;
+    }
+
+
+    /* Success */
+
+    alert(
+      "Task posted successfully! 🎉\n\n" +
+      "Your task is now available for runners to find."
+    );
+
+    window.location.href =
+      "find-tasks.html";
+
+  }
+
+</script>
+
+</body>
 </html>
