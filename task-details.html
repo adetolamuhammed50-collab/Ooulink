@@ -193,6 +193,7 @@
   </main>
 
   <nav class="bottom-nav">
+
     <a href="index.html">
       <span>⌂</span>
       Home
@@ -217,11 +218,13 @@
       <span>👤</span>
       Profile
     </a>
+
   </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
+
     const SUPABASE_URL =
       "https://dthvdxgxesomltlruogp.supabase.co";
 
@@ -240,52 +243,72 @@
     let currentTask = null;
     let currentUser = null;
 
+
     function escapeHtml(value) {
+
       return String(value ?? "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+
     }
+
 
     function formatMoney(amount) {
+
       return "₦" +
         Number(amount).toLocaleString("en-NG");
+
     }
 
+
     function formatDate(date) {
+
       return new Date(date).toLocaleString("en-NG", {
         dateStyle: "medium",
         timeStyle: "short"
       });
+
     }
+
 
     async function loadTask() {
 
       const params =
         new URLSearchParams(window.location.search);
 
-      const taskId = params.get("id");
+      const taskId =
+        params.get("id");
+
 
       if (!taskId) {
+
         content.innerHTML =
           '<div class="error">Task not found.</div>';
+
         return;
       }
+
 
       const { data: sessionData } =
         await supabaseClient.auth.getSession();
 
+
       if (!sessionData.session) {
+
         window.location.href =
           "login.html?redirect=task-details.html?id=" +
           encodeURIComponent(taskId);
+
         return;
       }
 
+
       currentUser =
         sessionData.session.user;
+
 
       const { data: task, error } =
         await supabaseClient
@@ -294,73 +317,107 @@
           .eq("id", taskId)
           .single();
 
+
       if (error || !task) {
 
-        console.error(error);
+        console.error("TASK LOAD ERROR:", error);
 
         content.innerHTML = `
           <div class="error">
+
             We couldn't find this task.
+
             <br><br>
+
             <a href="find-tasks.html">
               ← Back to tasks
             </a>
+
           </div>
         `;
 
         return;
       }
 
+
       currentTask = task;
+
 
       const isOwner =
         task.user_id === currentUser.id;
 
+
       const isTaken =
         task.runner_id !== null;
 
-      let buttonText = "ACCEPT TASK";
-      let disabled = false;
+
+      let buttonText =
+        "ACCEPT TASK";
+
+      let disabled =
+        false;
+
 
       if (isOwner) {
-        buttonText = "YOUR TASK";
-        disabled = true;
+
+        buttonText =
+          "YOUR TASK";
+
+        disabled =
+          true;
       }
 
+
       if (isTaken && !isOwner) {
-        buttonText = "TASK ALREADY ACCEPTED";
-        disabled = true;
+
+        buttonText =
+          "TASK ALREADY ACCEPTED";
+
+        disabled =
+          true;
       }
+
 
       if (
         task.status === "completed" ||
-        task.status === "cancelled" ||
-        task.status === "canceled"
+        task.status === "cancelled"
       ) {
-        buttonText = "TASK CLOSED";
-        disabled = true;
+
+        buttonText =
+          "TASK CLOSED";
+
+        disabled =
+          true;
       }
 
+
       content.innerHTML = `
+
         <div class="category">
           ${escapeHtml(task.category)}
         </div>
+
 
         <h1>
           ${escapeHtml(task.title)}
         </h1>
 
+
         <div class="description">
           ${escapeHtml(task.description)}
         </div>
+
 
         <div class="budget">
           ${formatMoney(task.budget)}
         </div>
 
+
         <div class="info">
 
+
           <div class="info-row">
+
             <div class="label">
               📍 Location
             </div>
@@ -368,9 +425,12 @@
             <div class="value">
               ${escapeHtml(task.location)}
             </div>
+
           </div>
 
+
           <div class="info-row">
+
             <div class="label">
               ⏰ Deadline
             </div>
@@ -378,9 +438,12 @@
             <div class="value">
               ${formatDate(task.deadline)}
             </div>
+
           </div>
 
+
           <div class="info-row">
+
             <div class="label">
               📌 Status
             </div>
@@ -388,9 +451,12 @@
             <div class="value">
               ${escapeHtml(task.status)}
             </div>
+
           </div>
 
+
         </div>
+
 
         <button
           id="acceptButton"
@@ -401,6 +467,7 @@
           ${buttonText}
         </button>
 
+
         <a
           href="#"
           class="report"
@@ -408,8 +475,10 @@
         >
           Report this task
         </a>
+
       `;
     }
+
 
     async function acceptTask() {
 
@@ -417,113 +486,219 @@
         return;
       }
 
+
       if (currentTask.user_id === currentUser.id) {
-        alert("You cannot accept your own task.");
+
+        alert(
+          "You cannot accept your own task."
+        );
+
         return;
       }
 
+
       if (currentTask.runner_id) {
-        alert("This task has already been accepted.");
+
+        alert(
+          "This task has already been accepted."
+        );
+
         return;
       }
+
+
+      if (currentTask.status !== "open") {
+
+        alert(
+          "This task is no longer available."
+        );
+
+        return;
+      }
+
 
       const button =
         document.getElementById("acceptButton");
 
+
       button.disabled = true;
-      button.textContent = "ACCEPTING...";
+
+      button.textContent =
+        "ACCEPTING...";
+
 
       /*
-       * First claim the task.
+       * Claim the task.
        *
-       * The extra filters prevent two runners
-       * from accepting the same task at once.
+       * IMPORTANT:
+       * The database allows:
+       * open, accepted, completed, cancelled
+       *
+       * Therefore acceptance uses:
+       * status = "accepted"
        */
+
       const { data: updatedTask, error: updateError } =
         await supabaseClient
           .from("tasks")
           .update({
-            runner_id: currentUser.id,
-            status: "in_progress"
+
+            runner_id:
+              currentUser.id,
+
+            status:
+              "accepted"
+
           })
           .eq("id", currentTask.id)
+          .eq("status", "open")
           .is("runner_id", null)
           .select()
           .single();
-if (updateError || !updatedTask) {
-  console.error("ACCEPT TASK ERROR:", updateError);
 
-  alert(
-    "Accept failed:\n\n" +
-    (updateError?.message || "No task was updated.") +
-    "\n\nCode: " +
-    (updateError?.code || "unknown")
-  );
 
-  return;
-}
+      if (updateError || !updatedTask) {
+
+        console.error(
+          "ACCEPT TASK ERROR:",
+          updateError
+        );
+
+
+        button.disabled = false;
+
+        button.textContent =
+          "ACCEPT TASK";
+
+
+        alert(
+
+          "Accept failed:\n\n" +
+
+          (
+            updateError?.message ||
+            "The task could not be accepted."
+          ) +
+
+          "\n\nCode: " +
+
+          (
+            updateError?.code ||
+            "unknown"
+          )
+
+        );
+
+        return;
+      }
+
+
+      /*
+       * Update our local copy.
+       */
+
+      currentTask =
+        updatedTask;
+
 
       /*
        * Notify the task uploader.
        */
+
       const { error: ownerNotificationError } =
         await supabaseClient
           .from("notifications")
           .insert({
-            user_id: currentTask.user_id,
-            task_id: currentTask.id,
-            type: "task_accepted",
-            title: "Task accepted",
+
+            user_id:
+              currentTask.user_id,
+
+            task_id:
+              currentTask.id,
+
+            type:
+              "task_accepted",
+
+            title:
+              "Task accepted",
+
             message:
               `Someone accepted your task "${currentTask.title}".`
+
           });
 
+
       if (ownerNotificationError) {
+
         console.error(
           "Owner notification error:",
           ownerNotificationError
         );
+
       }
+
 
       /*
        * Notify the runner.
        */
+
       const { error: runnerNotificationError } =
         await supabaseClient
           .from("notifications")
           .insert({
-            user_id: currentUser.id,
-            task_id: currentTask.id,
-            type: "task_accepted",
-            title: "Task accepted",
+
+            user_id:
+              currentUser.id,
+
+            task_id:
+              currentTask.id,
+
+            type:
+              "task_accepted",
+
+            title:
+              "Task accepted",
+
             message:
-              `You accepted "${currentTask.title}". The task is now in progress.`
+              `You accepted "${currentTask.title}".`
+
           });
 
+
       if (runnerNotificationError) {
+
         console.error(
           "Runner notification error:",
           runnerNotificationError
         );
+
       }
+
 
       alert(
         "Task accepted successfully! 🚀"
       );
 
+
       window.location.reload();
+
     }
+
 
     function reportTask(event) {
 
       event.preventDefault();
 
+
       alert(
         "Reporting will be connected later. Thanks for helping keep OOULink safe."
       );
+
     }
 
+
     loadTask();
+
   </script>
 
 </body>
