@@ -4,19 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>OOULink</title>
+  <title>OOULink — Connect. Get things done. Earn.</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      background: #f7f9f8;
-      color: #17201b;
+      background: #f4f7f5;
+      color: #222;
+      padding-bottom: 80px;
     }
 
     .app {
@@ -24,113 +26,154 @@
       max-width: 480px;
       min-height: 100vh;
       margin: auto;
-      padding-bottom: 90px;
+      background: #fff;
     }
+
+    /* HEADER */
 
     header {
-      background: #16834b;
-      color: white;
-      padding: 18px 16px 22px;
+      padding: 18px 16px 14px;
+      border-bottom: 1px solid #e7ebe8;
+      position: relative;
+      background: white;
     }
 
-    .top {
+    .top-row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
+      justify-content: space-between;
+      gap: 10px;
     }
 
     .logo {
-      font-size: 24px;
+      font-size: 23px;
       font-weight: 800;
+      color: #16834b;
     }
 
     .location {
-      background: rgba(255,255,255,0.15);
-      padding: 8px 10px;
-      border-radius: 10px;
+      margin-top: 10px;
+      display: inline-block;
+      background: #f0f6f2;
+      color: #16834b;
+      padding: 8px 11px;
+      border-radius: 9px;
       font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
     }
 
     .auth-buttons {
       display: flex;
-      gap: 8px;
-      margin-top: 10px;
+      gap: 6px;
+      align-items: center;
     }
 
     .auth-buttons a {
-      flex: 1;
-      text-align: center;
       text-decoration: none;
-      padding: 10px;
-      border-radius: 10px;
-      font-size: 13px;
+      font-size: 10px;
       font-weight: 700;
+      padding: 8px 9px;
+      border-radius: 8px;
     }
 
     .signup {
-      background: white;
       color: #16834b;
+      border: 1px solid #16834b;
+      background: white;
     }
 
     .login {
-      border: 1px solid rgba(255,255,255,0.7);
       color: white;
+      background: #16834b;
     }
+
+    .profile-btn {
+      text-decoration: none;
+      color: #16834b;
+      border: 1px solid #16834b;
+      background: white;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .logout-btn {
+      border: none;
+      color: white;
+      background: #d9534f;
+      padding: 8px 9px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* LOCATION MENU */
 
     .location-menu {
       display: none;
+      position: absolute;
+      top: 105px;
+      left: 16px;
+      right: 16px;
       background: white;
-      color: #17201b;
-      padding: 12px;
-      border-radius: 12px;
-      margin-top: 10px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-    }
-
-    .location-menu.show {
-      display: block;
+      border: 1px solid #dfe5e1;
+      border-radius: 13px;
+      padding: 10px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+      z-index: 2000;
     }
 
     .location-title {
-      font-weight: 700;
       font-size: 13px;
-      margin-bottom: 8px;
+      font-weight: 700;
+      padding: 8px;
+      color: #333;
     }
 
     .location-menu button {
       width: 100%;
-      background: #f7f9f8;
       border: none;
-      padding: 11px;
-      margin-top: 6px;
-      border-radius: 9px;
+      background: white;
       text-align: left;
+      padding: 12px 9px;
+      border-radius: 8px;
       font-size: 13px;
       cursor: pointer;
     }
 
+    .location-menu button:hover {
+      background: #f0f6f2;
+    }
+
+    /* HERO */
+
     .hero {
-      padding: 22px 16px;
+      padding: 28px 18px 22px;
+      background: linear-gradient(135deg, #16834b, #0d6238);
+      color: white;
     }
 
     .hero h1 {
-      font-size: 27px;
-      margin-bottom: 8px;
+      margin: 0 0 9px;
+      font-size: 29px;
+      line-height: 1.15;
     }
 
     .hero p {
-      color: #777;
+      margin: 0;
       font-size: 14px;
       line-height: 1.5;
-      margin-bottom: 18px;
+      opacity: 0.92;
     }
 
     .hero-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
+      margin-top: 20px;
     }
 
     .post,
@@ -151,38 +194,43 @@
     }
 
     .find {
-      background: #0d6238;
+      background: #0a4d2c;
       color: white;
     }
 
+    /* CONTENT */
+
     .section {
-      padding: 0 16px;
+      padding: 22px 16px 5px;
     }
 
-    .section-title {
+    .section-heading {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      justify-content: space-between;
+      margin-bottom: 13px;
     }
 
-    .section-title h2 {
+    .section-heading h2 {
+      margin: 0;
       font-size: 18px;
     }
 
-    .section-title a {
+    .section-heading a {
       color: #16834b;
-      text-decoration: none;
       font-size: 12px;
       font-weight: 700;
+      text-decoration: none;
     }
 
+    /* TASK CARDS */
+
     .task-card {
-      background: white;
-      border: 1px solid #e5e8e6;
+      border: 1px solid #e3e8e5;
       border-radius: 14px;
       padding: 15px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      background: white;
     }
 
     .task-top {
@@ -194,10 +242,12 @@
     .task-title {
       font-size: 15px;
       font-weight: 700;
+      margin-bottom: 7px;
     }
 
-    .price {
+    .task-price {
       color: #16834b;
+      font-size: 15px;
       font-weight: 800;
       white-space: nowrap;
     }
@@ -206,18 +256,69 @@
       color: #777;
       font-size: 12px;
       line-height: 1.7;
-      margin-top: 7px;
     }
 
     .tag {
       display: inline-block;
-      background: #eef7f2;
+      margin-top: 8px;
+      background: #edf7f1;
       color: #16834b;
-      padding: 4px 8px;
-      border-radius: 7px;
+      padding: 5px 8px;
+      border-radius: 6px;
       font-size: 10px;
-      margin-top: 7px;
+      font-weight: 700;
     }
+
+    /* HOW IT WORKS */
+
+    .how {
+      margin: 20px 16px;
+      padding: 18px;
+      background: #f4f8f5;
+      border-radius: 14px;
+    }
+
+    .how h2 {
+      margin: 0 0 15px;
+      font-size: 17px;
+    }
+
+    .step {
+      display: flex;
+      gap: 11px;
+      margin-bottom: 14px;
+    }
+
+    .step:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-number {
+      min-width: 27px;
+      height: 27px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #16834b;
+      color: white;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .step-text strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+
+    .step-text span {
+      color: #777;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* FOOTER NAV */
 
     nav {
       position: fixed;
@@ -245,6 +346,32 @@
       color: #16834b;
       font-weight: 700;
     }
+
+    /* LOGIN STATUS */
+
+    .welcome {
+      display: none;
+      padding: 10px 16px 0;
+      color: #555;
+      font-size: 12px;
+    }
+
+    @media (max-width: 360px) {
+      .logo {
+        font-size: 20px;
+      }
+
+      .auth-buttons a,
+      .logout-btn,
+      .profile-btn {
+        font-size: 9px;
+        padding: 7px;
+      }
+
+      .hero h1 {
+        font-size: 26px;
+      }
+    }
   </style>
 </head>
 
@@ -252,19 +379,54 @@
 
   <div class="app">
 
+    <!-- HEADER -->
+
     <header>
 
-      <div class="top">
+      <div class="top-row">
 
         <div class="logo">
           OOULink
         </div>
 
-        <div class="location" onclick="showLocations()">
-          📍 <span id="selectedLocation">Choose your location</span>
+        <!-- LOGGED OUT -->
+        <div class="auth-buttons" id="loggedOutButtons">
+
+          <a href="signup.html" class="signup">
+            SIGN UP
+          </a>
+
+          <a href="login.html" class="login">
+            LOG IN
+          </a>
+
+        </div>
+
+        <!-- LOGGED IN -->
+        <div class="auth-buttons" id="loggedInButtons" style="display:none;">
+
+          <a href="profile.html" class="profile-btn">
+            👤 PROFILE
+          </a>
+
+          <button class="logout-btn" id="logoutButton">
+            LOG OUT
+          </button>
+
         </div>
 
       </div>
+
+      <div
+        class="location"
+        onclick="showLocations()"
+      >
+        📍 <span id="selectedLocation">
+          Choose your location
+        </span>
+      </div>
+
+      <!-- LOCATION MENU -->
 
       <div id="locationMenu" class="location-menu">
 
@@ -294,20 +456,13 @@
 
       </div>
 
-      <div class="auth-buttons">
-
-        <a href="signup.html" class="signup">
-          SIGN UP
-        </a>
-
-        <a href="login.html" class="login">
-          LOG IN
-        </a>
-
-      </div>
-
     </header>
 
+    <!-- WELCOME -->
+
+    <div class="welcome" id="welcomeMessage"></div>
+
+    <!-- HERO -->
 
     <section class="hero">
 
@@ -316,16 +471,23 @@
       </h1>
 
       <p>
-        Get help from people around you. Post a task, find someone to help, and get things done.
+        Get help from people around you.
+        Complete tasks, earn money and get things done.
       </p>
 
       <div class="hero-buttons">
 
-        <a href="post-task.html" class="post">
+        <a
+          href="post-task.html"
+          class="post"
+        >
           🙋 POST A TASK
         </a>
 
-        <a href="find-tasks.html" class="find">
+        <a
+          href="find-tasks.html"
+          class="find"
+        >
           🏃 FIND TASKS
         </a>
 
@@ -333,39 +495,43 @@
 
     </section>
 
+    <!-- NEARBY TASKS -->
 
     <section class="section">
 
-      <div class="section-title">
+      <div class="section-heading">
 
         <h2>
           Nearby Tasks
         </h2>
 
         <a href="find-tasks.html">
-          View all
+          See all
         </a>
 
       </div>
 
+      <!-- TASK 1 -->
 
       <div class="task-card">
 
         <div class="task-top">
 
-          <div class="task-title">
-            🖨️ Print & Deliver Assignment
+          <div>
+            <div class="task-title">
+              🖨️ Print & Deliver Assignment
+            </div>
+
+            <div class="task-info">
+              📍 OOU — Ibogun Campus<br>
+              ⏰ Due today
+            </div>
           </div>
 
-          <div class="price">
+          <div class="task-price">
             ₦1,000
           </div>
 
-        </div>
-
-        <div class="task-info">
-          📍 OOU — Ibogun Campus<br>
-          ⏰ Due today
         </div>
 
         <span class="tag">
@@ -374,24 +540,27 @@
 
       </div>
 
+      <!-- TASK 2 -->
 
       <div class="task-card">
 
         <div class="task-top">
 
-          <div class="task-title">
-            🍱 Pick Up Food
+          <div>
+            <div class="task-title">
+              🍱 Pick Up Food
+            </div>
+
+            <div class="task-info">
+              📍 OOU — Ibogun Campus<br>
+              ⏰ Due in 1 hour
+            </div>
           </div>
 
-          <div class="price">
+          <div class="task-price">
             ₦700
           </div>
 
-        </div>
-
-        <div class="task-info">
-          📍 OOU — Ibogun Campus<br>
-          ⏰ Due in 1 hour
         </div>
 
         <span class="tag">
@@ -400,24 +569,27 @@
 
       </div>
 
+      <!-- TASK 3 -->
 
       <div class="task-card">
 
         <div class="task-top">
 
-          <div class="task-title">
-            ⌨️ Type Assignment
+          <div>
+            <div class="task-title">
+              ⌨️ Type Assignment
+            </div>
+
+            <div class="task-info">
+              📍 OOU — Ibogun Campus<br>
+              ⏰ Due tomorrow
+            </div>
           </div>
 
-          <div class="price">
+          <div class="task-price">
             ₦1,500
           </div>
 
-        </div>
-
-        <div class="task-info">
-          📍 OOU — Ibogun Campus<br>
-          ⏰ Due tomorrow
         </div>
 
         <span class="tag">
@@ -428,47 +600,174 @@
 
     </section>
 
+    <!-- HOW IT WORKS -->
 
-    <nav>
+    <section class="how">
 
-      <a href="index.html" class="active">
-        🏠<br>
-        Home
-      </a>
+      <h2>
+        How OOULink Works
+      </h2>
 
-      <a href="my-tasks.html">
-        📋<br>
-        My Tasks
-      </a>
+      <div class="step">
 
-      <a href="post-task.html">
-        ➕<br>
-        Post
-      </a>
+        <div class="step-number">
+          1
+        </div>
 
-      <a href="alerts.html">
-        🔔<br>
-        Alerts
-      </a>
+        <div class="step-text">
 
-      <a href="profile.html">
-        👤<br>
-        Profile
-      </a>
+          <strong>
+            Post a task
+          </strong>
 
-    </nav>
+          <span>
+            Tell people what you need done,
+            where and your budget.
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="step">
+
+        <div class="step-number">
+          2
+        </div>
+
+        <div class="step-text">
+
+          <strong>
+            Find someone
+          </strong>
+
+          <span>
+            A nearby person accepts your task
+            and gets to work.
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="step">
+
+        <div class="step-number">
+          3
+        </div>
+
+        <div class="step-text">
+
+          <strong>
+            Get it done
+          </strong>
+
+          <span>
+            Confirm completion and leave a rating.
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="step">
+
+        <div class="step-number">
+          4
+        </div>
+
+        <div class="step-text">
+
+          <strong>
+            Earn
+          </strong>
+
+          <span>
+            Complete tasks for others and earn money.
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
 
   </div>
 
+  <!-- BOTTOM NAV -->
+
+  <nav>
+
+    <a
+      href="index.html"
+      class="active"
+    >
+      🏠<br>
+      Home
+    </a>
+
+    <a href="my-tasks.html">
+      📋<br>
+      My Tasks
+    </a>
+
+    <a href="post-task.html">
+      ➕<br>
+      Post
+    </a>
+
+    <a href="alerts.html">
+      🔔<br>
+      Alerts
+    </a>
+
+    <a href="profile.html">
+      👤<br>
+      Profile
+    </a>
+
+  </nav>
+
+
+  <!-- SUPABASE + OOULINK LOGIC -->
 
   <script>
+
+    /* =========================
+       SUPABASE CONFIG
+    ========================= */
+
+    const SUPABASE_URL =
+      "https://dthvdxgxesomltlruogp.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+
+    const supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    /* =========================
+       LOCATION
+    ========================= */
 
     function showLocations() {
 
       const menu =
         document.getElementById("locationMenu");
 
-      menu.classList.toggle("show");
+      if (menu.style.display === "block") {
+
+        menu.style.display = "none";
+
+      } else {
+
+        menu.style.display = "block";
+
+      }
 
     }
 
@@ -479,11 +778,190 @@
         "selectedLocation"
       ).textContent = location;
 
+      localStorage.setItem(
+        "ooulink_location",
+        location
+      );
+
       document.getElementById(
         "locationMenu"
-      ).classList.remove("show");
+      ).style.display = "none";
 
     }
+
+
+    /* Load saved location */
+
+    const savedLocation =
+      localStorage.getItem(
+        "ooulink_location"
+      );
+
+    if (savedLocation) {
+
+      document.getElementById(
+        "selectedLocation"
+      ).textContent = savedLocation;
+
+    }
+
+
+    /* Close location menu when tapping outside */
+
+    document.addEventListener(
+      "click",
+      function(event) {
+
+        const menu =
+          document.getElementById(
+            "locationMenu"
+          );
+
+        const locationButton =
+          document.querySelector(
+            ".location"
+          );
+
+        if (
+          !menu.contains(event.target) &&
+          !locationButton.contains(event.target)
+        ) {
+
+          menu.style.display = "none";
+
+        }
+
+      }
+    );
+
+
+    /* =========================
+       AUTH STATE
+    ========================= */
+
+    async function updateAuthUI() {
+
+      const {
+        data: {
+          session
+        }
+      } =
+        await supabaseClient.auth.getSession();
+
+
+      const loggedOutButtons =
+        document.getElementById(
+          "loggedOutButtons"
+        );
+
+      const loggedInButtons =
+        document.getElementById(
+          "loggedInButtons"
+        );
+
+      const welcomeMessage =
+        document.getElementById(
+          "welcomeMessage"
+        );
+
+
+      if (session) {
+
+        loggedOutButtons.style.display =
+          "none";
+
+        loggedInButtons.style.display =
+          "flex";
+
+        const user =
+          session.user;
+
+        const fullName =
+          user.user_metadata?.full_name;
+
+
+        if (fullName) {
+
+          welcomeMessage.textContent =
+            "Welcome back, " +
+            fullName +
+            " 👋";
+
+        } else {
+
+          welcomeMessage.textContent =
+            "Welcome back 👋";
+
+        }
+
+        welcomeMessage.style.display =
+          "block";
+
+      } else {
+
+        loggedOutButtons.style.display =
+          "flex";
+
+        loggedInButtons.style.display =
+          "none";
+
+        welcomeMessage.style.display =
+          "none";
+
+      }
+
+    }
+
+
+    /* Check login immediately */
+
+    updateAuthUI();
+
+
+    /* Watch for login/logout */
+
+    supabaseClient.auth.onAuthStateChange(
+      function(event, session) {
+
+        updateAuthUI();
+
+      }
+    );
+
+
+    /* =========================
+       LOGOUT
+    ========================= */
+
+    document
+      .getElementById("logoutButton")
+      .addEventListener(
+        "click",
+        async function() {
+
+          const {
+            error
+          } =
+            await supabaseClient.auth.signOut();
+
+
+          if (error) {
+
+            alert(
+              "Logout failed: " +
+              error.message
+            );
+
+            return;
+
+          }
+
+
+          window.location.href =
+            "index.html";
+
+        }
+      );
 
   </script>
 
