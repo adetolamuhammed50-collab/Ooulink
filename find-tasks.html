@@ -81,6 +81,12 @@
       color: #777;
       font-size: 13px;
       margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .task-description {
+      color: #555 !important;
+      margin-top: 5px;
     }
 
     .task-bottom {
@@ -106,8 +112,27 @@
     .accept {
       margin-top: 12px;
       width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
       background: #16834b;
       color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 45px 20px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 35px 20px;
+      color: #777;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -124,62 +149,248 @@
   </header>
 
   <div class="filters">
-    <select class="filter">
-      <option>All categories</option>
-      <option>Errands</option>
-      <option>Printing</option>
-      <option>Digital</option>
-      <option>Cleaning</option>
-      <option>Moving</option>
-      <option>Creative</option>
-      <option>Tutoring</option>
+    <select class="filter" id="categoryFilter">
+      <option value="All">All categories</option>
+      <option value="Errands">Errands</option>
+      <option value="Physical Help">Physical Help</option>
+      <option value="Digital Work">Digital Work</option>
+      <option value="Creative Skills">Creative Skills</option>
+      <option value="Academic Support">Academic Support</option>
+      <option value="Campus Services">Campus Services</option>
+      <option value="Other">Other</option>
     </select>
   </div>
 
-  <section class="task-list">
-
-    <div class="task">
-      <h2>🖨️ Print & Deliver Assignment</h2>
-      <p>📍 OOU — Ibogun Campus</p>
-      <p>⏰ Due today</p>
-
-      <div class="task-bottom">
-        <span class="price">₦1,000</span>
-        <span class="tag">Printing</span>
-      </div>
-
-      <button class="accept">ACCEPT TASK</button>
+  <section class="task-list" id="taskList">
+    <div class="loading">
+      Loading available tasks...
     </div>
-
-    <div class="task">
-      <h2>🍱 Pick Up Food</h2>
-      <p>📍 OOU — Ibogun Campus</p>
-      <p>⏰ Due in 1 hour</p>
-
-      <div class="task-bottom">
-        <span class="price">₦700</span>
-        <span class="tag">Errand</span>
-      </div>
-
-      <button class="accept">ACCEPT TASK</button>
-    </div>
-
-    <div class="task">
-      <h2>⌨️ Type Assignment</h2>
-      <p>📍 OOU — Ibogun Campus</p>
-      <p>⏰ Due tomorrow</p>
-
-      <div class="task-bottom">
-        <span class="price">₦1,500</span>
-        <span class="tag">Digital</span>
-      </div>
-
-      <button class="accept">ACCEPT TASK</button>
-    </div>
-
   </section>
 
 </div>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+  const SUPABASE_URL =
+    "https://dthvdxgxesomltlruogp.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+
+  const supabaseClient =
+    supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+  let allTasks = [];
+
+
+  async function loadTasks() {
+
+    const taskList =
+      document.getElementById("taskList");
+
+    /* Check login */
+
+    const {
+      data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (!session) {
+
+      taskList.innerHTML = `
+        <div class="empty">
+          <h3>Please log in</h3>
+          <p style="margin-top:8px;">
+            You need an account to find tasks.
+          </p>
+          <button
+            onclick="window.location.href='login.html'"
+            style="
+              margin-top:15px;
+              border:none;
+              border-radius:10px;
+              padding:12px 20px;
+              background:#16834b;
+              color:white;
+              font-weight:bold;
+            "
+          >
+            LOG IN
+          </button>
+        </div>
+      `;
+
+      return;
+    }
+
+
+    /* Get open tasks */
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from("tasks")
+      .select("*")
+      .eq("status", "open")
+      .order("created_at", { ascending: false });
+
+
+    if (error) {
+
+      console.error(error);
+
+      taskList.innerHTML = `
+        <div class="empty">
+          <h3>Couldn't load tasks</h3>
+          <p style="margin-top:8px;">
+            ${escapeHtml(error.message)}
+          </p>
+        </div>
+      `;
+
+      return;
+    }
+
+
+    allTasks = data || [];
+
+    displayTasks(allTasks);
+  }
+
+
+  function displayTasks(tasks) {
+
+    const taskList =
+      document.getElementById("taskList");
+
+
+    if (!tasks.length) {
+
+      taskList.innerHTML = `
+        <div class="empty">
+          <h3>No tasks available yet</h3>
+          <p style="margin-top:8px;">
+            Check back later for new tasks.
+          </p>
+        </div>
+      `;
+
+      return;
+    }
+
+
+    taskList.innerHTML = tasks.map(task => {
+
+      const deadline =
+        new Date(task.deadline);
+
+      const formattedDeadline =
+        deadline.toLocaleString([], {
+          dateStyle: "medium",
+          timeStyle: "short"
+        });
+
+
+      return `
+        <div class="task">
+
+          <h2>
+            ${escapeHtml(task.title)}
+          </h2>
+
+          <p>
+            📍 ${escapeHtml(task.location)}
+          </p>
+
+          <p>
+            ⏰ ${formattedDeadline}
+          </p>
+
+          <p class="task-description">
+            ${escapeHtml(task.description)}
+          </p>
+
+          <div class="task-bottom">
+
+            <span class="price">
+              ₦${Number(task.budget).toLocaleString()}
+            </span>
+
+            <span class="tag">
+              ${escapeHtml(task.category)}
+            </span>
+
+          </div>
+
+          <button
+            class="accept"
+            onclick="acceptTask('${task.id}')"
+          >
+            ACCEPT TASK
+          </button>
+
+        </div>
+      `;
+
+    }).join("");
+  }
+
+
+  function filterTasks() {
+
+    const selected =
+      document.getElementById("categoryFilter").value;
+
+
+    if (selected === "All") {
+
+      displayTasks(allTasks);
+
+      return;
+    }
+
+
+    const filtered =
+      allTasks.filter(
+        task => task.category === selected
+      );
+
+
+    displayTasks(filtered);
+  }
+
+
+  async function acceptTask(taskId) {
+
+    alert(
+      "Task acceptance and payment are coming next! 🚀"
+    );
+  }
+
+
+  function escapeHtml(value) {
+
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+
+  document
+    .getElementById("categoryFilter")
+    .addEventListener("change", filterTasks);
+
+
+  loadTasks();
+
+</script>
 
 </body>
 </html>
