@@ -1,1 +1,1385 @@
-h
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>OOULink — Connect. Get things done. Earn.</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7f5;
+      color: #222;
+      padding-bottom: 80px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      margin: auto;
+      background: white;
+    }
+
+    /* HEADER */
+
+    header {
+      padding: 18px 16px 14px;
+      border-bottom: 1px solid #e7ebe8;
+      background: white;
+      position: relative;
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .logo {
+      font-size: 23px;
+      font-weight: 800;
+      color: #16834b;
+    }
+
+    .auth-buttons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .auth-buttons a {
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 8px 9px;
+      border-radius: 8px;
+    }
+
+    .signup {
+      color: #16834b;
+      border: 1px solid #16834b;
+      background: white;
+    }
+
+    .login {
+      color: white;
+      background: #16834b;
+    }
+
+    .profile-btn {
+      text-decoration: none;
+      color: #16834b;
+      border: 1px solid #16834b;
+      background: white;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .logout-btn {
+      border: none;
+      color: white;
+      background: #d9534f;
+      padding: 8px 9px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* LOCATION */
+
+    .location {
+      margin-top: 10px;
+      display: inline-block;
+      background: #f0f6f2;
+      color: #16834b;
+      padding: 8px 11px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .location-menu {
+      display: none;
+      position: absolute;
+      top: 105px;
+      left: 16px;
+      right: 16px;
+      background: white;
+      border: 1px solid #dfe5e1;
+      border-radius: 13px;
+      padding: 10px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+      z-index: 2000;
+    }
+
+    .location-title {
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px;
+      color: #333;
+    }
+
+    .location-menu button {
+      width: 100%;
+      border: none;
+      background: white;
+      text-align: left;
+      padding: 12px 9px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .location-menu button:active {
+      background: #f0f6f2;
+    }
+
+    /* WELCOME */
+
+    .welcome {
+      display: none;
+      padding: 10px 16px 0;
+      color: #555;
+      font-size: 12px;
+    }
+
+    /* HERO */
+
+    .hero {
+      padding: 28px 18px 22px;
+      background: linear-gradient(135deg, #16834b, #0d6238);
+      color: white;
+    }
+
+    .hero h1 {
+      margin: 0 0 9px;
+      font-size: 29px;
+      line-height: 1.15;
+    }
+
+    .hero p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      opacity: 0.92;
+    }
+
+    .hero-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .post,
+    .find {
+      display: block;
+      text-decoration: none;
+      text-align: center;
+      padding: 14px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .post {
+      background: white;
+      color: #16834b;
+    }
+
+    .find {
+      background: #0a4d2c;
+      color: white;
+    }
+
+    /* SECTIONS */
+
+    .section {
+      padding: 22px 16px 5px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 13px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .section-heading a {
+      color: #16834b;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    /* TASKS */
+
+    .task-card {
+      border: 1px solid #e3e8e5;
+      border-radius: 14px;
+      padding: 15px;
+      margin-bottom: 12px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .task-card:active {
+      transform: scale(0.99);
+    }
+
+    .task-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 7px;
+      line-height: 1.35;
+    }
+
+    .task-price {
+      color: #16834b;
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .task-info {
+      color: #777;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-top: 8px;
+      background: #edf7f1;
+      color: #16834b;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* LOADING */
+
+    .loading {
+      text-align: center;
+      padding: 25px 10px;
+      color: #777;
+      font-size: 13px;
+    }
+
+    .loading-icon {
+      font-size: 22px;
+      margin-bottom: 7px;
+    }
+
+    /* EMPTY */
+
+    .empty {
+      display: none;
+      text-align: center;
+      padding: 28px 18px;
+      border: 1px dashed #d9e1dc;
+      border-radius: 14px;
+      background: #fafcfb;
+    }
+
+    .empty-icon {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    .empty-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .empty-text {
+      color: #777;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .empty-button {
+      display: inline-block;
+      margin-top: 13px;
+      background: #16834b;
+      color: white;
+      text-decoration: none;
+      padding: 10px 14px;
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* ERROR */
+
+    .error-box {
+      display: none;
+      padding: 14px;
+      background: #fff5f5;
+      border: 1px solid #f0d2d2;
+      border-radius: 12px;
+      color: #a94442;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    /* HOW IT WORKS */
+
+    .how {
+      margin: 20px 16px;
+      padding: 18px;
+      background: #f4f8f5;
+      border-radius: 14px;
+    }
+
+    .how h2 {
+      margin: 0 0 15px;
+      font-size: 17px;
+    }
+
+    .step {
+      display: flex;
+      gap: 11px;
+      margin-bottom: 14px;
+    }
+
+    .step:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-number {
+      min-width: 27px;
+      height: 27px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #16834b;
+      color: white;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .step-text strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+
+    .step-text span {
+      color: #777;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* BOTTOM NAV */
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: white;
+      border-top: 1px solid #e5e8e6;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 5px;
+      z-index: 1000;
+    }
+
+    nav a {
+      text-align: center;
+      font-size: 11px;
+      color: #777;
+      text-decoration: none;
+    }
+
+    nav a.active {
+      color: #16834b;
+      font-weight: 700;
+    }
+
+    @media (max-width: 360px) {
+
+      .logo {
+        font-size: 20px;
+      }
+
+      .auth-buttons a,
+      .logout-btn,
+      .profile-btn {
+        font-size: 9px;
+        padding: 7px;
+      }
+
+      .hero h1 {
+        font-size: 26px;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+
+  <header>
+
+    <div class="top-row">
+
+      <div class="logo">
+        OOULink
+      </div>
+
+      <!-- LOGGED OUT -->
+
+      <div
+        class="auth-buttons"
+        id="loggedOutButtons"
+      >
+
+        <a
+          href="signup.html"
+          class="signup"
+        >
+          SIGN UP
+        </a>
+
+        <a
+          href="login.html"
+          class="login"
+        >
+          LOG IN
+        </a>
+
+      </div>
+
+
+      <!-- LOGGED IN -->
+
+      <div
+        class="auth-buttons"
+        id="loggedInButtons"
+        style="display:none;"
+      >
+
+        <a
+          href="profile.html"
+          class="profile-btn"
+        >
+          👤 PROFILE
+        </a>
+
+        <button
+          type="button"
+          class="logout-btn"
+          id="logoutButton"
+        >
+          LOG OUT
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- LOCATION BUTTON -->
+
+    <div
+      class="location"
+      id="locationButton"
+      role="button"
+      tabindex="0"
+    >
+
+      📍
+      <span id="selectedLocation">
+        Choose your location
+      </span>
+
+    </div>
+
+
+    <!-- LOCATION MENU -->
+
+    <div
+      class="location-menu"
+      id="locationMenu"
+    >
+
+      <div class="location-title">
+        Choose your location
+      </div>
+
+      <button
+        type="button"
+        data-location="OOU — Ago-Iwoye"
+      >
+        📍 OOU — Ago-Iwoye
+      </button>
+
+      <button
+        type="button"
+        data-location="OOU — Ibogun Campus"
+      >
+        📍 OOU — Ibogun Campus
+      </button>
+
+      <button
+        type="button"
+        data-location="Sagamu"
+      >
+        📍 Sagamu
+      </button>
+
+      <button
+        type="button"
+        data-location="Ayetoro"
+      >
+        📍 Ayetoro
+      </button>
+
+      <button
+        type="button"
+        data-location="Other"
+      >
+        📍 Other
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- WELCOME -->
+
+  <div
+    class="welcome"
+    id="welcomeMessage"
+  ></div>
+
+
+  <!-- HERO -->
+
+  <section class="hero">
+
+    <h1>
+      What do you need done?
+    </h1>
+
+    <p>
+      Get help from people around you.
+      Complete tasks, earn money and get things done.
+    </p>
+
+    <div class="hero-buttons">
+
+      <a
+        href="post-task.html"
+        class="post"
+      >
+        🙋 POST A TASK
+      </a>
+
+      <a
+        href="find-tasks.html"
+        class="find"
+      >
+        🏃 FIND TASKS
+      </a>
+
+    </div>
+
+  </section>
+
+
+  <!-- NEARBY TASKS -->
+
+  <section class="section">
+
+    <div class="section-heading">
+
+      <h2>
+        Nearby Tasks
+      </h2>
+
+      <a href="find-tasks.html">
+        See all
+      </a>
+
+    </div>
+
+
+    <div
+      class="loading"
+      id="tasksLoading"
+    >
+
+      <div class="loading-icon">
+        🔄
+      </div>
+
+      Loading nearby tasks...
+
+    </div>
+
+
+    <div
+      class="error-box"
+      id="tasksError"
+    ></div>
+
+
+    <div id="tasksContainer"></div>
+
+
+    <div
+      class="empty"
+      id="tasksEmpty"
+    >
+
+      <div class="empty-icon">
+        📭
+      </div>
+
+      <div class="empty-title">
+        No nearby tasks yet
+      </div>
+
+      <div class="empty-text">
+        There are no open tasks matching your
+        selected location right now.
+      </div>
+
+      <a
+        href="post-task.html"
+        class="empty-button"
+      >
+        POST A TASK
+      </a>
+
+    </div>
+
+  </section>
+
+
+  <!-- HOW IT WORKS -->
+
+  <section class="how">
+
+    <h2>
+      How OOULink Works
+    </h2>
+
+
+    <div class="step">
+
+      <div class="step-number">
+        1
+      </div>
+
+      <div class="step-text">
+
+        <strong>
+          Post a task
+        </strong>
+
+        <span>
+          Tell people what you need done,
+          where and your budget.
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="step">
+
+      <div class="step-number">
+        2
+      </div>
+
+      <div class="step-text">
+
+        <strong>
+          Find someone
+        </strong>
+
+        <span>
+          A nearby person accepts your task
+          and gets to work.
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="step">
+
+      <div class="step-number">
+        3
+      </div>
+
+      <div class="step-text">
+
+        <strong>
+          Get it done
+        </strong>
+
+        <span>
+          Confirm completion and leave a rating.
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="step">
+
+      <div class="step-number">
+        4
+      </div>
+
+      <div class="step-text">
+
+        <strong>
+          Earn
+        </strong>
+
+        <span>
+          Complete tasks for others and earn money.
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- BOTTOM NAV -->
+
+<nav>
+
+  <a
+    href="index.html"
+    class="active"
+  >
+    🏠<br>
+    Home
+  </a>
+
+  <a href="my-tasks.html">
+    📋<br>
+    My Tasks
+  </a>
+
+  <a href="post-task.html">
+    ➕<br>
+    Post
+  </a>
+
+  <a href="alerts.html">
+    🔔<br>
+    Alerts
+  </a>
+
+  <a href="profile.html">
+    👤<br>
+    Profile
+  </a>
+
+</nav>
+
+
+<script>
+
+  /* =========================
+     SUPABASE
+  ========================= */
+
+  const SUPABASE_URL =
+    "https://dthvdxgxesomltlruogp.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+
+  let supabaseClient = null;
+
+  try {
+
+    if (
+      typeof supabase !== "undefined" &&
+      supabase.createClient
+    ) {
+
+      supabaseClient =
+        supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_KEY
+        );
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Supabase initialization error:",
+      error
+    );
+
+  }
+
+
+  /* =========================
+     LOCATION
+  ========================= */
+
+  const locationButton =
+    document.getElementById(
+      "locationButton"
+    );
+
+  const locationMenu =
+    document.getElementById(
+      "locationMenu"
+    );
+
+  const selectedLocation =
+    document.getElementById(
+      "selectedLocation"
+    );
+
+
+  function toggleLocationMenu() {
+
+    if (
+      locationMenu.style.display ===
+      "block"
+    ) {
+
+      locationMenu.style.display =
+        "none";
+
+    } else {
+
+      locationMenu.style.display =
+        "block";
+
+    }
+
+  }
+
+
+  locationButton.addEventListener(
+    "click",
+    function(event) {
+
+      event.stopPropagation();
+
+      toggleLocationMenu();
+
+    }
+  );
+
+
+  locationButton.addEventListener(
+    "keydown",
+    function(event) {
+
+      if (
+        event.key === "Enter" ||
+        event.key === " "
+      ) {
+
+        event.preventDefault();
+
+        toggleLocationMenu();
+
+      }
+
+    }
+  );
+
+
+  const locationButtons =
+    locationMenu.querySelectorAll(
+      "button[data-location]"
+    );
+
+
+  locationButtons.forEach(
+    function(button) {
+
+      button.addEventListener(
+        "click",
+        function(event) {
+
+          event.stopPropagation();
+
+          const location =
+            button.getAttribute(
+              "data-location"
+            );
+
+
+          selectedLocation.textContent =
+            location;
+
+
+          try {
+
+            localStorage.setItem(
+              "ooulink_location",
+              location
+            );
+
+          } catch (error) {
+
+            console.log(
+              "Could not save location."
+            );
+
+          }
+
+
+          locationMenu.style.display =
+            "none";
+
+
+          loadNearbyTasks();
+
+        }
+      );
+
+    }
+  );
+
+
+  /* Load saved location */
+
+  try {
+
+    const savedLocation =
+      localStorage.getItem(
+        "ooulink_location"
+      );
+
+
+    if (savedLocation) {
+
+      selectedLocation.textContent =
+        savedLocation;
+
+    }
+
+  } catch (error) {
+
+    console.log(
+      "Could not read saved location."
+    );
+
+  }
+
+
+  /* Close menu outside */
+
+  document.addEventListener(
+    "click",
+    function(event) {
+
+      if (
+        !locationMenu.contains(
+          event.target
+        ) &&
+        !locationButton.contains(
+          event.target
+        )
+      ) {
+
+        locationMenu.style.display =
+          "none";
+
+      }
+
+    }
+  );
+
+
+  /* =========================
+     AUTH
+  ========================= */
+
+  async function updateAuthUI() {
+
+    if (!supabaseClient) {
+
+      return;
+
+    }
+
+
+    try {
+
+      const result =
+        await supabaseClient.auth.getSession();
+
+
+      const session =
+        result.data.session;
+
+
+      const loggedOutButtons =
+        document.getElementById(
+          "loggedOutButtons"
+        );
+
+      const loggedInButtons =
+        document.getElementById(
+          "loggedInButtons"
+        );
+
+      const welcomeMessage =
+        document.getElementById(
+          "welcomeMessage"
+        );
+
+
+      if (session) {
+
+        loggedOutButtons.style.display =
+          "none";
+
+        loggedInButtons.style.display =
+          "flex";
+
+
+        const fullName =
+          session.user.user_metadata &&
+          session.user.user_metadata.full_name;
+
+
+        if (fullName) {
+
+          welcomeMessage.textContent =
+            "Welcome back, " +
+            fullName +
+            " 👋";
+
+        } else {
+
+          welcomeMessage.textContent =
+            "Welcome back 👋";
+
+        }
+
+
+        welcomeMessage.style.display =
+          "block";
+
+      } else {
+
+        loggedOutButtons.style.display =
+          "flex";
+
+        loggedInButtons.style.display =
+          "none";
+
+        welcomeMessage.style.display =
+          "none";
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Auth error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  updateAuthUI();
+
+
+  if (supabaseClient) {
+
+    supabaseClient.auth.onAuthStateChange(
+      function() {
+
+        updateAuthUI();
+
+      }
+    );
+
+  }
+
+
+  /* =========================
+     MONEY
+  ========================= */
+
+  function formatBudget(amount) {
+
+    const number =
+      Number(amount);
+
+
+    if (
+      isNaN(number)
+    ) {
+
+      return "₦0";
+
+    }
+
+
+    return (
+      "₦" +
+      number.toLocaleString(
+        "en-NG"
+      )
+    );
+
+  }
+
+
+  /* =========================
+     DEADLINE
+  ========================= */
+
+  function formatDeadline(deadline) {
+
+    if (!deadline) {
+
+      return "No deadline";
+
+    }
+
+
+    const date =
+      new Date(deadline);
+
+
+    if (
+      isNaN(
+        date.getTime()
+      )
+    ) {
+
+      return "No deadline";
+
+    }
+
+
+    const now =
+      new Date();
+
+
+    const difference =
+      date.getTime() -
+      now.getTime();
+
+
+    if (
+      difference <= 0
+    ) {
+
+      return "Deadline passed";
+
+    }
+
+
+    const minutes =
+      Math.floor(
+        difference /
+        60000
+      );
+
+
+    const hours =
+      Math.floor(
+        minutes / 60
+      );
+
+
+    const days =
+      Math.floor(
+        hours / 24
+      );
+
+
+    if (
+      days === 0
+    ) {
+
+      if (
+        hours === 0
+      ) {
+
+        return (
+          "Due in " +
+          Math.max(
+            minutes,
+            1
+          ) +
+          " min"
+        );
+
+      }
+
+
+      return (
+        "Due in " +
+        hours +
+        (
+          hours === 1
+            ? " hour"
+            : " hours"
+        )
+      );
+
+    }
+
+
+    if (
+      days === 1
+    ) {
+
+      return "Due tomorrow";
+
+    }
+
+
+    if (
+      days < 7
+    ) {
+
+      return (
+        "Due in " +
+        days +
+        " days"
+      );
+
+    }
+
+
+    return (
+      "Due " +
+      date.toLocaleDateString(
+        "en-NG",
+        {
+          day: "numeric",
+          month: "short"
+        }
+      )
+    );
+
+  }
+
+
+  /* =========================
+     LOCATION MATCH
+  ========================= */
+
+  function locationMatches(
+    taskLocation,
+    chosenLocation
+  ) {
+
+    if (!chosenLocation) {
+
+      return true;
+
+    }
+
+
+    if (!taskLocation) {
+
+      return false;
+
+    }
+
+
+    const task =
+      String(taskLocation)
+        .toLowerCase()
+        .trim();
+
+
+    const chosen =
+      String(chosenLocation)
+        .toLowerCase()
+        .trim();
+
+
+    if (
+      task === chosen
+    ) {
+
+      return true;
+
+    }
+
+
+    const places = [
+      "ibogun",
+      "ago",
+      "sagamu",
+      "ayetoro"
+    ];
+
+
+    for (
+      let i = 0;
+      i < places.length;
+      i++
+    ) {
+
+  
