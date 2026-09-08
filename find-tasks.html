@@ -70,6 +70,7 @@
       border-radius: 15px;
       padding: 16px;
       margin-bottom: 12px;
+      cursor: pointer;
     }
 
     .task h2 {
@@ -169,7 +170,6 @@
 
 </div>
 
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -192,20 +192,22 @@
     const taskList =
       document.getElementById("taskList");
 
-    /* Check login */
-
     const {
       data: { session }
     } = await supabaseClient.auth.getSession();
+
 
     if (!session) {
 
       taskList.innerHTML = `
         <div class="empty">
+
           <h3>Please log in</h3>
+
           <p style="margin-top:8px;">
             You need an account to find tasks.
           </p>
+
           <button
             onclick="window.location.href='login.html'"
             style="
@@ -220,14 +222,13 @@
           >
             LOG IN
           </button>
+
         </div>
       `;
 
       return;
     }
 
-
-    /* Get open tasks */
 
     const {
       data,
@@ -245,10 +246,13 @@
 
       taskList.innerHTML = `
         <div class="empty">
+
           <h3>Couldn't load tasks</h3>
+
           <p style="margin-top:8px;">
             ${escapeHtml(error.message)}
           </p>
+
         </div>
       `;
 
@@ -272,10 +276,13 @@
 
       taskList.innerHTML = `
         <div class="empty">
+
           <h3>No tasks available yet</h3>
+
           <p style="margin-top:8px;">
             Check back later for new tasks.
           </p>
+
         </div>
       `;
 
@@ -288,6 +295,7 @@
       const deadline =
         new Date(task.deadline);
 
+
       const formattedDeadline =
         deadline.toLocaleString([], {
           dateStyle: "medium",
@@ -296,7 +304,10 @@
 
 
       return `
-        <div class="task">
+        <div
+          class="task"
+          onclick="openTask('${task.id}')"
+        >
 
           <h2>
             ${escapeHtml(task.title)}
@@ -328,15 +339,24 @@
 
           <button
             class="accept"
-            onclick="acceptTask('${task.id}')"
+            onclick="event.stopPropagation(); openTask('${task.id}')"
           >
-            ACCEPT TASK
+            VIEW TASK
           </button>
 
         </div>
       `;
 
     }).join("");
+  }
+
+
+  function openTask(taskId) {
+
+    window.location.href =
+      "task-details.html?id=" +
+      encodeURIComponent(taskId);
+
   }
 
 
@@ -364,22 +384,15 @@
   }
 
 
-  async function acceptTask(taskId) {
-
-    alert(
-      "Task acceptance and payment are coming next! 🚀"
-    );
-  }
-
-
   function escapeHtml(value) {
 
-    return String(value)
+    return String(value ?? "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+
   }
 
 
