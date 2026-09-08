@@ -276,7 +276,6 @@
   </div>
 
 
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
@@ -287,11 +286,8 @@
     const SUPABASE_KEY =
       "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
 
-    const { createClient } =
-      supabase;
-
     const supabaseClient =
-      createClient(
+      supabase.createClient(
         SUPABASE_URL,
         SUPABASE_KEY
       );
@@ -376,9 +372,15 @@
 
             options: {
 
+              emailRedirectTo:
+                "https://ooulink.vercel.app",
+
               data: {
+
                 full_name: name,
+
                 location: location
+
               }
 
             }
@@ -399,6 +401,7 @@
             "CREATE ACCOUNT";
 
           return;
+
         }
 
 
