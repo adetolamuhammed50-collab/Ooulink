@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Details — OOULink</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #172033;
+      padding-bottom: 85px;
+    }
+
+    .top {
+      background: white;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid #e8ebf0;
+    }
+
+    .back {
+      text-decoration: none;
+      font-size: 24px;
+      color: #172033;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: auto;
+      padding: 18px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    }
+
+    .category {
+      display: inline-block;
+      background: #eef2ff;
+      color: #4054b2;
+      padding: 7px 11px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 25px;
+      margin-bottom: 12px;
+    }
+
+    .description {
+      color: #5d6678;
+      line-height: 1.6;
+      margin-bottom: 22px;
+      white-space: pre-wrap;
+    }
+
+    .info {
+      border-top: 1px solid #edf0f4;
+      padding-top: 15px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 13px 0;
+      border-bottom: 1px solid #edf0f4;
+    }
+
+    .label {
+      color: #7a8291;
+      font-size: 14px;
+    }
+
+    .value {
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .budget {
+      font-size: 24px;
+      font-weight: 800;
+      margin: 22px 0;
+    }
+
+    .accept {
+      width: 100%;
+      border: none;
+      background: #111827;
+      color: white;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .report {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      color: #777;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .loading,
+    .error {
+      text-align: center;
+      padding: 40px 15px;
+      color: #667085;
+    }
+
+    .error {
+      color: #c0392b;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: white;
+      border-top: 1px solid #e6e9ef;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .bottom-nav a {
+      text-decoration: none;
+      color: #777;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .bottom-nav a span {
+      display: block;
+      font-size: 21px;
+      margin-bottom: 3px;
+    }
+
+    @media (min-width: 700px) {
+      .bottom-nav {
+        max-width: 650px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 15px 15px 0 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="top">
+    <a href="find-tasks.html" class="back">←</a>
+    <div class="logo">OOULink</div>
+  </header>
+
+  <main class="container">
+    <div id="content" class="card">
+      <div class="loading">Loading task...</div>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html">
+      <span>⌂</span>
+      Home
+    </a>
+
+    <a href="my-tasks.html">
+      <span>✓</span>
+      My Tasks
+    </a>
+
+    <a href="post-task.html">
+      <span>＋</span>
+      Post
+    </a>
+
+    <a href="alerts.html">
+      <span>🔔</span>
+      Alerts
+    </a>
+
+    <a href="profile.html">
+      <span>👤</span>
+      Profile
+    </a>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+
+    const supabaseClient =
+      window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const content = document.getElementById("content");
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatMoney(amount) {
+      return "₦" + Number(amount).toLocaleString("en-NG");
+    }
+
+    function formatDate(date) {
+      return new Date(date).toLocaleString("en-NG", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      });
+    }
+
+    async function loadTask() {
+      const params = new URLSearchParams(window.location.search);
+      const taskId = params.get("id");
+
+      if (!taskId) {
+        content.innerHTML =
+          '<div class="error">Task not found.</div>';
+        return;
+      }
+
+      const { data: sessionData } =
+        await supabaseClient.auth.getSession();
+
+      if (!sessionData.session) {
+        window.location.href =
+          "login.html?redirect=task-details.html?id=" +
+          encodeURIComponent(taskId);
+        return;
+      }
+
+      const { data: task, error } =
+        await supabaseClient
+          .from("tasks")
+          .select("*")
+          .eq("id", taskId)
+          .single();
+
+      if (error || !task) {
+        console.error(error);
+
+        content.innerHTML = `
+          <div class="error">
+            We couldn't find this task.
+            <br><br>
+            <a href="find-tasks.html">← Back to tasks</a>
+          </div>
+        `;
+
+        return;
+      }
+
+      content.innerHTML = `
+        <div class="category">
+          ${escapeHtml(task.category)}
+        </div>
+
+        <h1>${escapeHtml(task.title)}</h1>
+
+        <div class="description">
+          ${escapeHtml(task.description)}
+        </div>
+
+        <div class="budget">
+          ${formatMoney(task.budget)}
+        </div>
+
+        <div class="info">
+
+          <div class="info-row">
+            <div class="label">📍 Location</div>
+            <div class="value">
+              ${escapeHtml(task.location)}
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="label">⏰ Deadline</div>
+            <div class="value">
+              ${formatDate(task.deadline)}
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="label">📌 Status</div>
+            <div class="value">
+              ${escapeHtml(task.status)}
+            </div>
+          </div>
+
+        </div>
+
+        <button class="accept" onclick="acceptTask()">
+          ACCEPT TASK
+        </button>
+
+        <a href="#" class="report"
+           onclick="reportTask(event)">
+          Report this task
+        </a>
+      `;
+    }
+
+    function acceptTask() {
+      alert(
+        "Task acceptance and payment will be connected later. 🚀"
+      );
+    }
+
+    function reportTask(event) {
+      event.preventDefault();
+
+      alert(
+        "Reporting will be connected later. Thanks for helping keep OOULink safe."
+      );
+    }
+
+    loadTask();
+  </script>
+
+</body>
+</html>
