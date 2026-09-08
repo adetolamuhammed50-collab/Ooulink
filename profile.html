@@ -396,7 +396,7 @@
 
         const { error: uploadError } =
           await supabaseClient.storage
-            .from("avatars")
+            .from("AVARTARS")
             .upload(filePath, selectedFile, {
               contentType: selectedFile.type,
               upsert: false
