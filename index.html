@@ -10,28 +10,32 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
     }
 
     body {
-      background: #f6f8f7;
-      color: #17231d;
+      font-family: Arial, sans-serif;
+      background: #f7f9f8;
+      color: #17201b;
+      padding-bottom: 80px;
     }
 
     .app {
+      width: 100%;
       max-width: 480px;
-      min-height: 100vh;
       margin: auto;
-      background: white;
-      padding-bottom: 90px;
+      min-height: 100vh;
+      background: #f7f9f8;
     }
 
     header {
-      padding: 25px 20px 10px;
+      background: white;
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid #e8ece9;
+      position: relative;
     }
 
     .logo {
-      font-size: 26px;
+      font-size: 25px;
       font-weight: 800;
       color: #16834b;
     }
@@ -71,23 +75,27 @@
       font-size: 14px;
     }
 
+    main {
+      padding: 18px;
+    }
+
     .hero {
-      margin: 20px;
-      padding: 25px 20px;
-      border-radius: 20px;
       background: #16834b;
       color: white;
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 20px;
     }
 
     .hero h1 {
-      font-size: 28px;
-      line-height: 1.15;
-      margin-bottom: 10px;
+      font-size: 25px;
+      margin-bottom: 8px;
     }
 
     .hero p {
-      opacity: .9;
-      margin-bottom: 20px;
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 18px;
     }
 
     .buttons {
@@ -95,93 +103,73 @@
       gap: 10px;
     }
 
-    button {
-      border: none;
-      padding: 15px;
+    .post,
+    .find {
+      display: block;
+      text-decoration: none;
+      text-align: center;
+      padding: 14px;
       border-radius: 12px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
-      cursor: pointer;
     }
 
     .post {
       background: white;
       color: #16834b;
-      display: inline-block;
-      text-decoration: none;
-      text-align: center;
-      padding: 12px 18px;
-      border-radius: 12px;
-      font-weight: bold;
-      font-size: 14px;
     }
 
-.find {
-  background: #0d6238;
-  color: white;
-  display: block;
-  text-decoration: none;
-  text-align: center;
-  padding: 15px;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 700;
-}
-
-    .section {
-      padding: 5px 20px;
+    .find {
+      background: #0d6238;
+      color: white;
     }
 
     .section-title {
-      display: flex;
-      justify-content: space-between;
+      font-size: 18px;
+      font-weight: 800;
       margin-bottom: 12px;
     }
 
-    .section-title h2 {
-      font-size: 19px;
-    }
-
-    .section-title span {
-      color: #16834b;
-      font-size: 14px;
-    }
-
-    .task {
-      border: 1px solid #e5e8e6;
+    .task-card {
+      background: white;
+      border: 1px solid #e8ece9;
       border-radius: 15px;
-      padding: 16px;
+      padding: 15px;
       margin-bottom: 12px;
     }
 
-    .task h3 {
-      font-size: 16px;
-      margin-bottom: 8px;
-    }
-
-    .task p {
-      color: #777;
-      font-size: 13px;
-      margin-bottom: 10px;
-    }
-
-    .task-bottom {
+    .task-top {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      gap: 10px;
+    }
+
+    .task-title {
+      font-weight: 700;
+      font-size: 15px;
     }
 
     .price {
-      font-weight: 800;
       color: #16834b;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .task-info {
+      color: #777;
+      font-size: 12px;
+      margin-top: 8px;
+      line-height: 1.6;
     }
 
     .tag {
-      background: #edf7f1;
+      display: inline-block;
+      background: #eef7f2;
       color: #16834b;
-      padding: 6px 9px;
-      border-radius: 8px;
+      padding: 5px 8px;
+      border-radius: 7px;
       font-size: 11px;
+      margin-top: 8px;
     }
 
     nav {
@@ -196,15 +184,17 @@
       display: flex;
       justify-content: space-around;
       padding: 12px 5px;
+      z-index: 1000;
     }
 
-    nav div {
+    nav a {
       text-align: center;
       font-size: 11px;
       color: #777;
+      text-decoration: none;
     }
 
-    nav .active {
+    nav a.active {
       color: #16834b;
       font-weight: 700;
     }
@@ -213,112 +203,218 @@
 
 <body>
 
-<div class="app">
+  <div class="app">
 
-  <header>
-    <div class="logo">OOULink</div>
+    <header>
+      <div class="logo">OOULink</div>
 
-    <div class="location" onclick="showLocations()">
-      📍 <span id="selectedLocation">Choose your location</span>
-    </div>
-
-    <div id="locationMenu" class="location-menu">
-      <div class="location-title">Choose your location</div>
-
-      <button onclick="selectLocation('OOU — Ago-Iwoye')">
-        📍 OOU — Ago-Iwoye
-      </button>
-
-      <button onclick="selectLocation('OOU — Ibogun Campus')">
-        📍 OOU — Ibogun Campus
-      </button>
-
-      <button onclick="selectLocation('Sagamu')">
-        📍 Sagamu
-      </button>
-
-      <button onclick="selectLocation('Ayetoro')">
-        📍 Ayetoro
-      </button>
-
-      <button onclick="selectLocation('Other')">
-        📍 Other
-      </button>
-    </div>
-  </header>
-
-  <section class="hero">
-    <h1>What do you need done?</h1>
-    <p>Get help from people around you.</p>
-
-    <div class="buttons">
-      <a href="post-task.html" class="post">🙋 POST A TASK</a>
-      <a href="find-tasks.html" class="find">🏃 FIND TASKS</a>
-    </div>
-  </section>
-
-  <section class="section">
-
-    <div class="section-title">
-      <h2>Nearby Tasks</h2>
-      <span>See all</span>
-    </div>
-
-    <div class="task">
-      <h3>🖨️ Print & Deliver Assignment</h3>
-      <p>📍 Ibogun Campus • Due today</p>
-
-      <div class="task-bottom">
-        <span class="price">₦1,000</span>
-        <span class="tag">Printing</span>
+      <div class="location" onclick="showLocations()">
+        📍 <span id="selectedLocation">Choose your location</span>
       </div>
-    </div>
 
-    <div class="task">
-      <h3>🍱 Pick Up Food</h3>
-      <p>📍 Ibogun Campus • Due in 1 hour</p>
+      <div id="locationMenu" class="location-menu">
 
-      <div class="task-bottom">
-        <span class="price">₦700</span>
-        <span class="tag">Errand</span>
+        <div class="location-title">
+          Choose your location
+        </div>
+
+        <button onclick="selectLocation('OOU — Ago-Iwoye')">
+          📍 OOU — Ago-Iwoye
+        </button>
+
+        <button onclick="selectLocation('OOU — Ibogun Campus')">
+          📍 OOU — Ibogun Campus
+        </button>
+
+        <button onclick="selectLocation('Sagamu')">
+          📍 Sagamu
+        </button>
+
+        <button onclick="selectLocation('Ayetoro')">
+          📍 Ayetoro
+        </button>
+
+        <button onclick="selectLocation('Other')">
+          📍 Other
+        </button>
+
       </div>
-    </div>
+    </header>
 
-    <div class="task">
-      <h3>⌨️ Type Assignment</h3>
-      <p>📍 Ibogun Campus • Due tomorrow</p>
 
-      <div class="task-bottom">
-        <span class="price">₦1,500</span>
-        <span class="tag">Digital</span>
-      </div>
-    </div>
+    <main>
 
-  </section>
+      <section class="hero">
 
-</div>
+        <h1>What do you need done?</h1>
 
-<nav>
-  <div class="active">🏠<br>Home</div>
-  <div>📋<br>My Tasks</div>
-  <div>➕<br>Post</div>
-  <div>🔔<br>Alerts</div>
-  <div>👤<br>Profile</div>
-</nav>
+        <p>
+          Get help from people around you.
+          Post a task or find tasks to earn.
+        </p>
 
-<script>
-  function showLocations() {
-    const menu = document.getElementById("locationMenu");
+        <div class="buttons">
 
-    menu.style.display =
-      menu.style.display === "block" ? "none" : "block";
-  }
+          <a href="post-task.html" class="post">
+            🙋 POST A TASK
+          </a>
 
-  function selectLocation(location) {
-    document.getElementById("selectedLocation").textContent = location;
-    document.getElementById("locationMenu").style.display = "none";
-  }
-</script>
+          <a href="find-tasks.html" class="find">
+            🏃 FIND TASKS
+          </a>
+
+        </div>
+
+      </section>
+
+
+      <section>
+
+        <div class="section-title">
+          Nearby Tasks
+        </div>
+
+
+        <div class="task-card">
+
+          <div class="task-top">
+
+            <div class="task-title">
+              🖨️ Print & Deliver Assignment
+            </div>
+
+            <div class="price">
+              ₦1,000
+            </div>
+
+          </div>
+
+          <div class="task-info">
+            📍 Ibogun Campus<br>
+            ⏰ Due today
+          </div>
+
+          <span class="tag">
+            Printing
+          </span>
+
+        </div>
+
+
+        <div class="task-card">
+
+          <div class="task-top">
+
+            <div class="task-title">
+              🍱 Pick Up Food
+            </div>
+
+            <div class="price">
+              ₦700
+            </div>
+
+          </div>
+
+          <div class="task-info">
+            📍 Ibogun Campus<br>
+            ⏰ Due in 1 hour
+          </div>
+
+          <span class="tag">
+            Errand
+          </span>
+
+        </div>
+
+
+        <div class="task-card">
+
+          <div class="task-top">
+
+            <div class="task-title">
+              ⌨️ Type Assignment
+            </div>
+
+            <div class="price">
+              ₦1,500
+            </div>
+
+          </div>
+
+          <div class="task-info">
+            📍 Ibogun Campus<br>
+            ⏰ Due tomorrow
+          </div>
+
+          <span class="tag">
+            Digital
+          </span>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <nav>
+
+      <a href="index.html" class="active">
+        🏠<br>
+        Home
+      </a>
+
+      <a href="my-tasks.html">
+        📋<br>
+        My Tasks
+      </a>
+
+      <a href="post-task.html">
+        ➕<br>
+        Post
+      </a>
+
+      <a href="alerts.html">
+        🔔<br>
+        Alerts
+      </a>
+
+      <a href="profile.html">
+        👤<br>
+        Profile
+      </a>
+
+    </nav>
+
+  </div>
+
+
+  <script>
+
+    function showLocations() {
+
+      const menu =
+        document.getElementById("locationMenu");
+
+      menu.style.display =
+        menu.style.display === "block"
+          ? "none"
+          : "block";
+
+    }
+
+
+    function selectLocation(location) {
+
+      document.getElementById("selectedLocation")
+        .textContent = location;
+
+      document.getElementById("locationMenu")
+        .style.display = "none";
+
+    }
+
+  </script>
 
 </body>
 </html>
