@@ -1,4 +1,4 @@
-by<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -131,6 +131,7 @@ by<!DOCTYPE html>
 
     .save-button:disabled {
       opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .logout-button {
@@ -149,6 +150,7 @@ by<!DOCTYPE html>
       text-align: center;
       margin-top: 14px;
       font-size: 14px;
+      min-height: 20px;
     }
 
     .bottom-nav {
@@ -223,6 +225,7 @@ by<!DOCTYPE html>
         type="text"
         id="fullName"
         placeholder="Enter your full name"
+        autocomplete="name"
       >
     </div>
 
@@ -232,6 +235,7 @@ by<!DOCTYPE html>
         type="text"
         id="location"
         placeholder="Enter your location"
+        autocomplete="address-level2"
       >
     </div>
 
@@ -280,14 +284,19 @@ by<!DOCTYPE html>
 
 <script>
 
-  const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
+  const SUPABASE_URL =
+    "https://dthvdxgxesomltlruogp.supabase.co";
 
-  const SUPABASE_KEY = "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+  const SUPABASE_KEY =
+    "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
 
-  const supabaseClient = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+  const supabaseClient =
+    supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+  const AVATAR_BUCKET = "Avatars";
 
   let currentUser = null;
   let selectedFile = null;
@@ -295,17 +304,25 @@ by<!DOCTYPE html>
   async function loadProfile() {
 
     const {
-      data: { session }
+      data: { session },
+      error
     } = await supabaseClient.auth.getSession();
 
+    if (error) {
+      console.error(error);
+      return;
+    }
+
     if (!session) {
-      window.location.href = "login.html?redirect=profile.html";
+      window.location.href =
+        "login.html?redirect=profile.html";
       return;
     }
 
     currentUser = session.user;
 
-    const metadata = currentUser.user_metadata || {};
+    const metadata =
+      currentUser.user_metadata || {};
 
     document.getElementById("fullName").value =
       metadata.full_name || "";
@@ -321,46 +338,85 @@ by<!DOCTYPE html>
 
   function showAvatar(url) {
 
-    const avatar = document.getElementById("avatar");
+    const avatar =
+      document.getElementById("avatar");
 
-    avatar.innerHTML = `
-      <img src="${url}" alt="Profile picture">
-    `;
+    avatar.innerHTML = "";
+
+    const img =
+      document.createElement("img");
+
+    img.src = url;
+    img.alt = "Profile picture";
+
+    img.onerror = function() {
+      avatar.innerHTML = "👤";
+    };
+
+    avatar.appendChild(img);
 
   }
 
-  document.getElementById("avatarInput").addEventListener(
-    "change",
-    function(event) {
+  document
+    .getElementById("avatarInput")
+    .addEventListener("change", function(event) {
 
-      const file = event.target.files[0];
+      const file =
+        event.target.files[0];
 
       if (!file) return;
 
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        alert(
+          "Please choose a JPG, PNG, or WEBP image."
+        );
+
+        event.target.value = "";
+        return;
+      }
+
       if (file.size > 2 * 1024 * 1024) {
-        alert("Profile picture must be 2MB or smaller.");
+        alert(
+          "Profile picture must be 2MB or smaller."
+        );
+
         event.target.value = "";
         return;
       }
 
       selectedFile = file;
 
-      const previewURL = URL.createObjectURL(file);
+      const previewURL =
+        URL.createObjectURL(file);
 
       showAvatar(previewURL);
 
-    }
-  );
+    });
 
   async function saveProfile() {
 
-    if (!currentUser) return;
+    if (!currentUser) {
+      alert("You are not logged in.");
+      return;
+    }
 
     const fullName =
-      document.getElementById("fullName").value.trim();
+      document
+        .getElementById("fullName")
+        .value
+        .trim();
 
     const location =
-      document.getElementById("location").value.trim();
+      document
+        .getElementById("location")
+        .value
+        .trim();
 
     const button =
       document.getElementById("saveButton");
@@ -369,7 +425,9 @@ by<!DOCTYPE html>
       document.getElementById("status");
 
     if (!fullName || !location) {
-      alert("Please enter your full name and location.");
+      alert(
+        "Please enter your full name and location."
+      );
       return;
     }
 
@@ -380,35 +438,53 @@ by<!DOCTYPE html>
     try {
 
       let avatarURL =
-        currentUser.user_metadata?.avatar_url || null;
+        currentUser.user_metadata?.avatar_url ||
+        null;
 
       /*
-        Upload new profile picture if one was selected.
+        Upload a new profile picture.
       */
 
       if (selectedFile) {
 
         const extension =
-          selectedFile.name.split(".").pop().toLowerCase();
+          selectedFile.name
+            .split(".")
+            .pop()
+            .toLowerCase();
 
         const filePath =
           `${currentUser.id}/avatar-${Date.now()}.${extension}`;
 
-        const { error: uploadError } =
+        const {
+          error: uploadError
+        } =
           await supabaseClient.storage
-            .from("Avatars")
-            .upload(filePath, selectedFile, {
-              contentType: selectedFile.type,
-              upsert: false
-            });
+            .from(AVATAR_BUCKET)
+            .upload(
+              filePath,
+              selectedFile,
+              {
+                contentType: selectedFile.type,
+                upsert: false
+              }
+            );
 
         if (uploadError) {
           throw uploadError;
         }
 
-        const { data: publicURLData } =
+        /*
+          IMPORTANT:
+          Use the exact same bucket name:
+          Avatars
+        */
+
+        const {
+          data: publicURLData
+        } =
           supabaseClient.storage
-            .from("avatars")
+            .from(AVATAR_BUCKET)
             .getPublicUrl(filePath);
 
         avatarURL =
@@ -416,10 +492,13 @@ by<!DOCTYPE html>
       }
 
       /*
-        Save profile information in Supabase Auth metadata.
+        Save profile information
+        to Supabase Auth metadata.
       */
 
-      const { error: updateError } =
+      const {
+        error: updateError
+      } =
         await supabaseClient.auth.updateUser({
           data: {
             full_name: fullName,
@@ -432,31 +511,58 @@ by<!DOCTYPE html>
         throw updateError;
       }
 
-      currentUser =
-        (await supabaseClient.auth.getUser()).data.user;
+      const {
+        data: userData,
+        error: userError
+      } =
+        await supabaseClient.auth.getUser();
+
+      if (userError) {
+        throw userError;
+      }
+
+      currentUser = userData.user;
 
       selectedFile = null;
+
+      document.getElementById("avatarInput").value = "";
+
+      if (avatarURL) {
+        showAvatar(avatarURL);
+      }
 
       status.textContent =
         "Profile updated successfully! ✅";
 
-      button.textContent = "SAVED ✓";
+      button.textContent =
+        "SAVED ✓";
 
       setTimeout(() => {
-        button.textContent = "SAVE CHANGES";
+
+        button.textContent =
+          "SAVE CHANGES";
+
         status.textContent = "";
+
       }, 2500);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Profile save error:",
+        error
+      );
 
       status.textContent =
         "Could not save profile.";
 
-      alert(error.message);
+      alert(
+        error.message ||
+        "Something went wrong while saving your profile."
+      );
 
-      button.textContent = "SAVE CHANGES";
+      button.textContent =
+        "SAVE CHANGES";
 
     }
 
@@ -466,7 +572,9 @@ by<!DOCTYPE html>
 
   async function logout() {
 
-    const { error } =
+    const {
+      error
+    } =
       await supabaseClient.auth.signOut();
 
     if (error) {
@@ -474,7 +582,8 @@ by<!DOCTYPE html>
       return;
     }
 
-    window.location.href = "index.html";
+    window.location.href =
+      "index.html";
 
   }
 
