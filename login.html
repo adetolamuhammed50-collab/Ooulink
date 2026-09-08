@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Log In — OOULink</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7f5;
+      color: #222;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      margin: auto;
+      background: white;
+      padding: 25px 20px 40px;
+    }
+
+    .back {
+      display: inline-block;
+      color: #16834b;
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 800;
+      color: #16834b;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e5e8e6;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #d8ddda;
+      border-radius: 10px;
+      font-size: 15px;
+      margin-bottom: 18px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #16834b;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 11px;
+      background: #16834b;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+    }
+
+    .message {
+      display: none;
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .error {
+      display: block;
+      background: #fff0f0;
+      color: #b42318;
+    }
+
+    .success {
+      display: block;
+      background: #edf9f2;
+      color: #16834b;
+    }
+
+    .signup-link {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 14px;
+      color: #777;
+    }
+
+    .signup-link a {
+      color: #16834b;
+      font-weight: 700;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <a href="index.html" class="back">← Back to OOULink</a>
+
+    <div class="logo">OOULink</div>
+
+    <div class="subtitle">
+      Welcome back. Log in to continue.
+    </div>
+
+    <div class="card">
+
+      <form id="loginForm">
+
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="you@example.com"
+          required
+        >
+
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter your password"
+          required
+        >
+
+        <button type="submit" id="loginButton">
+          LOG IN
+        </button>
+
+      </form>
+
+      <div id="message" class="message"></div>
+
+      <div class="signup-link">
+        Don't have an account?
+        <a href="signup.html">Sign Up</a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    const SUPABASE_URL =
+      "https://dthvdxgxesomltlruogp.supabase.co";
+
+    const SUPABASE_KEY =
+      "YOUR_EXISTING_SUPABASE_PUBLISHABLE_KEY";
+
+    const supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    const form =
+      document.getElementById("loginForm");
+
+    const message =
+      document.getElementById("message");
+
+    const button =
+      document.getElementById("loginButton");
+
+    form.addEventListener("submit", async function(event) {
+
+      event.preventDefault();
+
+      const email =
+        document.getElementById("email").value.trim();
+
+      const password =
+        document.getElementById("password").value;
+
+      message.className = "message";
+      message.textContent = "";
+
+      button.disabled = true;
+      button.textContent = "LOGGING IN...";
+
+      const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+      if (error) {
+
+        message.className = "message error";
+        message.textContent = error.message;
+
+        button.disabled = false;
+        button.textContent = "LOG IN";
+
+        return;
+      }
+
+      message.className = "message success";
+      message.textContent = "Login successful!";
+
+      setTimeout(function() {
+        window.location.href = "index.html";
+      }, 700);
+
+    });
+
+  </script>
+
+</body>
+</html>
