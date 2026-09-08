@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Tasks - OOULink</title>
-
-  <style>
+  <title>My Tasks - OOULink</title>  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
     * {
       box-sizing: border-box;
       margin: 0;
@@ -61,6 +58,14 @@
       border-radius: 10px;
       background: white;
       font-size: 13px;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: #16834b;
+      color: white;
+      border-color: #16834b;
+      font-weight: bold;
     }
 
     .task-list {
@@ -72,6 +77,11 @@
       border-radius: 15px;
       padding: 16px;
       margin-bottom: 12px;
+      cursor: pointer;
+    }
+
+    .task:active {
+      background: #f7faf8;
     }
 
     .task h2 {
@@ -94,6 +104,27 @@
       color: #16834b;
       font-size: 11px;
       font-weight: bold;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 45px 20px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    .error {
+      text-align: center;
+      padding: 40px 20px;
+      color: #c0392b;
+      font-size: 14px;
     }
 
     nav {
@@ -121,51 +152,219 @@
       color: #16834b;
       font-weight: bold;
     }
-  </style>
-</head>
-
-<body>
-
-<div class="app">
-
-  <header>
+  </style></head><body><div class="app">  <header>
     <a href="index.html" class="back">← Back</a>
     <h1>My Tasks</h1>
     <p class="subtitle">Track tasks you posted or accepted.</p>
-  </header>
-
-  <div class="tabs">
-    <button class="tab">Posted</button>
-    <button class="tab">Accepted</button>
-  </div>
-
-  <section class="task-list">
-
-    <div class="task">
-      <h2>🖨️ Print & Deliver Assignment</h2>
-      <p>📍 OOU — Ibogun Campus</p>
-      <p>💰 ₦1,000</p>
-      <span class="status">In Progress</span>
-    </div>
-
-    <div class="task">
-      <h2>🍱 Pick Up Food</h2>
-      <p>📍 OOU — Ibogun Campus</p>
-      <p>💰 ₦700</p>
-      <span class="status">Completed</span>
-    </div>
-
-  </section>
-
-</div>
-
-<nav>
+  </header>  <div class="tabs">
+    <button class="tab active" id="postedTab">Posted</button>
+    <button class="tab" id="acceptedTab">Accepted</button>
+  </div>  <section class="task-list" id="taskList">
+    <div class="loading">Loading your tasks...</div>
+  </section></div><nav>
   <a href="index.html">🏠<br>Home</a>
   <a href="my-tasks.html" class="active">📋<br>My Tasks</a>
   <a href="post-task.html">➕<br>Post</a>
   <a href="alerts.html">🔔<br>Alerts</a>
   <a href="profile.html">👤<br>Profile</a>
-</nav>
+</nav><script>
+  const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
 
-</body>
+  const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const taskList = document.getElementById("taskList");
+  const postedTab = document.getElementById("postedTab");
+  const acceptedTab = document.getElementById("acceptedTab");
+
+  let currentUser = null;
+  let currentTab = "posted";
+
+  function escapeHTML(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function formatDeadline(deadline) {
+    if (!deadline) return "No deadline";
+
+    const date = new Date(deadline);
+
+    if (isNaN(date.getTime())) {
+      return "No deadline";
+    }
+
+    const now = new Date();
+
+    if (date < now) {
+      return "Deadline passed";
+    }
+
+    const difference = date.getTime() - now.getTime();
+    const minutes = Math.floor(difference / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (minutes < 60) {
+      return `Due in ${minutes} minute${minutes === 1 ? "" : "s"}`;
+    }
+
+    if (hours < 24) {
+      return `Due in ${hours} hour${hours === 1 ? "" : "s"}`;
+    }
+
+    if (days === 1) {
+      return "Due tomorrow";
+    }
+
+    if (days < 7) {
+      return `Due in ${days} days`;
+    }
+
+    return `Due ${date.toLocaleDateString()}`;
+  }
+
+  function formatStatus(status) {
+    if (!status) return "Open";
+
+    const text = String(status)
+      .replace(/_/g, " ")
+      .toLowerCase();
+
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
+  function showEmpty() {
+    if (currentTab === "posted") {
+      taskList.innerHTML = `
+        <div class="empty">
+          <div style="font-size:32px; margin-bottom:10px;">📋</div>
+          <strong>No posted tasks yet</strong>
+          <p style="margin-top:6px;">Tasks you post will appear here.</p>
+        </div>
+      `;
+    } else {
+      taskList.innerHTML = `
+        <div class="empty">
+          <div style="font-size:32px; margin-bottom:10px;">🤝</div>
+          <strong>No accepted tasks yet</strong>
+          <p style="margin-top:6px;">Tasks you accept will appear here.</p>
+        </div>
+      `;
+    }
+  }
+
+  async function loadTasks() {
+    if (!currentUser) return;
+
+    taskList.innerHTML = `
+      <div class="loading">Loading your tasks...</div>
+    `;
+
+    let query = supabaseClient
+      .from("tasks")
+      .select("id,title,description,category,location,budget,deadline,status,user_id,runner_id,created_at")
+      .order("created_at", { ascending: false });
+
+    if (currentTab === "posted") {
+      query = query.eq("user_id", currentUser.id);
+    } else {
+      query = query.eq("runner_id", currentUser.id);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("My Tasks error:", error);
+
+      taskList.innerHTML = `
+        <div class="error">
+          Unable to load your tasks.<br>
+          Please refresh and try again.
+        </div>
+      `;
+
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      showEmpty();
+      return;
+    }
+
+    taskList.innerHTML = data.map(task => `
+      <div class="task" onclick="openTask('${task.id}')">
+
+        <h2>${escapeHTML(task.title || "Untitled Task")}</h2>
+
+        <p>📍 ${escapeHTML(task.location || "Location not specified")}</p>
+
+        <p>💰 ₦${Number(task.budget || 0).toLocaleString()}</p>
+
+        <p>⏰ ${formatDeadline(task.deadline)}</p>
+
+        <span class="status">
+          ${escapeHTML(formatStatus(task.status))}
+        </span>
+
+      </div>
+    `).join("");
+  }
+
+  function openTask(taskId) {
+    window.location.href = `task-details.html?id=${encodeURIComponent(taskId)}`;
+  }
+
+  postedTab.addEventListener("click", () => {
+    if (currentTab === "posted") return;
+
+    currentTab = "posted";
+
+    postedTab.classList.add("active");
+    acceptedTab.classList.remove("active");
+
+    loadTasks();
+  });
+
+  acceptedTab.addEventListener("click", () => {
+    if (currentTab === "accepted") return;
+
+    currentTab = "accepted";
+
+    acceptedTab.classList.add("active");
+    postedTab.classList.remove("active");
+
+    loadTasks();
+  });
+
+  async function initialize() {
+    const {
+      data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (!session) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    currentUser = session.user;
+
+    await loadTasks();
+  }
+
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (!session) {
+      window.location.href = "login.html";
+    }
+  });
+
+  initialize();
+</script></body>
 </html>
