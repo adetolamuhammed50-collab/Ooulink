@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Tasks - OOULink</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f6f8f7;
+      color: #17231d;
+    }
+
+    .app {
+      max-width: 480px;
+      min-height: 100vh;
+      margin: auto;
+      background: white;
+      padding-bottom: 90px;
+    }
+
+    header {
+      padding: 25px 20px 15px;
+      border-bottom: 1px solid #e5e8e6;
+    }
+
+    .back {
+      color: #16834b;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    h1 {
+      margin-top: 15px;
+      font-size: 25px;
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 15px 20px 5px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #e5e8e6;
+      border-radius: 10px;
+      background: white;
+      font-size: 13px;
+    }
+
+    .task-list {
+      padding: 15px 20px;
+    }
+
+    .task {
+      border: 1px solid #e5e8e6;
+      border-radius: 15px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .task h2 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .task p {
+      color: #777;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .status {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 9px;
+      border-radius: 8px;
+      background: #edf7f1;
+      color: #16834b;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 5px;
+      background: white;
+      border-top: 1px solid #e5e8e6;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #777;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    nav a.active {
+      color: #16834b;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header>
+    <a href="index.html" class="back">← Back</a>
+    <h1>My Tasks</h1>
+    <p class="subtitle">Track tasks you posted or accepted.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab">Posted</button>
+    <button class="tab">Accepted</button>
+  </div>
+
+  <section class="task-list">
+
+    <div class="task">
+      <h2>🖨️ Print & Deliver Assignment</h2>
+      <p>📍 OOU — Ibogun Campus</p>
+      <p>💰 ₦1,000</p>
+      <span class="status">In Progress</span>
+    </div>
+
+    <div class="task">
+      <h2>🍱 Pick Up Food</h2>
+      <p>📍 OOU — Ibogun Campus</p>
+      <p>💰 ₦700</p>
+      <span class="status">Completed</span>
+    </div>
+
+  </section>
+
+</div>
+
+<nav>
+  <a href="index.html">🏠<br>Home</a>
+  <a href="my-tasks.html" class="active">📋<br>My Tasks</a>
+  <a href="post-task.html">➕<br>Post</a>
+  <a href="alerts.html">🔔<br>Alerts</a>
+  <a href="profile.html">👤<br>Profile</a>
+</nav>
+
+</body>
+</html>
