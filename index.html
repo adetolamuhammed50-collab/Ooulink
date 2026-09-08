@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>OOULink</title>
 
   <style>
@@ -16,90 +17,119 @@
       font-family: Arial, sans-serif;
       background: #f7f9f8;
       color: #17201b;
-      padding-bottom: 80px;
     }
 
     .app {
       width: 100%;
       max-width: 480px;
-      margin: auto;
       min-height: 100vh;
-      background: #f7f9f8;
+      margin: auto;
+      padding-bottom: 90px;
     }
 
     header {
-      background: white;
-      padding: 18px 18px 14px;
-      border-bottom: 1px solid #e8ece9;
-      position: relative;
+      background: #16834b;
+      color: white;
+      padding: 18px 16px 22px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
     }
 
     .logo {
-      font-size: 25px;
+      font-size: 24px;
       font-weight: 800;
-      color: #16834b;
     }
 
     .location {
-      margin-top: 5px;
-      color: #777;
-      font-size: 14px;
+      background: rgba(255,255,255,0.15);
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 12px;
       cursor: pointer;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .auth-buttons a {
+      flex: 1;
+      text-align: center;
+      text-decoration: none;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .signup {
+      background: white;
+      color: #16834b;
+    }
+
+    .login {
+      border: 1px solid rgba(255,255,255,0.7);
+      color: white;
     }
 
     .location-menu {
       display: none;
-      margin-top: 12px;
-      padding: 12px;
       background: white;
-      border: 1px solid #e8ece9;
-      border-radius: 14px;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      color: #17201b;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+
+    .location-menu.show {
+      display: block;
     }
 
     .location-title {
-      font-weight: bold;
+      font-weight: 700;
+      font-size: 13px;
       margin-bottom: 8px;
     }
 
     .location-menu button {
       width: 100%;
-      display: block;
-      padding: 12px;
-      margin: 5px 0;
+      background: #f7f9f8;
       border: none;
-      border-radius: 10px;
-      background: #f5f7f6;
-      color: #17201b;
+      padding: 11px;
+      margin-top: 6px;
+      border-radius: 9px;
       text-align: left;
-      font-size: 14px;
-    }
-
-    main {
-      padding: 18px;
+      font-size: 13px;
+      cursor: pointer;
     }
 
     .hero {
-      background: #16834b;
-      color: white;
-      border-radius: 18px;
-      padding: 22px;
-      margin-bottom: 20px;
+      padding: 22px 16px;
     }
 
     .hero h1 {
-      font-size: 25px;
+      font-size: 27px;
       margin-bottom: 8px;
     }
 
     .hero p {
+      color: #777;
       font-size: 14px;
-      opacity: 0.9;
+      line-height: 1.5;
       margin-bottom: 18px;
     }
 
-    .buttons {
+    .hero-buttons {
       display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
@@ -108,15 +138,16 @@
       display: block;
       text-decoration: none;
       text-align: center;
-      padding: 14px;
+      padding: 14px 10px;
       border-radius: 12px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
     }
 
     .post {
       background: white;
       color: #16834b;
+      border: 1px solid #16834b;
     }
 
     .find {
@@ -124,18 +155,34 @@
       color: white;
     }
 
+    .section {
+      padding: 0 16px;
+    }
+
     .section-title {
-      font-size: 18px;
-      font-weight: 800;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 12px;
+    }
+
+    .section-title h2 {
+      font-size: 18px;
+    }
+
+    .section-title a {
+      color: #16834b;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
     }
 
     .task-card {
       background: white;
-      border: 1px solid #e8ece9;
-      border-radius: 15px;
+      border: 1px solid #e5e8e6;
+      border-radius: 14px;
       padding: 15px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .task-top {
@@ -145,8 +192,8 @@
     }
 
     .task-title {
-      font-weight: 700;
       font-size: 15px;
+      font-weight: 700;
     }
 
     .price {
@@ -158,18 +205,18 @@
     .task-info {
       color: #777;
       font-size: 12px;
-      margin-top: 8px;
-      line-height: 1.6;
+      line-height: 1.7;
+      margin-top: 7px;
     }
 
     .tag {
       display: inline-block;
       background: #eef7f2;
       color: #16834b;
-      padding: 5px 8px;
+      padding: 4px 8px;
       border-radius: 7px;
-      font-size: 11px;
-      margin-top: 8px;
+      font-size: 10px;
+      margin-top: 7px;
     }
 
     nav {
@@ -206,10 +253,17 @@
   <div class="app">
 
     <header>
-      <div class="logo">OOULink</div>
 
-      <div class="location" onclick="showLocations()">
-        📍 <span id="selectedLocation">Choose your location</span>
+      <div class="top">
+
+        <div class="logo">
+          OOULink
+        </div>
+
+        <div class="location" onclick="showLocations()">
+          📍 <span id="selectedLocation">Choose your location</span>
+        </div>
+
       </div>
 
       <div id="locationMenu" class="location-menu">
@@ -239,122 +293,140 @@
         </button>
 
       </div>
+
+      <div class="auth-buttons">
+
+        <a href="signup.html" class="signup">
+          SIGN UP
+        </a>
+
+        <a href="login.html" class="login">
+          LOG IN
+        </a>
+
+      </div>
+
     </header>
 
 
-    <main>
+    <section class="hero">
 
-      <section class="hero">
+      <h1>
+        What do you need done?
+      </h1>
 
-        <h1>What do you need done?</h1>
+      <p>
+        Get help from people around you. Post a task, find someone to help, and get things done.
+      </p>
 
-        <p>
-          Get help from people around you.
-          Post a task or find tasks to earn.
-        </p>
+      <div class="hero-buttons">
 
-        <div class="buttons">
+        <a href="post-task.html" class="post">
+          🙋 POST A TASK
+        </a>
 
-          <a href="post-task.html" class="post">
-            🙋 POST A TASK
-          </a>
+        <a href="find-tasks.html" class="find">
+          🏃 FIND TASKS
+        </a>
 
-          <a href="find-tasks.html" class="find">
-            🏃 FIND TASKS
-          </a>
+      </div>
 
-        </div>
-
-      </section>
+    </section>
 
 
-      <section>
+    <section class="section">
 
-        <div class="section-title">
+      <div class="section-title">
+
+        <h2>
           Nearby Tasks
-        </div>
+        </h2>
+
+        <a href="find-tasks.html">
+          View all
+        </a>
+
+      </div>
 
 
-        <div class="task-card">
+      <div class="task-card">
 
-          <div class="task-top">
+        <div class="task-top">
 
-            <div class="task-title">
-              🖨️ Print & Deliver Assignment
-            </div>
-
-            <div class="price">
-              ₦1,000
-            </div>
-
+          <div class="task-title">
+            🖨️ Print & Deliver Assignment
           </div>
 
-          <div class="task-info">
-            📍 Ibogun Campus<br>
-            ⏰ Due today
+          <div class="price">
+            ₦1,000
           </div>
-
-          <span class="tag">
-            Printing
-          </span>
 
         </div>
 
+        <div class="task-info">
+          📍 OOU — Ibogun Campus<br>
+          ⏰ Due today
+        </div>
 
-        <div class="task-card">
+        <span class="tag">
+          Printing
+        </span>
 
-          <div class="task-top">
+      </div>
 
-            <div class="task-title">
-              🍱 Pick Up Food
-            </div>
 
-            <div class="price">
-              ₦700
-            </div>
+      <div class="task-card">
 
+        <div class="task-top">
+
+          <div class="task-title">
+            🍱 Pick Up Food
           </div>
 
-          <div class="task-info">
-            📍 Ibogun Campus<br>
-            ⏰ Due in 1 hour
+          <div class="price">
+            ₦700
           </div>
-
-          <span class="tag">
-            Errand
-          </span>
 
         </div>
 
+        <div class="task-info">
+          📍 OOU — Ibogun Campus<br>
+          ⏰ Due in 1 hour
+        </div>
 
-        <div class="task-card">
+        <span class="tag">
+          Errand
+        </span>
 
-          <div class="task-top">
+      </div>
 
-            <div class="task-title">
-              ⌨️ Type Assignment
-            </div>
 
-            <div class="price">
-              ₦1,500
-            </div>
+      <div class="task-card">
 
+        <div class="task-top">
+
+          <div class="task-title">
+            ⌨️ Type Assignment
           </div>
 
-          <div class="task-info">
-            📍 Ibogun Campus<br>
-            ⏰ Due tomorrow
+          <div class="price">
+            ₦1,500
           </div>
-
-          <span class="tag">
-            Digital
-          </span>
 
         </div>
 
-      </section>
+        <div class="task-info">
+          📍 OOU — Ibogun Campus<br>
+          ⏰ Due tomorrow
+        </div>
 
-    </main>
+        <span class="tag">
+          Digital
+        </span>
+
+      </div>
+
+    </section>
 
 
     <nav>
@@ -396,21 +468,20 @@
       const menu =
         document.getElementById("locationMenu");
 
-      menu.style.display =
-        menu.style.display === "block"
-          ? "none"
-          : "block";
+      menu.classList.toggle("show");
 
     }
 
 
     function selectLocation(location) {
 
-      document.getElementById("selectedLocation")
-        .textContent = location;
+      document.getElementById(
+        "selectedLocation"
+      ).textContent = location;
 
-      document.getElementById("locationMenu")
-        .style.display = "none";
+      document.getElementById(
+        "locationMenu"
+      ).classList.remove("show");
 
     }
 
