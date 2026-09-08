@@ -99,6 +99,31 @@
       margin-top: 4px;
     }
 
+    .signup-btn:disabled {
+      opacity: 0.6;
+    }
+
+    .message {
+      display: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .success {
+      display: block;
+      background: #eef7f2;
+      color: #16834b;
+    }
+
+    .error {
+      display: block;
+      background: #fff1f1;
+      color: #c62828;
+    }
+
     .login-text {
       text-align: center;
       margin-top: 20px;
@@ -143,6 +168,8 @@
         Create your account
       </h1>
 
+      <div id="message" class="message"></div>
+
       <form id="signupForm">
 
         <label for="name">
@@ -156,7 +183,6 @@
           required
         >
 
-
         <label for="email">
           Email Address
         </label>
@@ -167,7 +193,6 @@
           placeholder="Enter your email"
           required
         >
-
 
         <label for="location">
           Location
@@ -201,7 +226,6 @@
 
         </select>
 
-
         <label for="password">
           Password
         </label>
@@ -213,7 +237,6 @@
           minlength="6"
           required
         >
-
 
         <label for="confirmPassword">
           Confirm Password
@@ -227,23 +250,21 @@
           required
         >
 
-
         <button
           type="submit"
           class="signup-btn"
+          id="signupButton"
         >
           CREATE ACCOUNT
         </button>
 
       </form>
 
-
       <div class="terms">
         By creating an account, you agree to use OOULink responsibly and follow the platform's rules.
       </div>
 
     </div>
-
 
     <div class="login-text">
       Already have an account?
@@ -255,13 +276,61 @@
   </div>
 
 
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
 
-    document
-      .getElementById("signupForm")
-      .addEventListener("submit", function(event) {
+    const SUPABASE_URL =
+      "https://dthvdxgxesomltlruogp.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+
+    const { createClient } =
+      supabase;
+
+    const supabaseClient =
+      createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    const form =
+      document.getElementById("signupForm");
+
+    const message =
+      document.getElementById("message");
+
+    const button =
+      document.getElementById("signupButton");
+
+
+    function showMessage(text, type) {
+
+      message.textContent = text;
+
+      message.className =
+        "message " + type;
+
+    }
+
+
+    form.addEventListener(
+      "submit",
+      async function(event) {
 
         event.preventDefault();
+
+        const name =
+          document.getElementById("name").value.trim();
+
+        const email =
+          document.getElementById("email").value.trim();
+
+        const location =
+          document.getElementById("location").value;
 
         const password =
           document.getElementById("password").value;
@@ -269,18 +338,89 @@
         const confirmPassword =
           document.getElementById("confirmPassword").value;
 
+
         if (password !== confirmPassword) {
 
-          alert("Passwords do not match.");
+          showMessage(
+            "Passwords do not match.",
+            "error"
+          );
 
           return;
         }
 
-        alert(
-          "Signup form is working! Next we will connect it to Supabase."
-        );
 
-      });
+        if (password.length < 6) {
+
+          showMessage(
+            "Password must be at least 6 characters.",
+            "error"
+          );
+
+          return;
+        }
+
+
+        button.disabled = true;
+
+        button.textContent =
+          "CREATING ACCOUNT...";
+
+
+        const { data, error } =
+          await supabaseClient.auth.signUp({
+
+            email: email,
+
+            password: password,
+
+            options: {
+
+              data: {
+                full_name: name,
+                location: location
+              }
+
+            }
+
+          });
+
+
+        if (error) {
+
+          showMessage(
+            error.message,
+            "error"
+          );
+
+          button.disabled = false;
+
+          button.textContent =
+            "CREATE ACCOUNT";
+
+          return;
+        }
+
+
+        if (data.user) {
+
+          showMessage(
+            "Account created successfully! Check your email to confirm your account.",
+            "success"
+          );
+
+          form.reset();
+
+          button.disabled = false;
+
+          button.textContent =
+            "ACCOUNT CREATED";
+
+        }
+
+      }
+
+    );
 
   </script>
 
