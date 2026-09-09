@@ -49,7 +49,7 @@
       background: white;
       border-radius: 18px;
       padding: 20px;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+      box-shadow: 0 4px 18px rgba(0,0,0,.06);
     }
 
     .category {
@@ -133,8 +133,86 @@
       margin-top: 10px;
     }
 
-    .chat-btn:hover {
-      background: #1d4ed8;
+    .files-section {
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #edf0f4;
+    }
+
+    .files-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .files-note {
+      color: #6b7280;
+      font-size: 13px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .file-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .pdf-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: #fee2e2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .file-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .file-name {
+      font-weight: 700;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    .file-size {
+      color: #6b7280;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .file-button {
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      padding: 9px 11px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .file-button:active {
+      transform: scale(.97);
+    }
+
+    .no-files {
+      background: #f8fafc;
+      padding: 13px;
+      border-radius: 10px;
+      color: #6b7280;
+      font-size: 13px;
     }
 
     .report {
@@ -184,7 +262,6 @@
       margin-bottom: 3px;
     }
 
-    /* Notification dot */
     .bell-wrap {
       position: relative;
       display: inline-block;
@@ -202,6 +279,16 @@
       display: none;
     }
 
+    @media (max-width: 430px) {
+      .file-card {
+        align-items: flex-start;
+      }
+
+      .file-button {
+        padding: 8px;
+      }
+    }
+
     @media (min-width: 700px) {
       .bottom-nav {
         max-width: 650px;
@@ -215,590 +302,733 @@
 
 <body>
 
-  <header class="top">
-    <a href="find-tasks.html" class="back">←</a>
-    <div class="logo">OOULink</div>
-  </header>
+<header class="top">
+  <a href="find-tasks.html" class="back">←</a>
+  <div class="logo">OOULink</div>
+</header>
 
-  <main class="container">
-    <div id="content" class="card">
-      <div class="loading">Loading task...</div>
+<main class="container">
+  <div id="content" class="card">
+    <div class="loading">Loading task...</div>
+  </div>
+</main>
+
+<nav class="bottom-nav">
+
+  <a href="index.html">
+    <span>⌂</span>
+    Home
+  </a>
+
+  <a href="my-tasks.html">
+    <span>✓</span>
+    My Tasks
+  </a>
+
+  <a href="post-task.html">
+    <span>＋</span>
+    Post
+  </a>
+
+  <a href="alerts.html">
+    <span class="bell-wrap">
+      🔔
+      <span id="notificationDot" class="notification-dot"></span>
+    </span>
+    Alerts
+  </a>
+
+  <a href="profile.html">
+    <span>👤</span>
+    Profile
+  </a>
+
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL =
+  "https://dthvdxgxesomltlruogp.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+const content =
+  document.getElementById("content");
+
+const notificationDot =
+  document.getElementById("notificationDot");
+
+let currentTask = null;
+let currentUser = null;
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+function formatMoney(amount) {
+  return "₦" +
+    Number(amount).toLocaleString("en-NG");
+}
+
+
+function formatDate(date) {
+  return new Date(date).toLocaleString("en-NG", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  });
+}
+
+
+function formatFileSize(bytes) {
+
+  if (!bytes) return "";
+
+  if (bytes < 1024)
+    return bytes + " B";
+
+  if (bytes < 1024 * 1024)
+    return (bytes / 1024).toFixed(1) + " KB";
+
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+
+/* =========================
+   NOTIFICATION DOT
+========================= */
+
+async function updateNotificationDot() {
+
+  if (!currentUser) return;
+
+  const { count, error } =
+    await supabaseClient
+      .from("notifications")
+      .select("id", {
+        count: "exact",
+        head: true
+      })
+      .eq("user_id", currentUser.id)
+      .eq("is_read", false);
+
+  if (error) {
+    console.error(
+      "Notification dot error:",
+      error
+    );
+    return;
+  }
+
+  notificationDot.style.display =
+    count > 0 ? "block" : "none";
+}
+
+
+/* =========================
+   LOAD TASK FILES
+========================= */
+
+async function loadTaskFiles(taskId) {
+
+  const filesSection =
+    document.getElementById("filesSection");
+
+  if (!filesSection) return;
+
+  filesSection.innerHTML = `
+    <div class="files-title">
+      📎 Task Files
     </div>
-  </main>
 
-  <nav class="bottom-nav">
-
-    <a href="index.html">
-      <span>⌂</span>
-      Home
-    </a>
-
-    <a href="my-tasks.html">
-      <span>✓</span>
-      My Tasks
-    </a>
-
-    <a href="post-task.html">
-      <span>＋</span>
-      Post
-    </a>
-
-    <a href="alerts.html">
-      <span class="bell-wrap">
-        🔔
-        <span id="notificationDot" class="notification-dot"></span>
-      </span>
-      Alerts
-    </a>
-
-    <a href="profile.html">
-      <span>👤</span>
-      Profile
-    </a>
-
-  </nav>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script>
-
-    const SUPABASE_URL =
-      "https://dthvdxgxesomltlruogp.supabase.co";
-
-    const SUPABASE_KEY =
-      "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
-
-    const supabaseClient =
-      window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      );
-
-    const content =
-      document.getElementById("content");
-
-    const notificationDot =
-      document.getElementById("notificationDot");
-
-    let currentTask = null;
-    let currentUser = null;
+    <div class="files-note">
+      Loading attached PDF files...
+    </div>
+  `;
 
 
-    function escapeHtml(value) {
-
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-    }
-
-
-    function formatMoney(amount) {
-
-      return "₦" +
-        Number(amount).toLocaleString("en-NG");
-
-    }
-
-
-    function formatDate(date) {
-
-      return new Date(date).toLocaleString("en-NG", {
-        dateStyle: "medium",
-        timeStyle: "short"
+  const { data: files, error } =
+    await supabaseClient
+      .from("task_attachments")
+      .select(`
+        id,
+        file_name,
+        file_path,
+        file_size,
+        mime_type,
+        created_at
+      `)
+      .eq("task_id", taskId)
+      .order("created_at", {
+        ascending: true
       });
 
-    }
+
+  if (error) {
+
+    console.error(
+      "TASK FILES ERROR:",
+      error
+    );
+
+    filesSection.innerHTML = `
+      <div class="files-title">
+        📎 Task Files
+      </div>
+
+      <div class="no-files">
+        Unable to load the attached files.
+      </div>
+    `;
+
+    return;
+  }
 
 
-    async function updateNotificationDot() {
+  if (!files || files.length === 0) {
 
-      if (!currentUser) {
-        return;
-      }
+    filesSection.innerHTML = `
+      <div class="files-title">
+        📎 Task Files
+      </div>
 
-      const { count, error } =
-        await supabaseClient
-          .from("notifications")
-          .select("id", {
-            count: "exact",
-            head: true
-          })
-          .eq("user_id", currentUser.id)
-          .eq("is_read", false);
+      <div class="no-files">
+        No PDF files were attached to this task.
+      </div>
+    `;
 
-      if (error) {
+    return;
+  }
 
-        console.error(
-          "NOTIFICATION DOT ERROR:",
-          error
+
+  let html = `
+    <div class="files-title">
+      📎 Task Files
+    </div>
+
+    <div class="files-note">
+      PDF files attached to this task.
+    </div>
+  `;
+
+
+  for (const file of files) {
+
+    const { data: signedData, error: signedError } =
+      await supabaseClient.storage
+        .from("TaskFiles")
+        .createSignedUrl(
+          file.file_path,
+          60 * 10
         );
 
-        return;
-      }
 
-      notificationDot.style.display =
-        count > 0 ? "block" : "none";
+    if (signedError || !signedData?.signedUrl) {
 
+      console.error(
+        "SIGNED URL ERROR:",
+        signedError
+      );
+
+      html += `
+        <div class="file-card">
+
+          <div class="pdf-icon">
+            📄
+          </div>
+
+          <div class="file-info">
+
+            <div class="file-name">
+              ${escapeHtml(file.file_name)}
+            </div>
+
+            <div class="file-size">
+              File unavailable
+            </div>
+
+          </div>
+
+        </div>
+      `;
+
+      continue;
     }
 
 
-    async function loadTask() {
+    html += `
+      <div class="file-card">
 
-      const params =
-        new URLSearchParams(window.location.search);
-
-      const taskId =
-        params.get("id");
-
-
-      if (!taskId) {
-
-        content.innerHTML =
-          '<div class="error">Task not found.</div>';
-
-        return;
-      }
-
-
-      const { data: sessionData } =
-        await supabaseClient.auth.getSession();
-
-
-      if (!sessionData.session) {
-
-        window.location.href =
-          "login.html?redirect=task-details.html?id=" +
-          encodeURIComponent(taskId);
-
-        return;
-      }
-
-
-      currentUser =
-        sessionData.session.user;
-
-
-      await updateNotificationDot();
-
-
-      const { data: task, error } =
-        await supabaseClient
-          .from("tasks")
-          .select("*")
-          .eq("id", taskId)
-          .single();
-
-
-      if (error || !task) {
-
-        console.error("TASK LOAD ERROR:", error);
-
-        content.innerHTML = `
-          <div class="error">
-
-            We couldn't find this task.
-
-            <br><br>
-
-            <a href="find-tasks.html">
-              ← Back to tasks
-            </a>
-
-          </div>
-        `;
-
-        return;
-      }
-
-
-      currentTask = task;
-
-
-      const isOwner =
-        task.user_id === currentUser.id;
-
-
-      const isRunner =
-        task.runner_id === currentUser.id;
-
-
-      const isTaken =
-        task.runner_id !== null;
-
-
-      let buttonText =
-        "ACCEPT TASK";
-
-      let disabled =
-        false;
-
-
-      if (isOwner) {
-
-        buttonText =
-          "YOUR TASK";
-
-        disabled =
-          true;
-      }
-
-
-      if (isTaken && !isOwner) {
-
-        buttonText =
-          "TASK ALREADY ACCEPTED";
-
-        disabled =
-          true;
-      }
-
-
-      if (
-        task.status === "completed" ||
-        task.status === "cancelled"
-      ) {
-
-        buttonText =
-          "TASK CLOSED";
-
-        disabled =
-          true;
-      }
-
-
-      /*
-       * Chat is available only to:
-       * 1. The task owner
-       * 2. The assigned runner
-       *
-       * And only after the task has been accepted.
-       */
-
-      const canChat =
-        task.runner_id &&
-        (isOwner || isRunner);
-
-
-      content.innerHTML = `
-
-        <div class="category">
-          ${escapeHtml(task.category)}
+        <div class="pdf-icon">
+          📄
         </div>
 
+        <div class="file-info">
 
-        <h1>
-          ${escapeHtml(task.title)}
-        </h1>
-
-
-        <div class="description">
-          ${escapeHtml(task.description)}
-        </div>
-
-
-        <div class="budget">
-          ${formatMoney(task.budget)}
-        </div>
-
-
-        <div class="info">
-
-
-          <div class="info-row">
-
-            <div class="label">
-              📍 Location
-            </div>
-
-            <div class="value">
-              ${escapeHtml(task.location)}
-            </div>
-
+          <div class="file-name">
+            ${escapeHtml(file.file_name)}
           </div>
 
-
-          <div class="info-row">
-
-            <div class="label">
-              ⏰ Deadline
-            </div>
-
-            <div class="value">
-              ${formatDate(task.deadline)}
-            </div>
-
+          <div class="file-size">
+            PDF
+            ${file.file_size
+              ? " • " + formatFileSize(file.file_size)
+              : ""}
           </div>
-
-
-          <div class="info-row">
-
-            <div class="label">
-              📌 Status
-            </div>
-
-            <div class="value">
-              ${escapeHtml(task.status)}
-            </div>
-
-          </div>
-
 
         </div>
-
-
-        <button
-          id="acceptButton"
-          class="accept"
-          onclick="acceptTask()"
-          ${disabled ? "disabled" : ""}
-        >
-          ${buttonText}
-        </button>
-
-
-        ${
-          canChat
-          ? `
-            <a
-              href="chat.html?id=${encodeURIComponent(task.id)}"
-              class="chat-btn"
-            >
-              💬 ${
-                isOwner
-                ? "CHAT WITH RUNNER"
-                : "CHAT WITH POSTER"
-              }
-            </a>
-          `
-          : ""
-        }
-
 
         <a
-          href="#"
-          class="report"
-          onclick="reportTask(event)"
+          class="file-button"
+          href="${escapeHtml(signedData.signedUrl)}"
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          Report this task
+          VIEW PDF
         </a>
 
-      `;
+      </div>
+    `;
+  }
+
+
+  filesSection.innerHTML = html;
+}
+
+
+/* =========================
+   LOAD TASK
+========================= */
+
+async function loadTask() {
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const taskId =
+    params.get("id");
+
+
+  if (!taskId) {
+
+    content.innerHTML =
+      '<div class="error">Task not found.</div>';
+
+    return;
+  }
+
+
+  const { data: sessionData } =
+    await supabaseClient.auth.getSession();
+
+
+  if (!sessionData.session) {
+
+    window.location.href =
+      "login.html?redirect=task-details.html?id=" +
+      encodeURIComponent(taskId);
+
+    return;
+  }
+
+
+  currentUser =
+    sessionData.session.user;
+
+
+  await updateNotificationDot();
+
+
+  const { data: task, error } =
+    await supabaseClient
+      .from("tasks")
+      .select("*")
+      .eq("id", taskId)
+      .single();
+
+
+  if (error || !task) {
+
+    console.error(
+      "TASK LOAD ERROR:",
+      error
+    );
+
+    content.innerHTML = `
+      <div class="error">
+
+        We couldn't find this task.
+
+        <br><br>
+
+        <a href="find-tasks.html">
+          ← Back to tasks
+        </a>
+
+      </div>
+    `;
+
+    return;
+  }
+
+
+  currentTask = task;
+
+
+  const isOwner =
+    task.user_id === currentUser.id;
+
+  const isRunner =
+    task.runner_id === currentUser.id;
+
+  const isTaken =
+    task.runner_id !== null;
+
+
+  let buttonText =
+    "ACCEPT TASK";
+
+  let disabled = false;
+
+
+  if (isOwner) {
+
+    buttonText = "YOUR TASK";
+    disabled = true;
+
+  }
+
+
+  if (isTaken && !isOwner) {
+
+    buttonText =
+      "TASK ALREADY ACCEPTED";
+
+    disabled = true;
+
+  }
+
+
+  if (
+    task.status === "completed" ||
+    task.status === "cancelled"
+  ) {
+
+    buttonText = "TASK CLOSED";
+    disabled = true;
+
+  }
+
+
+  const canChat =
+    task.runner_id &&
+    (isOwner || isRunner);
+
+
+  /*
+   * Only the task owner and accepted runner
+   * can see the private task files.
+   */
+
+  const canViewFiles =
+    isOwner || isRunner;
+
+
+  content.innerHTML = `
+
+    <div class="category">
+      ${escapeHtml(task.category)}
+    </div>
+
+    <h1>
+      ${escapeHtml(task.title)}
+    </h1>
+
+    <div class="description">
+      ${escapeHtml(task.description)}
+    </div>
+
+    <div class="budget">
+      ${formatMoney(task.budget)}
+    </div>
+
+    <div class="info">
+
+      <div class="info-row">
+
+        <div class="label">
+          📍 Location
+        </div>
+
+        <div class="value">
+          ${escapeHtml(task.location)}
+        </div>
+
+      </div>
+
+
+      <div class="info-row">
+
+        <div class="label">
+          ⏰ Deadline
+        </div>
+
+        <div class="value">
+          ${formatDate(task.deadline)}
+        </div>
+
+      </div>
+
+
+      <div class="info-row">
+
+        <div class="label">
+          📌 Status
+        </div>
+
+        <div class="value">
+          ${escapeHtml(task.status)}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <button
+      id="acceptButton"
+      class="accept"
+      onclick="acceptTask()"
+      ${disabled ? "disabled" : ""}
+    >
+      ${buttonText}
+    </button>
+
+
+    ${
+      canChat
+      ? `
+        <a
+          href="chat.html?id=${encodeURIComponent(task.id)}"
+          class="chat-btn"
+        >
+          💬 ${
+            isOwner
+            ? "CHAT WITH RUNNER"
+            : "CHAT WITH POSTER"
+          }
+        </a>
+      `
+      : ""
     }
 
 
-    async function acceptTask() {
-
-      if (!currentTask || !currentUser) {
-        return;
-      }
-
-
-      if (currentTask.user_id === currentUser.id) {
-
-        alert(
-          "You cannot accept your own task."
-        );
-
-        return;
-      }
-
-
-      if (currentTask.runner_id) {
-
-        alert(
-          "This task has already been accepted."
-        );
-
-        return;
-      }
-
-
-      if (currentTask.status !== "open") {
-
-        alert(
-          "This task is no longer available."
-        );
-
-        return;
-      }
-
-
-      const button =
-        document.getElementById("acceptButton");
-
-
-      button.disabled = true;
-
-      button.textContent =
-        "ACCEPTING...";
-
-
-      /*
-       * Claim the task.
-       */
-
-      const { data: updatedTask, error: updateError } =
-        await supabaseClient
-          .from("tasks")
-          .update({
-
-            runner_id:
-              currentUser.id,
-
-            status:
-              "accepted"
-
-          })
-          .eq("id", currentTask.id)
-          .eq("status", "open")
-          .is("runner_id", null)
-          .select()
-          .single();
-
-
-      if (updateError || !updatedTask) {
-
-        console.error(
-          "ACCEPT TASK ERROR:",
-          updateError
-        );
-
-
-        button.disabled = false;
-
-        button.textContent =
-          "ACCEPT TASK";
-
-
-        alert(
-
-          "Accept failed:\n\n" +
-
-          (
-            updateError?.message ||
-            "The task could not be accepted."
-          ) +
-
-          "\n\nCode: " +
-
-          (
-            updateError?.code ||
-            "unknown"
-          )
-
-        );
-
-        return;
-      }
-
-
-      currentTask =
-        updatedTask;
-
-
-      /*
-       * Notify the task uploader.
-       */
-
-      const { error: ownerNotificationError } =
-        await supabaseClient
-          .from("notifications")
-          .insert({
-
-            user_id:
-              currentTask.user_id,
-
-            task_id:
-              currentTask.id,
-
-            type:
-              "task_accepted",
-
-            title:
-              "Task accepted",
-
-            message:
-              `Someone accepted your task "${currentTask.title}".`
-
-          });
-
-
-      if (ownerNotificationError) {
-
-        console.error(
-          "Owner notification error:",
-          ownerNotificationError
-        );
-
-      }
-
-
-      /*
-       * Notify the runner.
-       */
-
-      const { error: runnerNotificationError } =
-        await supabaseClient
-          .from("notifications")
-          .insert({
-
-            user_id:
-              currentUser.id,
-
-            task_id:
-              currentTask.id,
-
-            type:
-              "task_accepted",
-
-            title:
-              "Task accepted",
-
-            message:
-              `You accepted "${currentTask.title}".`
-
-          });
-
-
-      if (runnerNotificationError) {
-
-        console.error(
-          "Runner notification error:",
-          runnerNotificationError
-        );
-
-      }
-
-
-      alert(
-        "Task accepted successfully! 🚀"
-      );
-
-
-      window.location.reload();
-
+    ${
+      canViewFiles
+      ? `
+        <div
+          id="filesSection"
+          class="files-section"
+        >
+          <div class="files-title">
+            📎 Task Files
+          </div>
+
+          <div class="files-note">
+            Loading attached PDF files...
+          </div>
+        </div>
+      `
+      : ""
     }
 
 
-    function reportTask(event) {
+    <a
+      href="#"
+      class="report"
+      onclick="reportTask(event)"
+    >
+      Report this task
+    </a>
 
-      event.preventDefault();
+  `;
 
 
-      alert(
-        "Reporting will be connected later. Thanks for helping keep OOULink safe."
-      );
+  if (canViewFiles) {
+    await loadTaskFiles(task.id);
+  }
+}
 
-    }
+
+/* =========================
+   ACCEPT TASK
+========================= */
+
+async function acceptTask() {
+
+  if (!currentTask || !currentUser)
+    return;
 
 
-    loadTask();
+  if (currentTask.user_id === currentUser.id) {
 
-  </script>
+    alert(
+      "You cannot accept your own task."
+    );
+
+    return;
+  }
+
+
+  if (currentTask.runner_id) {
+
+    alert(
+      "This task has already been accepted."
+    );
+
+    return;
+  }
+
+
+  if (currentTask.status !== "open") {
+
+    alert(
+      "This task is no longer available."
+    );
+
+    return;
+  }
+
+
+  const button =
+    document.getElementById(
+      "acceptButton"
+    );
+
+
+  button.disabled = true;
+
+  button.textContent =
+    "ACCEPTING...";
+
+
+  const { data: updatedTask, error: updateError } =
+    await supabaseClient
+      .from("tasks")
+      .update({
+        runner_id: currentUser.id,
+        status: "accepted"
+      })
+      .eq("id", currentTask.id)
+      .eq("status", "open")
+      .is("runner_id", null)
+      .select()
+      .single();
+
+
+  if (updateError || !updatedTask) {
+
+    console.error(
+      "ACCEPT TASK ERROR:",
+      updateError
+    );
+
+    button.disabled = false;
+
+    button.textContent =
+      "ACCEPT TASK";
+
+    alert(
+      "Accept failed:\n\n" +
+      (
+        updateError?.message ||
+        "The task could not be accepted."
+      )
+    );
+
+    return;
+  }
+
+
+  currentTask =
+    updatedTask;
+
+
+  await supabaseClient
+    .from("notifications")
+    .insert({
+      user_id: currentTask.user_id,
+      task_id: currentTask.id,
+      type: "task_accepted",
+      title: "Task accepted",
+      message:
+        `Someone accepted your task "${currentTask.title}".`
+    });
+
+
+  await supabaseClient
+    .from("notifications")
+    .insert({
+      user_id: currentUser.id,
+      task_id: currentTask.id,
+      type: "task_accepted",
+      title: "Task accepted",
+      message:
+        `You accepted "${currentTask.title}".`
+    });
+
+
+  alert(
+    "Task accepted successfully! 🚀"
+  );
+
+
+  window.location.reload();
+}
+
+
+/* =========================
+   REPORT
+========================= */
+
+function reportTask(event) {
+
+  event.preventDefault();
+
+  alert(
+    "Reporting will be connected later. Thanks for helping keep OOULink safe."
+  );
+}
+
+
+/* =========================
+   START
+========================= */
+
+loadTask();
+
+</script>
 
 </body>
 </html>
