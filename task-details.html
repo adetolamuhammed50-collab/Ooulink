@@ -824,6 +824,20 @@ async function loadTask() {
     >
       ${buttonText}
     </button>
+${
+  isRunner && task.status === "in_progress"
+  ? `
+    <button
+      id="verifyButton"
+      class="accept"
+      onclick="submitForVerification()"
+      style="margin-top:10px;background:#f59e0b;"
+    >
+      📤 SUBMIT FOR VERIFICATION
+    </button>
+  `
+  : ""
+}
 
     ${
       isRunner && task.status === "accepted"
@@ -1105,6 +1119,84 @@ async function startTask() {
     });
 
   alert("Task is now in progress! 🚀");
+
+  window.location.reload();
+}
+async function submitForVerification() {
+
+  if (!currentTask || !currentUser) return;
+
+  if (currentTask.runner_id !== currentUser.id) {
+    alert("Only the assigned runner can submit this task.");
+    return;
+  }
+
+  if (currentTask.status !== "in_progress") {
+    alert("This task is not ready for verification.");
+    return;
+  }
+
+  const button = document.getElementById("verifyButton");
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "SUBMITTING...";
+  }
+
+  const { data: updatedTask, error } =
+    await supabaseClient
+      .from("tasks")
+      .update({
+        status: "awaiting_verification"
+      })
+      .eq("id", currentTask.id)
+      .eq("runner_id", currentUser.id)
+      .eq("status", "in_progress")
+      .select()
+      .single();
+
+  if (error || !updatedTask) {
+
+    console.error("VERIFICATION ERROR:", error);
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "📤 SUBMIT FOR VERIFICATION";
+    }
+
+    alert(
+      "Could not submit for verification.\n\n" +
+      (error?.message || "Please try again.")
+    );
+
+    return;
+  }
+
+  currentTask = updatedTask;
+
+  await supabaseClient
+    .from("notifications")
+    .insert({
+      user_id: currentTask.user_id,
+      task_id: currentTask.id,
+      type: "task_verification",
+      title: "Task ready for verification",
+      message:
+        `The runner submitted "${currentTask.title}" for your verification.`
+    });
+
+  await supabaseClient
+    .from("notifications")
+    .insert({
+      user_id: currentUser.id,
+      task_id: currentTask.id,
+      type: "task_verification",
+      title: "Task submitted",
+      message:
+        `You submitted "${currentTask.title}" for verification.`
+    });
+
+  alert("Task submitted for verification! 📤");
 
   window.location.reload();
 }
