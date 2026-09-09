@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Alerts - OOULink</title>
 
   <style>
@@ -15,7 +16,14 @@
       font-family: Arial, sans-serif;
       background: #f5f7fb;
       color: #111827;
-      padding-bottom: 80px;
+      padding-bottom: 82px;
+    }
+
+    .app {
+      max-width: 480px;
+      min-height: 100vh;
+      margin: auto;
+      background: #f5f7fb;
     }
 
     header {
@@ -60,6 +68,7 @@
     .task-header {
       padding: 16px;
       cursor: pointer;
+      user-select: none;
     }
 
     .task-title {
@@ -112,28 +121,75 @@
       font-weight: bold;
     }
 
-    nav {
+    /* CLICKABLE CHAT NOTIFICATION */
+
+    .chat-notification {
+      cursor: pointer;
+      padding: 13px;
+      margin: 4px -6px;
+      border-radius: 10px;
+      background: #f0f7ff;
+    }
+
+    .chat-notification:active {
+      transform: scale(0.99);
+    }
+
+    .chat-link {
+      margin-top: 7px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #2563eb;
+    }
+
+    /* STANDARD BOTTOM NAV */
+
+    .bottom-nav {
       position: fixed;
+      left: 50%;
       bottom: 0;
-      left: 0;
-      right: 0;
-      height: 65px;
-      background: white;
-      border-top: 1px solid #ddd;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: 68px;
+      background: #ffffff;
+      border-top: 1px solid #e4e9e6;
       display: flex;
       justify-content: space-around;
       align-items: center;
+      z-index: 9999;
+      box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.06);
     }
 
-    nav a {
+    .bottom-nav a {
+      position: relative;
+      flex: 1;
+      height: 68px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
       text-decoration: none;
-      color: #374151;
-      font-size: 13px;
+      color: #68736d;
+      font-size: 11px;
+      font-weight: 600;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .bottom-nav a.active {
+      color: #16834b;
+    }
+
+    .nav-icon {
+      font-size: 21px;
+      line-height: 22px;
     }
 
     .bell-wrap {
       position: relative;
       display: inline-block;
+      height: 22px;
     }
 
     .notification-dot {
@@ -152,33 +208,65 @@
 
 <body>
 
-<header>
-  <h1>🔔 Alerts</h1>
-</header>
+<div class="app">
 
-<div class="container">
-  <div id="alertsContainer">
-    <div class="loading">Loading your alerts...</div>
+  <header>
+    <h1>🔔 Alerts</h1>
+  </header>
+
+  <div class="container">
+
+    <div id="alertsContainer">
+      <div class="loading">
+        Loading your alerts...
+      </div>
+    </div>
+
   </div>
+
 </div>
 
-<nav>
-  <a href="index.html">🏠<br>Home</a>
 
-  <a href="find-tasks.html">🔎<br>Tasks</a>
+<!-- =========================
+     BOTTOM NAV
+     ========================= -->
 
-  <a href="my-tasks.html">📋<br>My Tasks</a>
+<nav class="bottom-nav">
 
-  <a href="alerts.html">
-    <span class="bell-wrap">
-      🔔
-      <span id="notificationDot" class="notification-dot"></span>
-    </span>
-    <br>Alerts
+  <a href="index.html">
+    <span class="nav-icon">🏠</span>
+    <span>Home</span>
   </a>
 
-  <a href="profile.html">👤<br>Profile</a>
+  <a href="find-tasks.html">
+    <span class="nav-icon">🔎</span>
+    <span>Find Tasks</span>
+  </a>
+
+  <a href="post-task.html">
+    <span class="nav-icon">➕</span>
+    <span>Post</span>
+  </a>
+
+  <a href="alerts.html" class="active">
+    <span class="bell-wrap">
+      <span class="nav-icon">🔔</span>
+      <span
+        id="notificationDot"
+        class="notification-dot"
+      ></span>
+    </span>
+
+    <span>Alerts</span>
+  </a>
+
+  <a href="profile.html">
+    <span class="nav-icon">👤</span>
+    <span>Profile</span>
+  </a>
+
 </nav>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -207,8 +295,8 @@ let currentUser = null;
 
 
 /* =========================
-   TIME FORMAT
-========================= */
+   TIME AGO
+   ========================= */
 
 function timeAgo(date) {
 
@@ -235,13 +323,18 @@ function timeAgo(date) {
   const days =
     Math.floor(hours / 24);
 
-  return days + " day" + (days > 1 ? "s" : "") + " ago";
+  return (
+    days +
+    " day" +
+    (days > 1 ? "s" : "") +
+    " ago"
+  );
 }
 
 
 /* =========================
    ESCAPE HTML
-========================= */
+   ========================= */
 
 function escapeHTML(value) {
 
@@ -255,14 +348,18 @@ function escapeHTML(value) {
 
 
 /* =========================
-   UPDATE RED DOT
-========================= */
+   RED DOT
+   ========================= */
 
 async function updateNotificationDot() {
 
-  if (!currentUser) return;
+  if (!currentUser)
+    return;
 
-  const { count, error } =
+  const {
+    count,
+    error
+  } =
     await supabaseClient
       .from("notifications")
       .select("id", {
@@ -273,18 +370,122 @@ async function updateNotificationDot() {
       .eq("is_read", false);
 
   if (error) {
-    console.error(error);
+
+    console.error(
+      "Notification dot error:",
+      error
+    );
+
     return;
   }
 
   notificationDot.style.display =
-    count > 0 ? "block" : "none";
+    count > 0
+      ? "block"
+      : "none";
+}
+
+
+/* =========================
+   MARK NOTIFICATIONS READ
+   ========================= */
+
+async function markNotificationsRead(list) {
+
+  const unreadIds =
+    list
+      .filter(n => !n.is_read)
+      .map(n => n.id);
+
+  if (unreadIds.length === 0)
+    return;
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("notifications")
+      .update({
+        is_read: true
+      })
+      .in("id", unreadIds);
+
+  if (error) {
+
+    console.error(
+      "Read notification error:",
+      error
+    );
+
+    return;
+  }
+
+  list.forEach(n => {
+    n.is_read = true;
+  });
+
+  await updateNotificationDot();
+}
+
+
+/* =========================
+   OPEN CHAT
+   ========================= */
+
+async function openChat(notification) {
+
+  if (!notification.task_id)
+    return;
+
+  /*
+    Mark this notification as read
+    before opening the chat.
+  */
+
+  if (!notification.is_read) {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("notifications")
+        .update({
+          is_read: true
+        })
+        .eq("id", notification.id)
+        .eq("user_id", currentUser.id);
+
+    if (error) {
+
+      console.error(
+        "Could not mark message notification read:",
+        error
+      );
+
+    } else {
+
+      notification.is_read = true;
+
+      await updateNotificationDot();
+    }
+  }
+
+  /*
+    Open the exact chat belonging
+    to this task.
+  */
+
+  window.location.href =
+    "chat.html?id=" +
+    encodeURIComponent(
+      notification.task_id
+    );
 }
 
 
 /* =========================
    LOAD ALERTS
-========================= */
+   ========================= */
 
 async function loadAlerts() {
 
@@ -294,18 +495,22 @@ async function loadAlerts() {
       '<div class="loading">Loading your alerts...</div>';
 
 
-    const { data: sessionData, error: sessionError } =
+    const {
+      data: sessionData,
+      error: sessionError
+    } =
       await supabaseClient.auth.getSession();
 
 
-    if (sessionError) {
+    if (sessionError)
       throw sessionError;
-    }
 
 
     if (!sessionData.session) {
 
-      window.location.href = "login.html";
+      window.location.href =
+        "login.html";
+
       return;
     }
 
@@ -317,22 +522,33 @@ async function loadAlerts() {
     await updateNotificationDot();
 
 
-    const { data: notifications, error } =
+    const {
+      data: notifications,
+      error
+    } =
       await supabaseClient
         .from("notifications")
         .select("*")
-        .eq("user_id", currentUser.id)
-        .order("created_at", {
-          ascending: false
-        });
+        .eq(
+          "user_id",
+          currentUser.id
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        );
 
 
-    if (error) {
+    if (error)
       throw error;
-    }
 
 
-    if (!notifications || notifications.length === 0) {
+    if (
+      !notifications ||
+      notifications.length === 0
+    ) {
 
       alertsContainer.innerHTML =
         '<div class="empty">🔔 No alerts yet.</div>';
@@ -341,171 +557,297 @@ async function loadAlerts() {
     }
 
 
+    /* =========================
+       GROUP BY TASK
+       ========================= */
+
     const groups = {};
 
 
-    notifications.forEach(notification => {
+    notifications.forEach(
+      notification => {
 
-      const key =
-        notification.task_id ||
-        "general";
+        const key =
+          notification.task_id ||
+          "general";
 
 
-      if (!groups[key]) {
-        groups[key] = [];
+        if (!groups[key]) {
+
+          groups[key] = [];
+        }
+
+
+        groups[key].push(
+          notification
+        );
+
       }
-
-
-      groups[key].push(notification);
-
-    });
+    );
 
 
     alertsContainer.innerHTML = "";
 
 
-    Object.keys(groups).forEach(taskId => {
+    /* =========================
+       BUILD GROUPS
+       ========================= */
 
-      const list =
-        groups[taskId];
+    Object.keys(groups).forEach(
+      taskId => {
 
-      const latest =
-        list[0];
+        const list =
+          groups[taskId];
 
-
-      const taskTitle =
-        latest.task_id
-          ? (
-              latest.message.match(/"([^"]+)"/)?.[1] ||
-              latest.title ||
-              "Task"
-            )
-          : "General";
+        const latest =
+          list[0];
 
 
-      const group =
-        document.createElement("div");
-
-      group.className =
-        "task-group";
-
-
-      const header =
-        document.createElement("div");
-
-      header.className =
-        "task-header";
+        const taskTitle =
+          latest.task_id
+            ? (
+                latest.message.match(
+                  /"([^"]+)"/
+                )?.[1] ||
+                latest.title ||
+                "Task"
+              )
+            : "General";
 
 
-      header.innerHTML = `
-        <div class="task-title">
-          📦 ${escapeHTML(taskTitle)}
-        </div>
+        const group =
+          document.createElement(
+            "div"
+          );
 
-        <div class="task-meta">
-          ${list.length} notification${list.length !== 1 ? "s" : ""}
-          • Latest: ${timeAgo(latest.created_at)}
-          <span style="float:right">▼</span>
-        </div>
-      `;
+        group.className =
+          "task-group";
 
 
-      const content =
-        document.createElement("div");
+        /* =====================
+           GROUP HEADER
+           ===================== */
 
-      content.className =
-        "group-content";
+        const header =
+          document.createElement(
+            "div"
+          );
 
-
-      list.forEach(notification => {
-
-        const item =
-          document.createElement("div");
-
-        item.className =
-          "notification " +
-          (!notification.is_read ? "unread" : "");
+        header.className =
+          "task-header";
 
 
-        item.innerHTML = `
-          <div class="notification-title">
-            ${escapeHTML(notification.title)}
+        header.innerHTML = `
+
+          <div class="task-title">
+            📦 ${escapeHTML(taskTitle)}
           </div>
 
-          <div class="notification-message">
-            ${escapeHTML(notification.message)}
+          <div class="task-meta">
+
+            ${list.length}
+            notification${list.length !== 1 ? "s" : ""}
+
+            • Latest:
+            ${timeAgo(latest.created_at)}
+
+            <span
+              style="float:right"
+            >
+              ▼
+            </span>
+
           </div>
 
-          <div class="notification-time">
-            ${timeAgo(notification.created_at)}
-          </div>
         `;
 
 
-        content.appendChild(item);
+        /* =====================
+           GROUP CONTENT
+           ===================== */
 
-      });
+        const content =
+          document.createElement(
+            "div"
+          );
 
-
-      header.addEventListener("click", async () => {
-
-        const isOpen =
-          content.classList.contains("open");
-
-
-        content.classList.toggle("open");
-
-
-        header.querySelector(
-          ".task-meta span"
-        ).textContent =
-          isOpen ? "▼" : "▲";
+        content.className =
+          "group-content";
 
 
-        if (!isOpen) {
+        list.forEach(
+          notification => {
 
-          const unreadIds =
-            list
-              .filter(n => !n.is_read)
-              .map(n => n.id);
-
-
-          if (unreadIds.length > 0) {
-
-            await supabaseClient
-              .from("notifications")
-              .update({
-                is_read: true
-              })
-              .in("id", unreadIds);
+            const item =
+              document.createElement(
+                "div"
+              );
 
 
-            list.forEach(n => {
-              n.is_read = true;
-            });
+            const isChat =
+              notification.type ===
+              "new_message";
 
 
-            content
-              .querySelectorAll(".unread")
-              .forEach(el => {
-                el.classList.remove("unread");
-              });
+            item.className =
+              "notification " +
+              (
+                !notification.is_read
+                  ? "unread "
+                  : ""
+              ) +
+              (
+                isChat
+                  ? "chat-notification"
+                  : ""
+              );
 
 
-            await updateNotificationDot();
+            item.innerHTML = `
+
+              <div class="notification-title">
+
+                ${isChat ? "💬 " : ""}
+
+                ${escapeHTML(
+                  notification.title
+                )}
+
+              </div>
+
+              <div class="notification-message">
+
+                ${escapeHTML(
+                  notification.message
+                )}
+
+              </div>
+
+              <div class="notification-time">
+
+                ${timeAgo(
+                  notification.created_at
+                )}
+
+              </div>
+
+              ${
+                isChat
+                  ? `
+                    <div class="chat-link">
+                      💬 Tap to open chat
+                    </div>
+                  `
+                  : ""
+              }
+
+            `;
+
+
+            /* =====================
+               CHAT CLICK
+               ===================== */
+
+            if (isChat) {
+
+              item.addEventListener(
+                "click",
+                async event => {
+
+                  event.stopPropagation();
+
+                  await openChat(
+                    notification
+                  );
+
+                }
+              );
+
+            }
+
+
+            content.appendChild(
+              item
+            );
+
           }
-
-        }
-
-      });
+        );
 
 
-      group.appendChild(header);
-      group.appendChild(content);
+        /* =====================
+           GROUP OPEN/CLOSE
+           ===================== */
 
-      alertsContainer.appendChild(group);
+        header.addEventListener(
+          "click",
+          async () => {
 
-    });
+            const isOpen =
+              content.classList.contains(
+                "open"
+              );
+
+
+            content.classList.toggle(
+              "open"
+            );
+
+
+            header.querySelector(
+              ".task-meta span"
+            ).textContent =
+              isOpen
+                ? "▼"
+                : "▲";
+
+
+            if (!isOpen) {
+
+              /*
+                Opening a task group marks
+                its unread notifications as read.
+
+                Chat notifications are also
+                marked read here.
+              */
+
+              await markNotificationsRead(
+                list
+              );
+
+
+              content
+                .querySelectorAll(
+                  ".unread"
+                )
+                .forEach(el => {
+
+                  el.classList.remove(
+                    "unread"
+                  );
+
+                });
+
+            }
+
+          }
+        );
+
+
+        group.appendChild(
+          header
+        );
+
+        group.appendChild(
+          content
+        );
+
+        alertsContainer.appendChild(
+          group
+        );
+
+      }
+    );
 
 
   } catch (error) {
@@ -517,10 +859,17 @@ async function loadAlerts() {
 
 
     alertsContainer.innerHTML = `
+
       <div class="error">
-        ❌ Unable to load alerts.<br><br>
+
+        ❌ Unable to load alerts.
+
+        <br><br>
+
         Please refresh the page.
+
       </div>
+
     `;
 
   }
@@ -530,7 +879,7 @@ async function loadAlerts() {
 
 /* =========================
    START
-========================= */
+   ========================= */
 
 document.addEventListener(
   "DOMContentLoaded",
