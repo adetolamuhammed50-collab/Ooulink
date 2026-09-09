@@ -777,3 +777,817 @@ async function loadTask() {
     currentTask.title;
 
 }
+/* LOAD PDF FILES */
+
+async function loadTaskFiles() {
+
+  filesBox.innerHTML = `
+    <div class="loading">
+      Loading task files...
+    </div>
+  `;
+
+  const {
+    data: files,
+    error
+  } =
+    await supabaseClient
+      .from("task_attachments")
+      .select(`
+        id,
+        file_name,
+        file_path,
+        file_size,
+        mime_type,
+        created_at
+      `)
+      .eq(
+        "task_id",
+        currentTask.id
+      )
+      .order(
+        "created_at",
+        {
+          ascending: true
+        }
+      );
+
+  if (error) {
+
+    filesBox.innerHTML = `
+      <div class="empty">
+        Unable to load task files.
+      </div>
+    `;
+
+    return;
+
+  }
+
+  if (!files || !files.length) {
+
+    filesBox.innerHTML = `
+      <div class="empty">
+        No PDF files attached to this task.
+      </div>
+    `;
+
+    return;
+
+  }
+
+  filesBox.innerHTML = "";
+
+  for (const file of files) {
+
+    const {
+      data: signed,
+      error: signedError
+    } =
+      await supabaseClient
+        .storage
+        .from("TaskFiles")
+        .createSignedUrl(
+          file.file_path,
+          600
+        );
+
+    if (
+      signedError ||
+      !signed?.signedUrl
+    ) {
+
+      const failed = document.createElement(
+        "div"
+      );
+
+      failed.className =
+        "file-card";
+
+      failed.innerHTML = `
+        <div class="file-name">
+          📄 ${escapeHTML(file.file_name)}
+        </div>
+
+        <div class="file-error">
+          Unable to open this PDF.
+        </div>
+      `;
+
+      filesBox.appendChild(
+        failed
+      );
+
+      continue;
+
+    }
+
+    const fileCard =
+      document.createElement(
+        "div"
+      );
+
+    fileCard.className =
+      "file-card";
+
+    fileCard.innerHTML = `
+
+      <div class="file-info">
+
+        <div class="file-name">
+          📄 ${escapeHTML(file.file_name)}
+        </div>
+
+        <div class="file-meta">
+          ${formatFileSize(file.file_size)}
+        </div>
+
+      </div>
+
+      <button
+        class="view-file-btn"
+        type="button"
+      >
+        VIEW PDF
+      </button>
+
+      <div
+        class="pdf-viewer"
+        style="display:none;"
+      >
+
+        <iframe
+          src="${signed.signedUrl}"
+          title="${escapeHTML(file.file_name)}"
+          loading="lazy"
+        ></iframe>
+
+      </div>
+
+    `;
+
+    const viewButton =
+      fileCard.querySelector(
+        ".view-file-btn"
+      );
+
+    const viewer =
+      fileCard.querySelector(
+        ".pdf-viewer"
+      );
+
+    viewButton.addEventListener(
+      "click",
+      () => {
+
+        const isHidden =
+          viewer.style.display ===
+          "none";
+
+        viewer.style.display =
+          isHidden
+            ? "block"
+            : "none";
+
+        viewButton.textContent =
+          isHidden
+            ? "HIDE PDF"
+            : "VIEW PDF";
+
+      }
+    );
+
+    filesBox.appendChild(
+      fileCard
+    );
+
+  }
+
+}
+
+
+/* RENDER MESSAGE */
+
+function renderMessage(msg) {
+
+  if (
+    document.querySelector(
+      `[data-message-id="${msg.id}"]`
+    )
+  ) {
+
+    return;
+
+  }
+
+  const mine =
+    msg.sender_id ===
+    currentUser.id;
+
+  const wrapper =
+    document.createElement(
+      "div"
+    );
+
+  wrapper.className =
+    mine
+      ? "message-row mine"
+      : "message-row other";
+
+  wrapper.dataset.messageId =
+    msg.id;
+
+  wrapper.innerHTML = `
+
+    <div class="message-bubble">
+
+      <div class="message-text">
+        ${escapeHTML(msg.message)}
+      </div>
+
+      <div class="message-time">
+        ${formatTime(msg.created_at)}
+      </div>
+
+    </div>
+
+  `;
+
+  messagesBox.appendChild(
+    wrapper
+  );
+
+}
+
+
+/* LOAD MESSAGES */
+
+async function loadMessages() {
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("messages")
+      .select(`
+        id,
+        sender_id,
+        receiver_id,
+        message,
+        is_read,
+        created_at
+      `)
+      .eq(
+        "task_id",
+        currentTask.id
+      )
+      .order(
+        "created_at",
+        {
+          ascending: true
+        }
+      );
+
+  if (error) {
+
+    messagesBox.innerHTML = `
+      <div class="message-error">
+        Unable to load messages.
+      </div>
+    `;
+
+    return;
+
+  }
+
+  messagesBox.innerHTML = "";
+
+  for (
+    const msg of data || []
+  ) {
+
+    renderMessage(msg);
+
+  }
+
+  scrollToBottom();
+
+  /*
+    Mark messages received by
+    the current user as read.
+  */
+
+  const unreadIds =
+    (data || [])
+      .filter(
+        msg =>
+          msg.receiver_id ===
+            currentUser.id &&
+          !msg.is_read
+      )
+      .map(
+        msg => msg.id
+      );
+
+  if (
+    unreadIds.length
+  ) {
+
+    await supabaseClient
+      .from("messages")
+      .update({
+        is_read: true
+      })
+      .in(
+        "id",
+        unreadIds
+      );
+
+  }
+
+}
+
+
+/* REALTIME MESSAGE HANDLER */
+
+function handleRealtimeMessage(payload) {
+
+  if (
+    !payload ||
+    !payload.new
+  ) {
+
+    return;
+
+  }
+
+  const message =
+    payload.new;
+
+  if (
+    message.task_id !==
+    currentTask.id
+  ) {
+
+    return;
+
+  }
+
+  renderMessage(
+    message
+  );
+
+  scrollToBottom();
+
+  /*
+    If the incoming message
+    belongs to the current user,
+    there is nothing else to do.
+
+    If it was received from the
+    other participant, mark it
+    as read because this chat is
+    currently open.
+  */
+
+  if (
+    message.receiver_id ===
+    currentUser.id &&
+    !message.is_read
+  ) {
+
+    supabaseClient
+      .from("messages")
+      .update({
+        is_read: true
+      })
+      .eq(
+        "id",
+        message.id
+      )
+      .then(() => {});
+
+  }
+
+}
+
+
+/* START REALTIME */
+
+function startRealtime() {
+
+  if (
+    realtimeChannel
+  ) {
+
+    return;
+
+  }
+
+  realtimeChannel =
+    supabaseClient
+      .channel(
+        `chat-${currentTask.id}`
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter:
+            `task_id=eq.${currentTask.id}`
+        },
+        payload => {
+
+          handleRealtimeMessage(
+            payload
+          );
+
+        }
+      )
+      .subscribe(
+        status => {
+
+          /*
+            No normal 5-second polling.
+
+            Realtime is the main method.
+
+            If the connection drops,
+            use a slower fallback check
+            instead of the old 5-second delay.
+          */
+
+          if (
+            status ===
+            "SUBSCRIBED"
+          ) {
+
+            connectionStatus.textContent =
+              "🟢 Live";
+
+          } else if (
+            status ===
+            "CHANNEL_ERROR" ||
+            status ===
+            "TIMED_OUT"
+          ) {
+
+            connectionStatus.textContent =
+              "🟡 Reconnecting...";
+
+            if (
+              fallbackTimer
+            ) {
+
+              clearInterval(
+                fallbackTimer
+              );
+
+            }
+
+            fallbackTimer =
+              setInterval(
+                loadMessages,
+                15000
+              );
+
+          } else {
+
+            connectionStatus.textContent =
+              "🟡 Connecting...";
+
+          }
+
+        }
+      );
+
+}
+
+
+/* SEND MESSAGE */
+
+async function sendMessage() {
+
+  if (
+    sending
+  ) {
+
+    return;
+
+  }
+
+  const text =
+    messageInput.value.trim();
+
+  if (!text) {
+
+    return;
+
+  }
+
+  const validation =
+    validateMessage(
+      text
+    );
+
+  if (
+    !validation.allowed
+  ) {
+
+    showBlockedMessage(
+      validation.reason
+    );
+
+    return;
+
+  }
+
+  sending = true;
+
+  sendButton.disabled =
+    true;
+
+  const originalText =
+    sendButton.textContent;
+
+  sendButton.textContent =
+    "Sending...";
+
+  /*
+    Clear any previous
+    warning message.
+  */
+
+  blockedMessage.textContent =
+    "";
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("messages")
+      .insert({
+        task_id:
+          currentTask.id,
+
+        sender_id:
+          currentUser.id,
+
+        receiver_id:
+          otherUserId,
+
+        message:
+          text
+      })
+      .select(`
+        id,
+        sender_id,
+        receiver_id,
+        message,
+        is_read,
+        created_at
+      `)
+      .single();
+
+  if (error) {
+
+    console.error(
+      "Message send error:",
+      error
+    );
+
+    blockedMessage.textContent =
+      "❌ Message could not be sent. Please try again.";
+
+    sendButton.disabled =
+      false;
+
+    sendButton.textContent =
+      originalText;
+
+    sending = false;
+
+    return;
+
+  }
+
+  /*
+    Render immediately.
+
+    Realtime will also receive
+    the message, but renderMessage()
+    prevents duplicates.
+  */
+
+  if (data) {
+
+    renderMessage(
+      data
+    );
+
+    scrollToBottom();
+
+  }
+
+  messageInput.value =
+    "";
+
+  /*
+    Create a notification for
+    the other participant.
+  */
+
+  const {
+    error: notificationError
+  } =
+    await supabaseClient
+      .from("notifications")
+      .insert({
+        user_id:
+          otherUserId,
+
+        task_id:
+          currentTask.id,
+
+        type:
+          "new_message",
+
+        title:
+          "New message",
+
+        message:
+          `You received a new message about "${currentTask.title}".`
+      });
+
+  if (
+    notificationError
+  ) {
+
+    console.warn(
+      "Notification could not be created:",
+      notificationError
+    );
+
+  }
+
+  sendButton.disabled =
+    false;
+
+  sendButton.textContent =
+    originalText;
+
+  sending = false;
+
+}
+
+
+/* SEND BUTTON */
+
+sendButton.addEventListener(
+  "click",
+  sendMessage
+);
+
+
+/* ENTER TO SEND */
+
+messageInput.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key ===
+      "Enter" &&
+      !event.shiftKey
+    ) {
+
+      event.preventDefault();
+
+      sendMessage();
+
+    }
+
+  }
+);
+
+
+/* START CHAT */
+
+async function start() {
+
+  try {
+
+    connectionStatus.textContent =
+      "🟡 Loading...";
+
+    const {
+      data: {
+        session
+      }
+    } =
+      await supabaseClient.auth
+        .getSession();
+
+    if (
+      !session
+    ) {
+
+      window.location.href =
+        "login.html";
+
+      return;
+
+    }
+
+    currentUser =
+      session.user;
+
+    await loadTask();
+
+    await loadTaskFiles();
+
+    await loadMessages();
+
+    /*
+      Start live messaging.
+
+      There is NO normal
+      5-second polling anymore.
+    */
+
+    startRealtime();
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+    connectionStatus.textContent =
+      "🔴 Error";
+
+    messagesBox.innerHTML = `
+
+      <div class="message-error">
+
+        ${escapeHTML(
+          error.message ||
+          "Something went wrong."
+        )}
+
+      </div>
+
+    `;
+
+    sendButton.disabled =
+      true;
+
+    messageInput.disabled =
+      true;
+
+  }
+
+}
+
+
+/* CLEAN UP REALTIME */
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+
+    if (
+      realtimeChannel
+    ) {
+
+      supabaseClient
+        .removeChannel(
+          realtimeChannel
+        );
+
+    }
+
+    if (
+      fallbackTimer
+    ) {
+
+      clearInterval(
+        fallbackTimer
+      );
+
+    }
+
+  }
+);
+
+
+start();
+
+</script>
+
+</body>
+</html>
