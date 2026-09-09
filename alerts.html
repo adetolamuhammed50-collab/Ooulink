@@ -1,8 +1,14 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alerts - OOULink</title>  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
+
+  <title>Alerts - OOULink</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
     * {
       box-sizing: border-box;
       margin: 0;
@@ -49,61 +55,229 @@
       padding: 15px 20px;
     }
 
-    .alert {
-      padding: 16px;
+    /* Notification dot */
+    .bell-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: -2px;
+      right: -5px;
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid white;
+      display: none;
+    }
+
+    /* Group */
+    .notification-group {
       border: 1px solid #e5e8e6;
-      border-radius: 14px;
+      border-radius: 16px;
       margin-bottom: 12px;
+      overflow: hidden;
+      background: white;
+    }
+
+    .notification-group.unread {
+      border-color: #b8dec9;
+      background: #fbfffc;
+    }
+
+    .group-header {
+      width: 100%;
+      border: none;
+      background: transparent;
+      padding: 16px;
+      text-align: left;
       cursor: pointer;
     }
 
-    .alert:active {
-      background: #f7faf8;
+    .group-header:active {
+      background: #f5faf7;
     }
 
-    .alert h2 {
+    .group-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .group-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #eef8f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      flex-shrink: 0;
+    }
+
+    .group-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .group-title {
       font-size: 15px;
-      margin-bottom: 7px;
+      font-weight: bold;
+      line-height: 1.35;
+      word-break: break-word;
     }
 
-    .alert p {
+    .group-meta {
+      margin-top: 5px;
       color: #777;
-      font-size: 13px;
-      line-height: 1.45;
-      margin-bottom: 5px;
+      font-size: 12px;
     }
 
-    .task-name {
-      color: #17231d !important;
+    .group-preview {
+      margin-top: 7px;
+      color: #666;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .group-right {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-shrink: 0;
+    }
+
+    .unread-badge {
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 10px;
+      background: #ef4444;
+      color: white;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-weight: bold;
     }
 
-    .time {
+    .chevron {
+      color: #777;
+      font-size: 18px;
+      transition: transform 0.2s ease;
+    }
+
+    .notification-group.open .chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Expanded notifications */
+    .group-content {
+      display: none;
+      border-top: 1px solid #e5e8e6;
+      background: #fafcfb;
+    }
+
+    .notification-group.open .group-content {
       display: block;
-      margin-top: 8px;
+    }
+
+    .notification-item {
+      display: flex;
+      gap: 11px;
+      padding: 14px 16px;
+      border-bottom: 1px solid #e8ebe9;
+      cursor: pointer;
+    }
+
+    .notification-item:last-child {
+      border-bottom: none;
+    }
+
+    .notification-item.unread-item {
+      background: #f4fbf7;
+    }
+
+    .notification-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: white;
+      border: 1px solid #e4e8e5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 16px;
+    }
+
+    .notification-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .notification-title {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .notification-message {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.45;
+    }
+
+    .notification-time {
+      display: block;
+      margin-top: 5px;
+      font-size: 10px;
       color: #999;
+    }
+
+    .unread-mark {
+      width: 7px;
+      height: 7px;
+      background: #ef4444;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .task-info {
+      padding: 12px 16px;
+      border-top: 1px solid #e5e8e6;
+      background: white;
       font-size: 11px;
+      color: #777;
+      line-height: 1.7;
+    }
+
+    .task-info strong {
+      color: #17231d;
+    }
+
+    .empty,
+    .loading,
+    .error {
+      text-align: center;
+      padding: 45px 20px;
+      font-size: 14px;
     }
 
     .empty {
-      text-align: center;
-      padding: 45px 20px;
       color: #777;
-      font-size: 14px;
     }
 
     .loading {
-      text-align: center;
-      padding: 45px 20px;
       color: #777;
-      font-size: 14px;
     }
 
     .error {
-      text-align: center;
-      padding: 40px 20px;
       color: #c0392b;
-      font-size: 14px;
     }
 
     nav {
@@ -118,6 +292,7 @@
       padding: 12px 5px;
       background: white;
       border-top: 1px solid #e5e8e6;
+      z-index: 20;
     }
 
     nav a {
@@ -131,128 +306,328 @@
       color: #16834b;
       font-weight: bold;
     }
-  </style></head><body><div class="app">  <header>
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header>
     <a href="index.html" class="back">← Back</a>
+
     <h1>Alerts</h1>
-    <p class="subtitle">Stay updated on your OOULink activity.</p>
-  </header>  <section class="alerts" id="alertsList">
-    <div class="loading">Loading your alerts...</div>
-  </section></div><nav>
-  <a href="index.html">🏠<br>Home</a>
-  <a href="my-tasks.html">📋<br>My Tasks</a>
-  <a href="post-task.html">➕<br>Post</a>
-  <a href="alerts.html" class="active">🔔<br>Alerts</a>
-  <a href="profile.html">👤<br>Profile</a>
-</nav><script>
-  const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
 
-  const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+    <p class="subtitle">
+      Your OOULink activity, grouped by job.
+    </p>
+  </header>
 
-  const alertsList = document.getElementById("alertsList");
+  <section class="alerts" id="alertsList">
+    <div class="loading">
+      Loading your alerts...
+    </div>
+  </section>
+
+</div>
+
+<nav>
+
+  <a href="index.html">
+    🏠<br>Home
+  </a>
+
+  <a href="my-tasks.html">
+    📋<br>My Tasks
+  </a>
+
+  <a href="post-task.html">
+    ➕<br>Post
+  </a>
+
+  <a href="alerts.html" class="active">
+    <span class="bell-wrap">
+      🔔
+      <span id="notificationDot" class="notification-dot"></span>
+    </span>
+    <br>
+    Alerts
+  </a>
+
+  <a href="profile.html">
+    👤<br>Profile
+  </a>
+
+</nav>
+
+<script src="notifications.js"></script>
+
+<script>
+
+  const SUPABASE_URL =
+    "https://dthvdxgxesomltlruogp.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+  const alertsList =
+    document.getElementById("alertsList");
 
   let currentUser = null;
 
+  let taskGroups = {};
+
+
+  /* =========================
+     SECURITY
+  ========================= */
+
   function escapeHTML(value) {
+
     return String(value ?? "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+
   }
 
-  function timeAgo(dateValue) {
-    if (!dateValue) return "Recently";
 
-    const date = new Date(dateValue);
+  /* =========================
+     TIME
+  ========================= */
+
+  function timeAgo(dateValue) {
+
+    if (!dateValue) {
+      return "Recently";
+    }
+
+    const date =
+      new Date(dateValue);
 
     if (isNaN(date.getTime())) {
       return "Recently";
     }
 
     const now = new Date();
-    const seconds = Math.floor((now - date) / 1000);
+
+    const seconds =
+      Math.floor(
+        (now - date) / 1000
+      );
 
     if (seconds < 60) {
       return "Just now";
     }
 
-    const minutes = Math.floor(seconds / 60);
+    const minutes =
+      Math.floor(seconds / 60);
 
     if (minutes < 60) {
       return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
     }
 
-    const hours = Math.floor(minutes / 60);
+    const hours =
+      Math.floor(minutes / 60);
 
     if (hours < 24) {
       return `${hours} hour${hours === 1 ? "" : "s"} ago`;
     }
 
-    const days = Math.floor(hours / 24);
+    const days =
+      Math.floor(hours / 24);
 
     if (days < 7) {
       return `${days} day${days === 1 ? "" : "s"} ago`;
     }
 
     return date.toLocaleDateString();
+
   }
+
+
+  /* =========================
+     HELPERS
+  ========================= */
+
+  function getIcon(type) {
+
+    const icons = {
+
+      task_posted: "📋",
+
+      task_accepted: "🤝",
+
+      task_progress: "🔄",
+
+      task_completed: "✅",
+
+      task_cancelled: "❌",
+
+      deadline_approaching: "⏰",
+
+      new_message: "💬",
+
+      payment: "💰"
+
+    };
+
+    return icons[type] || "🔔";
+
+  }
+
 
   function statusText(status) {
-    if (!status) return "Open";
 
-    const text = String(status)
-      .replace(/_/g, " ")
-      .toLowerCase();
+    if (!status) {
+      return "Open";
+    }
 
-    return text.charAt(0).toUpperCase() + text.slice(1);
+    const text =
+      String(status)
+        .replace(/_/g, " ")
+        .toLowerCase();
+
+    return text.charAt(0).toUpperCase()
+      + text.slice(1);
+
   }
 
-  function createAlert(icon, title, message, task, time) {
-    return `
-      <div class="alert" onclick="openTask('${task.id}')">
-        <h2>${icon} ${escapeHTML(title)}</h2>
 
-        <p class="task-name">
-          ${escapeHTML(task.title || "Untitled Task")}
-        </p>
+  /* =========================
+     ADD NOTIFICATION
+  ========================= */
 
-        <p>${escapeHTML(message)}</p>
+  function addNotification(
+    taskId,
+    notification
+  ) {
 
-        <p>📍 ${escapeHTML(task.location || "Location not specified")}</p>
+    if (!taskGroups[taskId]) {
 
-        <p>💰 ₦${Number(task.budget || 0).toLocaleString()}</p>
+      taskGroups[taskId] = {
+        task: notification.task || null,
+        notifications: []
+      };
 
-        <span class="time">${escapeHTML(time)}</span>
-      </div>
-    `;
+    }
+
+    taskGroups[taskId]
+      .notifications
+      .push(notification);
+
   }
 
-  function openTask(taskId) {
-    window.location.href =
-      `task-details.html?id=${encodeURIComponent(taskId)}`;
+
+  /* =========================
+     DEADLINE CHECK
+  ========================= */
+
+  function createDeadlineNotification(task) {
+
+    if (!task.deadline) {
+      return null;
+    }
+
+    if (
+      task.status === "completed" ||
+      task.status === "cancelled"
+    ) {
+      return null;
+    }
+
+    const deadline =
+      new Date(task.deadline);
+
+    const now =
+      new Date();
+
+    const difference =
+      deadline - now;
+
+    const twentyFourHours =
+      24 * 60 * 60 * 1000;
+
+    if (
+      difference > 0 &&
+      difference <= twentyFourHours
+    ) {
+
+      return {
+
+        id:
+          `deadline-${task.id}`,
+
+        task_id:
+          task.id,
+
+        type:
+          "deadline_approaching",
+
+        title:
+          "Deadline approaching",
+
+        message:
+          `This task is due ${deadline.toLocaleString()}.`,
+
+        created_at:
+          new Date().toISOString(),
+
+        is_read:
+          false,
+
+        dynamic:
+          true,
+
+        task
+
+      };
+
+    }
+
+    return null;
+
   }
+
+
+  /* =========================
+     LOAD ALERTS
+  ========================= */
 
   async function loadAlerts() {
-    if (!currentUser) return;
+
+    if (!currentUser) {
+      return;
+    }
 
     alertsList.innerHTML = `
-      <div class="loading">Loading your alerts...</div>
+      <div class="loading">
+        Loading your alerts...
+      </div>
     `;
 
-    /*
-      We fetch tasks where the user is either:
+    taskGroups = {};
 
-      1. The person who posted the task
-      2. The runner who accepted the task
-    */
 
-    const { data, error } = await supabaseClient
+    /* =========================
+       GET USER TASKS
+    ========================= */
+
+    const {
+      data: tasks,
+      error: taskError
+    } = await supabaseClient
+
       .from("tasks")
+
       .select(`
         id,
         user_id,
@@ -266,14 +641,25 @@
         status,
         created_at
       `)
+
       .or(
         `user_id.eq.${currentUser.id},runner_id.eq.${currentUser.id}`
       )
-      .order("created_at", { ascending: false })
-      .limit(30);
 
-    if (error) {
-      console.error("Alerts error:", error);
+      .order(
+        "created_at",
+        { ascending: false }
+      )
+
+      .limit(50);
+
+
+    if (taskError) {
+
+      console.error(
+        "Tasks alert error:",
+        taskError
+      );
 
       alertsList.innerHTML = `
         <div class="error">
@@ -285,181 +671,529 @@
       return;
     }
 
-    if (!data || data.length === 0) {
+
+    /* =========================
+       CREATE BASIC TASK GROUPS
+       ========================= */
+
+    (tasks || []).forEach(task => {
+
+      taskGroups[task.id] = {
+
+        task,
+
+        notifications: []
+
+      };
+
+    });
+
+
+    /* =========================
+       GET REAL NOTIFICATIONS
+       ========================= */
+
+    const {
+      data: notifications,
+      error: notificationError
+    } = await supabaseClient
+
+      .from("notifications")
+
+      .select(`
+        id,
+        user_id,
+        task_id,
+        type,
+        title,
+        message,
+        is_read,
+        created_at
+      `)
+
+      .eq(
+        "user_id",
+        currentUser.id
+      )
+
+      .order(
+        "created_at",
+        { ascending: false }
+      )
+
+      .limit(100);
+
+
+    if (notificationError) {
+
+      console.error(
+        "Notification error:",
+        notificationError
+      );
+
+    } else {
+
+      (notifications || []).forEach(notification => {
+
+        const task =
+          tasks.find(
+            item =>
+              item.id === notification.task_id
+          );
+
+        /*
+          Ignore notifications belonging to
+          tasks this user no longer has access to.
+        */
+
+        if (
+          notification.task_id &&
+          !task
+        ) {
+          return;
+        }
+
+        const groupId =
+          notification.task_id ||
+          "general";
+
+        addNotification(
+          groupId,
+          {
+            ...notification,
+            task
+          }
+        );
+
+      });
+
+    }
+
+
+    /* =========================
+       ADD DYNAMIC DEADLINE ALERTS
+       ========================= */
+
+    (tasks || []).forEach(task => {
+
+      const deadlineAlert =
+        createDeadlineNotification(task);
+
+      if (deadlineAlert) {
+
+        addNotification(
+          task.id,
+          deadlineAlert
+        );
+
+      }
+
+    });
+
+
+    /* =========================
+       FALLBACK TASK ACTIVITY
+       ========================= */
+
+    (tasks || []).forEach(task => {
+
+      const group =
+        taskGroups[task.id];
+
+      if (!group) {
+        return;
+      }
+
+      const existingTypes =
+        group.notifications.map(
+          notification =>
+            notification.type
+        );
+
+
+      /*
+        Task posted
+      */
+
+      if (
+        task.user_id === currentUser.id &&
+        !existingTypes.includes("task_posted")
+      ) {
+
+        group.notifications.push({
+
+          id:
+            `posted-${task.id}`,
+
+          task_id:
+            task.id,
+
+          type:
+            "task_posted",
+
+          title:
+            "Task posted",
+
+          message:
+            "Your task has been posted and is visible to people looking for tasks.",
+
+          created_at:
+            task.created_at,
+
+          is_read:
+            true,
+
+          dynamic:
+            true,
+
+          task
+
+        });
+
+      }
+
+
+      /*
+        Accepted fallback
+      */
+
+      if (
+        task.runner_id &&
+        !existingTypes.includes("task_accepted")
+      ) {
+
+        const isUploader =
+          task.user_id === currentUser.id;
+
+        const isRunner =
+          task.runner_id === currentUser.id;
+
+        if (
+          isUploader ||
+          isRunner
+        ) {
+
+          group.notifications.push({
+
+            id:
+              `accepted-${task.id}`,
+
+            task_id:
+              task.id,
+
+            type:
+              "task_accepted",
+
+            title:
+              "Task accepted",
+
+            message:
+              isUploader
+                ? "A runner has accepted your task."
+                : "You accepted this task. Check the task details and get it done.",
+
+            created_at:
+              task.created_at,
+
+            is_read:
+              true,
+
+            dynamic:
+              true,
+
+            task
+
+          });
+
+        }
+
+      }
+
+
+      /*
+        Completed fallback
+      */
+
+      if (
+        task.status === "completed" &&
+        !existingTypes.includes("task_completed")
+      ) {
+
+        group.notifications.push({
+
+          id:
+            `completed-${task.id}`,
+
+          task_id:
+            task.id,
+
+          type:
+            "task_completed",
+
+          title:
+            "Task completed",
+
+          message:
+            "This task has been marked as completed.",
+
+          created_at:
+            new Date().toISOString(),
+
+          is_read:
+            true,
+
+          dynamic:
+            true,
+
+          task
+
+        });
+
+      }
+
+
+      /*
+        Cancelled fallback
+      */
+
+      if (
+        task.status === "cancelled" &&
+        !existingTypes.includes("task_cancelled")
+      ) {
+
+        group.notifications.push({
+
+          id:
+            `cancelled-${task.id}`,
+
+          task_id:
+            task.id,
+
+          type:
+            "task_cancelled",
+
+          title:
+            "Task cancelled",
+
+          message:
+            "This task has been cancelled.",
+
+          created_at:
+            new Date().toISOString(),
+
+          is_read:
+            true,
+
+          dynamic:
+            true,
+
+          task
+
+        });
+
+      }
+
+    });
+
+
+    /* =========================
+       REMOVE EMPTY GROUPS
+    ========================= */
+
+    Object.keys(taskGroups).forEach(id => {
+
+      if (
+        !taskGroups[id].notifications ||
+        taskGroups[id].notifications.length === 0
+      ) {
+
+        delete taskGroups[id];
+
+      }
+
+    });
+
+
+    const groups =
+      Object.values(taskGroups);
+
+
+    if (groups.length === 0) {
+
       alertsList.innerHTML = `
         <div class="empty">
-          <div style="font-size:32px; margin-bottom:10px;">🔔</div>
+
+          <div style="font-size:38px; margin-bottom:12px;">
+            🔔
+          </div>
+
           <strong>No alerts yet</strong>
-          <p style="margin-top:6px;">
+
+          <p style="margin-top:7px;">
             Your OOULink task activity will appear here.
           </p>
+
         </div>
       `;
 
       return;
+
     }
+
+
+    /* =========================
+       SORT GROUPS
+    ========================= */
+
+    groups.sort((a, b) => {
+
+      const aLatest =
+        Math.max(
+          ...a.notifications.map(
+            n =>
+              new Date(n.created_at || 0).getTime()
+          )
+        );
+
+      const bLatest =
+        Math.max(
+          ...b.notifications.map(
+            n =>
+              new Date(n.created_at || 0).getTime()
+          )
+        );
+
+      return bLatest - aLatest;
+
+    });
+
+
+    /* =========================
+       RENDER
+    ========================= */
 
     let html = "";
 
-    data.forEach(task => {
-      const isUploader = task.user_id === currentUser.id;
-      const isRunner = task.runner_id === currentUser.id;
 
-      const status = String(task.status || "open").toLowerCase();
+    groups.forEach((group, index) => {
 
-      /*
-        Uploader alerts
-      */
+      const task =
+        group.task;
 
-      if (isUploader) {
-
-        html += createAlert(
-          "📋",
-          "Task posted",
-          "Your task has been posted and is visible to people looking for tasks.",
-          task,
-          timeAgo(task.created_at)
+      const notificationsForTask =
+        [...group.notifications].sort(
+          (a, b) =>
+            new Date(b.created_at || 0) -
+            new Date(a.created_at || 0)
         );
 
-        if (task.runner_id) {
-          html += createAlert(
-            "🤝",
-            "Task accepted",
-            "A runner has accepted your task.",
-            task,
-            timeAgo(task.created_at)
-          );
-        }
 
-        if (
-          status === "in_progress" ||
-          status === "in progress" ||
-          status === "accepted"
-        ) {
-          html += createAlert(
-            "🔄",
-            "Task in progress",
-            "Your task is currently being worked on.",
-            task,
-            timeAgo(task.created_at)
-          );
-        }
-
-        if (
-          status === "completed" ||
-          status === "complete"
-        ) {
-          html += createAlert(
-            "✅",
-            "Task completed",
-            "Your task has been marked as completed.",
-            task,
-            timeAgo(task.created_at)
-          );
-        }
-
-        if (status === "cancelled" || status === "canceled") {
-          html += createAlert(
-            "❌",
-            "Task cancelled",
-            "Your task has been cancelled.",
-            task,
-            timeAgo(task.created_at)
-          );
-        }
-      }
-
-      /*
-        Runner alerts
-      */
-
-      if (isRunner) {
-
-        html += createAlert(
-          "🤝",
-          "Task accepted",
-          "You accepted this task. Check the task details and get it done.",
-          task,
-          timeAgo(task.created_at)
+      const realUnread =
+        notificationsForTask.filter(
+          notification =>
+            notification.is_read === false &&
+            !notification.dynamic
         );
 
-        if (
-          status === "in_progress" ||
-          status === "in progress" ||
-          status === "accepted"
-        ) {
-          html += createAlert(
-            "🔄",
-            "Task in progress",
-            "This task is currently in progress.",
-            task,
-            timeAgo(task.created_at)
-          );
-        }
 
-        if (
-          status === "completed" ||
-          status === "complete"
-        ) {
-          html += createAlert(
-            "✅",
-            "Task completed",
-            "This task has been marked as completed.",
-            task,
-            timeAgo(task.created_at)
-          );
-        }
+      const unreadCount =
+        realUnread.length;
 
-        if (status === "cancelled" || status === "canceled") {
-          html += createAlert(
-            "❌",
-            "Task cancelled",
-            "This task has been cancelled.",
-            task,
-            timeAgo(task.created_at)
-          );
-        }
-      }
-    });
 
-    if (!html) {
-      alertsList.innerHTML = `
-        <div class="empty">
-          <div style="font-size:32px; margin-bottom:10px;">🔔</div>
-          <strong>No alerts yet</strong>
-          <p style="margin-top:6px;">
-            Your OOULink activity will appear here.
-          </p>
-        </div>
-      `;
+      const latest =
+        notificationsForTask[0];
 
-      return;
-    }
 
-    alertsList.innerHTML = html;
-  }
+      const title =
+        task?.title ||
+        "OOULink notification";
 
-  async function initialize() {
-    const {
-      data: { session }
-    } = await supabaseClient.auth.getSession();
 
-    if (!session) {
-      window.location.href = "login.html";
-      return;
-    }
+      const icon =
+        latest
+          ? getIcon(latest.type)
+          : "🔔";
 
-    currentUser = session.user;
 
-    await loadAlerts();
-  }
+      const location =
+        task?.location ||
+        "Location not specified";
 
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (!session) {
-      window.location.href = "login.html";
-    }
-  });
 
-  initialize();
-</script></body>
-</html>
+      const budget =
+        task?.budget != null
+          ? `₦${Number(task.budget).toLocaleString()}`
+          : "";
+
+
+      html += `
+
+        <div
+          class="notification-group ${unreadCount > 0 ? "unread" : ""}"
+          id="group-${escapeHTML(task?.id || "general")}"
+        >
+
+          <button
+            class="group-header"
+            onclick="toggleGroup('${escapeHTML(task?.id || "general")}')"
+          >
+
+            <div class="group-top">
+
+              <div class="group-icon">
+                ${icon}
+              </div>
+
+              <div class="group-main">
+
+                <div class="group-title">
+                  ${escapeHTML(title)}
+                </div>
+
+                <div class="group-meta">
+
+                  ${notificationsForTask.length}
+                  notification${notificationsForTask.length === 1 ? "" : "s"}
+
+                  ${task ? ` • ${escapeHTML(statusText(task.status))}` : ""}
+
+                </div>
+
+                <div class="group-preview">
+
+                  ${escapeHTML(
+                    latest?.message ||
+                    "OOULink activity"
+                  )}
+
+                </div>
+
+              </div>
+
+              <div class="group-right">
+
+                ${
+                  unreadCount > 0
+                    ? `<span class="unread-badge">${unreadCount}</span>`
+                    : ""
+                }
+
+                <span class="chevron">
+                  ▼
+                </span>
+
+              </div>
+
+            </div>
+
+          </button>
+
+
+          <div class="group-content">
+
+            ${
+              notificationsForTask
+                .map(notification => `
+
+                  <div
+    
