@@ -1177,35 +1177,44 @@
 
         card.innerHTML = `
 
-          <div class="task-top">
+  <div class="task-top">
 
-            <div>
+    <div>
 
-              <div class="task-title">
-                ${title}
-              </div>
+      <div class="task-title">
+        ${title}
+      </div>
 
-              <div class="task-info">
+      <div class="task-info">
 
-                📍 ${location || "Location not specified"}<br>
+        📍 ${location || "Location not specified"}<br>
+        ⏰ ${deadline}
 
-                ⏰ ${deadline}
+      </div>
 
-              </div>
+    </div>
 
-            </div>
+    <div class="task-price">
+      ₦${budget}
+    </div>
 
-            <div class="task-price">
-              ₦${budget}
-            </div>
+  </div>
 
-          </div>
+  <span class="tag">
+    ${category || "Other"}
+  </span>
 
-          <span class="tag">
-            ${category || "Other"}
-          </span>
+  <button
+    class="view-task-button"
+    type="button"
+  >
+    👀 View Task
+  </button>
 
-        `;
+`;
+card.querySelector(".view-task-button").addEventListener("click", function () {
+  window.location.href = `task-details.html?id=${task.id}`;
+});
 
 
         container.appendChild(
