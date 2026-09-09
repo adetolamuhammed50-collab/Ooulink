@@ -853,6 +853,48 @@ ${
       `
       : ""
     }
+${
+  isOwner && task.status === "awaiting_verification"
+  ? `
+    <button
+      id="approveButton"
+      class="accept"
+      onclick="approveTask()"
+      style="margin-top:10px;background:#16834b;"
+    >
+      ✅ APPROVE & COMPLETE
+    </button>
+
+    <button
+      id="rejectButton"
+      class="accept"
+      onclick="showRejectBox()"
+      style="margin-top:10px;background:#dc2626;"
+    >
+      ❌ REJECT TASK
+    </button>
+
+    <div
+      id="rejectBox"
+      style="display:none;margin-top:10px;"
+    >
+      <textarea
+        id="rejectionNote"
+        placeholder="Explain why you are rejecting this task..."
+        style="width:100%;min-height:90px;padding:10px;border:1px solid #ccc;border-radius:8px;"
+      ></textarea>
+
+      <button
+        class="accept"
+        onclick="rejectTask()"
+        style="margin-top:10px;background:#dc2626;"
+      >
+        CONFIRM REJECTION
+      </button>
+    </div>
+  `
+  : ""
+}
 
     ${
       canChat
