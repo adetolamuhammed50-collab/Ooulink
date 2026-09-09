@@ -744,24 +744,17 @@ function showBlockedMessage(message) {
   blockedMessage.style.display =
     "block";
 
-  clearTimeout(
-    blockedTimer
-  );
+  clearTimeout(blockedTimer);
 
-  blockedTimer =
-    setTimeout(
-      () => {
+  blockedTimer = setTimeout(() => {
 
-        blockedMessage.style.display =
-          "none";
+    blockedMessage.style.display =
+      "none";
 
-        blockedMessage.textContent =
-          "";
+    blockedMessage.textContent =
+      "";
 
-      },
-      5000
-    );
-
+  }, 5000);
 }
 
 
@@ -1082,9 +1075,9 @@ function renderMessage(message) {
   */
 
   row.className =
-    mine
-      ? "message-row mine"
-      : "message-row theirs";
+  mine
+    ? "message-row mine"
+    : "message-row theirs";
 
 
   row.dataset.messageId =
@@ -1098,22 +1091,18 @@ function renderMessage(message) {
   */
 
   row.innerHTML = `
+  <div class="bubble">
+    ${escapeHTML(
+      message.message
+    )}
 
-    <div class="bubble">
-
-      ${escapeHTML(
-        message.message
+    <div class="time">
+      ${formatTime(
+        message.created_at
       )}
-
-      <div class="time">
-        ${formatTime(
-          message.created_at
-        )}
-      </div>
-
     </div>
-
-  `;
+  </div>
+`;
 
 
   messagesBox.appendChild(
