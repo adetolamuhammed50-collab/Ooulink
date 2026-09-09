@@ -419,6 +419,22 @@ document.getElementById("postedCount").textContent =
 document.getElementById("completedCount").textContent =
   completedTasks?.length || 0;
 
+const { data: profileData } = await supabaseClient
+  .from("profiles")
+  .select("xp,reputation")
+  .eq("id", currentUser.id)
+  .single();
+
+const xp = profileData?.xp || 0;
+const reputation = profileData?.reputation || 0;
+
+document.getElementById("xpCount").textContent = xp;
+
+const level = Math.floor(xp / 100) + 1;
+
+document.querySelector(".profile-level").textContent =
+  `⭐ Level ${level} • ${xp} XP`;
+
     if (metadata.avatar_url) {
       showAvatar(metadata.avatar_url);
     }
