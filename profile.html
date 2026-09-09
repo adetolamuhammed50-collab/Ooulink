@@ -121,6 +121,33 @@
   font-size: 12px;
   font-weight: 700;
 }
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.profile-stat {
+  background: #f7f9f8;
+  border-radius: 12px;
+  padding: 10px 5px;
+  text-align: center;
+}
+
+.profile-stat strong {
+  display: block;
+  font-size: 17px;
+  color: #172033;
+}
+
+.profile-stat span {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  color: #687386;
+}
     .field {
       margin-bottom: 18px;
     }
@@ -244,6 +271,22 @@
   <div class="profile-meta" id="profileLocation">Location not set</div>
   <div class="profile-level">⭐ Level 1 • 0 XP</div>
 </div>
+<div class="profile-stats">
+  <div class="profile-stat">
+    <strong id="postedCount">0</strong>
+    <span>Tasks Posted</span>
+  </div>
+
+  <div class="profile-stat">
+    <strong id="completedCount">0</strong>
+    <span>Completed</span>
+  </div>
+
+  <div class="profile-stat">
+    <strong id="xpCount">0</strong>
+    <span>XP</span>
+  </div>
+</div>
     <div class="field">
       <label for="fullName">Full Name</label>
       <input
@@ -359,6 +402,22 @@ document.getElementById("profileName").textContent =
 
 document.getElementById("profileLocation").textContent =
   metadata.location || "Location not set";
+const { data: postedTasks } = await supabaseClient
+  .from("tasks")
+  .select("id")
+  .eq("user_id", currentUser.id);
+
+const { data: completedTasks } = await supabaseClient
+  .from("tasks")
+  .select("id")
+  .eq("runner_id", currentUser.id)
+  .eq("status", "completed");
+
+document.getElementById("postedCount").textContent =
+  postedTasks?.length || 0;
+
+document.getElementById("completedCount").textContent =
+  completedTasks?.length || 0;
 
     if (metadata.avatar_url) {
       showAvatar(metadata.avatar_url);
