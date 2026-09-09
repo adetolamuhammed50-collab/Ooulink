@@ -92,7 +92,35 @@
     #avatarInput {
       display: none;
     }
+.profile-identity {
+  text-align: center;
+  margin-top: -10px;
+  margin-bottom: 24px;
+}
 
+.profile-name {
+  font-size: 21px;
+  font-weight: 700;
+  color: #172033;
+  margin-top: 10px;
+}
+
+.profile-meta {
+  color: #687386;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+.profile-level {
+  display: inline-block;
+  margin-top: 9px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: #eef7f1;
+  color: #16834b;
+  font-size: 12px;
+  font-weight: 700;
+}
     .field {
       margin-bottom: 18px;
     }
@@ -211,7 +239,11 @@
       >
 
     </div>
-
+<div class="profile-identity">
+  <div class="profile-name" id="profileName">OOULink User</div>
+  <div class="profile-meta" id="profileLocation">Location not set</div>
+  <div class="profile-level">⭐ Level 1 • 0 XP</div>
+</div>
     <div class="field">
       <label for="fullName">Full Name</label>
       <input
@@ -322,6 +354,11 @@
 
     document.getElementById("location").value =
       metadata.location || "";
+document.getElementById("profileName").textContent =
+  metadata.full_name || "OOULink User";
+
+document.getElementById("profileLocation").textContent =
+  metadata.location || "Location not set";
 
     if (metadata.avatar_url) {
       showAvatar(metadata.avatar_url);
