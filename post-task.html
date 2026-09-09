@@ -93,6 +93,84 @@
       flex: 1;
     }
 
+    /* =========================
+       ATTACHMENTS
+       ========================= */
+
+    .attachment-box {
+      border: 2px dashed #cfd8d2;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 20px;
+      background: #fafcfb;
+    }
+
+    .attachment-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .attachment-help {
+      color: #6b756f;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .file-input {
+      width: 100%;
+      margin-bottom: 0;
+      padding: 10px;
+      border: 1px solid #d9dfdb;
+      border-radius: 10px;
+      background: white;
+    }
+
+    .selected-files {
+      margin-top: 12px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px;
+      margin-top: 8px;
+      background: #f0f8f3;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .file-info {
+      min-width: 0;
+    }
+
+    .file-name {
+      font-weight: bold;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-size {
+      color: #6b756f;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .remove-file {
+      border: none;
+      background: #fee2e2;
+      color: #b91c1c;
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 12px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
     .post-button {
       width: 100%;
       border: none;
@@ -207,6 +285,7 @@
     </p>
   </header>
 
+
   <main class="form">
 
     <label for="title">What do you need done?</label>
@@ -217,6 +296,7 @@
       placeholder="e.g. Print & Deliver Assignment"
     >
 
+
     <label for="description">Describe the task</label>
 
     <textarea
@@ -224,10 +304,15 @@
       placeholder="Give runners enough information to understand what you need..."
     ></textarea>
 
+
     <label for="category">Category</label>
 
     <select id="category">
-      <option value="">Select a category</option>
+
+      <option value="">
+        Select a category
+      </option>
+
       <option>Errands</option>
       <option>Physical Help</option>
       <option>Digital Work</option>
@@ -235,9 +320,13 @@
       <option>Academic Support</option>
       <option>Campus Services</option>
       <option>Other</option>
+
     </select>
 
-    <label for="location">Where should it be done?</label>
+
+    <label for="location">
+      Where should it be done?
+    </label>
 
     <input
       type="text"
@@ -245,10 +334,14 @@
       placeholder="e.g. Ibogun Campus"
     >
 
+
     <div class="row">
 
       <div>
-        <label for="budget">Budget (₦)</label>
+
+        <label for="budget">
+          Budget (₦)
+        </label>
 
         <input
           type="number"
@@ -256,18 +349,60 @@
           placeholder="1000"
           min="1"
         >
+
       </div>
 
+
       <div>
-        <label for="deadline">Deadline</label>
+
+        <label for="deadline">
+          Deadline
+        </label>
 
         <input
           type="datetime-local"
           id="deadline"
         >
+
       </div>
 
     </div>
+
+
+    <!-- =========================
+         PDF ATTACHMENT
+         ========================= -->
+
+    <label>
+      Attach PDF files
+    </label>
+
+    <div class="attachment-box">
+
+      <div class="attachment-title">
+        📎 Add task files
+      </div>
+
+      <div class="attachment-help">
+        Add PDFs that runners need for the task.
+        Maximum 10 MB per PDF.
+      </div>
+
+      <input
+        type="file"
+        id="taskFiles"
+        class="file-input"
+        accept="application/pdf,.pdf"
+        multiple
+      >
+
+      <div
+        id="selectedFiles"
+        class="selected-files"
+      ></div>
+
+    </div>
+
 
     <button
       class="post-button"
@@ -277,9 +412,13 @@
       POST TASK
     </button>
 
+
     <div class="note">
-      💡 Payment will be connected later. For now, your task will be saved
-      securely so runners can see it.
+
+      💡 Payment will be connected later.
+      For now, your task will be saved securely
+      so runners can see it.
+
     </div>
 
   </main>
@@ -294,37 +433,86 @@
 <nav class="bottom-nav">
 
   <a href="index.html">
-    <span class="nav-icon">🏠</span>
-    <span>Home</span>
+
+    <span class="nav-icon">
+      🏠
+    </span>
+
+    <span>
+      Home
+    </span>
+
   </a>
+
 
   <a href="find-tasks.html">
-    <span class="nav-icon">🔎</span>
-    <span>Find Tasks</span>
+
+    <span class="nav-icon">
+      🔎
+    </span>
+
+    <span>
+      Find Tasks
+    </span>
+
   </a>
 
-  <a href="post-task.html" class="active">
-    <span class="nav-icon">➕</span>
-    <span>Post</span>
+
+  <a
+    href="post-task.html"
+    class="active"
+  >
+
+    <span class="nav-icon">
+      ➕
+    </span>
+
+    <span>
+      Post
+    </span>
+
   </a>
+
 
   <a href="alerts.html">
+
     <span class="bell-wrap">
-      <span class="nav-icon">🔔</span>
-      <span id="notificationDot" class="notification-dot"></span>
+
+      <span class="nav-icon">
+        🔔
+      </span>
+
+      <span
+        id="notificationDot"
+        class="notification-dot"
+      ></span>
+
     </span>
-    <span>Alerts</span>
+
+    <span>
+      Alerts
+    </span>
+
   </a>
 
+
   <a href="profile.html">
-    <span class="nav-icon">👤</span>
-    <span>Profile</span>
+
+    <span class="nav-icon">
+      👤
+    </span>
+
+    <span>
+      Profile
+    </span>
+
   </a>
 
 </nav>
 
 
 <!-- Supabase -->
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -343,15 +531,202 @@
 
 
   /* =========================
+     FILE SELECTION
+     ========================= */
+
+  const fileInput =
+    document.getElementById("taskFiles");
+
+  const selectedFilesContainer =
+    document.getElementById("selectedFiles");
+
+
+  let selectedFiles = [];
+
+
+  fileInput.addEventListener(
+    "change",
+    function () {
+
+      const incomingFiles =
+        Array.from(fileInput.files);
+
+
+      for (const file of incomingFiles) {
+
+        /* PDF check */
+
+        const isPDF =
+          file.type === "application/pdf" ||
+          file.name.toLowerCase().endsWith(".pdf");
+
+
+        if (!isPDF) {
+
+          alert(
+            `"${file.name}" is not a PDF.\n\nOnly PDF files are allowed.`
+          );
+
+          continue;
+        }
+
+
+        /* 10 MB check */
+
+        const maxSize =
+          10 * 1024 * 1024;
+
+
+        if (file.size > maxSize) {
+
+          alert(
+            `"${file.name}" is larger than 10 MB.\n\nMaximum file size is 10 MB.`
+          );
+
+          continue;
+        }
+
+
+        /* Prevent duplicates */
+
+        const duplicate =
+          selectedFiles.some(
+            existing =>
+              existing.name === file.name &&
+              existing.size === file.size
+          );
+
+
+        if (duplicate) {
+          continue;
+        }
+
+
+        selectedFiles.push(file);
+
+      }
+
+
+      /*
+        Clear the input so the same
+        file can be selected again later.
+      */
+
+      fileInput.value = "";
+
+
+      renderSelectedFiles();
+
+    }
+  );
+
+
+  function formatFileSize(bytes) {
+
+    if (bytes < 1024) {
+      return bytes + " B";
+    }
+
+    if (bytes < 1024 * 1024) {
+      return (
+        (bytes / 1024).toFixed(1) +
+        " KB"
+      );
+    }
+
+    return (
+      (bytes / (1024 * 1024)).toFixed(1) +
+      " MB"
+    );
+
+  }
+
+
+  function renderSelectedFiles() {
+
+    selectedFilesContainer.innerHTML = "";
+
+
+    selectedFiles.forEach(
+      (file, index) => {
+
+        const item =
+          document.createElement("div");
+
+        item.className =
+          "file-item";
+
+
+        item.innerHTML = `
+
+          <div class="file-info">
+
+            <div class="file-name">
+              📄 ${escapeHTML(file.name)}
+            </div>
+
+            <div class="file-size">
+              ${formatFileSize(file.size)}
+            </div>
+
+          </div>
+
+          <button
+            type="button"
+            class="remove-file"
+            onclick="removeSelectedFile(${index})"
+          >
+            Remove
+          </button>
+
+        `;
+
+
+        selectedFilesContainer.appendChild(item);
+
+      }
+    );
+
+  }
+
+
+  function removeSelectedFile(index) {
+
+    selectedFiles.splice(
+      index,
+      1
+    );
+
+    renderSelectedFiles();
+
+  }
+
+
+  function escapeHTML(value) {
+
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  }
+
+
+  /* =========================
      NOTIFICATION DOT
      ========================= */
 
   async function updateNotificationDot() {
 
     const dot =
-      document.getElementById("notificationDot");
+      document.getElementById(
+        "notificationDot"
+      );
 
     if (!dot) return;
+
 
     const {
       data,
@@ -359,13 +734,23 @@
     } =
       await supabaseClient.auth.getSession();
 
-    if (error || !data.session) {
-      dot.style.display = "none";
+
+    if (
+      error ||
+      !data.session
+    ) {
+
+      dot.style.display =
+        "none";
+
       return;
+
     }
+
 
     const userId =
       data.session.user.id;
+
 
     const {
       count,
@@ -373,12 +758,22 @@
     } =
       await supabaseClient
         .from("notifications")
-        .select("id", {
-          count: "exact",
-          head: true
-        })
-        .eq("user_id", userId)
-        .eq("is_read", false);
+        .select(
+          "id",
+          {
+            count: "exact",
+            head: true
+          }
+        )
+        .eq(
+          "user_id",
+          userId
+        )
+        .eq(
+          "is_read",
+          false
+        );
+
 
     if (notificationError) {
 
@@ -388,12 +783,15 @@
       );
 
       return;
+
     }
+
 
     dot.style.display =
       count > 0
         ? "block"
         : "none";
+
   }
 
 
@@ -409,16 +807,19 @@
         .value
         .trim();
 
+
     const description =
       document
         .getElementById("description")
         .value
         .trim();
 
+
     const category =
       document
         .getElementById("category")
         .value;
+
 
     const location =
       document
@@ -426,21 +827,28 @@
         .value
         .trim();
 
+
     const budget =
       document
         .getElementById("budget")
         .value;
+
 
     const deadline =
       document
         .getElementById("deadline")
         .value;
 
+
     const button =
-      document.getElementById("postButton");
+      document.getElementById(
+        "postButton"
+      );
 
 
-    /* Check fields */
+    /* =========================
+       CHECK FIELDS
+       ========================= */
 
     if (
       !title ||
@@ -456,10 +864,13 @@
       );
 
       return;
+
     }
 
 
-    /* Check login */
+    /* =========================
+       CHECK LOGIN
+       ========================= */
 
     const {
       data: {
@@ -475,14 +886,19 @@
         "You need to be logged in to post a task."
       );
 
+
       window.location.href =
         "login.html";
 
+
       return;
+
     }
 
 
-    /* Prevent double submission */
+    /* =========================
+       PREVENT DOUBLE SUBMISSION
+       ========================= */
 
     button.disabled = true;
 
@@ -490,132 +906,291 @@
       "POSTING...";
 
 
-    /* =========================
-       SAVE TASK
-       ========================= */
+    let createdTask = null;
 
-    const {
-      data: task,
-      error
-    } =
-      await supabaseClient
-        .from("tasks")
-        .insert([
-          {
+
+    try {
+
+      /* =========================
+         CREATE TASK
+         ========================= */
+
+      const {
+        data: task,
+        error
+      } =
+        await supabaseClient
+          .from("tasks")
+          .insert([
+            {
+
+              user_id:
+                session.user.id,
+
+              title:
+                title,
+
+              description:
+                description,
+
+              category:
+                category,
+
+              location:
+                location,
+
+              budget:
+                Number(budget),
+
+              deadline:
+                new Date(
+                  deadline
+                ).toISOString(),
+
+              status:
+                "open"
+
+            }
+          ])
+          .select()
+          .single();
+
+
+      if (error) {
+
+        throw new Error(
+          "Could not create task:\n" +
+          error.message
+        );
+
+      }
+
+
+      createdTask = task;
+
+
+      /* =========================
+         UPLOAD PDF FILES
+         ========================= */
+
+      for (
+        let i = 0;
+        i < selectedFiles.length;
+        i++
+      ) {
+
+        const file =
+          selectedFiles[i];
+
+
+        button.textContent =
+          `UPLOADING FILE ${i + 1}/${selectedFiles.length}...`;
+
+
+        /*
+          Keep the task ID as the
+          first folder because our
+          Storage policies use it.
+        */
+
+        const safeFileName =
+          file.name
+            .replace(
+              /[^a-zA-Z0-9._-]/g,
+              "_"
+            );
+
+
+        const uniqueName =
+          Date.now() +
+          "_" +
+          Math.random()
+            .toString(36)
+            .substring(2, 10) +
+          "_" +
+          safeFileName;
+
+
+        const filePath =
+          `${task.id}/${session.user.id}/${uniqueName}`;
+
+
+        const {
+          error: uploadError
+        } =
+          await supabaseClient.storage
+            .from("TaskFiles")
+            .upload(
+              filePath,
+              file,
+              {
+                contentType:
+                  "application/pdf",
+
+                upsert:
+                  false
+              }
+            );
+
+
+        if (uploadError) {
+
+          throw new Error(
+            `Could not upload "${file.name}":\n` +
+            uploadError.message
+          );
+
+        }
+
+
+        /* =========================
+           SAVE ATTACHMENT RECORD
+           ========================= */
+
+        const {
+          error: attachmentError
+        } =
+          await supabaseClient
+            .from("task_attachments")
+            .insert({
+
+              task_id:
+                task.id,
+
+              user_id:
+                session.user.id,
+
+              file_name:
+                file.name,
+
+              file_path:
+                filePath,
+
+              file_size:
+                file.size,
+
+              mime_type:
+                "application/pdf"
+
+            });
+
+
+        if (attachmentError) {
+
+          /*
+            Remove the uploaded file if
+            the database record failed.
+          */
+
+          await supabaseClient.storage
+            .from("TaskFiles")
+            .remove([
+              filePath
+            ]);
+
+
+          throw new Error(
+            `Could not save attachment "${file.name}":\n` +
+            attachmentError.message
+          );
+
+        }
+
+      }
+
+
+      /* =========================
+         CREATE NOTIFICATION
+         ========================= */
+
+      const {
+        error:
+          notificationError
+      } =
+        await supabaseClient
+          .from("notifications")
+          .insert({
+
             user_id:
               session.user.id,
 
+            task_id:
+              task.id,
+
+            type:
+              "task_posted",
+
             title:
-              title,
+              "Task posted",
 
-            description:
-              description,
+            message:
+              `Your task "${task.title}" was posted successfully.`
 
-            category:
-              category,
-
-            location:
-              location,
-
-            budget:
-              Number(budget),
-
-            deadline:
-              new Date(
-                deadline
-              ).toISOString(),
-
-            status:
-              "open"
-          }
-        ])
-        .select()
-        .single();
+          });
 
 
-    /* Handle task error */
+      if (notificationError) {
 
-    if (error) {
+        console.error(
+          "Notification creation error:",
+          notificationError
+        );
+
+      }
+
+
+      /* =========================
+         SUCCESS
+         ========================= */
+
+      alert(
+        selectedFiles.length > 0
+
+          ? "Task posted successfully! 🎉\n\nYour PDF files were attached successfully."
+
+          : "Task posted successfully! 🎉\n\nYour task is now available for runners to find."
+      );
+
+
+      window.location.href =
+        "find-tasks.html";
+
+
+    } catch (error) {
 
       console.error(
-        "Task creation error:",
+        "Post task error:",
         error
       );
 
+
+      /*
+        If the task was created but
+        something failed afterward,
+        leave the task itself intact.
+        This avoids losing the task.
+      */
+
       alert(
-        "Could not post your task.\n\n" +
+        "Something went wrong.\n\n" +
         error.message
       );
 
-      button.disabled = false;
+
+      button.disabled =
+        false;
 
       button.textContent =
         "POST TASK";
 
-      return;
     }
-
-
-    /* =========================
-       CREATE NOTIFICATION
-       ========================= */
-
-    const {
-      error: notificationError
-    } =
-      await supabaseClient
-        .from("notifications")
-        .insert({
-          user_id:
-            session.user.id,
-
-          task_id:
-            task.id,
-
-          type:
-            "task_posted",
-
-          title:
-            "Task posted",
-
-          message:
-            `Your task "${task.title}" was posted successfully.`
-        });
-
-
-    /*
-      The task itself was already created.
-
-      So even if notification creation
-      fails, we do NOT delete the task.
-    */
-
-    if (notificationError) {
-
-      console.error(
-        "Notification creation error:",
-        notificationError
-      );
-
-    }
-
-
-    /* =========================
-       SUCCESS
-       ========================= */
-
-    alert(
-      "Task posted successfully! 🎉\n\n" +
-      "Your task is now available for runners to find."
-    );
-
-    window.location.href =
-      "find-tasks.html";
 
   }
 
 
-  /* Load notification dot */
+  /* =========================
+     LOAD NOTIFICATION DOT
+     ========================= */
 
   document.addEventListener(
     "DOMContentLoaded",
