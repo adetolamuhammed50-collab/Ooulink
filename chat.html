@@ -346,6 +346,10 @@ body {
 
 <script>
 
+/* =========================
+   SUPABASE
+========================= */
+
 const SUPABASE_URL =
   "https://dthvdxgxesomltlruogp.supabase.co";
 
@@ -358,12 +362,18 @@ const supabaseClient =
     SUPABASE_KEY
   );
 
+
+/* =========================
+   STATE
+========================= */
+
 let currentUser = null;
 let currentTask = null;
 let otherUserId = null;
 
 let realtimeChannel = null;
-let realtimeFallbackTimer = null;
+
+let sending = false;
 
 const params =
   new URLSearchParams(
@@ -373,32 +383,50 @@ const params =
 const taskId =
   params.get("id");
 
+
+/* =========================
+   ELEMENTS
+========================= */
+
 const messagesBox =
-  document.getElementById("messages");
+  document.getElementById(
+    "messages"
+  );
 
 const taskTitle =
-  document.getElementById("taskTitle");
+  document.getElementById(
+    "taskTitle"
+  );
 
 const subtitle =
-  document.getElementById("subtitle");
+  document.getElementById(
+    "subtitle"
+  );
 
 const filesContainer =
-  document.getElementById("filesContainer");
+  document.getElementById(
+    "filesContainer"
+  );
 
 const composer =
-  document.getElementById("composer");
+  document.getElementById(
+    "composer"
+  );
 
 const messageInput =
-  document.getElementById("messageInput");
+  document.getElementById(
+    "messageInput"
+  );
 
 const sendBtn =
-  document.getElementById("sendBtn");
+  document.getElementById(
+    "sendBtn"
+  );
 
-const blockedMessage =
-  document.getElementById("blockedMessage");
 
-const realtimeStatus =
-  document.getElementById("realtimeStatus");
+/* =========================
+   ESCAPE HTML
+========================= */
 
 function escapeHTML(value) {
 
@@ -410,6 +438,11 @@ function escapeHTML(value) {
     .replace(/'/g, "&#039;");
 
 }
+
+
+/* =========================
+   FORMAT TIME
+========================= */
 
 function formatTime(dateString) {
 
@@ -426,6 +459,11 @@ function formatTime(dateString) {
 
 }
 
+
+/* =========================
+   FILE SIZE
+========================= */
+
 function formatFileSize(bytes) {
 
   if (!bytes)
@@ -434,7 +472,10 @@ function formatFileSize(bytes) {
   if (bytes < 1024)
     return bytes + " B";
 
-  if (bytes < 1024 * 1024) {
+  if (
+    bytes <
+    1024 * 1024
+  ) {
 
     return (
       (bytes / 1024)
@@ -445,12 +486,18 @@ function formatFileSize(bytes) {
   }
 
   return (
-    (bytes / (1024 * 1024))
+    (bytes /
+      (1024 * 1024))
       .toFixed(1) +
     " MB"
   );
 
 }
+
+
+/* =========================
+   SCROLL
+========================= */
 
 function scrollToBottom() {
 
@@ -459,119 +506,27 @@ function scrollToBottom() {
 
 }
 
+
+/* =========================
+   NORMALIZE MESSAGE
+========================= */
+
 function normalizeForCheck(text) {
 
   return String(text || "")
     .toLowerCase()
     .normalize("NFKC")
-    .replace(/[\u200B-\u200D\uFEFF]/g, "");
-
-}
-
-function containsContactInformation(text) {
-
-  const normalized =
-    normalizeForCheck(text);
-
-  const cleaned =
-    normalized.replace(
-      /[\s().-]/g,
+    .replace(
+      /[\u200B-\u200D\uFEFF]/g,
       ""
     );
 
-  const digitsOnly =
-    normalized.replace(/\D/g, "");
-
-  const nigerianPhone =
-    /(?:\+?234|0)(?:70|80|81|90|91)\d{8}/;
-
-  const longNumber =
-    /\d{10,}/;
-
-  const accountPattern =
-    /\b(?:account|acct|account\s*no|account\s*number)\b[\s:#-]*\d{8,}/i;
-
-  const lettersOnly =
-    normalized.replace(
-      /[^a-z]/g,
-      ""
-    );
-
-  const whatsapp =
-    lettersOnly.includes(
-      "whatsapp"
-    );
-
-  const whatsappLink =
-    /wa\s*\.?\s*me/i.test(
-      normalized
-    );
-
-  if (
-    nigerianPhone.test(
-      cleaned
-    )
-  ) {
-
-    return {
-      blocked: true,
-      reason:
-        "Phone numbers cannot be shared in OOULink chat."
-    };
-
-  }
-
-  if (
-    accountPattern.test(
-      normalized
-    ) &&
-    longNumber.test(
-      digitsOnly
-    )
-  ) {
-
-    return {
-      blocked: true,
-      reason:
-        "Bank or account numbers cannot be shared in OOULink chat."
-    };
-
-  }
-
-  if (
-    whatsapp ||
-    whatsappLink
-  ) {
-
-    return {
-      blocked: true,
-      reason:
-        "WhatsApp or outside contact details cannot be shared in OOULink chat."
-    };
-
-  }
-
-  if (
-    longNumber.test(
-      digitsOnly
-    ) &&
-    digitsOnly.length >= 10
-  ) {
-
-    return {
-      blocked: true,
-      reason:
-        "Phone numbers or account numbers cannot be shared in OOULink chat."
-    };
-
-  }
-
-  return {
-    blocked: false,
-    reason: ""
-  };
-
 }
+
+
+/* =========================
+   BAD WORD FILTER
+========================= */
 
 const blockedWords = [
 
@@ -590,110 +545,257 @@ const blockedWords = [
 
 ];
 
-function containsBadLanguage(text) {
+
+/* =========================
+   CONTACT INFORMATION FILTER
+========================= */
+
+function containsContactInfo(text) {
 
   const normalized =
-    normalizeForCheck(text)
-      .replace(
-        /[^a-z0-9\s]/g,
-        " "
-      );
+    normalizeForCheck(text);
 
-  const words =
-    normalized
-      .split(/\s+/)
-      .filter(Boolean);
+  /*
+    Detect WhatsApp.
+  */
 
-  for (
-    const blocked of blockedWords
+  if (
+    normalized.includes("whatsapp") ||
+    normalized.includes("wa.me")
   ) {
 
+    return true;
+
+  }
+
+
+  /*
+    Remove common separators
+    before checking phone numbers.
+  */
+
+  const digitsOnly =
+    normalized.replace(
+      /[\s().+\-]/g,
+      ""
+    );
+
+
+  /*
+    Nigerian phone numbers.
+  */
+
+  const nigerianPhone =
+    /(?:234|0)(?:70|80|81|90|91)\d{8}/;
+
+  if (
+    nigerianPhone.test(
+      digitsOnly
+    )
+  ) {
+
+    return true;
+
+  }
+
+
+  /*
+    Long numeric sequences.
+    Helps block account numbers
+    and other contact details.
+  */
+
+  const longNumber =
+    /\d{10,}/;
+
+  if (
+    longNumber.test(
+      digitsOnly
+    )
+  ) {
+
+    return true;
+
+  }
+
+
+  /*
+    Explicit account-number wording.
+  */
+
+  const accountPattern =
+    /\b(?:account|acct|account\s*no|account\s*number)\b[\s:#-]*\d{8,}/i;
+
+  if (
+    accountPattern.test(text)
+  ) {
+
+    return true;
+
+  }
+
+
+  return false;
+
+}
+
+
+/* =========================
+   MESSAGE VALIDATION
+========================= */
+
+function validateMessage(text) {
+
+  const normalized =
+    normalizeForCheck(text);
+
+
+  /*
+    Empty message.
+  */
+
+  if (!normalized.trim()) {
+
+    return {
+      allowed: false,
+      reason:
+        "Please type a message."
+    };
+
+  }
+
+
+  /*
+    Bad language.
+  */
+
+  for (
+    const word of blockedWords
+  ) {
+
+    const pattern =
+      new RegExp(
+        `(^|[^a-z])${word}([^a-z]|$)`,
+        "i"
+      );
+
     if (
-      words.includes(
-        blocked
-      )
+      pattern.test(normalized)
     ) {
 
       return {
-        blocked: true,
+        allowed: false,
         reason:
-          "Please keep OOULink chats respectful. Abusive language is not allowed."
+          "Please keep the chat respectful. That language isn't allowed on OOULink."
       };
 
     }
 
   }
 
+
+  /*
+    Phone numbers,
+    account numbers and
+    WhatsApp/contact sharing.
+  */
+
+  if (
+    containsContactInfo(text)
+  ) {
+
+    return {
+      allowed: false,
+      reason:
+        "For your safety, phone numbers, bank/account numbers and WhatsApp/contact details cannot be shared in OOULink chat."
+    };
+
+  }
+
+
   return {
-    blocked: false,
+    allowed: true,
     reason: ""
   };
 
 }
 
-function validateMessage(text) {
 
-  const contactCheck =
-    containsContactInformation(
-      text
-    );
-
-  if (
-    contactCheck.blocked
-  ) {
-
-    return contactCheck;
-
-  }
-
-  const languageCheck =
-    containsBadLanguage(
-      text
-    );
-
-  if (
-    languageCheck.blocked
-  ) {
-
-    return languageCheck;
-
-  }
-
-  return {
-    blocked: false,
-    reason: ""
-  };
-
-}
+/* =========================
+   SHOW BLOCKED MESSAGE
+========================= */
 
 function showBlockedMessage(
-  reason
+  message
 ) {
 
-  blockedMessage.textContent =
-    "⚠️ " + reason;
+  let warning =
+    document.getElementById(
+      "chatWarning"
+    );
 
-  blockedMessage.style.display =
-    "block";
+  if (!warning) {
+
+    warning =
+      document.createElement(
+        "div"
+      );
+
+    warning.id =
+      "chatWarning";
+
+    warning.style.color =
+      "#dc2626";
+
+    warning.style.fontSize =
+      "12px";
+
+    warning.style.padding =
+      "5px 12px";
+
+    warning.style.textAlign =
+      "center";
+
+    composer.parentNode.insertBefore(
+      warning,
+      composer
+    );
+
+  }
+
+  warning.textContent =
+    "⚠️ " + message;
 
   clearTimeout(
-    window.blockWarningTimer
+    warning._timer
   );
 
-  window.blockWarningTimer =
+  warning._timer =
     setTimeout(
       () => {
-
-        blockedMessage.style.display =
-          "none";
-
+        warning.textContent =
+          "";
       },
-      4500
+      5000
     );
 
 }
 
+
+/* =========================
+   LOAD TASK
+========================= */
+
 async function loadTask() {
+
+  if (!taskId) {
+
+    throw new Error(
+      "No task was specified."
+    );
+
+  }
+
 
   const {
     data,
@@ -714,10 +816,16 @@ async function loadTask() {
       )
       .single();
 
+
   if (
     error ||
     !data
   ) {
+
+    console.error(
+      "Task loading error:",
+      error
+    );
 
     throw new Error(
       "Task could not be found."
@@ -725,8 +833,16 @@ async function loadTask() {
 
   }
 
+
   currentTask =
     data;
+
+
+  /*
+    Chat is available only
+    after somebody accepts
+    the task.
+  */
 
   if (
     !currentTask.runner_id
@@ -737,6 +853,12 @@ async function loadTask() {
     );
 
   }
+
+
+  /*
+    Only the task owner or
+    accepted runner can chat.
+  */
 
   if (
     currentUser.id !==
@@ -751,6 +873,12 @@ async function loadTask() {
     );
 
   }
+
+
+  /*
+    Determine the other
+    participant.
+  */
 
   if (
     currentUser.id ===
@@ -773,10 +901,13 @@ async function loadTask() {
 
   }
 
+
   taskTitle.textContent =
     currentTask.title;
 
 }
+
+
 /* LOAD PDF FILES */
 
 async function loadTaskFiles() {
