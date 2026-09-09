@@ -725,59 +725,37 @@ function validateMessage(text) {
    SHOW BLOCKED MESSAGE
 ========================= */
 
-function showBlockedMessage(
-  message
-) {
+function showBlockedMessage(message) {
 
-  let warning =
+  const warning =
     document.getElementById(
-      "chatWarning"
+      "blockedMessage"
     );
 
   if (!warning) {
-
-    warning =
-      document.createElement(
-        "div"
-      );
-
-    warning.id =
-      "chatWarning";
-
-    warning.style.color =
-      "#dc2626";
-
-    warning.style.fontSize =
-      "12px";
-
-    warning.style.padding =
-      "5px 12px";
-
-    warning.style.textAlign =
-      "center";
-
-    composer.parentNode.insertBefore(
-      warning,
-      composer
-    );
-
+    return;
   }
 
   warning.textContent =
     "⚠️ " + message;
+
+  warning.style.display =
+    "block";
 
   clearTimeout(
     warning._timer
   );
 
   warning._timer =
-    setTimeout(
-      () => {
-        warning.textContent =
-          "";
-      },
-      5000
-    );
+    setTimeout(() => {
+
+      warning.style.display =
+        "none";
+
+      warning.textContent =
+        "";
+
+    }, 5000);
 
 }
 
@@ -1086,33 +1064,23 @@ async function loadTaskFiles() {
    RENDER MESSAGE
 ========================= */
 
-function renderMessage(
-  message
-) {
+function renderMessage(message) {
 
   if (
     !messagesBox ||
-    !message
+    !message ||
+    !currentUser
   ) {
-
     return;
-
   }
 
-  /*
-    Prevent duplicate messages
-    when Realtime sends a message
-    that we already displayed.
-  */
-
+  // Prevent duplicate messages
   if (
     document.querySelector(
       `[data-message-id="${message.id}"]`
     )
   ) {
-
     return;
-
   }
 
   const mine =
@@ -1120,42 +1088,33 @@ function renderMessage(
     currentUser.id;
 
   const row =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
   row.className =
     mine
       ? "message-row mine"
-      : "message-row other";
+      : "message-row theirs";
 
   row.dataset.messageId =
     message.id;
 
   row.innerHTML = `
+    <div class="bubble">
 
-    <div class="message-bubble">
+      ${escapeHTML(
+        message.message
+      )}
 
-      <div class="message-text">
-        ${escapeHTML(
-          message.message
-        )}
-      </div>
-
-      <div class="message-time">
+      <div class="time">
         ${formatTime(
           message.created_at
         )}
       </div>
 
     </div>
-
   `;
 
-  messagesBox.appendChild(
-    row
-  );
-
+  messagesBox.appendChild(row);
 }
 
 
