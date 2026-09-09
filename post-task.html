@@ -140,6 +140,7 @@
   <main class="form">
 
     <label for="title">What do you need done?</label>
+
     <input
       type="text"
       id="title"
@@ -147,12 +148,14 @@
     >
 
     <label for="description">Describe the task</label>
+
     <textarea
       id="description"
       placeholder="Give runners enough information to understand what you need..."
     ></textarea>
 
     <label for="category">Category</label>
+
     <select id="category">
       <option value="">Select a category</option>
       <option>Errands</option>
@@ -165,6 +168,7 @@
     </select>
 
     <label for="location">Where should it be done?</label>
+
     <input
       type="text"
       id="location"
@@ -175,6 +179,7 @@
 
       <div>
         <label for="budget">Budget (₦)</label>
+
         <input
           type="number"
           id="budget"
@@ -185,6 +190,7 @@
 
       <div>
         <label for="deadline">Deadline</label>
+
         <input
           type="datetime-local"
           id="deadline"
@@ -193,7 +199,11 @@
 
     </div>
 
-    <button class="post-button" id="postButton" onclick="postTask()">
+    <button
+      class="post-button"
+      id="postButton"
+      onclick="postTask()"
+    >
       POST TASK
     </button>
 
@@ -206,134 +216,215 @@
 
 </div>
 
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 
-  const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
+const SUPABASE_URL =
+  "https://dthvdxgxesomltlruogp.supabase.co";
 
-  const SUPABASE_KEY =
-    "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+const SUPABASE_KEY =
+  "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
 
-  const supabaseClient =
-    supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-
-  async function postTask() {
-
-    const title =
-      document.getElementById("title").value.trim();
-
-    const description =
-      document.getElementById("description").value.trim();
-
-    const category =
-      document.getElementById("category").value;
-
-    const location =
-      document.getElementById("location").value.trim();
-
-    const budget =
-      document.getElementById("budget").value;
-
-    const deadline =
-      document.getElementById("deadline").value;
-
-    const button =
-      document.getElementById("postButton");
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
 
-    /* Check fields */
+async function postTask() {
 
-    if (
-      !title ||
-      !description ||
-      !category ||
-      !location ||
-      !budget ||
-      !deadline
-    ) {
-      alert("Please fill in all the task details.");
-      return;
-    }
+  const title =
+    document.getElementById("title").value.trim();
 
+  const description =
+    document.getElementById("description").value.trim();
 
-    /* Check login */
+  const category =
+    document.getElementById("category").value;
 
-    const {
-      data: { session }
-    } = await supabaseClient.auth.getSession();
+  const location =
+    document.getElementById("location").value.trim();
 
+  const budget =
+    document.getElementById("budget").value;
 
-    if (!session) {
+  const deadline =
+    document.getElementById("deadline").value;
 
-      alert(
-        "You need to be logged in to post a task."
-      );
-
-      window.location.href = "login.html";
-
-      return;
-    }
+  const button =
+    document.getElementById("postButton");
 
 
-    /* Prevent double submission */
+  /* =========================
+     CHECK FIELDS
+  ========================= */
 
-    button.disabled = true;
-    button.textContent = "POSTING...";
-
-
-    /* Save task */
-
-    const { data, error } =
-      await supabaseClient
-        .from("tasks")
-        .insert([
-          {
-            user_id: session.user.id,
-            title: title,
-            description: description,
-            category: category,
-            location: location,
-            budget: Number(budget),
-            deadline: new Date(deadline).toISOString(),
-            status: "open"
-          }
-        ])
-        .select()
-        .single();
-
-
-    /* Handle error */
-
-    if (error) {
-
-      console.error(error);
-
-      alert(
-        "Could not post your task.\n\n" +
-        error.message
-      );
-
-      button.disabled = false;
-      button.textContent = "POST TASK";
-
-      return;
-    }
-
-
-    /* Success */
+  if (
+    !title ||
+    !description ||
+    !category ||
+    !location ||
+    !budget ||
+    !deadline
+  ) {
 
     alert(
-      "Task posted successfully! 🎉\n\n" +
-      "Your task is now available for runners to find."
+      "Please fill in all the task details."
+    );
+
+    return;
+  }
+
+
+  /* =========================
+     CHECK LOGIN
+  ========================= */
+
+  const {
+    data: { session },
+    error: sessionError
+  } =
+    await supabaseClient.auth.getSession();
+
+
+  if (sessionError) {
+
+    alert(
+      "Could not check your login session."
+    );
+
+    return;
+  }
+
+
+  if (!session) {
+
+    alert(
+      "You need to be logged in to post a task."
     );
 
     window.location.href =
-      "find-tasks.html";
+      "login.html";
 
+    return;
   }
+
+
+  /* =========================
+     PREVENT DOUBLE SUBMISSION
+  ========================= */
+
+  button.disabled = true;
+
+  button.textContent =
+    "POSTING...";
+
+
+  /* =========================
+     SAVE TASK
+  ========================= */
+
+  const {
+    data: task,
+    error
+  } =
+    await supabaseClient
+      .from("tasks")
+      .insert([
+        {
+          user_id: session.user.id,
+          title: title,
+          description: description,
+          category: category,
+          location: location,
+          budget: Number(budget),
+          deadline:
+            new Date(deadline).toISOString(),
+          status: "open"
+        }
+      ])
+      .select()
+      .single();
+
+
+  /* =========================
+     HANDLE TASK ERROR
+  ========================= */
+
+  if (error) {
+
+    console.error(
+      "Task posting error:",
+      error
+    );
+
+    alert(
+      "Could not post your task.\n\n" +
+      error.message
+    );
+
+    button.disabled = false;
+
+    button.textContent =
+      "POST TASK";
+
+    return;
+  }
+
+
+  /* =========================
+     CREATE NOTIFICATION
+  ========================= */
+
+  const {
+    error: notificationError
+  } =
+    await supabaseClient
+      .from("notifications")
+      .insert({
+        user_id: session.user.id,
+        task_id: task.id,
+        type: "task_posted",
+        title: "Task posted",
+        message:
+          `Your task "${task.title}" was posted successfully.`
+      });
+
+
+  /* =========================
+     NOTIFICATION ERROR
+  ========================= */
+
+  if (notificationError) {
+
+    console.error(
+      "Notification error:",
+      notificationError
+    );
+
+    /*
+      The task was already created successfully,
+      so we do NOT block the user from continuing.
+    */
+  }
+
+
+  /* =========================
+     SUCCESS
+  ========================= */
+
+  alert(
+    "Task posted successfully! 🎉\n\n" +
+    "Your task is now available for runners to find."
+  );
+
+
+  window.location.href =
+    "find-tasks.html";
+
+}
 
 </script>
 
