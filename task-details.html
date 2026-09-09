@@ -1242,7 +1242,230 @@ async function submitForVerification() {
 
   window.location.reload();
 }
+/* =========================
+   APPROVE TASK
+========================= */
 
+async function approveTask() {
+
+  if (!currentTask || !currentUser)
+    return;
+
+  if (currentTask.user_id !== currentUser.id) {
+    alert("Only the task owner can approve this task.");
+    return;
+  }
+
+  if (currentTask.status !== "awaiting_verification") {
+    alert("This task is not awaiting verification.");
+    return;
+  }
+
+  const button =
+    document.getElementById("approveButton");
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "APPROVING...";
+  }
+
+  const { data: updatedTask, error } =
+    await supabaseClient
+      .from("tasks")
+      .update({
+        status: "completed"
+      })
+      .eq("id", currentTask.id)
+      .eq("user_id", currentUser.id)
+      .eq("status", "awaiting_verification")
+      .select()
+      .single();
+
+  if (error || !updatedTask) {
+
+    console.error(
+      "APPROVE TASK ERROR:",
+      error
+    );
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "✅ APPROVE & COMPLETE";
+    }
+
+    alert(
+      "Could not approve the task.\n\n" +
+      (error?.message || "Please try again.")
+    );
+
+    return;
+  }
+
+  currentTask = updatedTask;
+
+  await supabaseClient
+    .from("notifications")
+    .insert({
+      user_id: currentTask.runner_id,
+      task_id: currentTask.id,
+      type: "task_completed",
+      title: "Task completed",
+      message:
+        `The owner approved "${currentTask.title}". The task is now completed.`
+    });
+
+  await supabaseClient
+    .from("notifications")
+    .insert({
+      user_id: currentUser.id,
+      task_id: currentTask.id,
+      type: "task_completed",
+      title: "Task completed",
+      message:
+        `You approved "${currentTask.title}".`
+    });
+
+  alert("Task approved and completed! 🎉");
+
+  window.location.reload();
+}
+
+
+/* =========================
+   SHOW REJECT BOX
+========================= */
+
+function showRejectBox() {
+
+  const box =
+    document.getElementById("rejectBox");
+
+  if (!box) return;
+
+  box.style.display = "block";
+
+  const note =
+    document.getElementById("rejectionNote");
+
+  if (note) {
+    note.focus();
+  }
+}
+
+
+/* =========================
+   REJECT TASK
+========================= */
+
+async function rejectTask() {
+
+  if (!currentTask || !currentUser)
+    return;
+
+  if (currentTask.user_id !== currentUser.id) {
+    alert("Only the task owner can reject this task.");
+    return;
+  }
+
+  if (currentTask.status !== "awaiting_verification") {
+    alert("This task is not awaiting verification.");
+    return;
+  }
+
+  const noteInput =
+    document.getElementById("rejectionNote");
+
+  const rejectionNote =
+    noteInput?.value.trim() || "";
+
+  if (!rejectionNote) {
+    alert("Please provide a rejection reason.");
+    noteInput?.focus();
+    return;
+  }
+
+  const button =
+    document.getElementById("rejectButton");
+
+  const confirmButton =
+    document.querySelector(
+      "#rejectBox button"
+    );
+
+  if (button) {
+    button.disabled = true;
+  }
+
+  if (confirmButton) {
+    confirmButton.disabled = true;
+    confirmButton.textContent = "REJECTING...";
+  }
+
+  const { data: updatedTask, error } =
+    await supabaseClient
+      .from("tasks")
+      .update({
+        status: "rejected",
+        rejection_note: rejectionNote
+      })
+      .eq("id", currentTask.id)
+      .eq("user_id", currentUser.id)
+      .eq("status", "awaiting_verification")
+      .select()
+      .single();
+
+  if (error || !updatedTask) {
+
+    console.error(
+      "REJECT TASK ERROR:",
+      error
+    );
+
+    if (button) {
+      button.disabled = false;
+    }
+
+    if (confirmButton) {
+      confirmButton.disabled = false;
+      confirmButton.textContent = "CONFIRM REJECTION";
+    }
+
+    alert(
+      "Could not reject the task.\n\n" +
+      (error?.message || "Please try again.")
+    );
+
+    return;
+  }
+
+  currentTask = updatedTask;
+
+  await supabaseClient
+    .from("notifications")
+    .insert({
+      user_id: currentTask.runner_id,
+      task_id: currentTask.id,
+      type: "task_rejected",
+      title: "Task rejected",
+      message:
+        `The owner rejected "${currentTask.title}". Reason: ${rejectionNote}`
+    });
+
+  await supabaseClient
+    .from("notifications")
+    .insert({
+      user_id: currentUser.id,
+      task_id: currentTask.id,
+      type: "task_rejected",
+      title: "Task rejected",
+      message:
+        `You rejected "${currentTask.title}".`
+    });
+
+  alert("Task rejected. The chat is now closed.");
+
+  window.location.reload();
+}
 /* =========================
    REPORT
 ========================= */
