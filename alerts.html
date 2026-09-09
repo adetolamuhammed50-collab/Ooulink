@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>Alerts - OOULink</title>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -62,7 +69,7 @@
       border-radius: 14px;
       margin-bottom: 12px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
     }
 
     .task-header {
@@ -109,6 +116,7 @@
       font-size: 14px;
       color: #4b5563;
       margin-top: 4px;
+      line-height: 1.5;
     }
 
     .notification-time {
@@ -121,28 +129,54 @@
       font-weight: bold;
     }
 
-    /* CLICKABLE CHAT NOTIFICATION */
+    /* =========================
+       CHAT NOTIFICATION
+    ========================= */
 
     .chat-notification {
-      cursor: pointer;
+      background: #f0f7ff;
       padding: 13px;
       margin: 4px -6px;
       border-radius: 10px;
-      background: #f0f7ff;
     }
 
-    .chat-notification:active {
-      transform: scale(0.99);
+    .chat-button {
+      display: block;
+      width: 100%;
+      margin-top: 11px;
+      padding: 11px;
+      border: none;
+      border-radius: 9px;
+      background: #2563eb;
+      color: white;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
     }
 
-    .chat-link {
-      margin-top: 7px;
-      font-size: 12px;
-      font-weight: bold;
-      color: #2563eb;
+    .chat-button:active {
+      transform: scale(.98);
     }
 
-    /* STANDARD BOTTOM NAV */
+    /* =========================
+       UNREAD INDICATOR
+    ========================= */
+
+    .unread-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* =========================
+       BOTTOM NAV
+    ========================= */
 
     .bottom-nav {
       position: fixed;
@@ -158,7 +192,7 @@
       justify-content: space-around;
       align-items: center;
       z-index: 9999;
-      box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 -3px 12px rgba(0,0,0,.06);
     }
 
     .bottom-nav a {
@@ -203,8 +237,11 @@
       border: 2px solid white;
       display: none;
     }
+
   </style>
+
 </head>
+
 
 <body>
 
@@ -217,9 +254,11 @@
   <div class="container">
 
     <div id="alertsContainer">
+
       <div class="loading">
         Loading your alerts...
       </div>
+
     </div>
 
   </div>
@@ -227,48 +266,86 @@
 </div>
 
 
-<!-- =========================
-     BOTTOM NAV
-     ========================= -->
-
 <nav class="bottom-nav">
 
   <a href="index.html">
-    <span class="nav-icon">🏠</span>
-    <span>Home</span>
+
+    <span class="nav-icon">
+      🏠
+    </span>
+
+    <span>
+      Home
+    </span>
+
   </a>
+
 
   <a href="find-tasks.html">
-    <span class="nav-icon">🔎</span>
-    <span>Find Tasks</span>
+
+    <span class="nav-icon">
+      🔎
+    </span>
+
+    <span>
+      Find Tasks
+    </span>
+
   </a>
+
 
   <a href="post-task.html">
-    <span class="nav-icon">➕</span>
-    <span>Post</span>
+
+    <span class="nav-icon">
+      ➕
+    </span>
+
+    <span>
+      Post
+    </span>
+
   </a>
 
+
   <a href="alerts.html" class="active">
+
     <span class="bell-wrap">
-      <span class="nav-icon">🔔</span>
+
+      <span class="nav-icon">
+        🔔
+      </span>
+
       <span
         id="notificationDot"
         class="notification-dot"
       ></span>
+
     </span>
 
-    <span>Alerts</span>
+    <span>
+      Alerts
+    </span>
+
   </a>
 
+
   <a href="profile.html">
-    <span class="nav-icon">👤</span>
-    <span>Profile</span>
+
+    <span class="nav-icon">
+      👤
+    </span>
+
+    <span>
+      Profile
+    </span>
+
   </a>
 
 </nav>
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
 <script>
 
@@ -286,57 +363,25 @@ const supabaseClient =
 
 
 const alertsContainer =
-  document.getElementById("alertsContainer");
+  document.getElementById(
+    "alertsContainer"
+  );
+
 
 const notificationDot =
-  document.getElementById("notificationDot");
+  document.getElementById(
+    "notificationDot"
+  );
+
 
 let currentUser = null;
 
 
 /* =========================
-   TIME AGO
-   ========================= */
+   HELPERS
+========================= */
 
-function timeAgo(date) {
-
-  const seconds =
-    Math.floor(
-      (Date.now() - new Date(date).getTime()) / 1000
-    );
-
-  if (seconds < 60)
-    return "Just now";
-
-  const minutes =
-    Math.floor(seconds / 60);
-
-  if (minutes < 60)
-    return minutes + " min ago";
-
-  const hours =
-    Math.floor(minutes / 60);
-
-  if (hours < 24)
-    return hours + " hr ago";
-
-  const days =
-    Math.floor(hours / 24);
-
-  return (
-    days +
-    " day" +
-    (days > 1 ? "s" : "") +
-    " ago"
-  );
-}
-
-
-/* =========================
-   ESCAPE HTML
-   ========================= */
-
-function escapeHTML(value) {
+function escapeHtml(value) {
 
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -344,22 +389,43 @@ function escapeHTML(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+
+}
+
+
+function formatTime(date) {
+
+  return new Date(date).toLocaleString(
+    "en-NG",
+    {
+      dateStyle: "medium",
+      timeStyle: "short"
+    }
+  );
+
+}
+
+
+function isChatNotification(notification) {
+
+  return (
+    notification.type === "new_message" ||
+    notification.type === "message" ||
+    /new message/i.test(
+      notification.title || ""
+    )
+  );
+
 }
 
 
 /* =========================
-   RED DOT
-   ========================= */
+   GLOBAL RED DOT
+========================= */
 
 async function updateNotificationDot() {
 
-  if (!currentUser)
-    return;
-
-  const {
-    count,
-    error
-  } =
+  const { count, error } =
     await supabaseClient
       .from("notifications")
       .select("id", {
@@ -368,6 +434,7 @@ async function updateNotificationDot() {
       })
       .eq("user_id", currentUser.id)
       .eq("is_read", false);
+
 
   if (error) {
 
@@ -379,240 +446,264 @@ async function updateNotificationDot() {
     return;
   }
 
+
   notificationDot.style.display =
     count > 0
       ? "block"
       : "none";
+
 }
 
 
 /* =========================
-   MARK NOTIFICATIONS READ
-   ========================= */
+   MARK READ
+========================= */
 
-async function markNotificationsRead(list) {
+async function markNotificationRead(
+  notificationId
+) {
 
-  const unreadIds =
-    list
-      .filter(n => !n.is_read)
-      .map(n => n.id);
-
-  if (unreadIds.length === 0)
-    return;
-
-  const {
-    error
-  } =
+  const { error } =
     await supabaseClient
       .from("notifications")
       .update({
         is_read: true
       })
-      .in("id", unreadIds);
+      .eq("id", notificationId)
+      .eq("user_id", currentUser.id);
+
 
   if (error) {
 
     console.error(
-      "Read notification error:",
+      "Mark notification read error:",
       error
     );
 
-    return;
   }
 
-  list.forEach(n => {
-    n.is_read = true;
-  });
-
-  await updateNotificationDot();
 }
 
 
 /* =========================
    OPEN CHAT
-   ========================= */
+========================= */
 
-async function openChat(notification) {
-
-  if (!notification.task_id)
-    return;
+async function continueToChat(
+  event,
+  notification
+) {
 
   /*
-    Mark this notification as read
-    before opening the chat.
-  */
+   * VERY IMPORTANT:
+   * Prevent the task group itself from
+   * receiving this click.
+   */
 
-  if (!notification.is_read) {
+  event.preventDefault();
+  event.stopPropagation();
 
-    const {
-      error
-    } =
-      await supabaseClient
-        .from("notifications")
-        .update({
-          is_read: true
-        })
-        .eq("id", notification.id)
-        .eq("user_id", currentUser.id);
 
-    if (error) {
+  await markNotificationRead(
+    notification.id
+  );
 
-      console.error(
-        "Could not mark message notification read:",
-        error
-      );
 
-    } else {
+  await updateNotificationDot();
 
-      notification.is_read = true;
 
-      await updateNotificationDot();
-    }
+  if (!notification.task_id) {
+
+    alert(
+      "This message is no longer connected to a task."
+    );
+
+    return;
   }
 
-  /*
-    Open the exact chat belonging
-    to this task.
-  */
 
   window.location.href =
     "chat.html?id=" +
     encodeURIComponent(
       notification.task_id
     );
+
 }
 
 
 /* =========================
    LOAD ALERTS
-   ========================= */
+========================= */
 
 async function loadAlerts() {
 
-  try {
-
-    alertsContainer.innerHTML =
-      '<div class="loading">Loading your alerts...</div>';
+  const { data: sessionData } =
+    await supabaseClient.auth.getSession();
 
 
-    const {
-      data: sessionData,
-      error: sessionError
-    } =
-      await supabaseClient.auth.getSession();
+  if (!sessionData.session) {
+
+    window.location.href =
+      "login.html?redirect=alerts.html";
+
+    return;
+  }
 
 
-    if (sessionError)
-      throw sessionError;
+  currentUser =
+    sessionData.session.user;
 
 
-    if (!sessionData.session) {
-
-      window.location.href =
-        "login.html";
-
-      return;
-    }
+  await updateNotificationDot();
 
 
-    currentUser =
-      sessionData.session.user;
+  const { data: notifications, error } =
+    await supabaseClient
+      .from("notifications")
+      .select(`
+        id,
+        task_id,
+        type,
+        title,
+        message,
+        is_read,
+        created_at
+      `)
+      .eq("user_id", currentUser.id)
+      .order("created_at", {
+        ascending: false
+      });
 
 
-    await updateNotificationDot();
+  if (error) {
 
-
-    const {
-      data: notifications,
+    console.error(
+      "ALERT LOAD ERROR:",
       error
-    } =
-      await supabaseClient
-        .from("notifications")
-        .select("*")
-        .eq(
-          "user_id",
-          currentUser.id
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false
-          }
-        );
-
-
-    if (error)
-      throw error;
-
-
-    if (
-      !notifications ||
-      notifications.length === 0
-    ) {
-
-      alertsContainer.innerHTML =
-        '<div class="empty">🔔 No alerts yet.</div>';
-
-      return;
-    }
-
-
-    /* =========================
-       GROUP BY TASK
-       ========================= */
-
-    const groups = {};
-
-
-    notifications.forEach(
-      notification => {
-
-        const key =
-          notification.task_id ||
-          "general";
-
-
-        if (!groups[key]) {
-
-          groups[key] = [];
-        }
-
-
-        groups[key].push(
-          notification
-        );
-
-      }
     );
 
+    alertsContainer.innerHTML = `
+      <div class="error">
+        Unable to load your alerts.
+        <br><br>
+        ${escapeHtml(error.message)}
+      </div>
+    `;
 
-    alertsContainer.innerHTML = "";
+    return;
+  }
 
 
-    /* =========================
-       BUILD GROUPS
-       ========================= */
+  if (!notifications || notifications.length === 0) {
 
-    Object.keys(groups).forEach(
-      taskId => {
+    alertsContainer.innerHTML = `
+      <div class="empty">
+        🔔
+        <br><br>
+        You don't have any notifications yet.
+      </div>
+    `;
 
-        const list =
-          groups[taskId];
+    return;
+  }
+
+
+  /*
+   * Get task titles for grouped notifications.
+   */
+
+  const taskIds = [
+    ...new Set(
+      notifications
+        .map(n => n.task_id)
+        .filter(Boolean)
+    )
+  ];
+
+
+  let taskMap = {};
+
+
+  if (taskIds.length > 0) {
+
+    const { data: tasks } =
+      await supabaseClient
+        .from("tasks")
+        .select("id,title")
+        .in("id", taskIds);
+
+
+    if (tasks) {
+
+      tasks.forEach(task => {
+
+        taskMap[task.id] =
+          task.title;
+
+      });
+
+    }
+
+  }
+
+
+  /*
+   * Group notifications by task.
+   * Notifications without a task remain in
+   * their own general group.
+   */
+
+  const groups = {};
+
+
+  notifications.forEach(notification => {
+
+    const key =
+      notification.task_id ||
+      "general";
+
+
+    if (!groups[key]) {
+
+      groups[key] = [];
+
+    }
+
+
+    groups[key].push(
+      notification
+    );
+
+  });
+
+
+  alertsContainer.innerHTML = "";
+
+
+  Object.entries(groups)
+    .forEach(
+      ([taskId, list], groupIndex) => {
 
         const latest =
           list[0];
 
 
-        const taskTitle =
-          latest.task_id
-            ? (
-                latest.message.match(
-                  /"([^"]+)"/
-                )?.[1] ||
-                latest.title ||
-                "Task"
-              )
-            : "General";
+        const unreadCount =
+          list.filter(
+            n => !n.is_read
+          ).length;
+
+
+        let title =
+          taskId === "general"
+            ? "General notifications"
+            : (
+                taskMap[taskId] ||
+                extractTaskTitle(
+                  latest.message
+                ) ||
+                "Task notification"
+              );
 
 
         const group =
@@ -623,10 +714,6 @@ async function loadAlerts() {
         group.className =
           "task-group";
 
-
-        /* =====================
-           GROUP HEADER
-           ===================== */
 
         const header =
           document.createElement(
@@ -640,31 +727,45 @@ async function loadAlerts() {
         header.innerHTML = `
 
           <div class="task-title">
-            📦 ${escapeHTML(taskTitle)}
+
+            ${
+              unreadCount > 0
+                ? '<span class="unread-dot"></span>'
+                : ""
+            }
+
+            ${escapeHtml(title)}
+
           </div>
 
           <div class="task-meta">
 
-            ${list.length}
-            notification${list.length !== 1 ? "s" : ""}
+            ${
+              list.length
+            }
+            notification${
+              list.length === 1
+                ? ""
+                : "s"
+            }
 
             • Latest:
-            ${timeAgo(latest.created_at)}
+            ${escapeHtml(
+              formatTime(
+                latest.created_at
+              )
+            )}
 
-            <span
-              style="float:right"
-            >
-              ▼
-            </span>
+            ${
+              unreadCount > 0
+                ? ` • ${unreadCount} unread`
+                : ""
+            }
 
           </div>
 
         `;
 
-
-        /* =====================
-           GROUP CONTENT
-           ===================== */
 
         const content =
           document.createElement(
@@ -684,21 +785,22 @@ async function loadAlerts() {
               );
 
 
-            const isChat =
-              notification.type ===
-              "new_message";
+            const chat =
+              isChatNotification(
+                notification
+              );
 
 
             item.className =
-              "notification " +
+              "notification" +
               (
                 !notification.is_read
-                  ? "unread "
+                  ? " unread"
                   : ""
               ) +
               (
-                isChat
-                  ? "chat-notification"
+                chat
+                  ? " chat-notification"
                   : ""
               );
 
@@ -707,9 +809,7 @@ async function loadAlerts() {
 
               <div class="notification-title">
 
-                ${isChat ? "💬 " : ""}
-
-                ${escapeHTML(
+                ${escapeHtml(
                   notification.title
                 )}
 
@@ -717,7 +817,7 @@ async function loadAlerts() {
 
               <div class="notification-message">
 
-                ${escapeHTML(
+                ${escapeHtml(
                   notification.message
                 )}
 
@@ -725,38 +825,49 @@ async function loadAlerts() {
 
               <div class="notification-time">
 
-                ${timeAgo(
-                  notification.created_at
+                ${escapeHtml(
+                  formatTime(
+                    notification.created_at
+                  )
                 )}
 
               </div>
 
               ${
-                isChat
-                  ? `
-                    <div class="chat-link">
-                      💬 Tap to open chat
-                    </div>
-                  `
-                  : ""
+                chat && notification.task_id
+                ? `
+                  <a
+                    href="chat.html?id=${encodeURIComponent(
+                      notification.task_id
+                    )}"
+                    class="chat-button"
+                  >
+                    💬 CONTINUE TO CHAT
+                  </a>
+                `
+                : ""
               }
 
             `;
 
 
-            /* =====================
-               CHAT CLICK
-               ===================== */
+            if (
+              chat &&
+              notification.task_id
+            ) {
 
-            if (isChat) {
+              const chatButton =
+                item.querySelector(
+                  ".chat-button"
+                );
 
-              item.addEventListener(
+
+              chatButton.addEventListener(
                 "click",
                 async event => {
 
-                  event.stopPropagation();
-
-                  await openChat(
+                  await continueToChat(
+                    event,
                     notification
                   );
 
@@ -774,16 +885,19 @@ async function loadAlerts() {
         );
 
 
-        /* =====================
-           GROUP OPEN/CLOSE
-           ===================== */
+        /*
+         * Clicking the group header:
+         * - opens/collapses the group
+         * - marks notifications in that
+         *   task group as read.
+         */
 
         header.addEventListener(
           "click",
           async () => {
 
-            const isOpen =
-              content.classList.contains(
+            const opening =
+              !content.classList.contains(
                 "open"
               );
 
@@ -793,40 +907,59 @@ async function loadAlerts() {
             );
 
 
-            header.querySelector(
-              ".task-meta span"
-            ).textContent =
-              isOpen
-                ? "▼"
-                : "▲";
+            if (opening) {
+
+              const unread =
+                list.filter(
+                  n => !n.is_read
+                );
 
 
-            if (!isOpen) {
+              if (unread.length > 0) {
 
-              /*
-                Opening a task group marks
-                its unread notifications as read.
-
-                Chat notifications are also
-                marked read here.
-              */
-
-              await markNotificationsRead(
-                list
-              );
-
-
-              content
-                .querySelectorAll(
-                  ".unread"
-                )
-                .forEach(el => {
-
-                  el.classList.remove(
-                    "unread"
+                const ids =
+                  unread.map(
+                    n => n.id
                   );
 
-                });
+
+                const { error } =
+                  await supabaseClient
+                    .from("notifications")
+                    .update({
+                      is_read: true
+                    })
+                    .in(
+                      "id",
+                      ids
+                    )
+                    .eq(
+                      "user_id",
+                      currentUser.id
+                    );
+
+
+                if (error) {
+
+                  console.error(
+                    "GROUP READ ERROR:",
+                    error
+                  );
+
+                } else {
+
+                  list.forEach(
+                    n => {
+                      n.is_read = true;
+                    }
+                  );
+
+
+                  await updateNotificationDot();
+
+                }
+
+              }
 
             }
 
@@ -849,42 +982,37 @@ async function loadAlerts() {
       }
     );
 
+}
 
-  } catch (error) {
 
-    console.error(
-      "Alerts error:",
-      error
+/* =========================
+   FALLBACK TASK TITLE
+========================= */
+
+function extractTaskTitle(message) {
+
+  if (!message)
+    return "";
+
+
+  const match =
+    message.match(
+      /"([^"]+)"/
     );
 
 
-    alertsContainer.innerHTML = `
-
-      <div class="error">
-
-        ❌ Unable to load alerts.
-
-        <br><br>
-
-        Please refresh the page.
-
-      </div>
-
-    `;
-
-  }
+  return match
+    ? match[1]
+    : "";
 
 }
 
 
 /* =========================
    START
-   ========================= */
+========================= */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  loadAlerts
-);
+loadAlerts();
 
 </script>
 
