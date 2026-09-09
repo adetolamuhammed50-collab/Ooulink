@@ -16,6 +16,7 @@
     body {
       background: #f5f7f6;
       color: #17201b;
+      padding-bottom: 82px;
     }
 
     .app {
@@ -23,7 +24,6 @@
       min-height: 100vh;
       margin: auto;
       background: white;
-      padding-bottom: 30px;
     }
 
     header {
@@ -119,6 +119,76 @@
       color: #416050;
       font-size: 13px;
       line-height: 1.5;
+    }
+
+    /* =========================
+       STANDARD BOTTOM NAV
+       ========================= */
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: 68px;
+      background: #ffffff;
+      border-top: 1px solid #e4e9e6;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 9999;
+      box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .bottom-nav a {
+      position: relative;
+      flex: 1;
+      height: 68px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-decoration: none;
+      color: #68736d;
+      font-size: 11px;
+      font-weight: 600;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .bottom-nav a.active {
+      color: #16834b;
+    }
+
+    .nav-icon {
+      font-size: 21px;
+      line-height: 22px;
+    }
+
+    .bell-wrap {
+      position: relative;
+      display: inline-block;
+      height: 22px;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: -2px;
+      right: -5px;
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid white;
+      display: none;
+    }
+
+    @media (min-width: 481px) {
+      .bottom-nav {
+        border-radius: 14px 14px 0 0;
+      }
     }
   </style>
 </head>
@@ -216,215 +286,341 @@
 
 </div>
 
+
+<!-- =========================
+     BOTTOM NAVIGATION
+     ========================= -->
+
+<nav class="bottom-nav">
+
+  <a href="index.html">
+    <span class="nav-icon">🏠</span>
+    <span>Home</span>
+  </a>
+
+  <a href="find-tasks.html">
+    <span class="nav-icon">🔎</span>
+    <span>Find Tasks</span>
+  </a>
+
+  <a href="post-task.html" class="active">
+    <span class="nav-icon">➕</span>
+    <span>Post</span>
+  </a>
+
+  <a href="alerts.html">
+    <span class="bell-wrap">
+      <span class="nav-icon">🔔</span>
+      <span id="notificationDot" class="notification-dot"></span>
+    </span>
+    <span>Alerts</span>
+  </a>
+
+  <a href="profile.html">
+    <span class="nav-icon">👤</span>
+    <span>Profile</span>
+  </a>
+
+</nav>
+
+
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 
-const SUPABASE_URL =
-  "https://dthvdxgxesomltlruogp.supabase.co";
+  const SUPABASE_URL =
+    "https://dthvdxgxesomltlruogp.supabase.co";
 
-const SUPABASE_KEY =
-  "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+  const SUPABASE_KEY =
+    "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
 
-const supabaseClient =
-  supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
-
-
-async function postTask() {
-
-  const title =
-    document.getElementById("title").value.trim();
-
-  const description =
-    document.getElementById("description").value.trim();
-
-  const category =
-    document.getElementById("category").value;
-
-  const location =
-    document.getElementById("location").value.trim();
-
-  const budget =
-    document.getElementById("budget").value;
-
-  const deadline =
-    document.getElementById("deadline").value;
-
-  const button =
-    document.getElementById("postButton");
+  const supabaseClient =
+    supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
 
 
   /* =========================
-     CHECK FIELDS
-  ========================= */
+     NOTIFICATION DOT
+     ========================= */
 
-  if (
-    !title ||
-    !description ||
-    !category ||
-    !location ||
-    !budget ||
-    !deadline
-  ) {
+  async function updateNotificationDot() {
 
-    alert(
-      "Please fill in all the task details."
-    );
+    const dot =
+      document.getElementById("notificationDot");
 
-    return;
+    if (!dot) return;
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth.getSession();
+
+    if (error || !data.session) {
+      dot.style.display = "none";
+      return;
+    }
+
+    const userId =
+      data.session.user.id;
+
+    const {
+      count,
+      error: notificationError
+    } =
+      await supabaseClient
+        .from("notifications")
+        .select("id", {
+          count: "exact",
+          head: true
+        })
+        .eq("user_id", userId)
+        .eq("is_read", false);
+
+    if (notificationError) {
+
+      console.error(
+        "Notification dot error:",
+        notificationError
+      );
+
+      return;
+    }
+
+    dot.style.display =
+      count > 0
+        ? "block"
+        : "none";
   }
 
 
   /* =========================
-     CHECK LOGIN
-  ========================= */
+     POST TASK
+     ========================= */
 
-  const {
-    data: { session },
-    error: sessionError
-  } =
-    await supabaseClient.auth.getSession();
+  async function postTask() {
+
+    const title =
+      document
+        .getElementById("title")
+        .value
+        .trim();
+
+    const description =
+      document
+        .getElementById("description")
+        .value
+        .trim();
+
+    const category =
+      document
+        .getElementById("category")
+        .value;
+
+    const location =
+      document
+        .getElementById("location")
+        .value
+        .trim();
+
+    const budget =
+      document
+        .getElementById("budget")
+        .value;
+
+    const deadline =
+      document
+        .getElementById("deadline")
+        .value;
+
+    const button =
+      document.getElementById("postButton");
 
 
-  if (sessionError) {
+    /* Check fields */
+
+    if (
+      !title ||
+      !description ||
+      !category ||
+      !location ||
+      !budget ||
+      !deadline
+    ) {
+
+      alert(
+        "Please fill in all the task details."
+      );
+
+      return;
+    }
+
+
+    /* Check login */
+
+    const {
+      data: {
+        session
+      }
+    } =
+      await supabaseClient.auth.getSession();
+
+
+    if (!session) {
+
+      alert(
+        "You need to be logged in to post a task."
+      );
+
+      window.location.href =
+        "login.html";
+
+      return;
+    }
+
+
+    /* Prevent double submission */
+
+    button.disabled = true;
+
+    button.textContent =
+      "POSTING...";
+
+
+    /* =========================
+       SAVE TASK
+       ========================= */
+
+    const {
+      data: task,
+      error
+    } =
+      await supabaseClient
+        .from("tasks")
+        .insert([
+          {
+            user_id:
+              session.user.id,
+
+            title:
+              title,
+
+            description:
+              description,
+
+            category:
+              category,
+
+            location:
+              location,
+
+            budget:
+              Number(budget),
+
+            deadline:
+              new Date(
+                deadline
+              ).toISOString(),
+
+            status:
+              "open"
+          }
+        ])
+        .select()
+        .single();
+
+
+    /* Handle task error */
+
+    if (error) {
+
+      console.error(
+        "Task creation error:",
+        error
+      );
+
+      alert(
+        "Could not post your task.\n\n" +
+        error.message
+      );
+
+      button.disabled = false;
+
+      button.textContent =
+        "POST TASK";
+
+      return;
+    }
+
+
+    /* =========================
+       CREATE NOTIFICATION
+       ========================= */
+
+    const {
+      error: notificationError
+    } =
+      await supabaseClient
+        .from("notifications")
+        .insert({
+          user_id:
+            session.user.id,
+
+          task_id:
+            task.id,
+
+          type:
+            "task_posted",
+
+          title:
+            "Task posted",
+
+          message:
+            `Your task "${task.title}" was posted successfully.`
+        });
+
+
+    /*
+      The task itself was already created.
+
+      So even if notification creation
+      fails, we do NOT delete the task.
+    */
+
+    if (notificationError) {
+
+      console.error(
+        "Notification creation error:",
+        notificationError
+      );
+
+    }
+
+
+    /* =========================
+       SUCCESS
+       ========================= */
 
     alert(
-      "Could not check your login session."
-    );
-
-    return;
-  }
-
-
-  if (!session) {
-
-    alert(
-      "You need to be logged in to post a task."
+      "Task posted successfully! 🎉\n\n" +
+      "Your task is now available for runners to find."
     );
 
     window.location.href =
-      "login.html";
+      "find-tasks.html";
 
-    return;
   }
 
 
-  /* =========================
-     PREVENT DOUBLE SUBMISSION
-  ========================= */
+  /* Load notification dot */
 
-  button.disabled = true;
-
-  button.textContent =
-    "POSTING...";
-
-
-  /* =========================
-     SAVE TASK
-  ========================= */
-
-  const {
-    data: task,
-    error
-  } =
-    await supabaseClient
-      .from("tasks")
-      .insert([
-        {
-          user_id: session.user.id,
-          title: title,
-          description: description,
-          category: category,
-          location: location,
-          budget: Number(budget),
-          deadline:
-            new Date(deadline).toISOString(),
-          status: "open"
-        }
-      ])
-      .select()
-      .single();
-
-
-  /* =========================
-     HANDLE TASK ERROR
-  ========================= */
-
-  if (error) {
-
-    console.error(
-      "Task posting error:",
-      error
-    );
-
-    alert(
-      "Could not post your task.\n\n" +
-      error.message
-    );
-
-    button.disabled = false;
-
-    button.textContent =
-      "POST TASK";
-
-    return;
-  }
-
-
-  /* =========================
-     CREATE NOTIFICATION
-  ========================= */
-
-  const {
-    error: notificationError
-  } =
-    await supabaseClient
-      .from("notifications")
-      .insert({
-        user_id: session.user.id,
-        task_id: task.id,
-        type: "task_posted",
-        title: "Task posted",
-        message:
-          `Your task "${task.title}" was posted successfully.`
-      });
-
-
-  /* =========================
-     NOTIFICATION ERROR
-  ========================= */
-
-  if (notificationError) {
-
-    console.error(
-      "Notification error:",
-      notificationError
-    );
-
-    /*
-      The task was already created successfully,
-      so we do NOT block the user from continuing.
-    */
-  }
-
-
-  /* =========================
-     SUCCESS
-  ========================= */
-
-  alert(
-    "Task posted successfully! 🎉\n\n" +
-    "Your task is now available for runners to find."
+  document.addEventListener(
+    "DOMContentLoaded",
+    updateNotificationDot
   );
-
-
-  window.location.href =
-    "find-tasks.html";
-
-}
 
 </script>
 
