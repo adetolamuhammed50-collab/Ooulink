@@ -1196,8 +1196,47 @@
     "DOMContentLoaded",
     updateNotificationDot
   );
+  nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: white;
+  border-top: 1px solid #e5e8e6;
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 5px;
+  z-index: 1000;
+}
+
+nav a {
+  text-decoration: none;
+  color: #777;
+  font-size: 11px;
+  text-align: center;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+nav a.active {
+  color: #16834b;
+  font-weight: bold;
+  transform: translateY(-2px);
+}
+
+nav a br {
+  display: block;
+  }
 
 </script>
+  <nav>
+  <a href="index.html">🏠<br>Home</a>
+  <a href="my-tasks.html">📋<br>My Tasks</a>
+  <a href="post-task.html" class="active">➕<br>Post</a>
+  <a href="alerts.html">🔔<br>Alerts</a>
+  <a href="profile.html">👤<br>Profile</a>
+  </nav>
 
 </body>
 </html>
