@@ -370,9 +370,7 @@ const supabaseClient =
 let currentUser = null;
 let currentTask = null;
 let otherUserId = null;
-
 let realtimeChannel = null;
-
 let sending = false;
 
 const params =
@@ -403,6 +401,11 @@ const subtitle =
     "subtitle"
   );
 
+const realtimeStatus =
+  document.getElementById(
+    "realtimeStatus"
+  );
+
 const filesContainer =
   document.getElementById(
     "filesContainer"
@@ -421,6 +424,11 @@ const messageInput =
 const sendBtn =
   document.getElementById(
     "sendBtn"
+  );
+
+const blockedMessage =
+  document.getElementById(
+    "blockedMessage"
   );
 
 
@@ -466,16 +474,15 @@ function formatTime(dateString) {
 
 function formatFileSize(bytes) {
 
-  if (!bytes)
+  if (!bytes) {
     return "";
+  }
 
-  if (bytes < 1024)
+  if (bytes < 1024) {
     return bytes + " B";
+  }
 
-  if (
-    bytes <
-    1024 * 1024
-  ) {
+  if (bytes < 1024 * 1024) {
 
     return (
       (bytes / 1024)
@@ -486,8 +493,7 @@ function formatFileSize(bytes) {
   }
 
   return (
-    (bytes /
-      (1024 * 1024))
+    (bytes / (1024 * 1024))
       .toFixed(1) +
     " MB"
   );
@@ -501,6 +507,10 @@ function formatFileSize(bytes) {
 
 function scrollToBottom() {
 
+  if (!messagesBox) {
+    return;
+  }
+
   messagesBox.scrollTop =
     messagesBox.scrollHeight;
 
@@ -508,7 +518,7 @@ function scrollToBottom() {
 
 
 /* =========================
-   NORMALIZE MESSAGE
+   NORMALIZE
 ========================= */
 
 function normalizeForCheck(text) {
@@ -547,7 +557,7 @@ const blockedWords = [
 
 
 /* =========================
-   CONTACT INFORMATION FILTER
+   CONTACT FILTER
 ========================= */
 
 function containsContactInfo(text) {
@@ -555,13 +565,16 @@ function containsContactInfo(text) {
   const normalized =
     normalizeForCheck(text);
 
-  /*
-    Detect WhatsApp.
-  */
+
+  /* WhatsApp */
 
   if (
-    normalized.includes("whatsapp") ||
-    normalized.includes("wa.me")
+    normalized.includes(
+      "whatsapp"
+    ) ||
+    normalized.includes(
+      "wa.me"
+    )
   ) {
 
     return true;
@@ -571,7 +584,7 @@ function containsContactInfo(text) {
 
   /*
     Remove common separators
-    before checking phone numbers.
+    before checking numbers.
   */
 
   const digitsOnly =
@@ -581,9 +594,7 @@ function containsContactInfo(text) {
     );
 
 
-  /*
-    Nigerian phone numbers.
-  */
+  /* Nigerian phone numbers */
 
   const nigerianPhone =
     /(?:234|0)(?:70|80|81|90|91)\d{8}/;
@@ -600,9 +611,7 @@ function containsContactInfo(text) {
 
 
   /*
-    Long numeric sequences.
-    Helps block account numbers
-    and other contact details.
+    Long number sequences.
   */
 
   const longNumber =
@@ -620,7 +629,7 @@ function containsContactInfo(text) {
 
 
   /*
-    Explicit account-number wording.
+    Account-number wording.
   */
 
   const accountPattern =
@@ -641,7 +650,7 @@ function containsContactInfo(text) {
 
 
 /* =========================
-   MESSAGE VALIDATION
+   VALIDATE MESSAGE
 ========================= */
 
 function validateMessage(text) {
@@ -649,10 +658,6 @@ function validateMessage(text) {
   const normalized =
     normalizeForCheck(text);
 
-
-  /*
-    Empty message.
-  */
 
   if (!normalized.trim()) {
 
@@ -680,7 +685,9 @@ function validateMessage(text) {
       );
 
     if (
-      pattern.test(normalized)
+      pattern.test(
+        normalized
+      )
     ) {
 
       return {
@@ -695,9 +702,7 @@ function validateMessage(text) {
 
 
   /*
-    Phone numbers,
-    account numbers and
-    WhatsApp/contact sharing.
+    Contact information.
   */
 
   if (
@@ -725,37 +730,37 @@ function validateMessage(text) {
    SHOW BLOCKED MESSAGE
 ========================= */
 
+let blockedTimer = null;
+
 function showBlockedMessage(message) {
 
-  const warning =
-    document.getElementById(
-      "blockedMessage"
-    );
-
-  if (!warning) {
+  if (!blockedMessage) {
     return;
   }
 
-  warning.textContent =
+  blockedMessage.textContent =
     "⚠️ " + message;
 
-  warning.style.display =
+  blockedMessage.style.display =
     "block";
 
   clearTimeout(
-    warning._timer
+    blockedTimer
   );
 
-  warning._timer =
-    setTimeout(() => {
+  blockedTimer =
+    setTimeout(
+      () => {
 
-      warning.style.display =
-        "none";
+        blockedMessage.style.display =
+          "none";
 
-      warning.textContent =
-        "";
+        blockedMessage.textContent =
+          "";
 
-    }, 5000);
+      },
+      5000
+    );
 
 }
 
@@ -769,7 +774,7 @@ async function loadTask() {
   if (!taskId) {
 
     throw new Error(
-      "No task was specified."
+      "No chat task was specified."
     );
 
   }
@@ -817,9 +822,8 @@ async function loadTask() {
 
 
   /*
-    Chat is available only
-    after somebody accepts
-    the task.
+    Chat only becomes available
+    after acceptance.
   */
 
   if (
@@ -834,14 +838,12 @@ async function loadTask() {
 
 
   /*
-    Only the task owner or
-    accepted runner can chat.
+    Only participants can chat.
   */
 
   if (
     currentUser.id !==
       currentTask.user_id &&
-
     currentUser.id !==
       currentTask.runner_id
   ) {
@@ -852,11 +854,6 @@ async function loadTask() {
 
   }
 
-
-  /*
-    Determine the other
-    participant.
-  */
 
   if (
     currentUser.id ===
@@ -884,16 +881,23 @@ async function loadTask() {
     currentTask.title;
 
 }
+
+
 /* =========================
    LOAD TASK FILES
 ========================= */
 
 async function loadTaskFiles() {
 
-  if (!filesContainer) return;
+  if (!filesContainer) {
+    return;
+  }
 
   filesContainer.innerHTML =
-    `<div class="loading">Loading files...</div>`;
+    `<div class="loading">
+      Loading files...
+    </div>`;
+
 
   const {
     data: files,
@@ -920,6 +924,7 @@ async function loadTaskFiles() {
         }
       );
 
+
   if (error) {
 
     console.error(
@@ -928,7 +933,7 @@ async function loadTaskFiles() {
     );
 
     filesContainer.innerHTML =
-      `<div class="empty">
+      `<div class="file-error">
         Unable to load files.
       </div>`;
 
@@ -936,13 +941,14 @@ async function loadTaskFiles() {
 
   }
 
+
   if (
     !files ||
     files.length === 0
   ) {
 
     filesContainer.innerHTML =
-      `<div class="empty">
+      `<div class="no-files">
         No files attached.
       </div>`;
 
@@ -950,7 +956,10 @@ async function loadTaskFiles() {
 
   }
 
-  filesContainer.innerHTML = "";
+
+  filesContainer.innerHTML =
+    "";
+
 
   for (
     const file of files
@@ -968,6 +977,7 @@ async function loadTaskFiles() {
           600
         );
 
+
     if (
       signedError ||
       !signed?.signedUrl
@@ -977,6 +987,7 @@ async function loadTaskFiles() {
 
     }
 
+
     const card =
       document.createElement(
         "div"
@@ -984,6 +995,7 @@ async function loadTaskFiles() {
 
     card.className =
       "file-card";
+
 
     card.innerHTML = `
 
@@ -993,63 +1005,23 @@ async function loadTaskFiles() {
         )}
       </div>
 
-      <div class="file-meta">
+      <div class="file-size">
         ${formatFileSize(
           file.file_size
         )}
       </div>
 
-      <button
-        type="button"
-        class="view-pdf-btn"
+      <a
+        class="pdf-button"
+        href="${signed.signedUrl}"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         VIEW PDF
-      </button>
-
-      <div
-        class="pdf-viewer"
-        style="display:none;"
-      >
-        <iframe
-          src="${signed.signedUrl}"
-          title="${escapeHTML(
-            file.file_name
-          )}"
-        ></iframe>
-      </div>
+      </a>
 
     `;
 
-    const button =
-      card.querySelector(
-        ".view-pdf-btn"
-      );
-
-    const viewer =
-      card.querySelector(
-        ".pdf-viewer"
-      );
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        const opening =
-          viewer.style.display ===
-          "none";
-
-        viewer.style.display =
-          opening
-            ? "block"
-            : "none";
-
-        button.textContent =
-          opening
-            ? "HIDE PDF"
-            : "VIEW PDF";
-
-      }
-    );
 
     filesContainer.appendChild(
       card
@@ -1071,34 +1043,62 @@ function renderMessage(message) {
     !message ||
     !currentUser
   ) {
+
     return;
+
   }
 
-  // Prevent duplicate messages
+
+  /*
+    Prevent duplicates.
+  */
+
   if (
     document.querySelector(
       `[data-message-id="${message.id}"]`
     )
   ) {
+
     return;
+
   }
+
 
   const mine =
     message.sender_id ===
     currentUser.id;
 
+
   const row =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
+
+  /*
+    IMPORTANT:
+    Your CSS uses "mine"
+    and "theirs".
+  */
 
   row.className =
     mine
       ? "message-row mine"
       : "message-row theirs";
 
+
   row.dataset.messageId =
     message.id;
 
+
+  /*
+    IMPORTANT:
+    Your CSS uses .bubble
+    and .time.
+  */
+
   row.innerHTML = `
+
     <div class="bubble">
 
       ${escapeHTML(
@@ -1112,9 +1112,14 @@ function renderMessage(message) {
       </div>
 
     </div>
+
   `;
 
-  messagesBox.appendChild(row);
+
+  messagesBox.appendChild(
+    row
+  );
+
 }
 
 
@@ -1126,12 +1131,14 @@ async function loadMessages() {
 
   if (
     !currentTask ||
-    !currentUser
+    !currentUser ||
+    !messagesBox
   ) {
 
     return;
 
   }
+
 
   const {
     data,
@@ -1141,6 +1148,7 @@ async function loadMessages() {
       .from("messages")
       .select(`
         id,
+        task_id,
         sender_id,
         receiver_id,
         message,
@@ -1158,6 +1166,7 @@ async function loadMessages() {
         }
       );
 
+
   if (error) {
 
     console.error(
@@ -1165,20 +1174,19 @@ async function loadMessages() {
       error
     );
 
-    if (messagesBox) {
-
-      messagesBox.innerHTML =
-        `<div class="message-error">
-          Unable to load messages.
-        </div>`;
-
-    }
+    messagesBox.innerHTML =
+      `<div class="error">
+        Unable to load messages.
+      </div>`;
 
     return;
 
   }
 
-  messagesBox.innerHTML = "";
+
+  messagesBox.innerHTML =
+    "";
+
 
   for (
     const message of
@@ -1191,12 +1199,13 @@ async function loadMessages() {
 
   }
 
+
   scrollToBottom();
 
 
   /*
-    Mark messages received
-    by the current user as read.
+    Mark received messages
+    as read.
   */
 
   const unread =
@@ -1212,19 +1221,34 @@ async function loadMessages() {
           message.id
       );
 
+
   if (
-    unread.length
+    unread.length > 0
   ) {
 
-    await supabaseClient
-      .from("messages")
-      .update({
-        is_read: true
-      })
-      .in(
-        "id",
-        unread
+    const {
+      error:
+        readError
+    } =
+      await supabaseClient
+        .from("messages")
+        .update({
+          is_read: true
+        })
+        .in(
+          "id",
+          unread
+        );
+
+
+    if (readError) {
+
+      console.warn(
+        "Could not mark messages read:",
+        readError
       );
+
+    }
 
   }
 
@@ -1238,12 +1262,14 @@ async function loadMessages() {
 function startRealtime() {
 
   if (
-    !currentTask
+    !currentTask ||
+    !currentUser
   ) {
 
     return;
 
   }
+
 
   if (
     realtimeChannel
@@ -1252,6 +1278,7 @@ function startRealtime() {
     return;
 
   }
+
 
   realtimeChannel =
     supabaseClient
@@ -1273,10 +1300,6 @@ function startRealtime() {
           const message =
             payload.new;
 
-          /*
-            Only display messages
-            belonging to this task.
-          */
 
           if (
             !message ||
@@ -1288,6 +1311,7 @@ function startRealtime() {
 
           }
 
+
           renderMessage(
             message
           );
@@ -1296,8 +1320,8 @@ function startRealtime() {
 
 
           /*
-            If this was sent to us,
-            immediately mark it read.
+            If the message was
+            sent to us, mark it read.
           */
 
           if (
@@ -1328,6 +1352,49 @@ function startRealtime() {
             status
           );
 
+
+          if (
+            !realtimeStatus
+          ) {
+            return;
+          }
+
+
+          if (
+            status ===
+            "SUBSCRIBED"
+          ) {
+
+            realtimeStatus.textContent =
+              "🟢 Live chat connected";
+
+            realtimeStatus.className =
+              "realtime-status connected";
+
+          } else if (
+            status ===
+            "CHANNEL_ERROR"
+          ) {
+
+            realtimeStatus.textContent =
+              "⚠️ Live chat connection error";
+
+            realtimeStatus.className =
+              "realtime-status warning";
+
+          } else if (
+            status ===
+            "TIMED_OUT"
+          ) {
+
+            realtimeStatus.textContent =
+              "⚠️ Live chat connection timed out";
+
+            realtimeStatus.className =
+              "realtime-status warning";
+
+          }
+
         }
       );
 
@@ -1343,15 +1410,18 @@ async function sendMessage() {
   if (
     sending ||
     !currentTask ||
-    !otherUserId
+    !otherUserId ||
+    !currentUser
   ) {
 
     return;
 
   }
 
+
   const text =
     messageInput.value.trim();
+
 
   if (!text) {
 
@@ -1360,16 +1430,11 @@ async function sendMessage() {
   }
 
 
-  /*
-    Apply chat restrictions
-    before anything reaches
-    Supabase.
-  */
-
   const validation =
     validateMessage(
       text
     );
+
 
   if (
     !validation.allowed
@@ -1396,46 +1461,117 @@ async function sendMessage() {
     "Sending...";
 
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("messages")
-      .insert({
-        task_id:
-          currentTask.id,
+  try {
 
-        sender_id:
-          currentUser.id,
-
-        receiver_id:
-          otherUserId,
-
-        message:
-          text
-      })
-      .select(`
-        id,
-        sender_id,
-        receiver_id,
-        message,
-        is_read,
-        created_at
-      `)
-      .single();
-
-
-  if (error) {
-
-    console.error(
-      "Send message error:",
+    const {
+      data,
       error
-    );
+    } =
+      await supabaseClient
+        .from("messages")
+        .insert({
+          task_id:
+            currentTask.id,
 
-    showBlockedMessage(
-      "Message could not be sent. Please try again."
-    );
+          sender_id:
+            currentUser.id,
+
+          receiver_id:
+            otherUserId,
+
+          message:
+            text
+        })
+        .select(`
+          id,
+          task_id,
+          sender_id,
+          receiver_id,
+          message,
+          is_read,
+          created_at
+        `)
+        .single();
+
+
+    if (error) {
+
+      console.error(
+        "Send message error:",
+        error
+      );
+
+      showBlockedMessage(
+        "Message could not be sent. Please try again."
+      );
+
+      return;
+
+    }
+
+
+    /*
+      Show immediately.
+      Realtime won't duplicate it
+      because of the ID check.
+    */
+
+    if (data) {
+
+      renderMessage(
+        data
+      );
+
+      scrollToBottom();
+
+    }
+
+
+    messageInput.value =
+      "";
+
+
+    /*
+      Create notification
+      for the other participant.
+    */
+
+    const {
+      error:
+        notificationError
+    } =
+      await supabaseClient
+        .from("notifications")
+        .insert({
+          user_id:
+            otherUserId,
+
+          task_id:
+            currentTask.id,
+
+          type:
+            "new_message",
+
+          title:
+            "New message",
+
+          message:
+            `You received a new message about "${currentTask.title}".`
+        });
+
+
+    if (
+      notificationError
+    ) {
+
+      console.warn(
+        "Notification error:",
+        notificationError
+      );
+
+    }
+
+  } finally {
 
     sendBtn.disabled =
       false;
@@ -1445,93 +1581,26 @@ async function sendMessage() {
 
     sending = false;
 
-    return;
-
   }
-
-
-  /*
-    Show our message immediately.
-    Realtime will not create a
-    duplicate because renderMessage()
-    checks the message ID.
-  */
-
-  if (data) {
-
-    renderMessage(
-      data
-    );
-
-    scrollToBottom();
-
-  }
-
-
-  messageInput.value =
-    "";
-
-
-  /*
-    Notify the other participant.
-  */
-
-  const {
-    error:
-      notificationError
-  } =
-    await supabaseClient
-      .from("notifications")
-      .insert({
-        user_id:
-          otherUserId,
-
-        task_id:
-          currentTask.id,
-
-        type:
-          "new_message",
-
-        title:
-          "New message",
-
-        message:
-          `You received a new message about "${currentTask.title}".`
-      });
-
-
-  if (
-    notificationError
-  ) {
-
-    console.warn(
-      "Notification error:",
-      notificationError
-    );
-
-  }
-
-
-  sendBtn.disabled =
-    false;
-
-  sendBtn.textContent =
-    originalText;
-
-  sending = false;
 
 }
 
 
 /* =========================
-   SEND BUTTON
+   FORM SUBMIT
 ========================= */
 
-if (sendBtn) {
+if (composer) {
 
-  sendBtn.addEventListener(
-    "click",
-    sendMessage
+  composer.addEventListener(
+    "submit",
+    event => {
+
+      event.preventDefault();
+
+      sendMessage();
+
+    }
   );
 
 }
@@ -1547,15 +1616,8 @@ if (messageInput) {
     "keydown",
     event => {
 
-      /*
-        Enter sends.
-        Shift + Enter creates
-        a new line.
-      */
-
       if (
-        event.key ===
-          "Enter" &&
+        event.key === "Enter" &&
         !event.shiftKey
       ) {
 
@@ -1572,30 +1634,23 @@ if (messageInput) {
 
 
 /* =========================
-   START
+   START CHAT
 ========================= */
 
 async function startChat() {
 
   try {
 
-    /*
-      Show loading state.
-    */
+    if (
+      !taskId
+    ) {
 
-    if (messagesBox) {
-
-      messagesBox.innerHTML =
-        `<div class="loading">
-          Loading chat...
-        </div>`;
+      throw new Error(
+        "No chat task was specified."
+      );
 
     }
 
-
-    /*
-      Check login.
-    */
 
     const {
       data: {
@@ -1622,42 +1677,14 @@ async function startChat() {
       session.user;
 
 
-    /*
-      Make sure we have a task ID.
-    */
-
-    if (!taskId) {
-
-      throw new Error(
-        "No chat task was specified."
-      );
-
-    }
-
-
-    /*
-      Load task first.
-    */
-
     await loadTask();
 
-
-    /*
-      Load files and messages
-      independently so one failed
-      request doesn't leave the
-      whole page stuck.
-    */
 
     await Promise.all([
       loadTaskFiles(),
       loadMessages()
     ]);
 
-
-    /*
-      Start instant live messages.
-    */
 
     startRealtime();
 
@@ -1669,11 +1696,12 @@ async function startChat() {
       error
     );
 
+
     if (messagesBox) {
 
       messagesBox.innerHTML = `
 
-        <div class="message-error">
+        <div class="error">
 
           ❌ ${escapeHTML(
             error.message ||
@@ -1686,12 +1714,14 @@ async function startChat() {
 
     }
 
+
     if (messageInput) {
 
       messageInput.disabled =
         true;
 
     }
+
 
     if (sendBtn) {
 
