@@ -1003,10 +1003,12 @@ async function toggleGroup(id) {
 
 /* Start */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  loadAlerts
-);
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("alertsContainer").innerHTML =
+    '<div style="padding:20px;text-align:center;color:green;font-weight:bold;">✅ JavaScript is running</div>';
+
+  loadAlerts();
+});
 
 </script>
 
