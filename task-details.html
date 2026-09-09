@@ -825,6 +825,20 @@ async function loadTask() {
       ${buttonText}
     </button>
 
+    ${
+      isRunner && task.status === "accepted"
+      ? `
+        <button
+          id="startButton"
+          class="accept"
+          onclick="startTask()"
+          style="margin-top:10px;background:#16834b;"
+        >
+          ▶ START TASK
+        </button>
+      `
+      : ""
+    }
 
     ${
       canChat
