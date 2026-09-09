@@ -104,21 +104,37 @@
       margin: 22px 0;
     }
 
-    .accept {
+    .accept,
+    .chat-btn {
       width: 100%;
       border: none;
-      background: #111827;
       color: white;
       padding: 15px;
       border-radius: 12px;
       font-size: 16px;
       font-weight: 800;
       cursor: pointer;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+    }
+
+    .accept {
+      background: #111827;
     }
 
     .accept:disabled {
       background: #9ca3af;
       cursor: not-allowed;
+    }
+
+    .chat-btn {
+      background: #2563eb;
+      margin-top: 10px;
+    }
+
+    .chat-btn:hover {
+      background: #1d4ed8;
     }
 
     .report {
@@ -168,6 +184,24 @@
       margin-bottom: 3px;
     }
 
+    /* Notification dot */
+    .bell-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: -1px;
+      right: -4px;
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid white;
+      display: none;
+    }
+
     @media (min-width: 700px) {
       .bottom-nav {
         max-width: 650px;
@@ -210,7 +244,10 @@
     </a>
 
     <a href="alerts.html">
-      <span>🔔</span>
+      <span class="bell-wrap">
+        🔔
+        <span id="notificationDot" class="notification-dot"></span>
+      </span>
       Alerts
     </a>
 
@@ -239,6 +276,9 @@
 
     const content =
       document.getElementById("content");
+
+    const notificationDot =
+      document.getElementById("notificationDot");
 
     let currentTask = null;
     let currentUser = null;
@@ -270,6 +310,38 @@
         dateStyle: "medium",
         timeStyle: "short"
       });
+
+    }
+
+
+    async function updateNotificationDot() {
+
+      if (!currentUser) {
+        return;
+      }
+
+      const { count, error } =
+        await supabaseClient
+          .from("notifications")
+          .select("id", {
+            count: "exact",
+            head: true
+          })
+          .eq("user_id", currentUser.id)
+          .eq("is_read", false);
+
+      if (error) {
+
+        console.error(
+          "NOTIFICATION DOT ERROR:",
+          error
+        );
+
+        return;
+      }
+
+      notificationDot.style.display =
+        count > 0 ? "block" : "none";
 
     }
 
@@ -310,6 +382,9 @@
         sessionData.session.user;
 
 
+      await updateNotificationDot();
+
+
       const { data: task, error } =
         await supabaseClient
           .from("tasks")
@@ -345,6 +420,10 @@
 
       const isOwner =
         task.user_id === currentUser.id;
+
+
+      const isRunner =
+        task.runner_id === currentUser.id;
 
 
       const isTaken =
@@ -389,6 +468,19 @@
         disabled =
           true;
       }
+
+
+      /*
+       * Chat is available only to:
+       * 1. The task owner
+       * 2. The assigned runner
+       *
+       * And only after the task has been accepted.
+       */
+
+      const canChat =
+        task.runner_id &&
+        (isOwner || isRunner);
 
 
       content.innerHTML = `
@@ -468,6 +560,24 @@
         </button>
 
 
+        ${
+          canChat
+          ? `
+            <a
+              href="chat.html?id=${encodeURIComponent(task.id)}"
+              class="chat-btn"
+            >
+              💬 ${
+                isOwner
+                ? "CHAT WITH RUNNER"
+                : "CHAT WITH POSTER"
+              }
+            </a>
+          `
+          : ""
+        }
+
+
         <a
           href="#"
           class="report"
@@ -529,13 +639,6 @@
 
       /*
        * Claim the task.
-       *
-       * IMPORTANT:
-       * The database allows:
-       * open, accepted, completed, cancelled
-       *
-       * Therefore acceptance uses:
-       * status = "accepted"
        */
 
       const { data: updatedTask, error: updateError } =
@@ -592,10 +695,6 @@
         return;
       }
 
-
-      /*
-       * Update our local copy.
-       */
 
       currentTask =
         updatedTask;
