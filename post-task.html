@@ -1087,6 +1087,22 @@
 
       }
 
+/* =========================
+         AWARD XP
+         ========================= */
+      const { error: xpError } =
+        await supabaseClient.rpc(
+          "add_xp",
+          {
+            target_user_id: session.user.id,
+            amount: 10
+          }
+        );
+
+      if (xpError) {
+        console.error("XP error:", xpError);
+      }
+
 
       /* =========================
          CREATE NOTIFICATION
