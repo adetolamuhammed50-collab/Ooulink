@@ -3,471 +3,354 @@
 
 <head>
 
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>Chat • OOULink</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-
-  <style>
-
-    * {
-      box-sizing: border-box;
-    }
-
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f7fb;
-      color: #111827;
-      padding-bottom: 75px;
-    }
-
-
-    /* =========================
-       HEADER
-    ========================= */
-
-    .header {
-      background: white;
-      padding: 15px;
-      border-bottom: 1px solid #e5e7eb;
-
-      position: sticky;
-      top: 0;
-
-      z-index: 10;
-    }
-
-
-    .back {
-      color: #2563eb;
-      text-decoration: none;
-      font-size: 14px;
-      display: inline-block;
-      margin-bottom: 10px;
-    }
-
-
-    .task-title {
-      font-size: 19px;
-      font-weight: bold;
-      margin: 0;
-    }
-
-
-    .subtitle {
-      font-size: 13px;
-      color: #6b7280;
-      margin-top: 5px;
-    }
-
-
-    /* =========================
-       PDF FILES
-    ========================= */
-
-    .files-section {
-      background: white;
-
-      margin: 12px;
-
-      border-radius: 14px;
-
-      padding: 14px;
-
-      box-shadow:
-        0 2px 8px rgba(0,0,0,0.05);
-    }
-
-
-    .files-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-
-    .file-card {
-      border: 1px solid #e5e7eb;
-
-      border-radius: 10px;
-
-      padding: 11px;
-
-      margin-bottom: 9px;
-
-      background: #fafafa;
-    }
-
-
-    .file-card:last-child {
-      margin-bottom: 0;
-    }
-
-
-    .file-name {
-      font-size: 14px;
-      font-weight: bold;
-      word-break: break-word;
-    }
-
-
-    .file-size {
-      font-size: 11px;
-      color: #6b7280;
-      margin-top: 3px;
-    }
-
-
-    .pdf-button {
-      display: block;
-
-      margin-top: 9px;
-
-      padding: 10px;
-
-      border-radius: 8px;
-
-      background: #2563eb;
-
-      color: white;
-
-      text-align: center;
-
-      text-decoration: none;
-
-      font-size: 13px;
-
-      font-weight: bold;
-    }
-
-
-    .pdf-button:active {
-      transform: scale(0.98);
-    }
-
-
-    .no-files {
-      color: #6b7280;
-
-      font-size: 13px;
-
-      text-align: center;
-
-      padding: 8px;
-    }
-
-
-    .file-error {
-      color: #dc2626;
-
-      font-size: 13px;
-
-      text-align: center;
-
-      padding: 8px;
-    }
-
-
-    /* =========================
-       MESSAGES
-    ========================= */
-
-    .messages {
-      padding: 15px;
-
-      min-height: 300px;
-
-      display: flex;
-
-      flex-direction: column;
-
-      gap: 10px;
-    }
-
-
-    .loading,
-    .empty,
-    .error {
-      text-align: center;
-
-      color: #6b7280;
-
-      padding: 40px 15px;
-    }
-
-
-    .error {
-      color: #dc2626;
-    }
-
-
-    .message-row {
-      display: flex;
-    }
-
-
-    .message-row.mine {
-      justify-content: flex-end;
-    }
-
-
-    .message-row.theirs {
-      justify-content: flex-start;
-    }
-
-
-    .bubble {
-      max-width: 78%;
-
-      padding: 10px 13px;
-
-      border-radius: 16px;
-
-      font-size: 14px;
-
-      line-height: 1.4;
-
-      word-wrap: break-word;
-    }
-
-
-    .mine .bubble {
-      background: #2563eb;
-
-      color: white;
-
-      border-bottom-right-radius: 4px;
-    }
-
-
-    .theirs .bubble {
-      background: white;
-
-      color: #111827;
-
-      border: 1px solid #e5e7eb;
-
-      border-bottom-left-radius: 4px;
-    }
-
-
-    .time {
-      font-size: 10px;
-
-      margin-top: 4px;
-
-      opacity: 0.7;
-
-      text-align: right;
-    }
-
-
-    /* =========================
-       COMPOSER
-    ========================= */
-
-    .composer {
-      position: fixed;
-
-      bottom: 0;
-
-      left: 0;
-
-      right: 0;
-
-      background: white;
-
-      border-top: 1px solid #e5e7eb;
-
-      padding: 10px;
-
-      display: flex;
-
-      gap: 8px;
-
-      z-index: 20;
-    }
-
-
-    .composer input {
-      flex: 1;
-
-      border: 1px solid #d1d5db;
-
-      border-radius: 22px;
-
-      padding: 11px 14px;
-
-      font-size: 14px;
-
-      outline: none;
-    }
-
-
-    .composer input:focus {
-      border-color: #2563eb;
-    }
-
-
-    .send-btn {
-      border: none;
-
-      background: #2563eb;
-
-      color: white;
-
-      padding: 0 18px;
-
-      border-radius: 22px;
-
-      font-weight: bold;
-
-      cursor: pointer;
-    }
-
-
-    .send-btn:disabled {
-      opacity: 0.5;
-
-      cursor: not-allowed;
-    }
-
-  </style>
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>Chat • OOULink</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+  color: #111827;
+  padding-bottom: 75px;
+}
+
+.header {
+  background: white;
+  padding: 15px;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.back {
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 14px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.task-title {
+  font-size: 19px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 5px;
+}
+
+.realtime-status {
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.realtime-status.connected {
+  color: #16a34a;
+}
+
+.realtime-status.warning {
+  color: #d97706;
+}
+
+.files-section {
+  background: white;
+  margin: 12px;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.files-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.file-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 11px;
+  margin-bottom: 9px;
+  background: #fafafa;
+}
+
+.file-card:last-child {
+  margin-bottom: 0;
+}
+
+.file-name {
+  font-size: 14px;
+  font-weight: bold;
+  word-break: break-word;
+}
+
+.file-size {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 3px;
+}
+
+.pdf-button {
+  display: block;
+  margin-top: 9px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.pdf-button:active {
+  transform: scale(0.98);
+}
+
+.no-files {
+  color: #6b7280;
+  font-size: 13px;
+  text-align: center;
+  padding: 8px;
+}
+
+.file-error {
+  color: #dc2626;
+  font-size: 13px;
+  text-align: center;
+  padding: 8px;
+}
+
+.messages {
+  padding: 15px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.loading,
+.empty,
+.error {
+  text-align: center;
+  color: #6b7280;
+  padding: 40px 15px;
+}
+
+.error {
+  color: #dc2626;
+}
+
+.message-row {
+  display: flex;
+}
+
+.message-row.mine {
+  justify-content: flex-end;
+}
+
+.message-row.theirs {
+  justify-content: flex-start;
+}
+
+.bubble {
+  max-width: 78%;
+  padding: 10px 13px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.mine .bubble {
+  background: #2563eb;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.theirs .bubble {
+  background: white;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-bottom-left-radius: 4px;
+}
+
+.time {
+  font-size: 10px;
+  margin-top: 4px;
+  opacity: 0.7;
+  text-align: right;
+}
+
+.blocked-message {
+  display: none;
+  margin: 0 10px 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.composer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  padding: 10px;
+  display: flex;
+  gap: 8px;
+  z-index: 20;
+}
+
+.composer input {
+  flex: 1;
+  border: 1px solid #d1d5db;
+  border-radius: 22px;
+  padding: 11px 14px;
+  font-size: 14px;
+  outline: none;
+}
+
+.composer input:focus {
+  border-color: #2563eb;
+}
+
+.send-btn {
+  border: none;
+  background: #2563eb;
+  color: white;
+  padding: 0 18px;
+  border-radius: 22px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+</style>
 
 </head>
 
-
 <body>
 
+<div class="header">
 
-  <!-- =========================
-       HEADER
-  ========================= -->
+<a
+  href="javascript:history.back()"
+  class="back"
+>
+  ← Back
+</a>
 
-  <div class="header">
+<h1
+  id="taskTitle"
+  class="task-title"
+>
+  Loading...
+</h1>
 
-    <a
-      href="javascript:history.back()"
-      class="back"
-    >
-      ← Back
-    </a>
+<div
+  id="subtitle"
+  class="subtitle"
+></div>
 
+<div
+  id="realtimeStatus"
+  class="realtime-status"
+>
+  Connecting to live chat...
+</div>
 
-    <h1
-      id="taskTitle"
-      class="task-title"
-    >
-      Loading...
-    </h1>
+</div>
 
+<section class="files-section">
 
-    <div
-      id="subtitle"
-      class="subtitle"
-    ></div>
+<div class="files-title">
+  📎 Task Files
+</div>
 
-  </div>
+<div id="filesContainer">
 
+<div class="no-files">
+  Loading files...
+</div>
 
+</div>
 
-  <!-- =========================
-       PDF FILES
-  ========================= -->
+</section>
 
-  <section
-    class="files-section"
-  >
+<div
+  id="messages"
+  class="messages"
+>
 
-    <div class="files-title">
-      📎 Task Files
-    </div>
+<div class="loading">
+  Loading chat...
+</div>
 
+</div>
 
-    <div
-      id="filesContainer"
-    >
+<div
+  id="blockedMessage"
+  class="blocked-message"
+></div>
 
-      <div class="no-files">
-        Loading files...
-      </div>
+<form
+  id="composer"
+  class="composer"
+>
 
-    </div>
+<input
+  id="messageInput"
+  type="text"
+  placeholder="Type a message..."
+  autocomplete="off"
+  maxlength="1000"
+>
 
-  </section>
+<button
+  id="sendBtn"
+  class="send-btn"
+  type="submit"
+>
+  Send
+</button>
 
-
-
-  <!-- =========================
-       CHAT MESSAGES
-  ========================= -->
-
-  <div
-    id="messages"
-    class="messages"
-  >
-
-    <div class="loading">
-      Loading chat...
-    </div>
-
-  </div>
-
-
-
-  <!-- =========================
-       MESSAGE COMPOSER
-  ========================= -->
-
-  <form
-    id="composer"
-    class="composer"
-  >
-
-    <input
-      id="messageInput"
-      type="text"
-      placeholder="Type a message..."
-      autocomplete="off"
-      maxlength="1000"
-    >
-
-
-    <button
-      id="sendBtn"
-      class="send-btn"
-      type="submit"
-    >
-      Send
-    </button>
-
-  </form>
-
-
+</form>
 
 <script>
-
-
-/* =========================
-   SUPABASE
-========================= */
 
 const SUPABASE_URL =
   "https://dthvdxgxesomltlruogp.supabase.co";
 
-
 const SUPABASE_KEY =
   "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
-
 
 const supabaseClient =
   window.supabase.createClient(
@@ -475,122 +358,63 @@ const supabaseClient =
     SUPABASE_KEY
   );
 
-
-
-/* =========================
-   STATE
-========================= */
-
 let currentUser = null;
-
 let currentTask = null;
-
 let otherUserId = null;
 
-
+let realtimeChannel = null;
+let realtimeFallbackTimer = null;
 
 const params =
   new URLSearchParams(
     window.location.search
   );
 
-
 const taskId =
   params.get("id");
 
-
-
-/* =========================
-   ELEMENTS
-========================= */
-
 const messagesBox =
-  document.getElementById(
-    "messages"
-  );
-
+  document.getElementById("messages");
 
 const taskTitle =
-  document.getElementById(
-    "taskTitle"
-  );
-
+  document.getElementById("taskTitle");
 
 const subtitle =
-  document.getElementById(
-    "subtitle"
-  );
-
+  document.getElementById("subtitle");
 
 const filesContainer =
-  document.getElementById(
-    "filesContainer"
-  );
-
+  document.getElementById("filesContainer");
 
 const composer =
-  document.getElementById(
-    "composer"
-  );
-
+  document.getElementById("composer");
 
 const messageInput =
-  document.getElementById(
-    "messageInput"
-  );
-
+  document.getElementById("messageInput");
 
 const sendBtn =
-  document.getElementById(
-    "sendBtn"
-  );
+  document.getElementById("sendBtn");
 
+const blockedMessage =
+  document.getElementById("blockedMessage");
 
-
-/* =========================
-   ESCAPE HTML
-========================= */
+const realtimeStatus =
+  document.getElementById("realtimeStatus");
 
 function escapeHTML(value) {
 
   return String(value ?? "")
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
 }
 
-
-
-/* =========================
-   FORMAT TIME
-========================= */
-
-function formatTime(
-  dateString
-) {
+function formatTime(dateString) {
 
   const date =
-    new Date(
-      dateString
-    );
-
+    new Date(dateString);
 
   return date.toLocaleTimeString(
     [],
@@ -599,64 +423,275 @@ function formatTime(
       minute: "2-digit"
     }
   );
+
 }
 
-
-
-/* =========================
-   FILE SIZE
-========================= */
-
-function formatFileSize(
-  bytes
-) {
+function formatFileSize(bytes) {
 
   if (!bytes)
     return "";
 
-
   if (bytes < 1024)
     return bytes + " B";
 
-
-  if (
-    bytes <
-    1024 * 1024
-  ) {
+  if (bytes < 1024 * 1024) {
 
     return (
       (bytes / 1024)
         .toFixed(1) +
       " KB"
     );
+
   }
 
-
   return (
-    (bytes /
-      (1024 * 1024))
+    (bytes / (1024 * 1024))
       .toFixed(1) +
     " MB"
   );
+
 }
-
-
-
-/* =========================
-   SCROLL
-========================= */
 
 function scrollToBottom() {
 
   messagesBox.scrollTop =
     messagesBox.scrollHeight;
+
 }
 
+function normalizeForCheck(text) {
 
+  return String(text || "")
+    .toLowerCase()
+    .normalize("NFKC")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "");
 
-/* =========================
-   LOAD TASK
-========================= */
+}
+
+function containsContactInformation(text) {
+
+  const normalized =
+    normalizeForCheck(text);
+
+  const cleaned =
+    normalized.replace(
+      /[\s().-]/g,
+      ""
+    );
+
+  const digitsOnly =
+    normalized.replace(/\D/g, "");
+
+  const nigerianPhone =
+    /(?:\+?234|0)(?:70|80|81|90|91)\d{8}/;
+
+  const longNumber =
+    /\d{10,}/;
+
+  const accountPattern =
+    /\b(?:account|acct|account\s*no|account\s*number)\b[\s:#-]*\d{8,}/i;
+
+  const lettersOnly =
+    normalized.replace(
+      /[^a-z]/g,
+      ""
+    );
+
+  const whatsapp =
+    lettersOnly.includes(
+      "whatsapp"
+    );
+
+  const whatsappLink =
+    /wa\s*\.?\s*me/i.test(
+      normalized
+    );
+
+  if (
+    nigerianPhone.test(
+      cleaned
+    )
+  ) {
+
+    return {
+      blocked: true,
+      reason:
+        "Phone numbers cannot be shared in OOULink chat."
+    };
+
+  }
+
+  if (
+    accountPattern.test(
+      normalized
+    ) &&
+    longNumber.test(
+      digitsOnly
+    )
+  ) {
+
+    return {
+      blocked: true,
+      reason:
+        "Bank or account numbers cannot be shared in OOULink chat."
+    };
+
+  }
+
+  if (
+    whatsapp ||
+    whatsappLink
+  ) {
+
+    return {
+      blocked: true,
+      reason:
+        "WhatsApp or outside contact details cannot be shared in OOULink chat."
+    };
+
+  }
+
+  if (
+    longNumber.test(
+      digitsOnly
+    ) &&
+    digitsOnly.length >= 10
+  ) {
+
+    return {
+      blocked: true,
+      reason:
+        "Phone numbers or account numbers cannot be shared in OOULink chat."
+    };
+
+  }
+
+  return {
+    blocked: false,
+    reason: ""
+  };
+
+}
+
+const blockedWords = [
+
+  "fuck",
+  "fucking",
+  "fucked",
+  "shit",
+  "bullshit",
+  "bitch",
+  "bastard",
+  "asshole",
+  "dickhead",
+  "motherfucker",
+  "slut",
+  "whore"
+
+];
+
+function containsBadLanguage(text) {
+
+  const normalized =
+    normalizeForCheck(text)
+      .replace(
+        /[^a-z0-9\s]/g,
+        " "
+      );
+
+  const words =
+    normalized
+      .split(/\s+/)
+      .filter(Boolean);
+
+  for (
+    const blocked of blockedWords
+  ) {
+
+    if (
+      words.includes(
+        blocked
+      )
+    ) {
+
+      return {
+        blocked: true,
+        reason:
+          "Please keep OOULink chats respectful. Abusive language is not allowed."
+      };
+
+    }
+
+  }
+
+  return {
+    blocked: false,
+    reason: ""
+  };
+
+}
+
+function validateMessage(text) {
+
+  const contactCheck =
+    containsContactInformation(
+      text
+    );
+
+  if (
+    contactCheck.blocked
+  ) {
+
+    return contactCheck;
+
+  }
+
+  const languageCheck =
+    containsBadLanguage(
+      text
+    );
+
+  if (
+    languageCheck.blocked
+  ) {
+
+    return languageCheck;
+
+  }
+
+  return {
+    blocked: false,
+    reason: ""
+  };
+
+}
+
+function showBlockedMessage(
+  reason
+) {
+
+  blockedMessage.textContent =
+    "⚠️ " + reason;
+
+  blockedMessage.style.display =
+    "block";
+
+  clearTimeout(
+    window.blockWarningTimer
+  );
+
+  window.blockWarningTimer =
+    setTimeout(
+      () => {
+
+        blockedMessage.style.display =
+          "none";
+
+      },
+      4500
+    );
+
+}
 
 async function loadTask() {
 
@@ -679,7 +714,6 @@ async function loadTask() {
       )
       .single();
 
-
   if (
     error ||
     !data
@@ -688,17 +722,11 @@ async function loadTask() {
     throw new Error(
       "Task could not be found."
     );
-  }
 
+  }
 
   currentTask =
     data;
-
-
-  /*
-    Chat only becomes available
-    after the task is accepted.
-  */
 
   if (
     !currentTask.runner_id
@@ -707,13 +735,8 @@ async function loadTask() {
     throw new Error(
       "This task has not been accepted yet."
     );
+
   }
-
-
-  /*
-    Only the tasker or runner
-    can enter the chat.
-  */
 
   if (
     currentUser.id !==
@@ -726,12 +749,8 @@ async function loadTask() {
     throw new Error(
       "You are not part of this task."
     );
+
   }
-
-
-  /*
-    Determine the other participant.
-  */
 
   if (
     currentUser.id ===
@@ -741,7 +760,6 @@ async function loadTask() {
     otherUserId =
       currentTask.runner_id;
 
-
     subtitle.textContent =
       "Chatting with the task runner";
 
@@ -750,585 +768,12 @@ async function loadTask() {
     otherUserId =
       currentTask.user_id;
 
-
     subtitle.textContent =
       "Chatting with the task poster";
-  }
 
+  }
 
   taskTitle.textContent =
     currentTask.title;
+
 }
-
-
-
-/* =========================
-   LOAD PDF FILES
-========================= */
-
-async function loadTaskFiles() {
-
-  filesContainer.innerHTML =
-    '<div class="no-files">Loading files...</div>';
-
-
-  const {
-    data: files,
-    error
-  } =
-    await supabaseClient
-      .from("task_attachments")
-      .select(`
-        id,
-        file_name,
-        file_path,
-        file_size,
-        mime_type,
-        created_at
-      `)
-      .eq(
-        "task_id",
-        currentTask.id
-      )
-      .order(
-        "created_at",
-        {
-          ascending: true
-        }
-      );
-
-
-  if (error) {
-
-    console.error(
-      "Task files error:",
-      error
-    );
-
-
-    filesContainer.innerHTML =
-      `
-        <div class="file-error">
-          ❌ Could not load task files.
-        </div>
-      `;
-
-    return;
-  }
-
-
-  if (
-    !files ||
-    files.length === 0
-  ) {
-
-    filesContainer.innerHTML =
-      `
-        <div class="no-files">
-          📄 No PDF files attached to this task.
-        </div>
-      `;
-
-    return;
-  }
-
-
-  filesContainer.innerHTML =
-    "";
-
-
-  /*
-    Create a signed URL for every PDF.
-  */
-
-  for (
-    const file of files
-  ) {
-
-    const {
-      data: signedData,
-      error: signedError
-    } =
-      await supabaseClient
-        .storage
-        .from("TaskFiles")
-        .createSignedUrl(
-          file.file_path,
-          600
-        );
-
-
-    const card =
-      document.createElement(
-        "div"
-      );
-
-
-    card.className =
-      "file-card";
-
-
-    if (
-      signedError ||
-      !signedData ||
-      !signedData.signedUrl
-    ) {
-
-      card.innerHTML = `
-
-        <div class="file-name">
-          📄 ${escapeHTML(
-            file.file_name
-          )}
-        </div>
-
-        <div class="file-size">
-          ${formatFileSize(
-            file.file_size
-          )}
-        </div>
-
-        <div class="file-error">
-          PDF unavailable
-        </div>
-
-      `;
-
-    } else {
-
-      /*
-        Normal anchor instead of
-        window.open() so Android
-        browsers can open the PDF
-        reliably.
-      */
-
-      card.innerHTML = `
-
-        <div class="file-name">
-          📄 ${escapeHTML(
-            file.file_name
-          )}
-        </div>
-
-        <div class="file-size">
-          ${formatFileSize(
-            file.file_size
-          )}
-        </div>
-
-        <a
-          class="pdf-button"
-          href="${escapeHTML(
-            signedData.signedUrl
-          )}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          👁️ VIEW PDF
-        </a>
-
-      `;
-    }
-
-
-    filesContainer.appendChild(
-      card
-    );
-  }
-}
-
-
-
-/* =========================
-   LOAD MESSAGES
-========================= */
-
-async function loadMessages() {
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("messages")
-      .select(`
-        id,
-        sender_id,
-        receiver_id,
-        message,
-        is_read,
-        created_at
-      `)
-      .eq(
-        "task_id",
-        currentTask.id
-      )
-      .order(
-        "created_at",
-        {
-          ascending: true
-        }
-      );
-
-
-  if (error) {
-
-    console.error(
-      error
-    );
-
-
-    messagesBox.innerHTML =
-      `
-        <div class="error">
-          Could not load messages.
-        </div>
-      `;
-
-    return;
-  }
-
-
-  if (
-    !data ||
-    data.length === 0
-  ) {
-
-    messagesBox.innerHTML =
-      `
-        <div class="empty">
-
-          No messages yet.
-
-          <br>
-
-          Start the conversation 👋
-
-        </div>
-      `;
-
-    return;
-  }
-
-
-  messagesBox.innerHTML =
-    data
-      .map(
-        msg => {
-
-          const mine =
-            msg.sender_id ===
-            currentUser.id;
-
-
-          return `
-
-            <div
-              class="message-row ${
-                mine
-                  ? "mine"
-                  : "theirs"
-              }"
-            >
-
-              <div class="bubble">
-
-                ${escapeHTML(
-                  msg.message
-                )}
-
-                <div class="time">
-
-                  ${formatTime(
-                    msg.created_at
-                  )}
-
-                </div>
-
-              </div>
-
-            </div>
-
-          `;
-        }
-      )
-      .join("");
-
-
-  scrollToBottom();
-
-
-  /*
-    Mark received messages as read.
-  */
-
-  await supabaseClient
-    .from("messages")
-    .update({
-      is_read: true
-    })
-    .eq(
-      "task_id",
-      currentTask.id
-    )
-    .eq(
-      "receiver_id",
-      currentUser.id
-    )
-    .eq(
-      "is_read",
-      false
-    );
-}
-
-
-
-/* =========================
-   SEND MESSAGE
-========================= */
-
-async function sendMessage() {
-
-  const text =
-    messageInput.value.trim();
-
-
-  if (
-    !text ||
-    !otherUserId
-  )
-    return;
-
-
-  sendBtn.disabled =
-    true;
-
-
-  /*
-    Insert message.
-  */
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("messages")
-      .insert({
-
-        task_id:
-          currentTask.id,
-
-        sender_id:
-          currentUser.id,
-
-        receiver_id:
-          otherUserId,
-
-        message:
-          text
-      });
-
-
-  if (error) {
-
-    console.error(
-      error
-    );
-
-
-    alert(
-      "Could not send message: " +
-      error.message
-    );
-
-
-    sendBtn.disabled =
-      false;
-
-    return;
-  }
-
-
-  /*
-    Notify the other participant.
-  */
-
-  const {
-    error:
-      notificationError
-  } =
-    await supabaseClient
-      .from("notifications")
-      .insert({
-
-        user_id:
-          otherUserId,
-
-        task_id:
-          currentTask.id,
-
-        type:
-          "new_message",
-
-        title:
-          "New message",
-
-        message:
-          `You received a new message about "${currentTask.title}".`
-      });
-
-
-  if (
-    notificationError
-  ) {
-
-    console.error(
-      "Message sent, but notification failed:",
-      notificationError
-    );
-  }
-
-
-  messageInput.value =
-    "";
-
-  sendBtn.disabled =
-    false;
-
-
-  await loadMessages();
-
-
-  messageInput.focus();
-}
-
-
-
-/* =========================
-   COMPOSER
-========================= */
-
-composer.addEventListener(
-  "submit",
-  async event => {
-
-    event.preventDefault();
-
-    await sendMessage();
-
-  }
-);
-
-
-
-/* =========================
-   START
-========================= */
-
-async function start() {
-
-  if (!taskId) {
-
-    messagesBox.innerHTML =
-      `
-        <div class="error">
-          No task was specified.
-        </div>
-      `;
-
-    composer.style.display =
-      "none";
-
-    return;
-  }
-
-
-  const {
-    data: sessionData,
-    error: sessionError
-  } =
-    await supabaseClient
-      .auth
-      .getSession();
-
-
-  if (
-    sessionError ||
-    !sessionData.session
-  ) {
-
-    window.location.href =
-      "login.html?redirect=" +
-      encodeURIComponent(
-        window.location.href
-      );
-
-    return;
-  }
-
-
-  currentUser =
-    sessionData.session.user;
-
-
-  try {
-
-    await loadTask();
-
-
-    /*
-      IMPORTANT:
-
-      PDFs load directly inside
-      the chat page.
-    */
-
-    await loadTaskFiles();
-
-
-    await loadMessages();
-
-
-    /*
-      Refresh messages every 5 seconds.
-    */
-
-    setInterval(
-      loadMessages,
-      5000
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      error
-    );
-
-
-    messagesBox.innerHTML =
-      `
-        <div class="error">
-
-          ${escapeHTML(
-            error.message
-          )}
-
-        </div>
-      `;
-
-
-    composer.style.display =
-      "none";
-  }
-}
-
-
-start();
-
-</script>
-
-</body>
-
-</html>
