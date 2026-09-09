@@ -1021,6 +1021,93 @@ async function acceptTask() {
   window.location.reload();
 }
 
+/* =========================
+   START TASK
+========================= */
+
+async function startTask() {
+
+  if (!currentTask || !currentUser)
+    return;
+
+  if (currentTask.runner_id !== currentUser.id) {
+    alert("Only the accepted runner can start this task.");
+    return;
+  }
+
+  if (currentTask.status !== "accepted") {
+    alert("This task cannot be started right now.");
+    return;
+  }
+
+  const button =
+    document.getElementById("startButton");
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "STARTING...";
+  }
+
+  const { data: updatedTask, error } =
+    await supabaseClient
+      .from("tasks")
+      .update({
+        status: "in_progress"
+      })
+      .eq("id", currentTask.id)
+      .eq("runner_id", currentUser.id)
+      .eq("status", "accepted")
+      .select()
+      .single();
+
+  if (error || !updatedTask) {
+
+    console.error(
+      "START TASK ERROR:",
+      error
+    );
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "▶ START TASK";
+    }
+
+    alert(
+      "Could not start the task.\n\n" +
+      (error?.message || "Please try again.")
+    );
+
+    return;
+  }
+
+  currentTask = updatedTask;
+
+  await supabaseClient
+    .from("notifications")
+    .insert({
+      user_id: currentTask.user_id,
+      task_id: currentTask.id,
+      type: "task_in_progress",
+      title: "Task in progress",
+      message:
+        `The runner has started "${currentTask.title}".`
+    });
+
+  await supabaseClient
+    .from("notifications")
+    .insert({
+      user_id: currentUser.id,
+      task_id: currentTask.id,
+      type: "task_in_progress",
+      title: "Task in progress",
+      message:
+        `You started "${currentTask.title}".`
+    });
+
+  alert("Task is now in progress! 🚀");
+
+  window.location.reload();
+}
 
 /* =========================
    REPORT
