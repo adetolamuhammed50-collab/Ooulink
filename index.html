@@ -1238,11 +1238,12 @@
   </span>
 
   <button
-    class="view-task-button"
-    type="button"
-  >
-    👀 View Task
-  </button>
+  class="view-task-button"
+  type="button"
+  onclick="openTask('${task.id}')"
+>
+  👀 View Task
+</button>
 
 `;
 card.querySelector(".view-task-button").addEventListener("click", function () {
