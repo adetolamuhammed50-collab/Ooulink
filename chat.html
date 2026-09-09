@@ -906,17 +906,16 @@ async function loadTask() {
     currentTask.title;
 
 }
-
-
-/* LOAD PDF FILES */
+/* =========================
+   LOAD TASK FILES
+========================= */
 
 async function loadTaskFiles() {
 
-  filesBox.innerHTML = `
-    <div class="loading">
-      Loading task files...
-    </div>
-  `;
+  if (!filesContainer) return;
+
+  filesContainer.innerHTML =
+    `<div class="loading">Loading files...</div>`;
 
   const {
     data: files,
@@ -945,31 +944,39 @@ async function loadTaskFiles() {
 
   if (error) {
 
-    filesBox.innerHTML = `
-      <div class="empty">
-        Unable to load task files.
-      </div>
-    `;
+    console.error(
+      "File loading error:",
+      error
+    );
+
+    filesContainer.innerHTML =
+      `<div class="empty">
+        Unable to load files.
+      </div>`;
 
     return;
 
   }
 
-  if (!files || !files.length) {
+  if (
+    !files ||
+    files.length === 0
+  ) {
 
-    filesBox.innerHTML = `
-      <div class="empty">
-        No PDF files attached to this task.
-      </div>
-    `;
+    filesContainer.innerHTML =
+      `<div class="empty">
+        No files attached.
+      </div>`;
 
     return;
 
   }
 
-  filesBox.innerHTML = "";
+  filesContainer.innerHTML = "";
 
-  for (const file of files) {
+  for (
+    const file of files
+  ) {
 
     const {
       data: signed,
@@ -988,56 +995,35 @@ async function loadTaskFiles() {
       !signed?.signedUrl
     ) {
 
-      const failed = document.createElement(
-        "div"
-      );
-
-      failed.className =
-        "file-card";
-
-      failed.innerHTML = `
-        <div class="file-name">
-          📄 ${escapeHTML(file.file_name)}
-        </div>
-
-        <div class="file-error">
-          Unable to open this PDF.
-        </div>
-      `;
-
-      filesBox.appendChild(
-        failed
-      );
-
       continue;
 
     }
 
-    const fileCard =
+    const card =
       document.createElement(
         "div"
       );
 
-    fileCard.className =
+    card.className =
       "file-card";
 
-    fileCard.innerHTML = `
+    card.innerHTML = `
 
-      <div class="file-info">
+      <div class="file-name">
+        📄 ${escapeHTML(
+          file.file_name
+        )}
+      </div>
 
-        <div class="file-name">
-          📄 ${escapeHTML(file.file_name)}
-        </div>
-
-        <div class="file-meta">
-          ${formatFileSize(file.file_size)}
-        </div>
-
+      <div class="file-meta">
+        ${formatFileSize(
+          file.file_size
+        )}
       </div>
 
       <button
-        class="view-file-btn"
         type="button"
+        class="view-pdf-btn"
       >
         VIEW PDF
       </button>
@@ -1046,50 +1032,49 @@ async function loadTaskFiles() {
         class="pdf-viewer"
         style="display:none;"
       >
-
         <iframe
           src="${signed.signedUrl}"
-          title="${escapeHTML(file.file_name)}"
-          loading="lazy"
+          title="${escapeHTML(
+            file.file_name
+          )}"
         ></iframe>
-
       </div>
 
     `;
 
-    const viewButton =
-      fileCard.querySelector(
-        ".view-file-btn"
+    const button =
+      card.querySelector(
+        ".view-pdf-btn"
       );
 
     const viewer =
-      fileCard.querySelector(
+      card.querySelector(
         ".pdf-viewer"
       );
 
-    viewButton.addEventListener(
+    button.addEventListener(
       "click",
       () => {
 
-        const isHidden =
+        const opening =
           viewer.style.display ===
           "none";
 
         viewer.style.display =
-          isHidden
+          opening
             ? "block"
             : "none";
 
-        viewButton.textContent =
-          isHidden
+        button.textContent =
+          opening
             ? "HIDE PDF"
             : "VIEW PDF";
 
       }
     );
 
-    filesBox.appendChild(
-      fileCard
+    filesContainer.appendChild(
+      card
     );
 
   }
@@ -1097,13 +1082,32 @@ async function loadTaskFiles() {
 }
 
 
-/* RENDER MESSAGE */
+/* =========================
+   RENDER MESSAGE
+========================= */
 
-function renderMessage(msg) {
+function renderMessage(
+  message
+) {
+
+  if (
+    !messagesBox ||
+    !message
+  ) {
+
+    return;
+
+  }
+
+  /*
+    Prevent duplicate messages
+    when Realtime sends a message
+    that we already displayed.
+  */
 
   if (
     document.querySelector(
-      `[data-message-id="${msg.id}"]`
+      `[data-message-id="${message.id}"]`
     )
   ) {
 
@@ -1112,32 +1116,36 @@ function renderMessage(msg) {
   }
 
   const mine =
-    msg.sender_id ===
+    message.sender_id ===
     currentUser.id;
 
-  const wrapper =
+  const row =
     document.createElement(
       "div"
     );
 
-  wrapper.className =
+  row.className =
     mine
       ? "message-row mine"
       : "message-row other";
 
-  wrapper.dataset.messageId =
-    msg.id;
+  row.dataset.messageId =
+    message.id;
 
-  wrapper.innerHTML = `
+  row.innerHTML = `
 
     <div class="message-bubble">
 
       <div class="message-text">
-        ${escapeHTML(msg.message)}
+        ${escapeHTML(
+          message.message
+        )}
       </div>
 
       <div class="message-time">
-        ${formatTime(msg.created_at)}
+        ${formatTime(
+          message.created_at
+        )}
       </div>
 
     </div>
@@ -1145,15 +1153,26 @@ function renderMessage(msg) {
   `;
 
   messagesBox.appendChild(
-    wrapper
+    row
   );
 
 }
 
 
-/* LOAD MESSAGES */
+/* =========================
+   LOAD MESSAGES
+========================= */
 
 async function loadMessages() {
+
+  if (
+    !currentTask ||
+    !currentUser
+  ) {
+
+    return;
+
+  }
 
   const {
     data,
@@ -1182,11 +1201,19 @@ async function loadMessages() {
 
   if (error) {
 
-    messagesBox.innerHTML = `
-      <div class="message-error">
-        Unable to load messages.
-      </div>
-    `;
+    console.error(
+      "Message loading error:",
+      error
+    );
+
+    if (messagesBox) {
+
+      messagesBox.innerHTML =
+        `<div class="message-error">
+          Unable to load messages.
+        </div>`;
+
+    }
 
     return;
 
@@ -1195,34 +1222,39 @@ async function loadMessages() {
   messagesBox.innerHTML = "";
 
   for (
-    const msg of data || []
+    const message of
+    data || []
   ) {
 
-    renderMessage(msg);
+    renderMessage(
+      message
+    );
 
   }
 
   scrollToBottom();
 
+
   /*
-    Mark messages received by
-    the current user as read.
+    Mark messages received
+    by the current user as read.
   */
 
-  const unreadIds =
+  const unread =
     (data || [])
       .filter(
-        msg =>
-          msg.receiver_id ===
+        message =>
+          message.receiver_id ===
             currentUser.id &&
-          !msg.is_read
+          !message.is_read
       )
       .map(
-        msg => msg.id
+        message =>
+          message.id
       );
 
   if (
-    unreadIds.length
+    unread.length
   ) {
 
     await supabaseClient
@@ -1232,7 +1264,7 @@ async function loadMessages() {
       })
       .in(
         "id",
-        unreadIds
+        unread
       );
 
   }
@@ -1240,73 +1272,19 @@ async function loadMessages() {
 }
 
 
-/* REALTIME MESSAGE HANDLER */
-
-function handleRealtimeMessage(payload) {
-
-  if (
-    !payload ||
-    !payload.new
-  ) {
-
-    return;
-
-  }
-
-  const message =
-    payload.new;
-
-  if (
-    message.task_id !==
-    currentTask.id
-  ) {
-
-    return;
-
-  }
-
-  renderMessage(
-    message
-  );
-
-  scrollToBottom();
-
-  /*
-    If the incoming message
-    belongs to the current user,
-    there is nothing else to do.
-
-    If it was received from the
-    other participant, mark it
-    as read because this chat is
-    currently open.
-  */
-
-  if (
-    message.receiver_id ===
-    currentUser.id &&
-    !message.is_read
-  ) {
-
-    supabaseClient
-      .from("messages")
-      .update({
-        is_read: true
-      })
-      .eq(
-        "id",
-        message.id
-      )
-      .then(() => {});
-
-  }
-
-}
-
-
-/* START REALTIME */
+/* =========================
+   REALTIME
+========================= */
 
 function startRealtime() {
+
+  if (
+    !currentTask
+  ) {
+
+    return;
+
+  }
 
   if (
     realtimeChannel
@@ -1319,7 +1297,8 @@ function startRealtime() {
   realtimeChannel =
     supabaseClient
       .channel(
-        `chat-${currentTask.id}`
+        "ooulink-chat-" +
+        currentTask.id
       )
       .on(
         "postgres_changes",
@@ -1330,67 +1309,65 @@ function startRealtime() {
           filter:
             `task_id=eq.${currentTask.id}`
         },
-        payload => {
+        async payload => {
 
-          handleRealtimeMessage(
-            payload
+          const message =
+            payload.new;
+
+          /*
+            Only display messages
+            belonging to this task.
+          */
+
+          if (
+            !message ||
+            message.task_id !==
+              currentTask.id
+          ) {
+
+            return;
+
+          }
+
+          renderMessage(
+            message
           );
+
+          scrollToBottom();
+
+
+          /*
+            If this was sent to us,
+            immediately mark it read.
+          */
+
+          if (
+            message.receiver_id ===
+              currentUser.id &&
+            !message.is_read
+          ) {
+
+            await supabaseClient
+              .from("messages")
+              .update({
+                is_read: true
+              })
+              .eq(
+                "id",
+                message.id
+              );
+
+          }
 
         }
       )
       .subscribe(
         status => {
 
-          /*
-            No normal 5-second polling.
-
-            Realtime is the main method.
-
-            If the connection drops,
-            use a slower fallback check
-            instead of the old 5-second delay.
-          */
-
-          if (
-            status ===
-            "SUBSCRIBED"
-          ) {
-
-            connectionStatus.textContent =
-              "🟢 Live";
-
-          } else if (
-            status ===
-            "CHANNEL_ERROR" ||
-            status ===
-            "TIMED_OUT"
-          ) {
-
-            connectionStatus.textContent =
-              "🟡 Reconnecting...";
-
-            if (
-              fallbackTimer
-            ) {
-
-              clearInterval(
-                fallbackTimer
-              );
-
-            }
-
-            fallbackTimer =
-              setInterval(
-                loadMessages,
-                15000
-              );
-
-          } else {
-
-            connectionStatus.textContent =
-              "🟡 Connecting...";
-
-          }
+          console.log(
+            "Chat realtime:",
+            status
+          );
 
         }
       );
@@ -1398,12 +1375,16 @@ function startRealtime() {
 }
 
 
-/* SEND MESSAGE */
+/* =========================
+   SEND MESSAGE
+========================= */
 
 async function sendMessage() {
 
   if (
-    sending
+    sending ||
+    !currentTask ||
+    !otherUserId
   ) {
 
     return;
@@ -1418,6 +1399,13 @@ async function sendMessage() {
     return;
 
   }
+
+
+  /*
+    Apply chat restrictions
+    before anything reaches
+    Supabase.
+  */
 
   const validation =
     validateMessage(
@@ -1436,24 +1424,18 @@ async function sendMessage() {
 
   }
 
+
   sending = true;
 
-  sendButton.disabled =
+  sendBtn.disabled =
     true;
 
   const originalText =
-    sendButton.textContent;
+    sendBtn.textContent;
 
-  sendButton.textContent =
+  sendBtn.textContent =
     "Sending...";
 
-  /*
-    Clear any previous
-    warning message.
-  */
-
-  blockedMessage.textContent =
-    "";
 
   const {
     data,
@@ -1484,20 +1466,22 @@ async function sendMessage() {
       `)
       .single();
 
+
   if (error) {
 
     console.error(
-      "Message send error:",
+      "Send message error:",
       error
     );
 
-    blockedMessage.textContent =
-      "❌ Message could not be sent. Please try again.";
+    showBlockedMessage(
+      "Message could not be sent. Please try again."
+    );
 
-    sendButton.disabled =
+    sendBtn.disabled =
       false;
 
-    sendButton.textContent =
+    sendBtn.textContent =
       originalText;
 
     sending = false;
@@ -1506,12 +1490,12 @@ async function sendMessage() {
 
   }
 
-  /*
-    Render immediately.
 
-    Realtime will also receive
-    the message, but renderMessage()
-    prevents duplicates.
+  /*
+    Show our message immediately.
+    Realtime will not create a
+    duplicate because renderMessage()
+    checks the message ID.
   */
 
   if (data) {
@@ -1524,16 +1508,18 @@ async function sendMessage() {
 
   }
 
+
   messageInput.value =
     "";
 
+
   /*
-    Create a notification for
-    the other participant.
+    Notify the other participant.
   */
 
   const {
-    error: notificationError
+    error:
+      notificationError
   } =
     await supabaseClient
       .from("notifications")
@@ -1554,21 +1540,23 @@ async function sendMessage() {
           `You received a new message about "${currentTask.title}".`
       });
 
+
   if (
     notificationError
   ) {
 
     console.warn(
-      "Notification could not be created:",
+      "Notification error:",
       notificationError
     );
 
   }
 
-  sendButton.disabled =
+
+  sendBtn.disabled =
     false;
 
-  sendButton.textContent =
+  sendBtn.textContent =
     originalText;
 
   sending = false;
@@ -1576,44 +1564,79 @@ async function sendMessage() {
 }
 
 
-/* SEND BUTTON */
+/* =========================
+   SEND BUTTON
+========================= */
 
-sendButton.addEventListener(
-  "click",
-  sendMessage
-);
+if (sendBtn) {
+
+  sendBtn.addEventListener(
+    "click",
+    sendMessage
+  );
+
+}
 
 
-/* ENTER TO SEND */
+/* =========================
+   ENTER TO SEND
+========================= */
 
-messageInput.addEventListener(
-  "keydown",
-  event => {
+if (messageInput) {
 
-    if (
-      event.key ===
-      "Enter" &&
-      !event.shiftKey
-    ) {
+  messageInput.addEventListener(
+    "keydown",
+    event => {
 
-      event.preventDefault();
+      /*
+        Enter sends.
+        Shift + Enter creates
+        a new line.
+      */
 
-      sendMessage();
+      if (
+        event.key ===
+          "Enter" &&
+        !event.shiftKey
+      ) {
+
+        event.preventDefault();
+
+        sendMessage();
+
+      }
 
     }
+  );
 
-  }
-);
+}
 
 
-/* START CHAT */
+/* =========================
+   START
+========================= */
 
-async function start() {
+async function startChat() {
 
   try {
 
-    connectionStatus.textContent =
-      "🟡 Loading...";
+    /*
+      Show loading state.
+    */
+
+    if (messagesBox) {
+
+      messagesBox.innerHTML =
+        `<div class="loading">
+          Loading chat...
+        </div>`;
+
+    }
+
+
+    /*
+      Check login.
+    */
 
     const {
       data: {
@@ -1622,6 +1645,7 @@ async function start() {
     } =
       await supabaseClient.auth
         .getSession();
+
 
     if (
       !session
@@ -1634,58 +1658,97 @@ async function start() {
 
     }
 
+
     currentUser =
       session.user;
 
-    await loadTask();
-
-    await loadTaskFiles();
-
-    await loadMessages();
 
     /*
-      Start live messaging.
+      Make sure we have a task ID.
+    */
 
-      There is NO normal
-      5-second polling anymore.
+    if (!taskId) {
+
+      throw new Error(
+        "No chat task was specified."
+      );
+
+    }
+
+
+    /*
+      Load task first.
+    */
+
+    await loadTask();
+
+
+    /*
+      Load files and messages
+      independently so one failed
+      request doesn't leave the
+      whole page stuck.
+    */
+
+    await Promise.all([
+      loadTaskFiles(),
+      loadMessages()
+    ]);
+
+
+    /*
+      Start instant live messages.
     */
 
     startRealtime();
 
+
   } catch (error) {
 
     console.error(
+      "Chat startup error:",
       error
     );
 
-    connectionStatus.textContent =
-      "🔴 Error";
+    if (messagesBox) {
 
-    messagesBox.innerHTML = `
+      messagesBox.innerHTML = `
 
-      <div class="message-error">
+        <div class="message-error">
 
-        ${escapeHTML(
-          error.message ||
-          "Something went wrong."
-        )}
+          ❌ ${escapeHTML(
+            error.message ||
+            "Unable to load chat."
+          )}
 
-      </div>
+        </div>
 
-    `;
+      `;
 
-    sendButton.disabled =
-      true;
+    }
 
-    messageInput.disabled =
-      true;
+    if (messageInput) {
+
+      messageInput.disabled =
+        true;
+
+    }
+
+    if (sendBtn) {
+
+      sendBtn.disabled =
+        true;
+
+    }
 
   }
 
 }
 
 
-/* CLEAN UP REALTIME */
+/* =========================
+   CLEANUP
+========================= */
 
 window.addEventListener(
   "beforeunload",
@@ -1702,21 +1765,15 @@ window.addEventListener(
 
     }
 
-    if (
-      fallbackTimer
-    ) {
-
-      clearInterval(
-        fallbackTimer
-      );
-
-    }
-
   }
 );
 
 
-start();
+/* =========================
+   START APP
+========================= */
+
+startChat();
 
 </script>
 
