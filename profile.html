@@ -153,40 +153,31 @@
       min-height: 20px;
     }
 
-    .bottom-nav {
+   .bottom-nav {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
   max-width: 480px;
-  margin: auto;
-  height: 26px;
   background: white;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e8e6;
   display: flex;
   justify-content: space-around;
-  align-items: center;
-  z-index: 10;
+  padding: 12px 5px;
+  z-index: 1000;
 }
 
 .bottom-nav a {
-  text-decoration: none;
-  color: #7a8494;
-  font-size: 8px;
-  line-height: 9px;
   text-align: center;
+  font-size: 11px;
+  color: #777;
+  text-decoration: none;
 }
 
-.bottom-nav a span {
-  display: block;
-  font-size: 10px;
-  line-height: 10px;
-  margin-bottom: 0;
-}
-
-.bottom-nav .active {
-  color: #2563eb;
-  font-weight: bold;
+.bottom-nav a.active {
+  color: #16834b;
+  font-weight: 700;
 }
   </style>
 </head>
