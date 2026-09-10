@@ -3116,23 +3116,16 @@ await loadMyApplication();
 return true;
 
 }
-
 async function reloadEverything(){
+  const refreshed=
+    await refreshTaskOnly();
 
-if(busy){
-return;
-}
+  if(!refreshed){
+    return;
+  }
 
-const refreshed=
-await refreshTaskOnly();
-
-if(!refreshed){
-return;
-}
-
-await renderTask();
-
-}
+  await renderTask();
+    }
 
 async function loadFiles(){
 
