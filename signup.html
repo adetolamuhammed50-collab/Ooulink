@@ -418,7 +418,14 @@ const email =
         }
 
 
-        if (data.user) {
+        if (data.user) { await supabaseClient
+  .from("profiles")
+  .update({
+    username: username,
+    full_name: name,
+    location: location
+  })
+  .eq("id", data.user.id );
 
           showMessage(
             "Account created successfully! Check your email to confirm your account.",
