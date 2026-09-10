@@ -395,6 +395,104 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
+let selectedRating = 0;
+
+function setRating(rating) {
+  selectedRating = rating;
+
+  const buttons =
+    document.querySelectorAll("#starRating button");
+
+  buttons.forEach((button, index) => {
+    button.textContent =
+      index < rating ? "★" : "☆";
+  });
+}
+
+async function submitReview() {
+  if (!currentTask || !currentUser) return;
+
+  if (
+    currentTask.status !== "completed" &&
+    currentTask.status !== "rejected"
+  ) {
+    alert("Reviews are only available after the task is closed.");
+    return;
+  }
+
+  let revieweeId = null;
+
+  if (currentUser.id === currentTask.user_id) {
+    revieweeId = currentTask.runner_id;
+  } else if (currentUser.id === currentTask.runner_id) {
+    revieweeId = currentTask.user_id;
+  } else {
+    alert("You are not a participant in this task.");
+    return;
+  }
+
+  if (!revieweeId) {
+    alert("There is no other participant to review.");
+    return;
+  }
+
+  if (selectedRating < 1 || selectedRating > 5) {
+    alert("Please select a rating from 1 to 5 stars.");
+    return;
+  }
+
+  const noteInput =
+    document.getElementById("reviewNote");
+
+  const note =
+    noteInput?.value.trim() || null;
+
+  const button =
+    document.getElementById("submitReviewButton");
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "SUBMITTING...";
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("reviews")
+      .insert({
+        task_id: currentTask.id,
+        reviewer_id: currentUser.id,
+        reviewee_id: revieweeId,
+        rating: selectedRating,
+        note: note
+      });
+
+  if (error) {
+    console.error("REVIEW ERROR:", error);
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "⭐ SUBMIT REVIEW";
+    }
+
+    if (error.code === "23505") {
+      alert(
+        "You have already reviewed this person for this task."
+      );
+    } else {
+      alert(
+        "Could not submit your review.\n\n" +
+        (error.message || "Please try again.")
+      );
+    }
+
+    return;
+  }
+
+  alert("Review submitted successfully! ⭐");
+
+  window.location.reload();
+}
+
 
 function formatMoney(amount) {
   return "₦" +
