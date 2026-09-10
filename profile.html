@@ -267,8 +267,9 @@
 
     </div>
 <div class="profile-identity">
-  <div class="profile-name" id="profileName">OOULink User</div>
-  <div class="profile-meta" id="profileLocation">Location not set</div>
+ <div class="profile-name" id="profileName">OOULink User</div>
+<div class="profile-meta" id="profileUsername"></div>
+<div class="profile-meta" id="profileLocation">Location not set</div>
   <div class="profile-level">⭐ Level 1 • 0 XP</div>
 </div>
 
@@ -515,6 +516,11 @@ document.getElementById("location").value =
 
 document.getElementById("profileName").textContent =
   profileInfo?.full_name || metadata.full_name || "OOULink User";
+
+document.getElementById("profileUsername").textContent =
+  profileInfo?.username
+    ? `@${profileInfo.username}`
+    : "";
 
 document.getElementById("profileLocation").textContent =
   profileInfo?.location || metadata.location || "Location not set";
