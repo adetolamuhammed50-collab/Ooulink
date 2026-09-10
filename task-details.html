@@ -371,6 +371,17 @@ let currentTask = null;
 let currentUser = null;
 let selectedRating = 0;
 
+function setRating(rating) {
+  selectedRating = rating;
+
+  const buttons =
+    document.querySelectorAll("#starRating button");
+
+  buttons.forEach((button, index) => {
+    button.textContent =
+      index < rating ? "★" : "☆";
+  });
+}
 /* =========================
    HELPERS
 ========================= */
