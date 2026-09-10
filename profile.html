@@ -391,17 +391,31 @@
 
     const metadata =
       currentUser.user_metadata || {};
+const { data: profileInfo, error: profileError } =
+  await supabaseClient
+    .from("profiles")
+    .select("username,full_name,location,avatar_url")
+    .eq("id", currentUser.id)
+    .single();
 
+if (profileError) {
+  console.error("Profile data error:", profileError);
+}
     document.getElementById("fullName").value =
-      metadata.full_name || "";
+  profileInfo?.full_name || metadata.full_name || "";
 
-    document.getElementById("location").value =
-      metadata.location || "";
+document.getElementById("location").value =
+  profileInfo?.location || metadata.location || "";
+
 document.getElementById("profileName").textContent =
-  metadata.full_name || "OOULink User";
+  profileInfo?.full_name || metadata.full_name || "OOULink User";
 
 document.getElementById("profileLocation").textContent =
-  metadata.location || "Location not set";
+  profileInfo?.location || metadata.location || "Location not set";
+
+if (!profileInfo?.username) {
+  document.getElementById("usernameSetup").style.display = "block";
+}
 const { data: postedTasks } = await supabaseClient
   .from("tasks")
   .select("id")
