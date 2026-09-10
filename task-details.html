@@ -1866,43 +1866,309 @@ Keep communication respectful and use the OOULink task chat for important task-r
 
 }
 
+function taskHeaderHtml(){
+  if(!currentTask){
+    return "";
+  }
+
+  const status=currentTask.status||"open";
+
+  return `
+    <div>
+      <div class="category">
+        ${escapeHtml(currentTask.category||"Other")}
+      </div>
+
+      <h1>
+        ${escapeHtml(currentTask.title||"Untitled Task")}
+      </h1>
+
+      <div class="description">
+        ${escapeHtml(currentTask.description||"No description provided.")}
+      </div>
+
+      <div class="budget">
+        ${money(currentTask.budget)}
+      </div>
+
+      <div class="info">
+
+        <div class="info-row">
+          <div class="label">Location</div>
+          <div class="value">
+            ${escapeHtml(currentTask.location||"Not specified")}
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div class="label">Deadline</div>
+          <div class="value">
+            ${escapeHtml(dateText(currentTask.deadline))}
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div class="label">Status</div>
+          <div class="value">
+            <span class="status-pill ${statusClass(status)}">
+              ${escapeHtml(statusLabel(status))}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div class="label">Posted</div>
+          <div class="value">
+            ${escapeHtml(dateText(currentTask.created_at))}
+          </div>
+        </div>
+
+      </div>
+
+      <div class="notice info task-message">
+        ${escapeHtml(statusText(status))}
+      </div>
+    </div>
+  `;
+}
+
+
+function applicationHtml(){
+  if(!currentUser){
+    return "";
+  }
+
+  if(isOwner()){
+    return "";
+  }
+
+  let html="";
+
+  if(canApply()){
+    html+=`
+      <div class="section">
+        <div class="section-title">
+          🙋 Apply for this task
+        </div>
+
+        <div class="section-note">
+          Apply only if you are available and able to complete the task.
+        </div>
+
+        <button
+          class="btn blue"
+          onclick="applyForTask()"
+        >
+          APPLY FOR TASK
+        </button>
+      </div>
+    `;
+  }
+
+  if(myApplication){
+    html+=`
+      <div class="section">
+        <div class="section-title">
+          📄 Your Application
+        </div>
+
+        ${applicationStatusHtml()}
+
+        ${
+          myApplication.status==="pending"
+          ?
+          `
+          <button
+            class="btn gray"
+            onclick="withdrawApplication()"
+          >
+            WITHDRAW APPLICATION
+          </button>
+          `
+          :
+          ""
+        }
+      </div>
+    `;
+  }
+
+  return html;
+}
+
+
+function ownerActionsHtml(){
+  if(!isOwner()){
+    return "";
+  }
+
+  let html="";
+
+  if(canCancelTask()){
+    html+=`
+      <div class="section">
+        <div class="section-title">
+          ⚙️ Task Controls
+        </div>
+
+        <button
+          class="btn red"
+          onclick="cancelTask()"
+        >
+          CANCEL TASK
+        </button>
+      </div>
+    `;
+  }
+
+  if(canApproveTask()){
+    html+=`
+      <div class="section">
+        <div class="section-title">
+          ✅ Verify Submission
+        </div>
+
+        <div class="section-note">
+          Approve the runner's submission when the work has been completed correctly.
+        </div>
+
+        <button
+          class="btn green"
+          onclick="approveTask()"
+        >
+          APPROVE & COMPLETE
+        </button>
+
+        <button
+          class="btn red"
+          onclick="rejectTask()"
+        >
+          REJECT SUBMISSION
+        </button>
+      </div>
+    `;
+  }
+
+  return html;
+}
+
+
+function runnerActionsHtml(){
+  if(!isRunner()){
+    return "";
+  }
+
+  let html="";
+
+  if(canStartTask()){
+    html+=`
+      <div class="section">
+        <div class="section-title">
+          🚀 Start Task
+        </div>
+
+        <div class="section-note">
+          Start working when you are ready to complete the task.
+        </div>
+
+        <button
+          class="btn blue"
+          onclick="startTask()"
+        >
+          START TASK
+        </button>
+      </div>
+    `;
+  }
+
+  if(canSubmitTask()){
+    html+=`
+      <div class="section">
+        <div class="section-title">
+          📤 Submit Work
+        </div>
+
+        <div class="section-note">
+          Submit the task when you have finished the requested work.
+        </div>
+
+        <button
+          class="btn green"
+          onclick="submitTask()"
+        >
+          SUBMIT FOR VERIFICATION
+        </button>
+      </div>
+    `;
+  }
+
+  return html;
+}
+
+
+function applicantsContainerHtml(){
+  if(!isOwner()){
+    return "";
+  }
+
+  if(currentTask.status!=="open"){
+    return "";
+  }
+
+  return `
+    <div class="section">
+      <div class="section-title">
+        👥 Applicants
+      </div>
+
+      <div class="section-note">
+        Review applicants and select the person who will handle this task.
+      </div>
+
+      <div id="applicants">
+        <div class="empty">
+          Loading applicants...
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
 function renderBaseTask(){
+  if(!currentTask){
+    return "";
+  }
 
-if(!currentTask){
-return "";
-}
+  return `
+    ${taskHeaderHtml()}
 
-return `
-${taskHeaderHtml()}
+    ${taskTimelineHtml()}
 
-${taskTimelineHtml()}
+    ${ownerHtml()}
 
-${ownerHtml()}
+    ${runnerHtml()}
 
-${runnerHtml()}
+    ${taskRulesHtml()}
 
-${taskRulesHtml()}
+    ${applicationHtml()}
 
-${applicationHtml()}
+    ${ownerActionsHtml()}
 
-${ownerActionsHtml()}
+    ${runnerActionsHtml()}
 
-${runnerActionsHtml()}
+    ${rejectionHtml()}
 
-${rejectionHtml()}
+    ${applicantsContainerHtml()}
 
-${applicantsContainerHtml()}
+    <div id="files"></div>
 
-<div id="files"></div>
+    <div id="chat"></div>
 
-<div id="chat"></div>
+    <div id="reviews"></div>
 
-<div id="reviews"></div>
-
-${reportHtml()}
-`;
-
-}
+    ${reportHtml()}
+  `;
+  }
 async function renderTask(){
 
 if(!currentTask){
