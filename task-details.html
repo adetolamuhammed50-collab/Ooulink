@@ -933,7 +933,68 @@ ${
       : ""
     }
 
+<!-- =========================
+     REVIEWS
+========================= -->
+${
+  (
+    (task.status === "completed" || task.status === "rejected") &&
+    (task.user_id === currentUser.id || task.runner_id === currentUser.id)
+  )
+  ? `
+    <div
+      id="reviewSection"
+      style="margin-top:20px;padding:16px;border-radius:12px;background:#f8fafc;"
+    >
+      <h3 style="margin-top:0;">⭐ Leave a Review</h3>
 
+      <p style="font-size:14px;color:#666;">
+        How was your experience with this person?
+      </p>
+
+      <div
+        id="starRating"
+        style="display:flex;gap:8px;font-size:30px;margin:12px 0;"
+      >
+        <button type="button" onclick="setRating(1)">☆</button>
+        <button type="button" onclick="setRating(2)">☆</button>
+        <button type="button" onclick="setRating(3)">☆</button>
+        <button type="button" onclick="setRating(4)">☆</button>
+        <button type="button" onclick="setRating(5)">☆</button>
+      </div>
+
+      <textarea
+        id="reviewNote"
+        placeholder="Optional note about your experience..."
+        style="width:100%;min-height:90px;padding:10px;border:1px solid #ddd;border-radius:8px;resize:vertical;"
+      ></textarea>
+
+      <button
+        id="submitReviewButton"
+        class="accept"
+        onclick="submitReview()"
+        style="margin-top:10px;background:#16834b;"
+      >
+        ⭐ SUBMIT REVIEW
+      </button>
+
+      ${
+        task.status === "rejected"
+        ? `
+          <button
+            class="accept"
+            onclick="showReportBox()"
+            style="margin-top:10px;background:#dc2626;"
+          >
+            🚩 REPORT
+          </button>
+        `
+        : ""
+      }
+    </div>
+  `
+  : ""
+}
     <a
       href="#"
       class="report"
