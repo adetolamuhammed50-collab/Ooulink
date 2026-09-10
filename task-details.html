@@ -3226,12 +3226,21 @@ if(!loaded){
 return;
 }
 
-await loadProfiles();
-
-myApplication=
-await loadMyApplication();
-
 await renderTask();
+
+loadProfiles()
+.catch(error=>{
+console.error("PROFILE LOAD:",error);
+});
+
+loadMyApplication()
+.then(data=>{
+myApplication=data;
+return renderTask();
+})
+.catch(error=>{
+console.error("APPLICATION LOAD:",error);
+});
 
 cleanupTaskRealtime();
 
