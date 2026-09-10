@@ -1,82 +1,376 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
   <title>Find Users - OOULink</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
   <style>
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
+
     body {
       font-family: Arial, sans-serif;
       background: #f5f7fb;
       color: #172033;
-      padding-bottom: 80px;
+      padding-bottom: 82px;
     }
 
+
     .container {
+      width: 100%;
       max-width: 480px;
-      margin: auto;
+      margin: 0 auto;
       padding: 20px 16px;
     }
 
+
+    /* TOP */
+
     .top {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
-    .top a {
-      text-decoration: none;
+
+    .back-link {
+      display: inline-block;
       color: #2563eb;
+      text-decoration: none;
       font-size: 14px;
+      margin-bottom: 12px;
+      transition:
+        transform 0.15s ease,
+        opacity 0.15s ease;
     }
+
+
+    .back-link:active {
+      transform: scale(0.97);
+      opacity: 0.7;
+    }
+
 
     h1 {
-      margin-top: 12px;
       font-size: 28px;
+      line-height: 1.15;
     }
+
 
     .subtitle {
       color: #687386;
-      margin-top: 5px;
+      font-size: 14px;
+      margin-top: 6px;
+      line-height: 1.45;
     }
+
+
+    /* SEARCH */
 
     .search-box {
       background: white;
       padding: 14px;
       border-radius: 16px;
-      box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+      box-shadow:
+        0 5px 18px rgba(0, 0, 0, 0.06);
+      margin-bottom: 16px;
     }
+
+
+    .search-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #687386;
+      margin-bottom: 7px;
+    }
+
+
+    .search-input-wrap {
+      position: relative;
+    }
+
+
+    .search-icon {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      pointer-events: none;
+    }
+
 
     .search-box input {
       width: 100%;
-      padding: 14px;
+      padding: 13px 42px 13px 39px;
       border: 1px solid #d7dce5;
       border-radius: 11px;
       font-size: 15px;
       outline: none;
+      background: #fff;
+      color: #172033;
+      transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
     }
+
 
     .search-box input:focus {
       border-color: #2563eb;
+      box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.08);
     }
 
-    #results {
-      margin-top: 16px;
+
+    .clear-search {
+      position: absolute;
+      right: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      border: 0;
+      border-radius: 50%;
+      background: #eef2f7;
+      color: #687386;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 15px;
     }
+
+
+    .clear-search:active {
+      transform:
+        translateY(-50%)
+        scale(0.9);
+    }
+
+
+    /* RESULTS */
+
+    #results {
+      margin-top: 4px;
+    }
+
+
+    .result-count {
+      font-size: 12px;
+      color: #687386;
+      margin: 0 3px 10px;
+    }
+
 
     .empty {
       text-align: center;
       color: #687386;
-      padding: 30px 10px;
+      padding: 34px 15px;
       font-size: 14px;
+      line-height: 1.5;
     }
+
+
+    .empty-icon {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+
+    /* USER CARD */
+
+    .user-card {
+      background: white;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 11px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow:
+        0 5px 18px rgba(0, 0, 0, 0.05);
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+
+
+    .user-card:active {
+      transform: scale(0.985);
+      box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+
+
+    .avatar {
+      width: 52px;
+      height: 52px;
+      min-width: 52px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #eef2f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      color: #687386;
+    }
+
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+
+    .user-name {
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 1.25;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+
+    .username {
+      color: #2563eb;
+      font-size: 13px;
+      margin-top: 3px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+
+    .user-location {
+      color: #687386;
+      font-size: 12px;
+      margin-top: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+
+    .user-rating {
+      color: #687386;
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+
+    .view-button {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 0 11px;
+      border-radius: 9px;
+      background: #16834b;
+      color: white;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 700;
+      transition:
+        transform 0.15s ease,
+        opacity 0.15s ease;
+    }
+
+
+    .view-button:active {
+      transform: scale(0.94);
+      opacity: 0.85;
+    }
+
+
+    /* SKELETON */
+
+    .skeleton-card {
+      background: white;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 11px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+
+    .skeleton {
+      background:
+        linear-gradient(
+          90deg,
+          #eef1f5 25%,
+          #f7f8fa 50%,
+          #eef1f5 75%
+        );
+      background-size: 200% 100%;
+      animation: skeletonMove 1.4s infinite;
+      border-radius: 8px;
+    }
+
+
+    .skeleton-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+
+    .skeleton-lines {
+      flex: 1;
+    }
+
+
+    .skeleton-line {
+      height: 11px;
+      margin-bottom: 8px;
+    }
+
+
+    .skeleton-line.short {
+      width: 55%;
+    }
+
+
+    @keyframes skeletonMove {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+
+    /* BOTTOM NAV */
 
     .bottom-nav {
       position: fixed;
@@ -86,93 +380,251 @@
       width: 100%;
       max-width: 480px;
       background: white;
-      border-top: 1px solid #e5e8e6;
+      border-top: 1px solid #e5e8ec;
       display: flex;
       justify-content: space-around;
-      padding: 12px 5px;
+      padding: 10px 5px;
       z-index: 1000;
     }
 
+
     .bottom-nav a {
+      min-width: 48px;
+      padding: 3px 2px;
       text-align: center;
       font-size: 11px;
       color: #777;
       text-decoration: none;
+      transition:
+        transform 0.15s ease,
+        color 0.15s ease;
     }
+
+
+    .bottom-nav a span {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 2px;
+    }
+
+
+    .bottom-nav a:active {
+      transform: scale(0.9);
+    }
+
 
     .bottom-nav a.active {
       color: #16834b;
       font-weight: 700;
     }
+
+
+    /* SMALL SCREENS */
+
+    @media (max-width: 360px) {
+
+      .container {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+
+      h1 {
+        font-size: 25px;
+      }
+
+
+      .user-card {
+        padding: 12px;
+        gap: 9px;
+      }
+
+
+      .avatar {
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+      }
+
+
+      .view-button {
+        padding: 0 9px;
+        font-size: 10px;
+      }
+
+    }
+
   </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-  <div class="top">
-    <a href="profile.html">← Back to Profile</a>
 
-    <h1>Find Users</h1>
+  <div class="top">
+
+    <a
+      href="profile.html"
+      class="back-link"
+    >
+      ← Back to Profile
+    </a>
+
+
+    <h1>
+      Find Users
+    </h1>
+
 
     <p class="subtitle">
-      Search OOULink users by username or name.
+      Search OOULink users by username, name, or location.
     </p>
+
   </div>
+
+
 
   <div class="search-box">
-    <input
-      type="search"
-      id="userSearch"
-      placeholder="Search @username or name..."
-      autocomplete="off"
+
+    <label
+      class="search-label"
+      for="userSearch"
     >
+      SEARCH USERS
+    </label>
+
+
+    <div class="search-input-wrap">
+
+      <span class="search-icon">
+        🔎
+      </span>
+
+
+      <input
+        type="search"
+        id="userSearch"
+        placeholder="@username or name..."
+        autocomplete="off"
+        autocapitalize="none"
+        spellcheck="false"
+      >
+
+
+      <button
+        type="button"
+        class="clear-search"
+        id="clearSearch"
+        aria-label="Clear search"
+      >
+        ×
+      </button>
+
+    </div>
+
   </div>
 
+
+
   <div id="results">
+
     <div class="empty">
-      Start typing to find users.
+
+      <div class="empty-icon">
+        👥
+      </div>
+
+      Start typing to find OOULink users.
+
     </div>
+
   </div>
+
 
 </div>
 
+
+
 <nav class="bottom-nav">
 
+
   <a href="index.html">
-    <span>🏠</span>
+
+    <span>
+      🏠
+    </span>
+
     Home
+
   </a>
+
 
   <a href="my-tasks.html">
-    <span>📋</span>
+
+    <span>
+      📋
+    </span>
+
     My Tasks
+
   </a>
+
 
   <a href="post-task.html">
-    <span>➕</span>
+
+    <span>
+      ➕
+
+    </span>
+
     Post
+
   </a>
+
 
   <a href="alerts.html">
-    <span>🔔</span>
+
+    <span>
+      🔔
+    </span>
+
     Alerts
+
   </a>
 
-  <a href="profile.html">
-    <span>👤</span>
+
+  <a
+    href="profile.html"
+    class="active"
+  >
+
+    <span>
+      👤
+    </span>
+
     Profile
+
   </a>
+
 
 </nav>
+
+
+
 <script>
+
 
 const SUPABASE_URL =
   "https://dthvdxgxesomltlruogp.supabase.co";
 
+
 const SUPABASE_KEY =
   "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+
 
 const supabaseClient =
   supabase.createClient(
@@ -181,180 +633,537 @@ const supabaseClient =
   );
 
 
+
+let currentUser = null;
+
+let searchTimer = null;
+
+let searchRequestId = 0;
+
+
+
 const searchInput =
-  document.getElementById("userSearch");
+  document.getElementById(
+    "userSearch"
+  );
+
+
+const clearSearch =
+  document.getElementById(
+    "clearSearch"
+  );
+
 
 const results =
-  document.getElementById("results");
+  document.getElementById(
+    "results"
+  );
 
 
-searchInput.addEventListener(
-  "input",
-  searchUsers
-);
+
+/*
+  Escape profile data before putting
+  it into HTML.
+*/
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
 
 
-async function searchUsers() {
 
-  const search =
-    searchInput.value.trim();
+/*
+  Show loading cards.
+*/
 
-  if (search.length < 2) {
+function showLoading() {
 
-    results.innerHTML = `
-      <div class="empty">
-        Start typing to find users.
+  results.innerHTML = `
+
+    <div class="skeleton-card">
+
+      <div class="skeleton skeleton-avatar"></div>
+
+      <div class="skeleton-lines">
+
+        <div class="skeleton skeleton-line"></div>
+
+        <div class="skeleton skeleton-line short"></div>
+
+        <div class="skeleton skeleton-line short"></div>
+
       </div>
-    `;
+
+    </div>
+
+
+    <div class="skeleton-card">
+
+      <div class="skeleton skeleton-avatar"></div>
+
+      <div class="skeleton-lines">
+
+        <div class="skeleton skeleton-line"></div>
+
+        <div class="skeleton skeleton-line short"></div>
+
+        <div class="skeleton skeleton-line short"></div>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+
+/*
+  Load logged-in user.
+*/
+
+async function loadCurrentUser() {
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth.getSession();
+
+
+  if (error) {
+
+    console.error(
+      "Session error:",
+      error
+    );
 
     return;
+
   }
 
 
-  results.innerHTML = `
-    <div class="empty">
-      Searching...
-    </div>
-  `;
+  currentUser =
+    data?.session?.user || null;
+
+}
+
+
+
+/*
+  Update clear button.
+*/
+
+function updateClearButton() {
+
+  clearSearch.style.display =
+    searchInput.value.trim()
+      ? "flex"
+      : "none";
+
+}
+
+
+
+/*
+  Main search.
+*/
+
+async function searchUsers() {
+
+  const requestId =
+    ++searchRequestId;
+
+
+  const rawSearch =
+    searchInput.value.trim();
+
+
+  updateClearButton();
+
+
+  if (rawSearch.length < 2) {
+
+    results.innerHTML = `
+
+      <div class="empty">
+
+        <div class="empty-icon">
+          👥
+        </div>
+
+        Start typing to find OOULink users.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  showLoading();
 
 
   const cleanSearch =
-    search.replace(/^@/, "");
+    rawSearch
+      .replace(/^@+/, "")
+      .trim();
 
 
-  const { data, error } =
+  if (!cleanSearch) {
+
+    results.innerHTML = `
+
+      <div class="empty">
+
+        Enter a username or name.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  /*
+    Search username, full name,
+    or location.
+  */
+
+  const {
+    data,
+    error
+  } =
     await supabaseClient
       .from("profiles")
       .select(
         "id,username,full_name,location,avatar_url,reputation"
       )
       .or(
-        `username.ilike.%${cleanSearch}%,full_name.ilike.%${cleanSearch}%`
+        [
+          `username.ilike.%${cleanSearch}%`,
+          `full_name.ilike.%${cleanSearch}%`,
+          `location.ilike.%${cleanSearch}%`
+        ].join(",")
+      )
+      .order(
+        "username",
+        {
+          ascending: true,
+          nullsFirst: false
+        }
       )
       .limit(20);
 
 
+  /*
+    Ignore an older search result
+    if the user has already typed
+    something newer.
+  */
+
+  if (requestId !== searchRequestId) {
+    return;
+  }
+
+
   if (error) {
 
-    console.error(error);
+    console.error(
+      "User search error:",
+      error
+    );
+
 
     results.innerHTML = `
+
       <div class="empty">
+
+        <div class="empty-icon">
+          ⚠️
+        </div>
+
         Could not search users.
+
+        <br>
+
+        Please try again.
+
       </div>
+
     `;
 
     return;
+
   }
 
 
-  if (!data || data.length === 0) {
+  /*
+    Remove the current user's own
+    profile from search results.
+  */
+
+  const users =
+    (data || []).filter(
+      user =>
+        user.id !== currentUser?.id
+    );
+
+
+  if (users.length === 0) {
 
     results.innerHTML = `
+
       <div class="empty">
-        No users found.
+
+        <div class="empty-icon">
+          🔎
+        </div>
+
+        No other users found.
+
+        <br>
+
+        Try another username or name.
+
       </div>
+
     `;
 
     return;
+
   }
 
 
-  results.innerHTML =
-    data.map(user => `
+  results.innerHTML = `
 
-      <div style="
-        background:white;
-        border-radius:16px;
-        padding:15px;
-        margin-bottom:12px;
-        display:flex;
-        align-items:center;
-        gap:12px;
-        box-shadow:0 5px 18px rgba(0,0,0,0.05);
-      ">
+    <div class="result-count">
 
-        <div style="
-          width:52px;
-          height:52px;
-          border-radius:50%;
-          overflow:hidden;
-          background:#eef2f7;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          flex-shrink:0;
-        ">
+      ${users.length}
+      ${users.length === 1 ? "user" : "users"} found
 
-          ${
-            user.avatar_url
-              ? `<img
-                  src="${user.avatar_url}"
-                  style="
-                    width:100%;
-                    height:100%;
-                    object-fit:cover;
-                  "
-                >`
-              : "👤"
-          }
-
-        </div>
+    </div>
 
 
-        <div style="flex:1;min-width:0;">
+    ${users.map(
+      user => {
 
-          <div style="
-            font-weight:700;
-            font-size:15px;
-          ">
-            ${user.full_name || "OOULink User"}
+        const safeId =
+          encodeURIComponent(
+            user.id
+          );
+
+
+        const safeName =
+          escapeHtml(
+            user.full_name ||
+            "OOULink User"
+          );
+
+
+        const safeUsername =
+          user.username
+            ? escapeHtml(
+                `@${user.username}`
+              )
+            : "";
+
+
+        const safeLocation =
+          escapeHtml(
+            user.location ||
+            "Location not set"
+          );
+
+
+        const reputation =
+          Number(
+            user.reputation || 0
+          ).toFixed(1);
+
+
+        const avatar =
+          user.avatar_url
+            ? `
+              <img
+                src="${escapeHtml(user.avatar_url)}"
+                alt=""
+                loading="lazy"
+              >
+            `
+            : "👤";
+
+
+        return `
+
+          <div class="user-card">
+
+
+            <div class="avatar">
+
+              ${avatar}
+
+            </div>
+
+
+
+            <div class="user-info">
+
+
+              <div class="user-name">
+
+                ${safeName}
+
+              </div>
+
+
+              ${
+                safeUsername
+                  ? `
+                    <div class="username">
+                      ${safeUsername}
+                    </div>
+                  `
+                  : ""
+              }
+
+
+              <div class="user-location">
+
+                📍 ${safeLocation}
+
+              </div>
+
+
+              <div class="user-rating">
+
+                ⭐ ${reputation}
+
+              </div>
+
+
+            </div>
+
+
+
+            <a
+              href="profile.html?id=${safeId}"
+              class="view-button"
+            >
+              VIEW
+            </a>
+
+
           </div>
 
+        `;
 
-          <div style="
-            color:#2563eb;
-            font-size:13px;
-            margin-top:3px;
-          ">
-            ${user.username ? `@${user.username}` : ""}
-          </div>
+      }
+    ).join("")}
 
-
-          <div style="
-            color:#687386;
-            font-size:12px;
-            margin-top:3px;
-          ">
-            ${user.location || "Location not set"}
-          </div>
-
-        </div>
-
-
-        <a
-          href="profile.html?id=${user.id}"
-          style="
-            text-decoration:none;
-            background:#16834b;
-            color:white;
-            padding:9px 12px;
-            border-radius:9px;
-            font-size:12px;
-            font-weight:700;
-            white-space:nowrap;
-          "
-        >
-          VIEW
-        </a>
-
-      </div>
-
-    `).join("");
+  `;
 
 }
 
+
+
+/*
+  Search as the user types.
+
+  Debouncing keeps requests low,
+  which is better for mobile data
+  and low-end phones.
+*/
+
+searchInput.addEventListener(
+  "input",
+  () => {
+
+    updateClearButton();
+
+
+    clearTimeout(
+      searchTimer
+    );
+
+
+    searchTimer =
+      setTimeout(
+        searchUsers,
+        350
+      );
+
+  }
+);
+
+
+
+/*
+  Clear search.
+*/
+
+clearSearch.addEventListener(
+  "click",
+  () => {
+
+    searchInput.value = "";
+
+    updateClearButton();
+
+    searchRequestId++;
+
+    results.innerHTML = `
+
+      <div class="empty">
+
+        <div class="empty-icon">
+          👥
+        </div>
+
+        Start typing to find OOULink users.
+
+      </div>
+
+    `;
+
+    searchInput.focus();
+
+  }
+);
+
+
+
+/*
+  Start page.
+*/
+
+async function init() {
+
+  await loadCurrentUser();
+
+  updateClearButton();
+
+}
+
+
+init();
+
+
 </script>
 
+
 </body>
+
 </html>
