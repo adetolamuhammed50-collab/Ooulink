@@ -3055,14 +3055,27 @@ async function renderTask(){
     return;
   }
 
-  // Render the actual task information FIRST.
-  content.innerHTML =
-    renderBaseTask();
+  try{
 
-  pageReady=true;
+    const html = renderBaseTask();
 
-  // These are secondary sections.
-  // They must NEVER block the task itself.
+    content.innerHTML = html;
+
+    pageReady = true;
+
+  }catch(error){
+
+    console.error("RENDER TASK:",error);
+
+    showError(
+      "Unable to display task",
+      error?.message ||
+      "There is an error in the task display."
+    );
+
+    return;
+  }
+
   loadFiles().catch(error=>{
     console.error("FILES RENDER:",error);
   });
