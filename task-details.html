@@ -3203,67 +3203,69 @@ taskRealtimeChannel=null;
 
 async function initializePage(){
 
-try{
+  try{
 
-currentUser=
-await getCurrentUser();
+    const loaded=await loadTask();
 
-if(!currentUser){
+    if(!loaded){
+      return;
+    }
 
-showError(
-"Sign in required",
-"You need to sign in to view this task."
-);
+    currentUser=
+    await getCurrentUser();
 
-return;
+    await renderTask();
 
-}
+    if(currentUser){
 
-const loaded=
-await loadTask();
+      loadProfiles()
+      .then(()=>{
+        return renderTask();
+      })
+      .catch(error=>{
+        console.error(
+          "PROFILE LOAD:",
+          error
+        );
+      });
 
-if(!loaded){
-return;
-}
+      loadMyApplication()
+      .then(data=>{
+        myApplication=data;
+        return renderTask();
+      })
+      .catch(error=>{
+        console.error(
+          "APPLICATION LOAD:",
+          error
+        );
+      });
 
-await renderTask();
+    }
 
-loadProfiles()
-.catch(error=>{
-console.error("PROFILE LOAD:",error);
-});
+    cleanupTaskRealtime();
 
-loadMyApplication()
-.then(data=>{
-myApplication=data;
-return renderTask();
-})
-.catch(error=>{
-console.error("APPLICATION LOAD:",error);
-});
+    taskRealtimeChannel=
+    setupRealtimeTaskUpdates();
 
-cleanupTaskRealtime();
+    updateDot();
 
-taskRealtimeChannel=
-setupRealtimeTaskUpdates();
+  }catch(error){
 
-updateDot();
+    console.error(
+      "PAGE INIT:",
+      error
+    );
 
-}catch(error){
+    showError(
+      "Something went wrong",
+      error.message||
+      "OOULink could not load this task right now."
+    );
 
-console.error(
-"PAGE INIT:",
-error
-);
+  }
 
-showError(
-"Something went wrong",
-"OOULink could not load this task right now."
-);
-
-}
-
-}
+  }
 
 window.addEventListener(
 "beforeunload",
