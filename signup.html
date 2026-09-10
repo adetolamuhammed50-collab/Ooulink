@@ -340,10 +340,32 @@ const username =
 const email =
   document.getElementById("email").value.trim();
 
-        const location =
-          document.getElementById("location").value;
+const location =
+  document.getElementById("location").value;
 
-        const password =
+const { data: usernameAvailable, error: usernameError } =
+  await supabaseClient.rpc(
+    "is_username_available",
+    {
+      check_username: username
+    }
+  );
+
+if (usernameError) {
+  showMessage(
+    "Could not check username availability. Please try again.",
+    "error"
+  );
+  return;
+}
+
+if (!usernameAvailable) {
+  showMessage(
+    "That username is already taken. Please choose another.",
+    "error"
+  );
+  return;
+}
           document.getElementById("password").value;
 
         const confirmPassword =
