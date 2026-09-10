@@ -1611,3 +1611,1661 @@ ${name}
 
 ${username?
 `<div class
+function applicationStatusHtml(){
+
+if(!myApplication){
+return "";
+}
+
+const status=myApplication.status||"pending";
+
+let message="";
+
+if(status==="pending"){
+message="Your application is waiting for the task owner's decision.";
+}
+
+if(status==="selected"){
+message="You were selected for this task.";
+}
+
+if(status==="rejected"){
+message="Your application was not selected.";
+}
+
+if(status==="withdrawn"){
+message="You withdrew this application.";
+}
+
+return `
+<div class="notice ${
+status==="selected"
+?"success"
+:
+status==="rejected"
+?"danger"
+:
+"info"
+}">
+<div class="bold">
+Application: ${escapeHtml(statusLabel(status))}
+</div>
+
+<div style="margin-top:4px">
+${escapeHtml(message)}
+</div>
+</div>
+`;
+
+}
+
+function taskTimelineHtml(){
+
+if(!currentTask){
+return "";
+}
+
+const steps=[
+{
+status:"open",
+label:"Task posted"
+},
+{
+status:"accepted",
+label:"Runner selected"
+},
+{
+status:"in_progress",
+label:"Work started"
+},
+{
+status:"awaiting_verification",
+label:"Submitted for verification"
+},
+{
+status:"completed",
+label:"Completed"
+}
+];
+
+const current=currentTask.status;
+
+const order={
+open:0,
+accepted:1,
+in_progress:2,
+awaiting_verification:3,
+completed:4,
+rejected:3,
+cancelled:-1
+};
+
+const currentIndex=
+Object.prototype.hasOwnProperty.call(
+order,
+current
+)
+?
+order[current]
+:
+0;
+
+let html=`
+<div class="section">
+<div class="section-title">
+📍 Task Progress
+</div>
+
+<div class="section-note">
+Follow the task from posting to completion.
+</div>
+`;
+
+steps.forEach((step,index)=>{
+
+let state="";
+
+if(current==="cancelled"){
+state=index===0?"done":"";
+}else if(current==="rejected"){
+state=
+index<3
+?"done"
+:
+index===3
+?"current"
+:"";
+}else{
+state=
+index<currentIndex
+?"done"
+:
+index===currentIndex
+?"current"
+:"";
+}
+
+html+=`
+<div style="
+display:flex;
+align-items:center;
+gap:10px;
+padding:8px 0;
+">
+
+<div style="
+width:27px;
+height:27px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+flex:none;
+font-size:11px;
+font-weight:900;
+background:${
+state==="done"
+?"#dcfce7"
+:
+state==="current"
+?"#dbeafe"
+:"#eef2f7"
+};
+color:${
+state==="done"
+?"#166534"
+:
+state==="current"
+?"#1d4ed8"
+:"#6b7280"
+};
+">
+${
+state==="done"
+?"✓"
+:
+index+1
+}
+</div>
+
+<div style="
+font-size:12px;
+font-weight:${
+state==="current"
+?"900"
+:"700"
+};
+color:${
+state==="current"
+?"#172033"
+:"#667085"
+};
+">
+${escapeHtml(step.label)}
+</div>
+
+</div>
+`;
+
+});
+
+if(current==="cancelled"){
+
+html+=`
+<div class="notice danger" style="margin-top:8px">
+This task was cancelled before completion.
+</div>
+`;
+
+}
+
+if(current==="rejected"){
+
+html+=`
+<div class="notice danger" style="margin-top:8px">
+The latest submission was rejected and the runner can continue working on the task.
+</div>
+`;
+
+}
+
+html+=`</div>`;
+
+return html;
+
+}
+
+function taskRulesHtml(){
+
+if(!currentTask){
+return "";
+}
+
+return `
+<div class="section">
+
+<div class="section-title">
+📋 Task Information
+</div>
+
+<div class="notice">
+
+<div class="bold">
+Before proceeding
+</div>
+
+<div style="margin-top:6px">
+Only work related to the task description should be requested or completed.
+Keep communication respectful and use the OOULink task chat for important task-related messages.
+</div>
+
+</div>
+
+</div>
+`;
+
+}
+
+function renderBaseTask(){
+
+if(!currentTask){
+return "";
+}
+
+return `
+${taskHeaderHtml()}
+
+${taskTimelineHtml()}
+
+${ownerHtml()}
+
+${runnerHtml()}
+
+${taskRulesHtml()}
+
+${applicationHtml()}
+
+${ownerActionsHtml()}
+
+${runnerActionsHtml()}
+
+${rejectionHtml()}
+
+${applicantsContainerHtml()}
+
+<div id="files"></div>
+
+<div id="chat"></div>
+
+<div id="reviews"></div>
+
+${reportHtml()}
+`;
+
+}
+
+async function refreshTaskOnly(){
+
+if(!currentTask){
+return false;
+}
+
+const {
+data,
+error
+}=await supabaseClient
+.from("tasks")
+.select("*")
+.eq("id",currentTask.id)
+.single();
+
+if(error){
+
+console.error(
+"REFRESH TASK:",
+error
+);
+
+return false;
+
+}
+
+if(!data){
+return false;
+}
+
+currentTask=data;
+
+taskOwnerProfile=null;
+taskRunnerProfile=null;
+
+await loadProfiles();
+
+if(currentUser){
+
+myApplication=
+await loadMyApplication();
+
+}
+
+return true;
+
+}
+
+async function reloadEverything(){
+
+if(busy){
+return;
+}
+
+const refreshed=
+await refreshTaskOnly();
+
+if(!refreshed){
+return;
+}
+
+await renderTask();
+
+}
+
+async function loadFiles(){
+
+const box=
+document.getElementById("files");
+
+if(!box){
+return;
+}
+
+if(!participant()){
+
+box.innerHTML="";
+
+return;
+
+}
+
+box.innerHTML=`
+<div class="section">
+<div class="section-title">
+📎 Task Files
+</div>
+
+<div class="section-note">
+Loading attached files...
+</div>
+</div>
+`;
+
+const {
+data:files,
+error
+}=await supabaseClient
+.from("task_attachments")
+.select(
+"id,task_id,file_name,file_path,file_size,mime_type,created_at"
+)
+.eq("task_id",currentTask.id)
+.order(
+"created_at",
+{
+ascending:true
+}
+);
+
+if(error){
+
+console.error(
+"FILES:",
+error
+);
+
+box.innerHTML=`
+<div class="section">
+
+<div class="section-title">
+📎 Task Files
+</div>
+
+<div class="empty">
+Unable to load task files.
+</div>
+
+</div>
+`;
+
+return;
+
+}
+
+if(!files?.length){
+
+box.innerHTML=`
+<div class="section">
+
+<div class="section-title">
+📎 Task Files
+</div>
+
+<div class="empty">
+No files have been attached to this task.
+</div>
+
+</div>
+`;
+
+return;
+
+}
+
+let html=`
+<div class="section">
+
+<div class="section-title">
+📎 Task Files
+</div>
+
+<div class="section-note">
+Files are available only to the task participants.
+</div>
+`;
+
+for(const file of files){
+
+let signedUrl=null;
+
+if(file.file_path){
+
+const {
+data:signed,
+error:signedError
+}=await supabaseClient
+.storage
+.from("TaskFiles")
+.createSignedUrl(
+file.file_path,
+600
+);
+
+if(
+signedError||
+!signed?.signedUrl
+){
+
+console.error(
+"FILE URL:",
+signedError
+);
+
+}else{
+
+signedUrl=signed.signedUrl;
+
+}
+
+}
+
+html+=`
+
+<div class="file-card">
+
+<div class="pdf">
+📄
+</div>
+
+<div class="file-info">
+
+<div class="file-name">
+${escapeHtml(
+file.file_name||
+"Unnamed file"
+)}
+</div>
+
+<div class="file-size">
+${fileSize(file.file_size)}
+${file.created_at?
+" • "+escapeHtml(
+shortDate(file.created_at)
+)
+:""}
+</div>
+
+</div>
+
+${
+signedUrl
+?
+`
+<a
+class="file-link"
+href="${escapeHtml(signedUrl)}"
+target="_blank"
+rel="noopener noreferrer"
+>
+OPEN
+</a>
+`
+:
+`
+<span
+class="file-link"
+style="background:#9ca3af"
+>
+UNAVAILABLE
+</span>
+`
+}
+
+</div>
+`;
+
+}
+
+html+=`
+</div>
+`;
+
+box.innerHTML=html;
+
+}
+
+function chatParticipantIds(){
+
+if(!currentTask){
+return [];
+}
+
+return [
+currentTask.user_id,
+currentTask.runner_id
+].filter(Boolean);
+
+}
+
+function canUseChat(){
+
+if(!currentUser||!currentTask){
+return false;
+}
+
+if(!participant()){
+return false;
+}
+
+return !!currentTask.runner_id;
+
+}
+
+function chatHtml(){
+
+if(!canUseChat()){
+return "";
+}
+
+return `
+<div class="section">
+
+<div class="section-title">
+💬 Task Chat
+</div>
+
+<div class="section-note">
+Use this chat for communication related to this task.
+</div>
+
+<div class="chat-box">
+
+<div
+id="messageList"
+class="message-list"
+>
+<div class="empty">
+Loading messages...
+</div>
+</div>
+
+<div class="chat-compose">
+
+<textarea
+id="chatInput"
+maxlength="1000"
+placeholder="Type a message..."
+></textarea>
+
+<button
+id="chatSend"
+class="chat-send"
+onclick="sendChatMessage()"
+>
+SEND
+</button>
+
+</div>
+
+</div>
+
+</div>
+`;
+
+}
+
+async function loadChat(){
+
+const box=
+document.getElementById("chat");
+
+if(!box){
+return;
+}
+
+if(!canUseChat()){
+
+box.innerHTML="";
+
+cleanupChatChannel();
+
+return;
+
+}
+
+box.innerHTML=
+chatHtml();
+
+const {
+data,
+error
+}=await supabaseClient
+.from("task_messages")
+.select(
+"id,task_id,sender_id,message,created_at"
+)
+.eq("task_id",currentTask.id)
+.order(
+"created_at",
+{
+ascending:true
+}
+);
+
+if(error){
+
+console.error(
+"CHAT LOAD:",
+error
+);
+
+const list=
+document.getElementById(
+"messageList"
+);
+
+if(list){
+
+list.innerHTML=`
+<div class="empty">
+Unable to load chat messages.
+</div>
+`;
+
+}
+
+}else{
+
+taskMessages=data||[];
+
+renderMessages();
+
+}
+
+subscribeToChat();
+
+}
+
+function renderMessages(){
+
+const list=
+document.getElementById(
+"messageList"
+);
+
+if(!list){
+return;
+}
+
+if(!taskMessages.length){
+
+list.innerHTML=`
+<div class="empty">
+No messages yet. Start the conversation.
+</div>
+`;
+
+return;
+
+}
+
+let html="";
+
+for(const message of taskMessages){
+
+const mine=
+message.sender_id===
+currentUser?.id;
+
+html+=`
+
+<div class="message ${
+mine
+?"mine"
+:"theirs"
+}">
+
+<div>
+${escapeHtml(
+message.message
+)}
+</div>
+
+<div class="message-time">
+${dateText(
+message.created_at
+)}
+</div>
+
+</div>
+`;
+
+}
+
+list.innerHTML=html;
+
+list.scrollTop=list.scrollHeight;
+
+}
+
+function cleanupChatChannel(){
+
+if(!chatChannel){
+return;
+}
+
+supabaseClient
+.removeChannel(chatChannel)
+.catch(
+error=>{
+console.error(
+"CHAT CHANNEL CLEANUP:",
+error
+);
+}
+);
+
+chatChannel=null;
+
+}
+
+function subscribeToChat(){
+
+cleanupChatChannel();
+
+if(!canUseChat()){
+return;
+}
+
+chatChannel=
+supabaseClient
+.channel(
+"task-chat-"+currentTask.id
+)
+.on(
+"postgres_changes",
+{
+event:"INSERT",
+schema:"public",
+table:"task_messages",
+filter:"task_id=eq."+currentTask.id
+},
+payload=>{
+
+const incoming=
+payload.new;
+
+if(!incoming){
+return;
+}
+
+if(
+taskMessages.some(
+message=>
+String(message.id)===
+String(incoming.id)
+)
+){
+return;
+}
+
+taskMessages.push(
+incoming
+);
+
+renderMessages();
+
+}
+)
+.subscribe(
+status=>{
+
+if(status==="CHANNEL_ERROR"){
+console.error(
+"CHAT CHANNEL ERROR"
+);
+}
+
+}
+);
+
+}
+
+async function sendChatMessage(){
+
+if(
+busy||
+!canUseChat()||
+!currentUser
+){
+return;
+}
+
+const input=
+document.getElementById(
+"chatInput"
+);
+
+if(!input){
+return;
+}
+
+const message=
+input.value.trim();
+
+if(!message){
+return;
+}
+
+if(message.length>1000){
+
+alert(
+"Keep messages under 1000 characters."
+);
+
+return;
+
+}
+
+const sendButton=
+document.getElementById(
+"chatSend"
+);
+
+busy=true;
+
+if(sendButton){
+
+sendButton.disabled=true;
+sendButton.textContent="SENDING...";
+
+}
+
+const {
+data,
+error
+}=await supabaseClient
+.from("task_messages")
+.insert({
+task_id:currentTask.id,
+sender_id:currentUser.id,
+message:message
+})
+.select(
+"id,task_id,sender_id,message,created_at"
+)
+.single();
+
+if(error){
+
+console.error(
+"SEND MESSAGE:",
+error
+);
+
+alert(
+error.message||
+"Could not send message."
+);
+
+busy=false;
+
+if(sendButton){
+
+sendButton.disabled=false;
+sendButton.textContent="SEND";
+
+}
+
+return;
+
+}
+
+if(data){
+
+if(
+!taskMessages.some(
+item=>
+String(item.id)===
+String(data.id)
+)
+){
+
+taskMessages.push(data);
+
+}
+
+}
+
+input.value="";
+
+busy=false;
+
+if(sendButton){
+
+sendButton.disabled=false;
+sendButton.textContent="SEND";
+
+}
+
+renderMessages();
+
+}
+
+function reviewStarsHtml(
+rating,
+interactive=false
+){
+
+const value=
+Math.max(
+0,
+Math.min(
+5,
+Number(rating)||0
+)
+);
+
+let html="";
+
+for(let i=1;i<=5;i++){
+
+if(interactive){
+
+html+=`
+<button
+type="button"
+class="star"
+onclick="setRating(${i})"
+aria-label="${i} star"
+>
+${i<=value?"★":"☆"}
+</button>
+`;
+
+}else{
+
+html+=
+i<=value
+?"★"
+:"☆";
+
+}
+
+}
+
+return html;
+
+}
+
+function reviewFormHtml(){
+
+if(!canReview()){
+return "";
+}
+
+const alreadyReviewed=
+taskReviews.some(
+review=>
+review.reviewer_id===
+currentUser.id
+);
+
+if(alreadyReviewed){
+
+return `
+<div class="notice success">
+You have already reviewed this task.
+</div>
+`;
+
+}
+
+const targetId=
+isOwner()
+?
+currentTask.runner_id
+:
+currentTask.user_id;
+
+if(!targetId){
+
+return `
+<div class="empty">
+The other participant could not be identified for review.
+</div>
+`;
+
+}
+
+return `
+<div class="section">
+
+<div class="section-title">
+⭐ Leave a Review
+</div>
+
+<div class="section-note">
+Your review helps other OOULink users know who they can trust.
+</div>
+
+<div
+id="ratingStars"
+class="stars"
+>
+${reviewStarsHtml(
+selectedRating,
+true
+)}
+</div>
+
+<textarea
+id="reviewComment"
+maxlength="500"
+placeholder="Share your experience..."
+></textarea>
+
+<button
+class="btn dark"
+onclick="submitReview('${escapeHtml(targetId)}')"
+>
+SUBMIT REVIEW
+</button>
+
+</div>
+`;
+
+}
+
+function reviewsHtml(){
+
+let html=`
+<div class="section">
+
+<div class="section-title">
+⭐ Reviews
+</div>
+`;
+
+if(!taskReviews.length){
+
+html+=`
+<div class="empty">
+No reviews have been posted for this task yet.
+</div>
+`;
+
+}else{
+
+for(const review of taskReviews){
+
+const rating=
+Math.max(
+0,
+Math.min(
+5,
+Number(review.rating)||0
+)
+);
+
+const reviewerName=
+escapeHtml(
+review.reviewer_profile?.full_name||
+review.reviewer_profile?.username||
+"OOULink User"
+);
+
+html+=`
+
+<div class="review-card">
+
+<div class="review-head">
+
+<div>
+
+<div class="review-author">
+${reviewerName}
+</div>
+
+<div class="review-date">
+${shortDate(
+review.created_at
+)}
+</div>
+
+</div>
+
+<div class="review-rating">
+${reviewStarsHtml(rating)}
+</div>
+
+</div>
+
+${
+review.comment
+?
+`
+<div class="review-note">
+${escapeHtml(review.comment)}
+</div>
+`
+:
+""
+}
+
+</div>
+`;
+
+}
+
+}
+
+html+=`
+</div>
+`;
+
+return html;
+
+}
+
+async function loadReviews(){
+
+const box=
+document.getElementById(
+"reviews"
+);
+
+if(!box||!currentTask){
+return;
+}
+
+const {
+data,
+error
+}=await supabaseClient
+.from("task_reviews")
+.select(
+"id,task_id,reviewer_id,reviewee_id,rating,comment,created_at"
+)
+.eq("task_id",currentTask.id)
+.order(
+"created_at",
+{
+ascending:false
+}
+);
+
+if(error){
+
+console.error(
+"REVIEWS:",
+error
+);
+
+taskReviews=[];
+
+box.innerHTML=`
+<div class="section">
+
+<div class="section-title">
+⭐ Reviews
+</div>
+
+<div class="empty">
+Unable to load reviews right now.
+</div>
+
+</div>
+`;
+
+return;
+
+}
+
+taskReviews=data||[];
+
+const reviewerIds=[
+...new Set(
+taskReviews
+.map(review=>review.reviewer_id)
+.filter(Boolean)
+)
+];
+
+if(reviewerIds.length){
+
+const {
+data:profiles,
+error:profileError
+}=await supabaseClient
+.from("profiles")
+.select(
+"id,username,full_name,avatar_url"
+)
+.in("id",reviewerIds);
+
+if(!profileError){
+
+const map=
+new Map(
+(profiles||[]).map(
+profile=>[
+profile.id,
+profile
+]
+)
+);
+
+taskReviews=
+taskReviews.map(
+review=>({
+...review,
+reviewer_profile:
+map.get(
+review.reviewer_id
+)||null
+})
+);
+
+}
+
+}
+
+box.innerHTML=
+reviewsHtml()+
+reviewFormHtml();
+
+}
+
+function setRating(rating){
+
+const value=
+Number(rating);
+
+if(
+value<1||
+value>5
+){
+return;
+}
+
+selectedRating=value;
+
+const stars=
+document.getElementById(
+"ratingStars"
+);
+
+if(stars){
+
+stars.innerHTML=
+reviewStarsHtml(
+selectedRating,
+true
+);
+
+}
+
+}
+
+async function submitReview(revieweeId){
+
+if(
+busy||
+!canReview()||
+!currentUser
+){
+return;
+}
+
+if(!revieweeId){
+
+alert(
+"Review recipient not found."
+);
+
+return;
+
+}
+
+const rating=
+Number(selectedRating);
+
+if(
+rating<1||
+rating>5
+){
+
+alert(
+"Please select a rating from 1 to 5."
+);
+
+return;
+
+}
+
+const comment=
+document
+.getElementById("reviewComment")
+?.value
+.trim()||"";
+
+if(comment.length>500){
+
+alert(
+"Keep the review under 500 characters."
+);
+
+return;
+
+}
+
+if(
+taskReviews.some(
+review=>
+review.reviewer_id===
+currentUser.id
+)
+){
+
+alert(
+"You have already reviewed this task."
+);
+
+return;
+
+}
+
+busy=true;
+
+const {
+data,
+error
+}=await supabaseClient
+.from("task_reviews")
+.insert({
+task_id:currentTask.id,
+reviewer_id:currentUser.id,
+reviewee_id:revieweeId,
+rating:rating,
+comment:comment||null
+})
+.select()
+.single();
+
+if(error){
+
+console.error(
+"SUBMIT REVIEW:",
+error
+);
+
+alert(
+error.message||
+"Could not submit your review."
+);
+
+busy=false;
+
+return;
+
+}
+
+if(data){
+
+taskReviews.unshift({
+...data,
+reviewer_profile:{
+id:currentUser.id,
+full_name:
+currentUser.user_metadata?.full_name||
+currentUser.email||
+"OOULink User",
+username:
+currentUser.user_metadata?.username||
+null
+}
+});
+
+}
+
+const targetName=
+isOwner()
+?
+"runner"
+:
+"task owner";
+
+await notify(
+revieweeId,
+"task_review",
+"New task review",
+`You received a review from the ${targetName} for "${currentTask.title}".`
+);
+
+selectedRating=0;
+
+busy=false;
+
+await loadReviews();
+
+}
+
+function setupRealtimeTaskUpdates(){
+
+if(!currentTask){
+return;
+}
+
+const channelName=
+"task-details-"+currentTask.id;
+
+const channel=
+supabaseClient
+.channel(channelName)
+.on(
+"postgres_changes",
+{
+event:"UPDATE",
+schema:"public",
+table:"tasks",
+filter:"id=eq."+currentTask.id
+},
+async payload=>{
+
+if(!payload?.new){
+return;
+}
+
+const previousStatus=
+currentTask.status;
+
+currentTask=
+payload.new;
+
+if(
+previousStatus!==
+currentTask.status
+){
+
+await loadProfiles();
+
+if(currentUser){
+
+myApplication=
+await loadMyApplication();
+
+}
+
+await renderTask();
+
+}
+
+}
+)
+.subscribe(
+status=>{
+
+if(status==="CHANNEL_ERROR"){
+
+console.error(
+"TASK REALTIME CHANNEL ERROR"
+);
+
+}
+
+}
+);
+
+return channel;
+
+}
+
+let taskRealtimeChannel=null;
+
+function cleanupTaskRealtime(){
+
+if(!taskRealtimeChannel){
+return;
+}
+
+supabaseClient
+.removeChannel(
+taskRealtimeChannel
+)
+.catch(
+error=>{
+console.error(
+"TASK CHANNEL CLEANUP:",
+error
+);
+}
+);
+
+taskRealtimeChannel=null;
+
+}
+
+async function initializePage(){
+
+try{
+
+currentUser=
+await getCurrentUser();
+
+if(!currentUser){
+
+showError(
+"Sign in required",
+"You need to sign in to view this task."
+);
+
+return;
+
+}
+
+const loaded=
+await loadTask();
+
+if(!loaded){
+return;
+}
+
+await loadProfiles();
+
+myApplication=
+await loadMyApplication();
+
+await renderTask();
+
+cleanupTaskRealtime();
+
+taskRealtimeChannel=
+setupRealtimeTaskUpdates();
+
+updateDot();
+
+}catch(error){
+
+console.error(
+"PAGE INIT:",
+error
+);
+
+showError(
+"Something went wrong",
+"OOULink could not load this task right now."
+);
+
+}
+
+}
+
+window.addEventListener(
+"beforeunload",
+()=>{
+
+cleanupChatChannel();
+cleanupTaskRealtime();
+
+}
+);
+
+document.addEventListener(
+"visibilitychange",
+()=>{
+
+if(
+document.visibilityState==="visible"&&
+pageReady
+){
+
+updateDot();
+
+}
+
+}
+);
+
+initializePage();
+
+</script>
+</body>
+</html>
