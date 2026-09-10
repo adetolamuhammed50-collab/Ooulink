@@ -4354,66 +4354,47 @@ async function initializePage(){
 
   try{
 
+    currentUser=
+      await getCurrentUser();
+
     content.innerHTML=`
       <div class="loading">
         <div class="loading-spinner"></div>
-        Checking task...
+        Loading task...
       </div>
     `;
 
-    const loaded=await loadTask();
+    const loaded=
+      await loadTask();
 
     if(!loaded){
       return;
     }
 
-    content.innerHTML=`
-      <div class="loading">
-        <div class="loading-spinner"></div>
-        Task found. Loading details...
-      </div>
-    `;
-
-    await renderTask();
-
-    try{
-      currentUser=await getCurrentUser();
-    }catch(error){
-      console.error("AUTH:",error);
-      currentUser=null;
-    }
-
     if(currentUser){
 
-      loadProfiles()
-      .then(()=>{
-        return renderTask();
-      })
-      .catch(error=>{
-        console.error("PROFILE LOAD:",error);
-      });
+      await loadProfiles();
 
-      loadMyApplication()
-      .then(data=>{
-        myApplication=data;
-        return renderTask();
-      })
-      .catch(error=>{
-        console.error("APPLICATION LOAD:",error);
-      });
+      myApplication=
+        await loadMyApplication();
 
     }
+
+    await renderTask();
 
     cleanupTaskRealtime();
 
     taskRealtimeChannel=
-    setupRealtimeTaskUpdates();
+      setupRealtimeTaskUpdates();
 
     updateDot();
 
   }catch(error){
 
-    console.error("PAGE INIT:",error);
+    console.error(
+      "PAGE INIT:",
+      error
+    );
 
     showError(
       "Task loading failed",
