@@ -4345,60 +4345,49 @@ taskRealtimeChannel=null;
 
 async function initializePage(){
 
-  content.innerHTML=`
-    <div class="loading">
-      <div class="loading-spinner"></div>
-      Connecting to OOULink...
-    </div>
-  `;
-
   try{
 
-    currentUser=
-      await getCurrentUser();
+    // 1. Get the logged-in user.
+    currentUser = await getCurrentUser();
 
-    content.innerHTML=`
-      <div class="loading">
-        <div class="loading-spinner"></div>
-        Loading task...
-      </div>
-    `;
-
-    const loaded=
-      await loadTask();
+    // 2. Load the task itself.
+    const loaded = await loadTask();
 
     if(!loaded){
       return;
     }
 
+    // 3. Render the task IMMEDIATELY.
+    // Do not wait for profiles/applications.
+    await renderTask();
+
+    // 4. Load optional user/task data afterward.
     if(currentUser){
 
       await loadProfiles();
 
-      myApplication=
+      myApplication =
         await loadMyApplication();
 
+      // Refresh the UI with the extra information.
+      await renderTask();
+
+      updateDot();
     }
 
-    await renderTask();
-
+    // 5. Start realtime updates.
     cleanupTaskRealtime();
 
-    taskRealtimeChannel=
+    taskRealtimeChannel =
       setupRealtimeTaskUpdates();
-
-    updateDot();
 
   }catch(error){
 
-    console.error(
-      "PAGE INIT:",
-      error
-    );
+    console.error("PAGE INIT:", error);
 
     showError(
       "Task loading failed",
-      error?.message||
+      error?.message ||
       "OOULink could not load this task."
     );
 
