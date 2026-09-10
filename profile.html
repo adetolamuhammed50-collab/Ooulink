@@ -271,6 +271,7 @@
   <div class="profile-meta" id="profileLocation">Location not set</div>
   <div class="profile-level">⭐ Level 1 • 0 XP</div>
 </div>
+
 <div id="usernameSetup" style="
   display:none;
   background:#eef7f1;
@@ -280,37 +281,40 @@
   margin-top:20px;
   margin-bottom:20px;
 ">
+
   <strong style="display:block;margin-bottom:6px;">
     Choose your username
-  </strong>  <p style="
+  </strong>
+
+  <p style="
     font-size:13px;
     color:#687386;
     margin-bottom:12px;
   ">
     This will be your public OOULink identity.
-  </p><input
-type="text"
-id="usernameInput"
-placeholder="e.g. shina_01"
-minlength="3"
-maxlength="20"
-pattern="[A-Za-z0-9_]+"
-autocomplete="off"
+  </p>
 
-«»
+  <input
+    type="text"
+    id="usernameInput"
+    placeholder="e.g. shina_01"
+    minlength="3"
+    maxlength="20"
+    pattern="[A-Za-z0-9_]+"
+    autocomplete="off"
+  >
 
-<button
-type="button"
-class="save-button"
-id="usernameButton"
-onclick="saveUsername()"
-style="margin-top:10px;"
+  <button
+    type="button"
+    class="save-button"
+    id="usernameButton"
+    onclick="saveUsername()"
+    style="margin-top:10px;"
+  >
+    SAVE USERNAME
+  </button>
 
-«»
-
-SAVE USERNAME
-
-  </button>  <div
+  <div
     id="usernameStatus"
     style="
       text-align:center;
@@ -319,7 +323,9 @@ SAVE USERNAME
       min-height:18px;
     "
   ></div>
+
 </div>
+
 <div class="profile-stats">
   <div class="profile-stat">
     <strong id="postedCount">0</strong>
