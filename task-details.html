@@ -3203,7 +3203,21 @@ taskRealtimeChannel=null;
 
 async function initializePage(){
 
+  content.innerHTML=`
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      Connecting to OOULink...
+    </div>
+  `;
+
   try{
+
+    content.innerHTML=`
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        Checking task...
+      </div>
+    `;
 
     const loaded=await loadTask();
 
@@ -3211,10 +3225,21 @@ async function initializePage(){
       return;
     }
 
-    currentUser=
-    await getCurrentUser();
+    content.innerHTML=`
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        Task found. Loading details...
+      </div>
+    `;
 
     await renderTask();
+
+    try{
+      currentUser=await getCurrentUser();
+    }catch(error){
+      console.error("AUTH:",error);
+      currentUser=null;
+    }
 
     if(currentUser){
 
@@ -3223,10 +3248,7 @@ async function initializePage(){
         return renderTask();
       })
       .catch(error=>{
-        console.error(
-          "PROFILE LOAD:",
-          error
-        );
+        console.error("PROFILE LOAD:",error);
       });
 
       loadMyApplication()
@@ -3235,10 +3257,7 @@ async function initializePage(){
         return renderTask();
       })
       .catch(error=>{
-        console.error(
-          "APPLICATION LOAD:",
-          error
-        );
+        console.error("APPLICATION LOAD:",error);
       });
 
     }
@@ -3252,15 +3271,12 @@ async function initializePage(){
 
   }catch(error){
 
-    console.error(
-      "PAGE INIT:",
-      error
-    );
+    console.error("PAGE INIT:",error);
 
     showError(
-      "Something went wrong",
-      error.message||
-      "OOULink could not load this task right now."
+      "Task loading failed",
+      error?.message||
+      "OOULink could not load this task."
     );
 
   }
