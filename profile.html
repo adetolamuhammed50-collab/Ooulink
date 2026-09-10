@@ -336,6 +336,57 @@ SAVE USERNAME
     <span>XP</span>
   </div>
 </div>
+<div id="usernameSetup" style="
+  display:none;
+  background:#eef7f1;
+  border:1px solid #cfe8d9;
+  border-radius:14px;
+  padding:15px;
+  margin-top:20px;
+  margin-bottom:20px;
+">
+  <strong style="display:block;margin-bottom:6px;">
+    Choose your username
+  </strong>
+
+  <p style="
+    font-size:13px;
+    color:#687386;
+    margin-bottom:12px;
+  ">
+    This will be your public OOULink identity.
+  </p>
+
+  <input
+    type="text"
+    id="usernameInput"
+    placeholder="e.g. shina_01"
+    minlength="3"
+    maxlength="20"
+    pattern="[A-Za-z0-9_]+"
+    autocomplete="off"
+  >
+
+  <button
+    type="button"
+    class="save-button"
+    id="usernameButton"
+    onclick="saveUsername()"
+    style="margin-top:10px;"
+  >
+    SAVE USERNAME
+  </button>
+
+  <div
+    id="usernameStatus"
+    style="
+      text-align:center;
+      margin-top:9px;
+      font-size:13px;
+      min-height:18px;
+    "
+  ></div>
+</div>
     <div class="field">
       <label for="fullName">Full Name</label>
       <input
