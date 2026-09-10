@@ -1903,7 +1903,25 @@ ${reportHtml()}
 `;
 
 }
+async function renderTask(){
 
+if(!currentTask){
+return;
+}
+
+content.innerHTML=
+renderBaseTask();
+
+pageReady=true;
+
+await Promise.all([
+loadFiles(),
+loadChat(),
+loadReviews()
+]);
+
+  }
+  
 async function refreshTaskOnly(){
 
 if(!currentTask){
