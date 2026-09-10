@@ -517,7 +517,65 @@ document.querySelector(".profile-level").textContent =
       showAvatar(previewURL);
 
     });
+async function saveUsername() {
+  const input =
+    document.getElementById("usernameInput");
 
+  const button =
+    document.getElementById("usernameButton");
+
+  const status =
+    document.getElementById("usernameStatus");
+
+  const username =
+    input.value.trim().toLowerCase();
+
+  if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+    status.textContent =
+      "Use 3–20 letters, numbers, or underscores.";
+    status.style.color = "#dc2626";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "SAVING...";
+  status.textContent = "";
+
+  try {
+    const { error } =
+      await supabaseClient.rpc(
+        "set_my_username",
+        {
+          new_username: username
+        }
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    status.textContent =
+      "Username saved successfully! ✅";
+    status.style.color = "#16834b";
+
+    button.textContent = "SAVED ✓";
+
+    setTimeout(() => {
+      document.getElementById("usernameSetup").style.display = "none";
+    }, 1200);
+
+  } catch (error) {
+    console.error("Username error:", error);
+
+    status.textContent =
+      error.message || "Could not save username.";
+
+    status.style.color = "#dc2626";
+
+    button.disabled = false;
+    button.textContent = "SAVE USERNAME";
+  }
+}
   async function saveProfile() {
 
     if (!currentUser) {
