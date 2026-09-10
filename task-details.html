@@ -3013,7 +3013,31 @@ function applicantsContainerHtml(){
   `;
 }
 
+function rejectionHtml(){
+  if(!currentTask){
+    return "";
+  }
 
+  if(
+    !isRunner() ||
+    currentTask.status!=="rejected"
+  ){
+    return "";
+  }
+
+  return `
+    <div class="section">
+      <div class="section-title">
+        ⚠️ Submission Rejected
+      </div>
+
+      <div class="notice danger">
+        Your latest submission was rejected by the task owner.
+        Please review the task and continue working on it.
+      </div>
+    </div>
+  `;
+  }
 function renderBaseTask(){
   if(!currentTask){
     return "";
