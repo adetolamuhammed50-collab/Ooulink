@@ -1173,4 +1173,1032 @@
           "← Back to Users";
 
 
-        document.
+        document.          getElementById(
+            "publicActions"
+          ).classList.remove("hidden");
+
+        document.getElementById(
+          "changePhotoButton"
+        ).classList.add("hidden");
+
+      }
+
+
+      /*
+        ------------------------------------------------
+        IDENTITY
+        ------------------------------------------------
+      */
+
+      document.getElementById(
+        "profileName"
+      ).textContent =
+        fullName;
+
+
+      document.getElementById(
+        "profileUsername"
+      ).textContent =
+        username
+          ? `@${username}`
+          : "Username not set";
+
+
+      document.getElementById(
+        "profileLocation"
+      ).textContent =
+        location;
+
+
+      document.getElementById(
+        "xpCount"
+      ).textContent =
+        xp;
+
+
+      document.getElementById(
+        "profileLevel"
+      ).textContent =
+        `⭐ Level ${calculateLevel(xp)} • ${xp} XP`;
+
+
+      /*
+        Current verification system is not
+        activated yet.
+      */
+
+      const verificationBadge =
+        document.getElementById(
+          "verificationBadge"
+        );
+
+      verificationBadge.textContent =
+        "🛡️ Not verified";
+
+      verificationBadge.classList.remove(
+        "verified"
+      );
+
+
+      /*
+        Avatar.
+      */
+
+      showAvatar(
+        avatarURL
+      );
+
+
+      /*
+        ------------------------------------------------
+        TASK COUNTS
+        ------------------------------------------------
+      */
+
+      const {
+        data: postedTasks,
+        error: postedError
+      } =
+        await supabaseClient
+          .from("tasks")
+          .select("id")
+          .eq(
+            "user_id",
+            profileUserId
+          );
+
+
+      if (postedError) {
+        console.error(
+          "Posted tasks error:",
+          postedError
+        );
+      }
+
+
+      const {
+        data: completedTasks,
+        error: completedError
+      } =
+        await supabaseClient
+          .from("tasks")
+          .select("id")
+          .eq(
+            "runner_id",
+            profileUserId
+          )
+          .eq(
+            "status",
+            "completed"
+          );
+
+
+      if (completedError) {
+        console.error(
+          "Completed tasks error:",
+          completedError
+        );
+      }
+
+
+      document.getElementById(
+        "postedCount"
+      ).textContent =
+        postedTasks?.length || 0;
+
+
+      document.getElementById(
+        "completedCount"
+      ).textContent =
+        completedTasks?.length || 0;
+
+
+      /*
+        ------------------------------------------------
+        REVIEWS
+        ------------------------------------------------
+      */
+
+      await loadReviews(
+        profileUserId
+      );
+
+
+      /*
+        Finish loading.
+      */
+
+      loading.classList.add(
+        "hidden"
+      );
+
+      content.classList.remove(
+        "hidden"
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Profile loading error:",
+        error
+      );
+
+      loading.classList.add(
+        "hidden"
+      );
+
+      errorBox.textContent =
+        error.message ||
+        "Could not load this profile.";
+
+      errorBox.classList.remove(
+        "hidden"
+      );
+
+    }
+
+  }
+
+
+  /*
+    --------------------------------------------------
+    LOAD REVIEWS
+    --------------------------------------------------
+  */
+
+  async function loadReviews(userId) {
+
+    const reviewsList =
+      document.getElementById(
+        "reviewsList"
+      );
+
+
+    const {
+      data: reviews,
+      error
+    } =
+      await supabaseClient
+        .from("reviews")
+        .select(
+          "id,task_id,reviewer_id,rating,note,created_at"
+        )
+        .eq(
+          "reviewee_id",
+          userId
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        )
+        .limit(10);
+
+
+    if (error) {
+
+      console.error(
+        "Reviews error:",
+        error
+      );
+
+      reviewsList.innerHTML = `
+        <div class="no-reviews">
+          Reviews could not be loaded.
+        </div>
+      `;
+
+      return;
+    }
+
+
+    if (!reviews || !reviews.length) {
+
+      reviewsList.innerHTML = `
+        <div class="no-reviews">
+          No reviews yet.
+        </div>
+      `;
+
+      return;
+    }
+
+
+    /*
+      Calculate reputation from actual reviews.
+    */
+
+    const total =
+      reviews.reduce(
+        (sum, review) =>
+          sum + Number(review.rating || 0),
+        0
+      );
+
+
+    const average =
+      total / reviews.length;
+
+
+    /*
+      Add reputation below location.
+    */
+
+    const profileLocation =
+      document.getElementById(
+        "profileLocation"
+      );
+
+
+    let reputationElement =
+      document.getElementById(
+        "profileReputation"
+      );
+
+
+    if (!reputationElement) {
+
+      reputationElement =
+        document.createElement(
+          "div"
+        );
+
+      reputationElement.id =
+        "profileReputation";
+
+      reputationElement.className =
+        "profile-meta";
+
+      profileLocation.insertAdjacentElement(
+        "afterend",
+        reputationElement
+      );
+
+    }
+
+
+    reputationElement.textContent =
+      `⭐ ${average.toFixed(2)} / 5 reputation`;
+
+
+    /*
+      Render reviews.
+    */
+
+    reviewsList.innerHTML =
+      reviews.map(
+        review => {
+
+          const rating =
+            Number(review.rating || 0);
+
+          const stars =
+            "★".repeat(
+              Math.max(
+                0,
+                Math.min(
+                  5,
+                  rating
+                )
+              )
+            ) +
+            "☆".repeat(
+              5 -
+              Math.max(
+                0,
+                Math.min(
+                  5,
+                  rating
+                )
+              )
+            );
+
+
+          const note =
+            review.note
+              ? escapeHTML(
+                  review.note
+                )
+              : "No written comment.";
+
+
+          return `
+            <div class="review-card">
+
+              <div class="review-top">
+
+                <div class="review-rating">
+                  ${stars} ${rating}/5
+                </div>
+
+                <div class="review-date">
+                  ${formatDate(
+                    review.created_at
+                  )}
+                </div>
+
+              </div>
+
+              <div class="review-note">
+                ${note}
+              </div>
+
+            </div>
+          `;
+
+        }
+      ).join("");
+
+  }
+
+
+  /*
+    --------------------------------------------------
+    AVATAR INPUT
+    --------------------------------------------------
+  */
+
+  document
+    .getElementById("avatarInput")
+    .addEventListener(
+      "change",
+      function(event) {
+
+        if (!isOwnProfile) {
+
+          event.target.value = "";
+
+          return;
+        }
+
+
+        const file =
+          event.target.files[0];
+
+
+        if (!file) {
+          return;
+        }
+
+
+        const allowedTypes = [
+          "image/jpeg",
+          "image/png",
+          "image/webp"
+        ];
+
+
+        if (
+          !allowedTypes.includes(
+            file.type
+          )
+        ) {
+
+          alert(
+            "Please choose a JPG, PNG, or WEBP image."
+          );
+
+          event.target.value = "";
+
+          return;
+        }
+
+
+        if (
+          file.size >
+          2 * 1024 * 1024
+        ) {
+
+          alert(
+            "Profile picture must be 2MB or smaller."
+          );
+
+          event.target.value = "";
+
+          return;
+        }
+
+
+        selectedFile =
+          file;
+
+
+        const previewURL =
+          URL.createObjectURL(
+            file
+          );
+
+
+        showAvatar(
+          previewURL
+        );
+
+      }
+    );
+
+
+  /*
+    --------------------------------------------------
+    SAVE USERNAME
+    --------------------------------------------------
+  */
+
+  async function saveUsername() {
+
+    if (!isOwnProfile) {
+      return;
+    }
+
+
+  const input =
+      document.getElementById(
+        "usernameInput"
+      );
+
+  const button =
+      document.getElementById(
+        "usernameButton"
+      );
+
+  const status =
+      document.getElementById(
+        "usernameStatus"
+      );
+
+
+  const username =
+      input.value
+        .trim()
+        .toLowerCase();
+
+
+  if (
+      !/^[a-z0-9_]{3,20}$/.test(
+        username
+      )
+    ) {
+
+      status.textContent =
+        "Use 3–20 letters, numbers, or underscores.";
+
+      status.style.color =
+        "#dc2626";
+
+      return;
+    }
+
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "SAVING...";
+
+    status.textContent =
+      "";
+
+
+    try {
+
+      const {
+        error
+      } =
+        await supabaseClient.rpc(
+          "set_my_username",
+          {
+            new_username:
+              username
+          }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      status.textContent =
+        "Username saved successfully! ✅";
+
+      status.style.color =
+        "#16834b";
+
+
+      button.textContent =
+        "SAVED ✓";
+
+
+      document.getElementById(
+        "profileUsername"
+      ).textContent =
+        `@${username}`;
+
+
+      setTimeout(
+        () => {
+
+          const box =
+            document.getElementById(
+              "usernameSetup"
+            );
+
+          if (box) {
+            box.style.display =
+              "none";
+          }
+
+        },
+        1200
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Username error:",
+        error
+      );
+
+
+      let message =
+        error.message ||
+        "Could not save username.";
+
+
+      if (
+        message
+          .toLowerCase()
+          .includes("already taken")
+      ) {
+
+        message =
+          "That username is already taken.";
+
+      }
+
+
+      status.textContent =
+        message;
+
+      status.style.color =
+        "#dc2626";
+
+
+      button.disabled =
+        false;
+
+      button.textContent =
+        "SAVE USERNAME";
+
+    }
+
+  }  /*
+    --------------------------------------------------
+    SAVE PROFILE
+    --------------------------------------------------
+  */
+
+  async function saveProfile() {
+
+    if (
+      !currentUser ||
+      !isOwnProfile
+    ) {
+
+      alert(
+        "You are not allowed to edit this profile."
+      );
+
+      return;
+    }
+
+
+    const fullName =
+      document
+        .getElementById(
+          "fullName"
+        )
+        .value
+        .trim();
+
+
+    const location =
+      document
+        .getElementById(
+          "location"
+        )
+        .value
+        .trim();
+
+
+    const button =
+      document.getElementById(
+        "saveButton"
+      );
+
+
+    const status =
+      document.getElementById(
+        "status"
+      );
+
+
+    if (
+      !fullName ||
+      !location
+    ) {
+
+      alert(
+        "Please enter your full name and location."
+      );
+
+      return;
+    }
+
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "SAVING...";
+
+    status.textContent =
+      "";
+
+
+    try {
+
+      /*
+        Keep existing avatar if
+        no new picture is selected.
+      */
+
+      let avatarURL =
+        currentUser
+          .user_metadata
+          ?.avatar_url ||
+        null;
+
+
+      /*
+        Upload new avatar.
+      */
+
+      if (selectedFile) {
+
+        const extension =
+          selectedFile.name
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+
+        const filePath =
+          `${currentUser.id}/avatar-${Date.now()}.${extension}`;
+
+
+        const {
+          error:
+            uploadError
+        } =
+          await supabaseClient
+            .storage
+            .from(
+              AVATAR_BUCKET
+            )
+            .upload(
+              filePath,
+              selectedFile,
+              {
+                contentType:
+                  selectedFile.type,
+                upsert:
+                  false
+              }
+            );
+
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+
+        const {
+          data:
+            publicURLData
+        } =
+          supabaseClient
+            .storage
+            .from(
+              AVATAR_BUCKET
+            )
+            .getPublicUrl(
+              filePath
+            );
+
+
+        avatarURL =
+          publicURLData.publicUrl;
+
+      }
+
+
+      /*
+        Update Auth metadata.
+      */
+
+      const {
+        error:
+          updateError
+      } =
+        await supabaseClient.auth.updateUser(
+          {
+            data: {
+              full_name:
+                fullName,
+
+              location:
+                location,
+
+              avatar_url:
+                avatarURL
+            }
+          }
+        );
+
+
+      if (updateError) {
+        throw updateError;
+      }
+
+
+      /*
+        Also update public profile.
+      */
+
+      const {
+        error:
+          profileUpdateError
+      } =
+        await supabaseClient
+          .from("profiles")
+          .update(
+            {
+              full_name:
+                fullName,
+
+              location:
+                location,
+
+              avatar_url:
+                avatarURL
+            }
+          )
+          .eq(
+            "id",
+            currentUser.id
+          );
+
+
+      if (profileUpdateError) {
+        throw profileUpdateError;
+      }
+
+
+      /*
+        Refresh current user.
+      */
+
+      const {
+        data:
+          userData,
+        error:
+          userError
+      } =
+        await supabaseClient.auth.getUser();
+
+
+      if (userError) {
+        throw userError;
+      }
+
+
+      currentUser =
+        userData.user;
+
+
+      selectedFile =
+        null;
+
+
+      document.getElementById(
+        "avatarInput"
+      ).value =
+        "";
+
+
+      /*
+        Update visible profile.
+      */
+
+      document.getElementById(
+        "profileName"
+      ).textContent =
+        fullName;
+
+
+      document.getElementById(
+        "profileLocation"
+      ).textContent =
+        location;
+
+
+      if (avatarURL) {
+
+        showAvatar(
+          avatarURL
+        );
+
+      }
+
+
+      status.textContent =
+        "Profile updated successfully! ✅";
+
+
+      status.style.color =
+        "#16834b";
+
+
+      button.textContent =
+        "SAVED ✓";
+
+
+      setTimeout(
+        () => {
+
+          button.textContent =
+            "SAVE CHANGES";
+
+          status.textContent =
+            "";
+
+        },
+        2500
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Profile save error:",
+        error
+      );
+
+
+      status.textContent =
+        "Could not save profile.";
+
+      status.style.color =
+        "#dc2626";
+
+
+      alert(
+        error.message ||
+        "Something went wrong while saving your profile."
+      );
+
+
+      button.textContent =
+        "SAVE CHANGES";
+
+    }
+
+
+    button.disabled =
+      false;
+
+  }
+
+
+  /*
+    --------------------------------------------------
+    VERIFICATION
+    --------------------------------------------------
+  */
+
+  function showVerificationInfo() {
+
+    alert(
+      "Profile verification is coming soon. 🛡️\n\n" +
+      "Verification will be optional and will help users identify trusted OOULink accounts."
+    );
+
+  }
+
+
+  /*
+    --------------------------------------------------
+    TIP USER
+    --------------------------------------------------
+  */
+
+  function showTipInfo() {
+
+    alert(
+      "Tipping is coming soon. 💜\n\n" +
+      "OOULink will use a secure payment process for tips. Direct wallet transfers are not enabled yet."
+    );
+
+  }
+
+
+  /*
+    --------------------------------------------------
+    LOGOUT
+    --------------------------------------------------
+  */
+
+  async function logout() {
+
+    if (!isOwnProfile) {
+      return;
+    }
+
+
+    const {
+      error
+    } =
+      await supabaseClient.auth.signOut();
+
+
+    if (error) {
+
+      alert(
+        error.message
+      );
+
+      return;
+    }
+
+
+    window.location.href =
+      "index.html";
+
+  }
+
+
+  /*
+    --------------------------------------------------
+    START
+    --------------------------------------------------
+  */
+
+  loadProfile();
+
+</script>
+
+</body>
+</html>
