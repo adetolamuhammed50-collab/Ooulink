@@ -3051,21 +3051,33 @@ function renderBaseTask(){
   }
 async function renderTask(){
 
-if(!currentTask){
-return;
-}
+  if(!currentTask){
+    return;
+  }
 
-content.innerHTML=
-renderBaseTask();
+  // Render the actual task information FIRST.
+  content.innerHTML =
+    renderBaseTask();
 
-pageReady=true;
+  pageReady=true;
 
-await Promise.all([
-  loadFiles(),
-  loadChat(),
-  loadReviews(),
-  renderApplicants()
-]);
+  // These are secondary sections.
+  // They must NEVER block the task itself.
+  loadFiles().catch(error=>{
+    console.error("FILES RENDER:",error);
+  });
+
+  loadChat().catch(error=>{
+    console.error("CHAT RENDER:",error);
+  });
+
+  loadReviews().catch(error=>{
+    console.error("REVIEWS RENDER:",error);
+  });
+
+  renderApplicants().catch(error=>{
+    console.error("APPLICANTS RENDER:",error);
+  });
 
   }
   
@@ -4347,47 +4359,47 @@ async function initializePage(){
 
   try{
 
-    // 1. Get the logged-in user.
-    currentUser = await getCurrentUser();
-
-    // 2. Load the task itself.
-    const loaded = await loadTask();
+    // Load the task first.
+    const loaded=await loadTask();
 
     if(!loaded){
       return;
     }
 
-    // 3. Render the task IMMEDIATELY.
-    // Do not wait for profiles/applications.
+    // Show task information immediately.
     await renderTask();
 
-    // 4. Load optional user/task data afterward.
+    // Authentication is secondary.
+    currentUser=await getCurrentUser();
+
     if(currentUser){
 
       await loadProfiles();
 
-      myApplication =
+      myApplication=
         await loadMyApplication();
 
-      // Refresh the UI with the extra information.
+      // Refresh buttons/owner information.
       await renderTask();
 
       updateDot();
     }
 
-    // 5. Start realtime updates.
     cleanupTaskRealtime();
 
-    taskRealtimeChannel =
+    taskRealtimeChannel=
       setupRealtimeTaskUpdates();
 
   }catch(error){
 
-    console.error("PAGE INIT:", error);
+    console.error(
+      "PAGE INIT:",
+      error
+    );
 
     showError(
       "Task loading failed",
-      error?.message ||
+      error?.message||
       "OOULink could not load this task."
     );
 
