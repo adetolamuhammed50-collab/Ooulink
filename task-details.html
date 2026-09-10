@@ -3061,9 +3061,10 @@ renderBaseTask();
 pageReady=true;
 
 await Promise.all([
-loadFiles(),
-loadChat(),
-loadReviews()
+  loadFiles(),
+  loadChat(),
+  loadReviews(),
+  renderApplicants()
 ]);
 
   }
