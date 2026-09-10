@@ -1405,7 +1405,887 @@ return null;
 return data||null;
 
 }
+async function applyForTask(){
 
+  if(busy){
+    return;
+  }
+
+  if(!currentUser||!currentTask||!canApply()){
+    alert("You cannot apply for this task.");
+    return;
+  }
+
+  busy=true;
+
+  try{
+
+    const {
+      data,
+      error
+    }=await supabaseClient
+      .from("task_applications")
+      .insert({
+        task_id:currentTask.id,
+        runner_id:currentUser.id,
+        status:"pending"
+      })
+      .select(
+        "id,task_id,runner_id,status,created_at,updated_at"
+      )
+      .single();
+
+    if(error){
+      console.error("APPLY:",error);
+      alert(error.message||"Unable to apply for this task.");
+      return;
+    }
+
+    myApplication=data;
+
+    await notify(
+      currentTask.user_id,
+      "task_application",
+      "New task application",
+      "Someone applied for your task."
+    );
+
+    await reloadEverything();
+
+  }catch(error){
+
+    console.error("APPLY ERROR:",error);
+
+    alert(
+      error?.message||
+      "Something went wrong while applying."
+    );
+
+  }finally{
+
+    busy=false;
+
+  }
+
+}
+
+
+async function withdrawApplication(){
+
+  if(busy){
+    return;
+  }
+
+  if(
+    !currentUser||
+    !currentTask||
+    !myApplication
+  ){
+    return;
+  }
+
+  if(myApplication.status!=="pending"){
+    return;
+  }
+
+  const confirmed=confirm(
+    "Withdraw your application for this task?"
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  busy=true;
+
+  try{
+
+    const {
+      error
+    }=await supabaseClient
+      .from("task_applications")
+      .update({
+        status:"withdrawn",
+        updated_at:new Date().toISOString()
+      })
+      .eq("id",myApplication.id)
+      .eq("runner_id",currentUser.id);
+
+    if(error){
+      console.error(
+        "WITHDRAW:",
+        error
+      );
+
+      alert(
+        error.message||
+        "Unable to withdraw application."
+      );
+
+      return;
+    }
+
+    myApplication=null;
+
+    await reloadEverything();
+
+  }catch(error){
+
+    console.error(
+      "WITHDRAW ERROR:",
+      error
+    );
+
+    alert(
+      error?.message||
+      "Something went wrong."
+    );
+
+  }finally{
+
+    busy=false;
+
+  }
+
+  }
+  async function loadApplicants(){
+
+  if(!isOwner()||!currentTask){
+    return [];
+  }
+
+  const {
+    data,
+    error
+  }=await supabaseClient
+    .from("task_applications")
+    .select(
+      "id,task_id,runner_id,status,created_at,updated_at"
+    )
+    .eq("task_id",currentTask.id)
+    .order(
+      "created_at",
+      {
+        ascending:true
+      }
+    );
+
+  if(error){
+
+    console.error(
+      "APPLICANTS:",
+      error
+    );
+
+    return [];
+
+  }
+
+  return data||[];
+
+}
+
+
+async function renderApplicants(){
+
+  const box=
+    document.getElementById("applicants");
+
+  if(!box){
+    return;
+  }
+
+  if(!isOwner()){
+    box.innerHTML="";
+    return;
+  }
+
+  box.innerHTML=`
+    <div class="empty">
+      Loading applicants...
+    </div>
+  `;
+
+  const applications=
+    await loadApplicants();
+
+  if(!applications.length){
+
+    box.innerHTML=`
+      <div class="empty">
+        No applications yet.
+      </div>
+    `;
+
+    return;
+  }
+
+  const runnerIds=[
+    ...new Set(
+      applications
+        .map(item=>item.runner_id)
+        .filter(Boolean)
+    )
+  ];
+
+  let profiles=[];
+
+  if(runnerIds.length){
+
+    const {
+      data,
+      error
+    }=await supabaseClient
+      .from("profiles")
+      .select(
+        "id,username,full_name,location,avatar_url,reputation,xp"
+      )
+      .in("id",runnerIds);
+
+    if(error){
+
+      console.error(
+        "APPLICANT PROFILES:",
+        error
+      );
+
+    }else{
+
+      profiles=data||[];
+
+    }
+
+  }
+
+  let html="";
+
+  for(const application of applications){
+
+    const profile=
+      profiles.find(
+        item=>item.id===application.runner_id
+      )||null;
+
+    const name=
+      escapeHtml(
+        getProfileName(profile)
+      );
+
+    const username=
+      escapeHtml(
+        getProfileUsername(profile)
+      );
+
+    const reputation=
+      Number(
+        profile?.reputation||0
+      ).toFixed(2);
+
+    const selectable=
+      application.status==="pending"&&
+      currentTask.status==="open";
+
+    html+=`
+
+      <div class="applicant-card">
+
+        <div class="applicant-main">
+
+          ${avatarHtml(
+            profile,
+            "owner-avatar"
+          )}
+
+          <div>
+
+            <div class="owner-name">
+              ${name}
+            </div>
+
+            ${
+              username
+              ?
+              `
+              <div class="owner-username">
+                ${username}
+              </div>
+              `
+              :
+              ""
+            }
+
+            <div class="section-note">
+              Reputation: ${reputation}
+            </div>
+
+            <div class="section-note">
+              Applied:
+              ${escapeHtml(
+                dateText(
+                  application.created_at
+                )
+              )}
+            </div>
+
+          </div>
+
+        </div>
+
+        <div style="margin-top:10px">
+
+          <span class="status-pill ${
+            statusClass(
+              application.status
+            )
+          }">
+
+            ${escapeHtml(
+              statusLabel(
+                application.status
+              )
+            )}
+
+          </span>
+
+        </div>
+
+        ${
+          selectable
+          ?
+          `
+          <button
+            class="btn blue"
+            style="margin-top:10px"
+            onclick="selectRunner('${application.id}','${application.runner_id}')"
+          >
+            SELECT RUNNER
+          </button>
+          `
+          :
+          ""
+        }
+
+      </div>
+
+    `;
+
+  }
+
+  box.innerHTML=html;
+
+  }
+  async function selectRunner(
+  applicationId,
+  runnerId
+){
+
+  if(busy){
+    return;
+  }
+
+  if(
+    !isOwner()||
+    currentTask.status!=="open"||
+    !applicationId||
+    !runnerId
+  ){
+    return;
+  }
+
+  const confirmed=confirm(
+    "Select this applicant as the runner for this task?"
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  busy=true;
+
+  try{
+
+    const {
+      error:taskError
+    }=await supabaseClient
+      .from("tasks")
+      .update({
+        runner_id:runnerId,
+        status:"accepted"
+      })
+      .eq("id",currentTask.id)
+      .eq("user_id",currentUser.id)
+      .eq("status","open");
+
+    if(taskError){
+
+      console.error(
+        "SELECT RUNNER TASK:",
+        taskError
+      );
+
+      alert(
+        taskError.message||
+        "Unable to select runner."
+      );
+
+      return;
+    }
+
+    const {
+      error:applicationError
+    }=await supabaseClient
+      .from("task_applications")
+      .update({
+        status:"selected",
+        updated_at:new Date().toISOString()
+      })
+      .eq("id",applicationId)
+      .eq("runner_id",runnerId);
+
+    if(applicationError){
+
+      console.error(
+        "SELECT RUNNER APPLICATION:",
+        applicationError
+      );
+
+      alert(
+        "Runner was selected, but the application status could not be updated."
+      );
+
+    }
+
+    await supabaseClient
+      .from("task_applications")
+      .update({
+        status:"rejected",
+        updated_at:new Date().toISOString()
+      })
+      .eq("task_id",currentTask.id)
+      .neq("id",applicationId)
+      .eq("status","pending");
+
+    await notify(
+      runnerId,
+      "runner_selected",
+      "You were selected",
+      "You have been selected to handle a task."
+    );
+
+    await reloadEverything();
+
+  }catch(error){
+
+    console.error(
+      "SELECT RUNNER ERROR:",
+      error
+    );
+
+    alert(
+      error?.message||
+      "Something went wrong while selecting the runner."
+    );
+
+  }finally{
+
+    busy=false;
+
+  }
+
+}
+
+
+async function startTask(){
+
+  if(busy){
+    return;
+  }
+
+  if(!canStartTask()){
+    return;
+  }
+
+  busy=true;
+
+  try{
+
+    const {
+      error
+    }=await supabaseClient
+      .from("tasks")
+      .update({
+        status:"in_progress"
+      })
+      .eq("id",currentTask.id)
+      .eq("runner_id",currentUser.id)
+      .eq("status","accepted");
+
+    if(error){
+
+      console.error(
+        "START TASK:",
+        error
+      );
+
+      alert(
+        error.message||
+        "Unable to start task."
+      );
+
+      return;
+    }
+
+    await notify(
+      currentTask.user_id,
+      "task_started",
+      "Task started",
+      "The selected runner has started working on your task."
+    );
+
+    await reloadEverything();
+
+  }catch(error){
+
+    console.error(
+      "START TASK ERROR:",
+      error
+    );
+
+    alert(
+      error?.message||
+      "Something went wrong."
+    );
+
+  }finally{
+
+    busy=false;
+
+  }
+
+}
+
+
+async function submitTask(){
+
+  if(busy){
+    return;
+  }
+
+  if(!canSubmitTask()){
+    return;
+  }
+
+  const confirmed=confirm(
+    "Submit this task for the owner's verification?"
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  busy=true;
+
+  try{
+
+    const {
+      error
+    }=await supabaseClient
+      .from("tasks")
+      .update({
+        status:"awaiting_verification"
+      })
+      .eq("id",currentTask.id)
+      .eq("runner_id",currentUser.id)
+      .eq("status","in_progress");
+
+    if(error){
+
+      console.error(
+        "SUBMIT TASK:",
+        error
+      );
+    alert(
+        error.message||
+        "Unable to submit task."
+      );
+
+      return;
+    }
+
+    await notify(
+      currentTask.user_id,
+      "task_submitted",
+      "Task submitted",
+      "The runner submitted the task for your verification."
+    );
+
+    await reloadEverything();
+
+  }catch(error){
+
+    console.error(
+      "SUBMIT TASK ERROR:",
+      error
+    );
+
+    alert(
+      error?.message||
+      "Something went wrong."
+    );
+
+  }finally{
+
+    busy=false;
+
+  }
+
+}
+
+
+async function approveTask(){
+
+  if(busy){
+    return;
+  }
+
+  if(!canApproveTask()){
+    return;
+  }
+
+  const confirmed=confirm(
+    "Approve this submission and mark the task as completed?"
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  busy=true;
+
+  try{
+
+    const {
+      error
+    }=await supabaseClient
+      .from("tasks")
+      .update({
+        status:"completed"
+      })
+      .eq("id",currentTask.id)
+      .eq("user_id",currentUser.id)
+      .eq("status","awaiting_verification");
+
+    if(error){
+
+      console.error(
+        "APPROVE TASK:",
+        error
+      );
+
+      alert(
+        error.message||
+        "Unable to approve task."
+      );
+
+      return;
+    }
+
+    if(currentTask.runner_id){
+
+      await notify(
+        currentTask.runner_id,
+        "task_completed",
+        "Task completed",
+        "The task owner approved your submission."
+      );
+
+    }
+
+    await reloadEverything();
+
+  }catch(error){
+
+    console.error(
+      "APPROVE TASK ERROR:",
+      error
+    );
+
+    alert(
+      error?.message||
+      "Something went wrong."
+    );
+
+  }finally{
+
+    busy=false;
+
+  }
+
+}
+
+
+async function rejectTask(){
+
+  if(busy){
+    return;
+  }
+
+  if(!canRejectTask()){
+    return;
+  }
+
+  const confirmed=confirm(
+    "Reject this submission and allow the runner to continue?"
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  busy=true;
+
+  try{
+
+    const {
+      error
+    }=await supabaseClient
+      .from("tasks")
+      .update({
+        status:"rejected"
+      })
+      .eq("id",currentTask.id)
+      .eq("user_id",currentUser.id)
+      .eq("status","awaiting_verification");
+
+    if(error){
+
+      console.error(
+        "REJECT TASK:",
+        error
+      );
+
+      alert(
+        error.message||
+        "Unable to reject submission."
+      );
+
+      return;
+    }
+
+    if(currentTask.runner_id){
+
+      await notify(
+        currentTask.runner_id,
+        "task_rejected",
+        "Submission rejected",
+        "Your submission was rejected. You can continue working on the task."
+      );
+
+    }
+
+    await reloadEverything();
+
+  }catch(error){
+
+    console.error(
+      "REJECT TASK ERROR:",
+      error
+    );
+
+    alert(
+      error?.message||
+      "Something went wrong."
+    );
+
+  }finally{
+
+    busy=false;
+
+  }
+
+}
+
+
+async function cancelTask(){
+
+  if(busy){
+    return;
+  }
+
+  if(!canCancelTask()){
+    return;
+  }
+
+  const confirmed=confirm(
+    "Cancel this task? This cannot be undone."
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  busy=true;
+
+  try{
+
+    const {
+      error
+    }=await supabaseClient
+      .from("tasks")
+      .update({
+        status:"cancelled"
+      })
+      .eq("id",currentTask.id)
+      .eq("user_id",currentUser.id)
+      .eq("status","open");
+
+    if(error){
+
+      console.error(
+        "CANCEL TASK:",
+        error
+      );
+
+      alert(
+        error.message||
+        "Unable to cancel task."
+      );
+
+      return;
+    }
+
+    if(currentTask.runner_id){
+
+      await notify(
+        currentTask.runner_id,
+        "task_cancelled",
+        "Task cancelled",
+        "The task owner cancelled this task."
+      );
+
+    }
+
+    await reloadEverything();
+
+  }catch(error){
+
+    console.error(
+      "CANCEL TASK ERROR:",
+      error
+    );
+
+    alert(
+      error?.message||
+      "Something went wrong."
+    );
+
+  }finally{
+
+    busy=false;
+
+  }
+
+  }
 async function updateDot(){
 
 if(!currentUser){
