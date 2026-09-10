@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Users - OOULink</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #172033;
+      padding-bottom: 80px;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: auto;
+      padding: 20px 16px;
+    }
+
+    .top {
+      margin-bottom: 20px;
+    }
+
+    .top a {
+      text-decoration: none;
+      color: #2563eb;
+      font-size: 14px;
+    }
+
+    h1 {
+      margin-top: 12px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #687386;
+      margin-top: 5px;
+    }
+
+    .search-box {
+      background: white;
+      padding: 14px;
+      border-radius: 16px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #d7dce5;
+      border-radius: 11px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .search-box input:focus {
+      border-color: #2563eb;
+    }
+
+    #results {
+      margin-top: 16px;
+    }
+
+    .empty {
+      text-align: center;
+      color: #687386;
+      padding: 30px 10px;
+      font-size: 14px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: white;
+      border-top: 1px solid #e5e8e6;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 5px;
+      z-index: 1000;
+    }
+
+    .bottom-nav a {
+      text-align: center;
+      font-size: 11px;
+      color: #777;
+      text-decoration: none;
+    }
+
+    .bottom-nav a.active {
+      color: #16834b;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="top">
+    <a href="profile.html">← Back to Profile</a>
+
+    <h1>Find Users</h1>
+
+    <p class="subtitle">
+      Search OOULink users by username or name.
+    </p>
+  </div>
+
+  <div class="search-box">
+    <input
+      type="search"
+      id="userSearch"
+      placeholder="Search @username or name..."
+      autocomplete="off"
+    >
+  </div>
+
+  <div id="results">
+    <div class="empty">
+      Start typing to find users.
+    </div>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+
+  <a href="index.html">
+    <span>🏠</span>
+    Home
+  </a>
+
+  <a href="my-tasks.html">
+    <span>📋</span>
+    My Tasks
+  </a>
+
+  <a href="post-task.html">
+    <span>➕</span>
+    Post
+  </a>
+
+  <a href="alerts.html">
+    <span>🔔</span>
+    Alerts
+  </a>
+
+  <a href="profile.html">
+    <span>👤</span>
+    Profile
+  </a>
+
+</nav>
+
+<script>
+
+const SUPABASE_URL =
+  "https://dthvdxgxesomltlruogp.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+</script>
+
+</body>
+</html>
