@@ -332,10 +332,13 @@ required
         event.preventDefault();
 
         const name =
-          document.getElementById("name").value.trim();
+  document.getElementById("name").value.trim();
 
-        const email =
-          document.getElementById("email").value.trim();
+const username =
+  document.getElementById("username").value.trim().toLowerCase();
+
+const email =
+  document.getElementById("email").value.trim();
 
         const location =
           document.getElementById("location").value;
@@ -388,12 +391,10 @@ required
                 "https://ooulink.vercel.app",
 
               data: {
-
-                full_name: name,
-
-                location: location
-
-              }
+  full_name: name,
+  username: username,
+  location: location
+}
 
             }
 
