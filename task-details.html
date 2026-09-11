@@ -623,16 +623,20 @@ function normalizeStatus(status){
 
 function statusLabel(status){
   const value = normalizeStatus(status);
+
   const labels = {
     open:"Open",
     assigned:"Assigned",
+    accepted:"Accepted",
     in_progress:"In Progress",
+    awaiting_verification:"Awaiting Verification",
     completed:"Completed",
     cancelled:"Cancelled",
     canceled:"Cancelled"
   };
+
   return labels[value] || value.replace(/_/g," ") || "Unknown";
-}
+    }
 
 function statusClass(status){
   const value = normalizeStatus(status);
@@ -881,6 +885,7 @@ async function renderAttachments(){
 
 function renderTimeline(){
   const status = normalizeStatus(currentTask.status);
+
   const items = [
     {
       title:"Task posted",
@@ -891,21 +896,47 @@ function renderTimeline(){
   if(currentTask.runner_id){
     items.push({
       title:"Runner assigned",
-      text:"A runner is assigned to this task."
+      text:"A runner has been selected for this task."
     });
   }
 
-  if(status === "in_progress"){
+  if(
+    status === "accepted" ||
+    status === "in_progress" ||
+    status === "awaiting_verification" ||
+    status === "completed"
+  ){
+    items.push({
+      title:"Task accepted",
+      text:"A runner has been selected and the task is ready to begin."
+    });
+  }
+
+  if(
+    status === "in_progress" ||
+    status === "awaiting_verification" ||
+    status === "completed"
+  ){
     items.push({
       title:"Task in progress",
-      text:"This task is currently being worked on."
+      text:"The runner is working on this task."
+    });
+  }
+
+  if(
+    status === "awaiting_verification" ||
+    status === "completed"
+  ){
+    items.push({
+      title:"Awaiting verification",
+      text:"The runner submitted the task for the poster to verify."
     });
   }
 
   if(status === "completed"){
     items.push({
       title:"Task completed",
-      text:"This task has been marked completed."
+      text:"The poster approved the submitted task."
     });
   }
 
@@ -923,7 +954,7 @@ function renderTimeline(){
       <p>${escapeHtml(item.text)}</p>
     </div>
   `).join("");
-}
+    }
 function renderApplicantActions(){
   const box = $("actionContent");
   const status = normalizeStatus(currentTask.status);
@@ -1094,53 +1125,455 @@ function renderApplicantActions(){
 
   $("applyBtn").addEventListener("click",applyForTask);
   }
-  
-function renderActions(){
-  const box = $("actionContent");
-
-  if(canUseChat()){
-    box.innerHTML = `
-      <button class="action-btn chat-btn" id="chatBtn">
-        💬 Open Task Chat
-      </button>
-      <div class="helper-text">
-        Chat is available because you are involved in this task.
-      </div>
-    `;
-
-    $("chatBtn").addEventListener("click",()=>{
-      window.location.href =
-        "chat.html?id=" + encodeURIComponent(currentTask.id);
-    });
-
+  async function startTask(){
+  if(!currentUser || !currentTask){
+    showToast("Please try again.");
     return;
   }
 
-  if(isOwner()){
-    if(normalizeStatus(currentTask.status) === "open"){
+  if(!isRunner()){
+    showToast("Only the assigned runner can start this task.");
+    return;
+  }
+
+  if(normalizeStatus(currentTask.status) !== "accepted"){
+    showToast("This task cannot be started right now.");
+    return;
+  }
+
+  const button = $("startTaskBtn");
+
+  if(button){
+    button.disabled = true;
+    button.textContent = "Starting...";
+  }
+
+  try{
+    const {error} = await supabaseClient
+      .from("tasks")
+      .update({
+        status:"in_progress"
+      })
+      .eq("id",currentTask.id)
+      .eq("runner_id",currentUser.id)
+      .eq("status","accepted");
+
+    if(error) throw error;
+
+    showToast("Task started.");
+
+    await loadTask();
+
+  }catch(error){
+    console.error("Start task error:",error);
+
+    if(button){
+      button.disabled = false;
+      button.textContent = "▶ Start Task";
+    }
+
+    showToast(
+      error?.message ||
+      "Could not start the task."
+    );
+  }
+}
+
+
+async function submitForVerification(){
+  if(!currentUser || !currentTask){
+    showToast("Please try again.");
+    return;
+  }
+
+  if(!isRunner()){
+    showToast("Only the assigned runner can submit this task.");
+    return;
+  }
+
+  if(normalizeStatus(currentTask.status) !== "in_progress"){
+    showToast("This task is not currently in progress.");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "Submit this task for the poster to verify?"
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  const button = $("submitVerificationBtn");
+
+  if(button){
+    button.disabled = true;
+    button.textContent = "Submitting...";
+  }
+
+  try{
+    const {error} = await supabaseClient
+      .from("tasks")
+      .update({
+        status:"awaiting_verification"
+      })
+      .eq("id",currentTask.id)
+      .eq("runner_id",currentUser.id)
+      .eq("status","in_progress");
+
+    if(error) throw error;
+
+    showToast("Task submitted for verification.");
+
+    await loadTask();
+
+  }catch(error){
+    console.error("Submit verification error:",error);
+
+    if(button){
+      button.disabled = false;
+      button.textContent = "✓ Submit for Verification";
+    }
+
+    showToast(
+      error?.message ||
+      "Could not submit the task."
+    );
+  }
+}
+
+
+async function completeTask(){
+  if(!currentUser || !currentTask){
+    showToast("Please try again.");
+    return;
+  }
+
+  if(!isOwner()){
+    showToast("Only the task poster can complete this task.");
+    return;
+  }
+
+  if(normalizeStatus(currentTask.status) !== "awaiting_verification"){
+    showToast("This task is not awaiting verification.");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "Approve this task and mark it as completed?"
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  const button = $("completeTaskBtn");
+
+  if(button){
+    button.disabled = true;
+    button.textContent = "Completing...";
+  }
+
+  try{
+    const {error} = await supabaseClient
+      .from("tasks")
+      .update({
+        status:"completed"
+      })
+      .eq("id",currentTask.id)
+      .eq("user_id",currentUser.id)
+      .eq("runner_id",currentTask.runner_id)
+      .eq("status","awaiting_verification");
+
+    if(error) throw error;
+
+    showToast("Task completed successfully.");
+
+    await loadTask();
+
+  }catch(error){
+    console.error("Complete task error:",error);
+
+    if(button){
+      button.disabled = false;
+      button.textContent = "✓ Approve & Complete";
+    }
+
+    showToast(
+      error?.message ||
+      "Could not complete the task."
+    );
+  }
+  }
+  
+function renderActions(){
+  const box = $("actionContent");
+  const status = normalizeStatus(currentTask.status);
+
+  /*
+   * OPEN
+   * Poster manages applicants.
+   * Other students can apply.
+   */
+  if(status === "open"){
+    if(isOwner()){
       renderApplicantActions();
-    }else{
-      box.innerHTML = `
+      return;
+    }
+
+    renderApplicantActions();
+    return;
+  }
+
+  /*
+   * ACCEPTED
+   * Assigned runner can start.
+   * Poster can view the task/chat.
+   */
+  if(status === "accepted"){
+    let html = "";
+
+    if(isRunner()){
+      html += `
+        <button
+          class="action-btn chat-btn"
+          type="button"
+          id="startTaskBtn"
+        >
+          ▶ Start Task
+        </button>
+
         <div class="helper-text">
-          This task is no longer accepting applicants.
+          Start the task when you are ready to begin working.
         </div>
       `;
+    }else if(isOwner()){
+      html += `
+        <div class="helper-text">
+          Your runner has been selected. They can now start the task.
+        </div>
+      `;
+    }
+
+    if(canUseChat()){
+      html += `
+        <button
+          class="action-btn secondary-btn"
+          type="button"
+          id="chatBtn"
+        >
+          💬 Open Task Chat
+        </button>
+      `;
+    }
+
+    if(!html){
+      html = `
+        <div class="helper-text">
+          This task has already been assigned to a runner.
+        </div>
+      `;
+    }
+
+    box.innerHTML = html;
+
+    if($("startTaskBtn")){
+      $("startTaskBtn").addEventListener("click",startTask);
+    }
+
+    if($("chatBtn")){
+      $("chatBtn").addEventListener("click",()=>{
+        window.location.href =
+          "chat.html?id=" +
+          encodeURIComponent(currentTask.id);
+      });
     }
 
     return;
   }
 
-  if(normalizeStatus(currentTask.status) === "open"){
-    renderApplicantActions();
+  /*
+   * IN PROGRESS
+   * Runner submits for verification.
+   * Poster waits.
+   */
+  if(status === "in_progress"){
+    let html = "";
+
+    if(isRunner()){
+      html += `
+        <button
+          class="action-btn chat-btn"
+          type="button"
+          id="submitVerificationBtn"
+        >
+          ✓ Submit for Verification
+        </button>
+
+        <div class="helper-text">
+          Submit when you have finished the task.
+        </div>
+      `;
+    }else if(isOwner()){
+      html += `
+        <div class="helper-text">
+          Your runner is currently working on this task.
+          You can review their submission when they finish.
+        </div>
+      `;
+    }
+
+    if(canUseChat()){
+      html += `
+        <button
+          class="action-btn secondary-btn"
+          type="button"
+          id="chatBtn"
+        >
+          💬 Open Task Chat
+        </button>
+      `;
+    }
+
+    if(!html){
+      html = `
+        <div class="helper-text">
+          This task is currently in progress.
+        </div>
+      `;
+    }
+
+    box.innerHTML = html;
+
+    if($("submitVerificationBtn")){
+      $("submitVerificationBtn")
+        .addEventListener("click",submitForVerification);
+    }
+
+    if($("chatBtn")){
+      $("chatBtn").addEventListener("click",()=>{
+        window.location.href =
+          "chat.html?id=" +
+          encodeURIComponent(currentTask.id);
+      });
+    }
+
     return;
   }
 
+  /*
+   * AWAITING VERIFICATION
+   * Poster approves.
+   * Runner waits.
+   */
+  if(status === "awaiting_verification"){
+    let html = "";
+
+    if(isOwner()){
+      html += `
+        <button
+          class="action-btn chat-btn"
+          type="button"
+          id="completeTaskBtn"
+        >
+          ✓ Approve & Complete
+        </button>
+
+        <div class="helper-text">
+          Review the task before approving it as completed.
+        </div>
+      `;
+    }else if(isRunner()){
+      html += `
+        <div class="helper-text">
+          Your submission is waiting for the poster to verify.
+        </div>
+      `;
+    }
+
+    if(canUseChat()){
+      html += `
+        <button
+          class="action-btn secondary-btn"
+          type="button"
+          id="chatBtn"
+        >
+          💬 Open Task Chat
+        </button>
+      `;
+    }
+
+    if(!html){
+      html = `
+        <div class="helper-text">
+          This task is awaiting verification.
+        </div>
+      `;
+    }
+
+    box.innerHTML = html;
+
+    if($("completeTaskBtn")){
+      $("completeTaskBtn")
+        .addEventListener("click",completeTask);
+    }
+
+    if($("chatBtn")){
+      $("chatBtn").addEventListener("click",()=>{
+        window.location.href =
+          "chat.html?id=" +
+          encodeURIComponent(currentTask.id);
+      });
+    }
+
+    return;
+  }
+
+  /*
+   * COMPLETED
+   */
+  if(status === "completed"){
+    let html = `
+      <div class="helper-text">
+        🎉 This task has been completed successfully.
+      </div>
+    `;
+
+    if(canUseChat()){
+      html += `
+        <button
+          class="action-btn secondary-btn"
+          type="button"
+          id="chatBtn"
+        >
+          💬 Open Task Chat
+        </button>
+      `;
+    }
+
+    box.innerHTML = html;
+
+    if($("chatBtn")){
+      $("chatBtn").addEventListener("click",()=>{
+        window.location.href =
+          "chat.html?id=" +
+          encodeURIComponent(currentTask.id);
+      });
+    }
+
+    return;
+  }
+
+  /*
+   * CANCELLED / OTHER
+   */
   box.innerHTML = `
     <div class="helper-text">
       There are no actions available for this task right now.
     </div>
   `;
-}
+  }
+
 
   async function applyForTask(){
   if(!currentUser){
