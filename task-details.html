@@ -832,57 +832,65 @@ async function renderAttachments(){
     return;
   }
 
-  const items = [];
+  const items = await Promise.all(
+    taskAttachments.map(async file=>{
+      let url = "";
 
-  for(const file of taskAttachments){
-    let url = "";
+      try{
+        const result = await supabaseClient
+          .storage
+          .from("TaskFiles")
+          .createSignedUrl(file.file_path,600);
 
-    try{
-      const result = await supabaseClient
-        .storage
-        .from("TaskFiles")
-        .createSignedUrl(file.file_path,600);
-
-      if(!result.error && result.data){
-        url = result.data.signedUrl || "";
-      }
-    }catch(error){
-      console.warn("Attachment URL error:",error);
-    }
-
-    const safeName = escapeHtml(file.file_name || "Attachment");
-    const size = formatFileSize(file.file_size);
-
-    items.push(`
-      <div class="attachment">
-        <div class="file-icon">📄</div>
-        <div class="file-info">
-          <div class="file-name">${safeName}</div>
-          <div class="file-size">${escapeHtml(size)}</div>
-        </div>
-        ${
-          url
-          ? `<button class="file-link"
-                type="button"
-                data-url="${escapeHtml(url)}">
-                Open
-             </button>`
-          : `<span class="file-size">Unavailable</span>`
+        if(!result.error && result.data){
+          url = result.data.signedUrl || "";
         }
-      </div>
-    `);
-  }
+      }catch(error){
+        console.warn("Attachment URL error:",error);
+      }
 
-  box.innerHTML = `<div class="attachment-list">${items.join("")}</div>`;
+      const safeName =
+        escapeHtml(file.file_name || "Attachment");
+
+      const size =
+        formatFileSize(file.file_size);
+
+      return `
+        <div class="attachment">
+          <div class="file-icon">📄</div>
+
+          <div class="file-info">
+            <div class="file-name">${safeName}</div>
+            <div class="file-size">${escapeHtml(size)}</div>
+          </div>
+
+          ${
+            url
+            ? `<button class="file-link"
+                  type="button"
+                  data-url="${escapeHtml(url)}">
+                  Open
+               </button>`
+            : `<span class="file-size">Unavailable</span>`
+          }
+        </div>
+      `;
+    })
+  );
+
+  box.innerHTML =
+    `<div class="attachment-list">${items.join("")}</div>`;
 
   box.querySelectorAll(".file-link").forEach(button=>{
     button.addEventListener("click",()=>{
       const url = button.getAttribute("data-url");
-      if(url) window.open(url,"_blank","noopener");
+      if(url){
+        window.open(url,"_blank","noopener");
+      }
     });
   });
 }
-
+  
 function renderTimeline(){
   const status = normalizeStatus(currentTask.status);
 
@@ -1933,14 +1941,17 @@ async function loadTask(){
     }
 
     renderTask();
-    renderPoster();
-    renderRunner();
-    renderTimeline();
-    renderActions();
-    await renderAttachments();
+renderPoster();
+renderRunner();
+renderTimeline();
+renderActions();
 
-    showContent();
+showContent();
 
+renderAttachments().catch(error=>{
+  console.warn("Attachment rendering error:",error);
+});
+    
   }catch(error){
     console.error("Task details error:",error);
     showError(
