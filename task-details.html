@@ -972,33 +972,7 @@ function renderActions(){
   `;
 }
 
-  if(isOwner()){
-    box.innerHTML = `
-      <button class="action-btn disabled-btn" type="button" disabled>
-        Task acceptance & payment
-      </button>
-      <div class="helper-text">
-        Task management and payment features are coming next.
-      </div>`;
-    return;
-  }
-
-  if(normalizeStatus(currentTask.status) === "open"){
-    box.innerHTML = `
-      <button class="action-btn disabled-btn" type="button" disabled>
-        Accept Task
-      </button>
-      <div class="helper-text">
-        Task acceptance and payment are coming next.
-      </div>`;
-    return;
-  }
-
-  box.innerHTML = `
-    <div class="helper-text">
-      There are no actions available for this task right now.
-    </div>`;
-}
+  
 async function loadMyApplication(taskId){
   myApplication = null;
 
