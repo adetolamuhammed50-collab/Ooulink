@@ -935,14 +935,42 @@ function renderActions(){
       </button>
       <div class="helper-text">
         Chat is available because you are involved in this task.
-      </div>`;
-    
+      </div>
+    `;
+
     $("chatBtn").addEventListener("click",()=>{
       window.location.href =
         "chat.html?id=" + encodeURIComponent(currentTask.id);
     });
+
     return;
   }
+
+  if(isOwner()){
+    if(normalizeStatus(currentTask.status) === "open"){
+      renderApplicantActions();
+    }else{
+      box.innerHTML = `
+        <div class="helper-text">
+          This task is no longer accepting applicants.
+        </div>
+      `;
+    }
+
+    return;
+  }
+
+  if(normalizeStatus(currentTask.status) === "open"){
+    renderApplicantActions();
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="helper-text">
+      There are no actions available for this task right now.
+    </div>
+  `;
+}
 
   if(isOwner()){
     box.innerHTML = `
