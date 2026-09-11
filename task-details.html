@@ -1,2179 +1,1126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Task Details • OOULink</title>
-
-  <meta
-    name="description"
-    content="View task details, applications, files, chat and task progress on OOULink."
-  >
-
-  <style>
-    :root{
-      --green:#16a34a;
-      --green-dark:#15803d;
-      --green-light:#dcfce7;
-      --green-soft:#f0fdf4;
-
-      --text:#17211b;
-      --muted:#64748b;
-
-      --white:#ffffff;
-      --bg:#f6faf7;
-      --border:#e2e8f0;
-
-      --danger:#dc2626;
-      --danger-bg:#fef2f2;
-
-      --warning:#d97706;
-      --warning-bg:#fffbeb;
-
-      --blue:#2563eb;
-      --blue-bg:#eff6ff;
-
-      --shadow:
-        0 8px 25px rgba(15,23,42,.07);
-
-      --radius:18px;
-    }
-
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-    }
-
-    html{
-      scroll-behavior:smooth;
-    }
-
-    body{
-      min-height:100vh;
-      background:var(--bg);
-      color:var(--text);
-      font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        Arial,
-        sans-serif;
-      line-height:1.5;
-    }
-
-    button,
-    input,
-    textarea,
-    select{
-      font:inherit;
-    }
-
-    button{
-      cursor:pointer;
-    }
-
-    a{
-      color:inherit;
-      text-decoration:none;
-    }
-
-    .app{
-      width:100%;
-      max-width:480px;
-      min-height:100vh;
-      margin:0 auto;
-      background:var(--bg);
-      padding-bottom:92px;
-    }
-
-    /* =========================
-       HEADER
-       ========================= */
-
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:50;
-
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-
-      min-height:64px;
-      padding:12px 16px;
-
-      background:rgba(255,255,255,.96);
-      border-bottom:1px solid var(--border);
-
-      backdrop-filter:blur(12px);
-      -webkit-backdrop-filter:blur(12px);
-    }
-
-    .back-button{
-      width:42px;
-      height:42px;
-
-      display:flex;
-      align-items:center;
-      justify-content:center;
-
-      border:1px solid var(--border);
-      border-radius:14px;
-
-      background:var(--white);
-      color:var(--text);
-
-      font-size:21px;
-
-      transition:
-        transform .15s ease,
-        background .15s ease;
-    }
-
-    .back-button:active{
-      transform:scale(.94);
-      background:#f1f5f9;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:8px;
-
-      font-size:19px;
-      font-weight:800;
-      letter-spacing:-.3px;
-    }
-
-    .brand-mark{
-      width:32px;
-      height:32px;
-display:flex;
-      align-items:center;
-      justify-content:center;
-
-      border-radius:10px;
-
-      background:var(--green);
-      color:white;
-
-      font-size:15px;
-      font-weight:900;
-    }
-
-    .header-spacer{
-      width:42px;
-      height:42px;
-    }
-
-    /* =========================
-       MAIN
-       ========================= */
-
-    main{
-      padding:16px;
-    }
-
-    .page{
-      width:100%;
-    }
-
-    /* =========================
-       LOADING
-       ========================= */
-
-    .loading-state{
-      padding:28px 0;
-    }
-
-    .skeleton{
-      position:relative;
-      overflow:hidden;
-
-      background:#e8eef0;
-      border-radius:12px;
-    }
-
-    .skeleton::after{
-      content:"";
-
-      position:absolute;
-      inset:0;
-
-      transform:translateX(-100%);
-
-      background:
-        linear-gradient(
-          90deg,
-          transparent,
-          rgba(255,255,255,.65),
-          transparent
-        );
-
-      animation:skeleton-shimmer 1.4s infinite;
-    }
-
-    @keyframes skeleton-shimmer{
-      100%{
-        transform:translateX(100%);
-      }
-    }
-
-    .skeleton-title{
-      width:72%;
-      height:28px;
-      margin-bottom:14px;
-    }
-
-    .skeleton-line{
-      width:100%;
-      height:14px;
-      margin-bottom:10px;
-    }
-
-    .skeleton-line.short{
-      width:65%;
-    }
-
-    .skeleton-card{
-      height:160px;
-      margin-top:18px;
-    }
-
-    /* =========================
-       ERROR / EMPTY
-       ========================= */
-
-    .state-card{
-      padding:28px 20px;
-      margin-top:20px;
-
-      background:var(--white);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-
-      box-shadow:var(--shadow);
-      text-align:center;
-    }
-
-    .state-icon{
-      width:54px;
-      height:54px;
-
-      display:flex;
-      align-items:center;
-      justify-content:center;
-
-      margin:0 auto 14px;
-
-      border-radius:16px;
-
-      background:var(--green-light);
-
-      font-size:25px;
-    }
-
-    .state-card.error .state-icon{
-      background:var(--danger-bg);
-    }
-
-    .state-title{
-      margin-bottom:7px;
-
-      font-size:19px;
-      font-weight:800;
-    }
- .state-text{
-      color:var(--muted);
-      font-size:14px;
-    }
-
-    .retry-button{
-      margin-top:18px;
-    }
-
-    /* =========================
-       BUTTONS
-       ========================= */
-
-    .btn{
-      width:100%;
-      min-height:46px;
-
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-
-      padding:11px 16px;
-
-      border:0;
-      border-radius:13px;
-
-      font-size:14px;
-      font-weight:750;
-
-      transition:
-        transform .15s ease,
-        opacity .15s ease,
-        background .15s ease;
-    }
-
-    .btn:active{
-      transform:scale(.97);
-    }
-
-    .btn:disabled{
-      cursor:not-allowed;
-      opacity:.55;
-      transform:none;
-    }
-
-    .btn-primary{
-      background:var(--green);
-      color:white;
-    }
-
-    .btn-primary:hover{
-      background:var(--green-dark);
-    }
-
-    .btn-secondary{
-      background:#f1f5f9;
-      color:var(--text);
-    }
-
-    .btn-secondary:hover{
-      background:#e2e8f0;
-    }
-
-    .btn-danger{
-      background:var(--danger);
-      color:white;
-    }
-
-    .btn-danger-outline{
-      background:transparent;
-      color:var(--danger);
-      border:1px solid #fecaca;
-    }
-
-    .btn-warning{
-      background:var(--warning);
-      color:white;
-    }
-
-    .btn-blue{
-      background:var(--blue);
-      color:white;
-    }
-
-    .button-row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .button-row .btn{
-      flex:1 1 140px;
-    }
-
-    /* =========================
-       TASK HERO
-       ========================= */
-
-    .task-hero{
-      padding:20px;
-
-      background:
-        linear-gradient(
-          145deg,
-          #ffffff,
-          #f0fdf4
-        );
-
-      border:1px solid #d9f3df;
-      border-radius:22px;
-
-      box-shadow:var(--shadow);
-    }
-
-    .task-category{
-      display:inline-flex;
-      align-items:center;
-
-      padding:6px 10px;
-
-      border-radius:999px;
-
-      background:var(--green-light);
-      color:var(--green-dark);
-
-      font-size:12px;
-      font-weight:800;
-    }
-
-    .task-title{
-      margin-top:13px;
-
-      font-size:25px;
-      line-height:1.18;
-      letter-spacing:-.5px;
-      font-weight:850;
-      word-break:break-word;
-    }
-
-    .task-description{
-      margin-top:12px;
-
-      color:#475569;
-      font-size:14px;
-
-      white-space:pre-wrap;
-      word-break:break-word;
-    }
-
-    /* =========================
-       STATUS
-       ========================= */
-
-    .status-badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-
-      margin-top:15px;
-      padding:7px 11px;
-
-      border-radius:999px;
-
-      font-size:12px;
-      font-weight:800;
-    }
-
-    .status-open{
-      background:var(--green-light);
-      color:var(--green-dark);
-    }
-
-    .status-progress{
-      background:var(--blue-bg);
-      color:#1d4ed8;
-    }
-
-    .status-submitted{
-      background:var(--warning-bg);
-      color:#b45309;
-    }
-
-    .status-completed{
-      background:#ecfdf5;
-      color:#047857;
-    }
-
-    .status-rejected{
-      background:var(--danger-bg);
-      color:#b91c1c;
-    }
-
-    .status-cancelled{
-      background:#f1f5f9;
-      color:#475569;
-    }
-
-/* =========================
-       INFORMATION GRID
-       ========================= */
-
-    .info-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-
-      margin-top:18px;
-    }
-
-    .info-item{
-      min-width:0;
-      padding:13px;
-
-      background:rgba(255,255,255,.9);
-      border:1px solid var(--border);
-      border-radius:14px;
-    }
-
-    .info-label{
-      color:var(--muted);
-
-      font-size:11px;
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:.4px;
-    }
-
-    .info-value{
-      margin-top:4px;
-
-      font-size:14px;
-      font-weight:800;
-
-      overflow-wrap:anywhere;
-    }
-
-    .budget-value{
-      color:var(--green-dark);
-      font-size:17px;
-    }
-
-    /* =========================
-       SECTIONS
-       ========================= */
-
-    .section{
-      margin-top:16px;
-      padding:18px;
-
-      background:var(--white);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-
-      box-shadow:0 4px 16px rgba(15,23,42,.04);
-    }
-
-    .section-header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-
-      margin-bottom:14px;
-    }
-
-    .section-title{
-      font-size:16px;
-      font-weight:850;
-    }
-
-    .section-subtitle{
-      margin-top:3px;
-
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    /* =========================
-       POSTER / PROFILE
-       ========================= */
-
-    .person{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-
-    .avatar{
-      width:48px;
-      height:48px;
-
-      flex:0 0 48px;
-
-      display:flex;
-      align-items:center;
-      justify-content:center;
-
-      overflow:hidden;
-
-      border-radius:50%;
-
-      background:var(--green-light);
-      color:var(--green-dark);
-
-      font-size:17px;
-      font-weight:850;
-    }
-
-    .avatar img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .person-info{
-      min-width:0;
-      flex:1;
-    }
-
-    .person-name{
-      font-size:14px;
-      font-weight:800;
-
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-
-    .person-meta{
-      margin-top:2px;
-
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .profile-link{
-      flex:0 0 auto;
-
-      padding:8px 10px;
-
-      border-radius:10px;
-
-      background:var(--green-soft);
-      color:var(--green-dark);
-
-      font-size:12px;
-      font-weight:800;
-    }
-
-    /* =========================
-       ALERTS / NOTICES
-       ========================= */
-
-    .notice{
-      padding:13px 14px;
-
-      border-radius:13px;
-
-      font-size:13px;
-    }
-
-    .notice.info{
-      background:var(--blue-bg);
-      color:#1e40af;
-    }
-
-    .notice.success{
-      background:var(--green-soft);
-      color:var(--green-dark);
-    }
-
-    .notice.warning{
-      background:var(--warning-bg);
-      color:#92400e;
-    }
-
-    .notice.danger{
-      background:var(--danger-bg);
-      color:#991b1b;
-    }
-
-    /* =========================
-       TIMELINE
-       ========================= */
-
-    .timeline{
-      display:flex;
-      flex-direction:column;
-      gap:0;
-    }
-
-    .timeline-item{
-      position:relative;
-
-      display:flex;
-      gap:12px;
-
-      padding-bottom:18px;
-    }
-
-    .timeline-item:last-child{
-      padding-bottom:0;
-    }
-
-    .timeline-dot-wrap{
-      position:relative;
-
-      flex:0 0 24px;
-
-      display:flex;
-      justify-content:center;
-    }
-
-    .timeline-dot{
-      width:12px;
-      height:12px;
-
-      margin-top:4px;
-
-      border-radius:50%;
-
-      background:#cbd5e1;
-      border:3px solid white;
-      box-shadow:0 0 0 1px #cbd5e1;
-
-      z-index:2;
-    }
-
-    .timeline-item.active .timeline-dot{
-      background:var(--green);
-      box-shadow:0 0 0 1px var(--green);
-    }
-
-    .timeline-item.done .timeline-dot{
-      background:var(--green-dark);
-      box-shadow:0 0 0 1px var(--green-dark);
-    }
-
-    .timeline-line{
-      position:absolute;
-
-      top:16px;
-      bottom:-2px;
-
-      width:1px;
-
-      background:#e2e8f0;
-    }
-
-    .timeline-content{
-      min-width:0;
-    }
-
-    .timeline-title{
-      font-size:13px;
-      font-weight:800;
-    }
-
-    .timeline-text{
-      margin-top:2px;
-
-      color:var(--muted);
-      font-size:12px;
-    }
-    /* =========================
-       CHAT
-       ========================= */
-
-    .chat-box{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-
-      max-height:320px;
-      overflow-y:auto;
-
-      padding:4px 0;
-    }
-
-    .chat-empty{
-      padding:16px;
-
-      border-radius:12px;
-
-      background:#f8fafc;
-
-      color:var(--muted);
-
-      font-size:12px;
-      text-align:center;
-    }
-
-    .message{
-      max-width:84%;
-      padding:9px 11px;
-
-      border-radius:14px;
-
-      font-size:12px;
-      word-break:break-word;
-    }
-
-    .message.mine{
-      align-self:flex-end;
-
-      background:var(--green);
-      color:white;
-
-      border-bottom-right-radius:5px;
-    }
-
-    .message.theirs{
-      align-self:flex-start;
-
-      background:#f1f5f9;
-      color:var(--text);
-
-      border-bottom-left-radius:5px;
-    }
-
-    .message-author{
-      margin-bottom:3px;
-
-      font-size:10px;
-      font-weight:800;
-      opacity:.75;
-    }
-
-    .message-time{
-      margin-top:4px;
-
-      font-size:9px;
-      opacity:.65;
-    }
-
-    .chat-compose{
-      display:flex;
-      gap:8px;
-
-      margin-top:11px;
-    }
-
-    .chat-input{
-      flex:1;
-
-      min-width:0;
-      min-height:42px;
-
-      padding:10px 12px;
-
-      border:1px solid var(--border);
-      border-radius:12px;
-
-      outline:none;
-
-      background:white;
-
-      font-size:12px;
-    }
-
-    .chat-input:focus{
-      border-color:#86efac;
-      box-shadow:0 0 0 3px rgba(34,197,94,.08);
-    }
-
-    .send-btn{
-      width:44px;
-      min-height:42px;
-
-      flex:0 0 44px;
-
-      padding:0;
-
-      border:0;
-      border-radius:12px;
-
-      background:var(--green);
-      color:white;
-
-      font-size:16px;
-    }
-
-    /* =========================
-       REVIEWS
-       ========================= */
-
-    .review-list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    .review{
-      padding:12px;
-
-      border:1px solid var(--border);
-      border-radius:13px;
-
-      background:#fafafa;
-    }
-
-    .review-top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-
-    .reviewer{
-      display:flex;
-      align-items:center;
-      gap:8px;
-
-      min-width:0;
-    }
-
-    .reviewer-avatar{
-      width:30px;
-      height:30px;
-
-      flex:0 0 30px;
-
-      overflow:hidden;
-
-      display:flex;
-      align-items:center;
-      justify-content:center;
-
-      border-radius:50%;
-
-      background:var(--green-light);
-      color:var(--green-dark);
-
-      font-size:11px;
-      font-weight:800;
-    }
-
-    .reviewer-avatar img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .reviewer-name{
-      font-size:12px;
-      font-weight:800;
-    }
-
-    .stars{
-      color:#d97706;
-      font-size:13px;
-      white-space:nowrap;
-    }
-
-    .review-text{
-      margin-top:8px;
-
-      color:#475569;
-      font-size:12px;
-      white-space:pre-wrap;
-    }
-/* =========================
-       REPORT
-       ========================= */
-
-    .report-link{
-      display:inline-flex;
-      align-items:center;
-      gap:5px;
-
-      color:var(--danger);
-
-      font-size:12px;
-      font-weight:750;
-    }
-
-    /* =========================
-       BOTTOM NAV
-       ========================= */
-
-    .bottom-nav{
-      position:fixed;
-      left:50%;
-      bottom:0;
-      z-index:60;
-
-      width:100%;
-      max-width:480px;
-
-      transform:translateX(-50%);
-
-      display:grid;
-      grid-template-columns:repeat(5,1fr);
-
-      padding:8px 8px calc(8px + env(safe-area-inset-bottom));
-
-      background:rgba(255,255,255,.97);
-      border-top:1px solid var(--border);
-
-      box-shadow:0 -5px 20px rgba(15,23,42,.06);
-
-      backdrop-filter:blur(12px);
-      -webkit-backdrop-filter:blur(12px);
-    }
-
-    .nav-item{
-      min-height:54px;
-
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:3px;
-
-      border-radius:13px;
-
-      color:#64748b;
-
-      font-size:10px;
-      font-weight:700;
-
-      transition:
-        transform .15s ease,
-        background .15s ease,
-        color .15s ease;
-    }
-
-    .nav-item:active{
-      transform:scale(.94);
-    }
-
-    .nav-item.active{
-      background:var(--green-soft);
-      color:var(--green-dark);
-    }
-
-    .nav-icon{
-      font-size:18px;
-      line-height:1;
-    }
-
-    /* =========================
-       MODAL
-       ========================= */
-
-    .modal-backdrop{
-      position:fixed;
-      inset:0;
-      z-index:100;
-
-      display:none;
-      align-items:flex-end;
-      justify-content:center;
-
-      padding:16px;
-
-      background:rgba(15,23,42,.48);
-    }
-
-    .modal-backdrop.show{
-      display:flex;
-    }
-
-    .modal{
-      width:100%;
-      max-width:480px;
-      max-height:85vh;
-      overflow-y:auto;
-
-      padding:20px;
-
-      background:white;
-      border-radius:22px 22px 16px 16px;
-
-      box-shadow:0 20px 50px rgba(15,23,42,.2);
-
-      animation:modal-in .18s ease;
-    }
-
-    @keyframes modal-in{
-      from{
-        opacity:0;
-        transform:translateY(20px);
-      }
-
-      to{
-        opacity:1;
-        transform:translateY(0);
-      }
-    }
-
-    .modal-title{
-      font-size:18px;
-      font-weight:850;
-    }
-
-    .modal-text{
-      margin-top:6px;
-
-      color:var(--muted);
-      font-size:13px;
-    }
-
-    .modal-actions{
-      display:flex;
-      gap:9px;
-
-      margin-top:18px;
-    }
-
-    .modal-actions .btn{
-      flex:1;
-    }
-
-    /* =========================
-       TOAST
-       ========================= */
-
-    .toast-container{
-      position:fixed;
-      left:50%;
-      bottom:82px;
-      z-index:120;
-
-      width:calc(100% - 32px);
-      max-width:448px;
-
-      transform:translateX(-50%);
-
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-
-      pointer-events:none;
-    }
-
-    .toast{
-      padding:12px 14px;
-
-      border-radius:13px;
-
-      background:#17211b;
-      color:white;
-
-      box-shadow:0 10px 30px rgba(15,23,42,.18);
-
-      font-size:12px;
-      font-weight:700;
-
-      animation:toast-in .18s ease;
-    }
-
-    .toast.success{
-      background:var(--green-dark);
-    }
-
-    .toast.error{
-      background:#b91c1c;
-    }
-
-    @keyframes toast-in{
-      from{
-        opacity:0;
-        transform:translateY(8px);
-      }
-
-      to{
-        opacity:1;
-        transform:translateY(0);
-      }
-    }
-/* =========================
-       RESPONSIVE
-       ========================= */
-
-    @media (max-width:360px){
-      main{
-        padding:12px;
-      }
-
-      .task-hero{
-        padding:16px;
-      }
-
-      .task-title{
-        font-size:22px;
-      }
-
-      .info-grid{
-        grid-template-columns:1fr;
-      }
-
-      .section{
-        padding:15px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Task Details — OOULink</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#16a34a;
+  --green-dark:#15803d;
+  --green-light:#ecfdf3;
+  --text:#17201a;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --bg:#f6f8f7;
+  --white:#fff;
+  --red:#dc2626;
+  --orange:#ea580c;
+  --blue:#2563eb;
+  --shadow:0 4px 18px rgba(0,0,0,.06);
+}
+html,body{
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
+body{
+  display:flex;
+  justify-content:center;
+}
+button,a{font:inherit}
+button{cursor:pointer}
+.app{
+  width:100%;
+  max-width:480px;
+  min-height:100vh;
+  background:var(--bg);
+  position:relative;
+}
+.header{
+  height:60px;
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:0 14px;
+  position:sticky;
+  top:0;
+  z-index:20;
+}
+.back-btn{
+  width:40px;
+  height:40px;
+  border:0;
+  background:transparent;
+  border-radius:12px;
+  font-size:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text);
+  transition:.15s;
+}
+.back-btn:active{transform:scale(.92);background:#f1f5f3}
+.header-title{
+  flex:1;
+  min-width:0;
+  text-align:center;
+  font-size:16px;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  padding:0 8px;
+}
+.header-brand{
+  width:40px;
+  text-align:right;
+  color:var(--green-dark);
+  font-weight:800;
+  font-size:12px;
+}
+main{padding:14px 14px 90px}
+.hidden{display:none!important}
+
+.loading-card,
+.error-card,
+.not-found-card{
+  background:var(--white);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+.skeleton{
+  background:linear-gradient(90deg,#edf0ee 25%,#f7f8f7 50%,#edf0ee 75%);
+  background-size:200% 100%;
+  animation:shine 1.4s infinite;
+  border-radius:10px;
+}
+@keyframes shine{
+  from{background-position:200% 0}
+  to{background-position:-200% 0}
+}
+.sk-title{height:28px;width:78%;margin-bottom:14px}
+.sk-line{height:14px;width:100%;margin-bottom:9px}
+.sk-line.short{width:62%}
+.sk-box{height:80px;width:100%;margin-top:16px}
+
+.error-card{text-align:center;padding:35px 20px}
+.error-icon,.not-found-icon{font-size:42px;margin-bottom:12px}
+.error-card h2,.not-found-card h2{font-size:20px;margin-bottom:8px}
+.error-card p,.not-found-card p{
+  color:var(--muted);
+  line-height:1.5;
+  font-size:14px;
+}
+.primary-btn{
+  margin-top:18px;
+  border:0;
+  background:var(--green);
+  color:#fff;
+  padding:12px 18px;
+  border-radius:12px;
+  font-weight:700;
+  transition:.15s;
+}
+.primary-btn:active{transform:scale(.97)}
+
+.hero{
+  background:var(--white);
+  border-radius:20px;
+  padding:18px;
+  box-shadow:var(--shadow);
+  margin-bottom:12px;
+}
+.hero-top{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:12px;
+}
+.category{
+  color:var(--green-dark);
+  background:var(--green-light);
+  padding:6px 9px;
+  border-radius:8px;
+  font-size:11px;
+  font-weight:700;
+}
+.status{
+  margin-left:auto;
+  padding:6px 9px;
+  border-radius:8px;
+  font-size:11px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.status-open{background:#dcfce7;color:#166534}
+.status-progress{background:#dbeafe;color:#1d4ed8}
+.status-completed{background:#e0e7ff;color:#3730a3}
+.status-cancelled{background:#fee2e2;color:#991b1b}
+.status-default{background:#f3f4f6;color:#4b5563}
+
+.hero h1{
+  font-size:22px;
+  line-height:1.25;
+  margin-bottom:10px;
+}
+.description{
+  color:#4b5563;
+  line-height:1.6;
+  font-size:14px;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.info-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:12px;
+}
+.info-box{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:13px;
+}
+.info-label{
+  color:var(--muted);
+  font-size:11px;
+  margin-bottom:6px;
+}
+.info-value{
+  font-size:14px;
+  font-weight:700;
+  word-break:break-word;
+}
+.money{color:var(--green-dark);font-size:17px}
+
+.section{
+  background:var(--white);
+  border-radius:18px;
+  padding:16px;
+  box-shadow:var(--shadow);
+  margin-bottom:12px;
+}
+.section-title{
+  font-size:15px;
+  font-weight:800;
+  margin-bottom:13px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+  .poster-card{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:4px 0;
+}
+.avatar{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  background:var(--green-light);
+  color:var(--green-dark);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:15px;
+  overflow:hidden;
+  flex:none;
+}
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.person-info{min-width:0;flex:1}
+.person-name{
+  font-size:14px;
+  font-weight:800;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.person-meta{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:4px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.person-stats{
+  display:flex;
+  gap:8px;
+  margin-top:5px;
+  flex-wrap:wrap;
+}
+.stat{
+  font-size:10px;
+  color:#4b5563;
+  background:#f3f4f6;
+  padding:4px 7px;
+  border-radius:6px;
+}
+.runner-empty{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+  background:#f8faf9;
+  border-radius:12px;
+  padding:12px;
+}
+
+.timeline{
+  position:relative;
+  padding-left:26px;
+}
+.timeline:before{
+  content:"";
+  position:absolute;
+  left:7px;
+  top:5px;
+  bottom:5px;
+  width:2px;
+  background:#dfe7e2;
+}
+.timeline-item{
+  position:relative;
+  margin-bottom:18px;
+}
+.timeline-item:last-child{margin-bottom:0}
+.timeline-dot{
+  position:absolute;
+  left:-24px;
+  top:2px;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:var(--green);
+  border:3px solid #dcfce7;
+}
+.timeline-item h4{
+  font-size:13px;
+  margin-bottom:4px;
+}
+.timeline-item p{
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.45;
+}
+
+.attachment-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.attachment{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px;
+}
+.file-icon{
+  width:36px;
+  height:36px;
+  border-radius:9px;
+  background:#f0fdf4;
+  color:var(--green-dark);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:17px;
+}
+.file-info{flex:1;min-width:0}
+.file-name{
+  font-size:12px;
+  font-weight:700;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.file-size{font-size:10px;color:var(--muted);margin-top:3px}
+.file-link{
+  border:0;
+  background:#f0fdf4;
+  color:var(--green-dark);
+  border-radius:8px;
+  padding:7px 9px;
+  font-size:11px;
+  font-weight:700;
+}
+.no-files{
+  color:var(--muted);
+  font-size:13px;
+  text-align:center;
+  padding:8px;
+}
+
+.action-section{padding-bottom:14px}
+.action-btn{
+  width:100%;
+  min-height:46px;
+  border:0;
+  border-radius:13px;
+  font-weight:800;
+  transition:transform .15s,opacity .15s;
+}
+.action-btn:active{transform:scale(.97)}
+.chat-btn{
+  background:var(--green);
+  color:#fff;
+}
+.disabled-btn{
+  background:#eef1ef;
+  color:#7a827d;
+  cursor:not-allowed;
+}
+.secondary-btn{
+  margin-top:9px;
+  background:#fff;
+  color:#374151;
+  border:1px solid var(--border);
+}
+.helper-text{
+  text-align:center;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.45;
+  margin-top:9px;
+}
+
+.bottom-space{height:8px}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  transform:translate(-50%,20px);
+  width:calc(100% - 32px);
+  max-width:448px;
+  background:#17201a;
+  color:#fff;
+  padding:12px 14px;
+  border-radius:12px;
+  font-size:13px;
+  text-align:center;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+  z-index:100;
+}
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+
+@media(max-width:360px){
+  .hero h1{font-size:20px}
+  .info-grid{grid-template-columns:1fr}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+  }
+}
+</style>
 </head>
 
 <body>
+<div class="app">
 
-  <div class="app">
+<header class="header">
+  <button class="back-btn" id="backBtn" aria-label="Go back">‹</button>
+  <div class="header-title" id="headerTitle">Task Details</div>
+  <div class="header-brand">OOULink</div>
+</header>
 
-    <!-- =========================
-         TOP BAR
-         ========================= -->
+<main>
+  <section id="loadingState" class="loading-card">
+    <div class="skeleton sk-title"></div>
+    <div class="skeleton sk-line"></div>
+    <div class="skeleton sk-line short"></div>
+    <div class="skeleton sk-box"></div>
+    <div class="skeleton sk-box"></div>
+  </section>
 
-    <header class="topbar">
+  <section id="errorState" class="error-card hidden">
+    <div class="error-icon">⚠️</div>
+    <h2>Something went wrong</h2>
+    <p id="errorMessage">We couldn't load this task.</p>
+    <button class="primary-btn" id="retryBtn">Try Again</button>
+  </section>
 
-      <button
-        class="back-button"
-        type="button"
-        onclick="goBack()"
-        aria-label="Go back"
-      >
-        ←
-      </button>
+  <section id="notFoundState" class="not-found-card hidden">
+    <div class="not-found-icon">🔎</div>
+    <h2>Task not found</h2>
+    <p>This task may have been removed or the link is no longer valid.</p>
+    <button class="primary-btn" id="backHomeBtn">Go Home</button>
+  </section>
 
-      <div class="brand">
-        <span class="brand-mark">O</span>
-        <span>OOULink</span>
+  <div id="contentState" class="hidden">
+
+    <section class="hero">
+      <div class="hero-top">
+        <span class="category" id="taskCategory">Task</span>
+        <span class="status status-default" id="taskStatus">Loading</span>
       </div>
+      <h1 id="taskTitle">Task title</h1>
+      <div class="description" id="taskDescription"></div>
+    </section>
 
-      <div class="header-spacer"></div>
-
-    </header>
-
-
-    <!-- =========================
-         MAIN CONTENT
-         ========================= -->
-
-    <main>
-
-      <div id="page" class="page">
-
-        <div class="loading-state">
-
-          <div class="skeleton skeleton-title"></div>
-
-          <div class="skeleton skeleton-line"></div>
-          <div class="skeleton skeleton-line short"></div>
-
-          <div class="skeleton skeleton-card"></div>
-
-          <div class="skeleton skeleton-line"></div>
-          <div class="skeleton skeleton-line short"></div>
-
+    <section class="info-grid">
+      <div class="info-box">
+        <div class="info-label">Budget</div>
+        <div class="info-value money" id="taskBudget">₦0</div>
+      </div>
+      <div class="info-box">
+        <div class="info-label">Location</div>
+        <div class="info-value" id="taskLocation">—</div>
+      </div>
+      <div class="info-box">
+        <div class="info-label">Deadline</div>
+        <div class="info-value" id="taskDeadline">—</div>
+      </div>
+      <div class="info-box">
+        <div class="info-label">Posted</div>
+        <div class="info-value" id="taskCreated">—</div>
+      </div>
+    </section>
+        <section class="section">
+      <div class="section-title">👤 Poster</div>
+      <div class="poster-card">
+        <div class="avatar" id="posterAvatar">?</div>
+        <div class="person-info">
+          <div class="person-name" id="posterName">Loading...</div>
+          <div class="person-meta" id="posterLocation">Location unavailable</div>
+          <div class="person-stats">
+            <span class="stat" id="posterXp">XP 0</span>
+            <span class="stat" id="posterRep">Reputation 0</span>
+          </div>
         </div>
-
       </div>
+    </section>
 
-    </main>
+    <section class="section">
+      <div class="section-title">🏃 Runner</div>
+      <div id="runnerContent"></div>
+    </section>
 
+    <section class="section">
+      <div class="section-title">📎 Attachments</div>
+      <div id="attachmentContent"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">🕒 Task Timeline</div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <section class="section action-section" id="actionSection">
+      <div class="section-title">⚡ Actions</div>
+      <div id="actionContent"></div>
+    </section>
+
+    <div class="bottom-space"></div>
   </div>
+</main>
 
+<div class="toast" id="toast"></div>
 
-  <!-- =========================
-       BOTTOM NAVIGATION
-       ========================= -->
+<script>
+const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-  <nav class="bottom-nav">
+let currentUser = null;
+let currentTask = null;
+let ownerProfile = null;
+let runnerProfile = null;
+let taskAttachments = [];
+let isLoading = false;
 
-    <a
-      class="nav-item"
-      href="index.html"
-      aria-label="Home"
-    >
-      <span class="nav-icon">⌂</span>
-      <span>Home</span>
-    </a>
+const $ = id => document.getElementById(id);
 
-    <a
-      class="nav-item"
-      href="my-tasks.html"
-      aria-label="My Tasks"
-    >
-      <span class="nav-icon">✓</span>
-      <span>My Tasks</span>
-    </a>
+function getTaskId(){
+  return new URLSearchParams(window.location.search).get("id");
+}
 
-    <a
-      class="nav-item"
-      href="post-task.html"
-      aria-label="Post Task"
-    >
-      <span class="nav-icon">＋</span>
-      <span>Post</span>
-    </a>
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
 
-    <a
-      class="nav-item"
-      href="alerts.html"
-      aria-label="Alerts"
-    >
-      <span class="nav-icon">♢</span>
-      <span>Alerts</span>
-    </a>
+function formatMoney(value){
+  const number = Number(value);
+  if(!Number.isFinite(number)) return "₦0";
+  return "₦" + number.toLocaleString("en-NG");
+}
 
-    <a
-      class="nav-item"
-      href="profile.html"
-      aria-label="Profile"
-    >
-      <span class="nav-icon">◉</span>
-      <span>Profile</span>
-    </a>
+function formatDate(value){
+  if(!value) return "—";
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString("en-NG",{
+    day:"numeric",
+    month:"short",
+    year:"numeric"
+  });
+}
 
-  </nav>
-<!-- =========================
-       MODAL
-       ========================= -->
+function formatDateTime(value){
+  if(!value) return "—";
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString("en-NG",{
+    day:"numeric",
+    month:"short",
+    year:"numeric",
+    hour:"numeric",
+    minute:"2-digit"
+  });
+}
 
-  <div
-    id="modalBackdrop"
-    class="modal-backdrop"
-    onclick="closeModalFromBackdrop(event)"
-  >
+function displayName(profile){
+  if(!profile) return "OOULink User";
+  return profile.full_name || profile.username || "OOULink User";
+}
 
-    <div
-      id="modal"
-      class="modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modalTitle"
-      onclick="event.stopPropagation()"
-    >
+function getInitials(name){
+  const clean = String(name || "?").trim();
+  if(!clean) return "?";
+  const parts = clean.split(/\s+/).filter(Boolean);
+  if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+}
 
-      <div id="modalTitle" class="modal-title">
-        Confirm action
+function normalizeStatus(status){
+  return String(status || "unknown").toLowerCase().trim();
+}
+
+function statusLabel(status){
+  const value = normalizeStatus(status);
+  const labels = {
+    open:"Open",
+    assigned:"Assigned",
+    in_progress:"In Progress",
+    completed:"Completed",
+    cancelled:"Cancelled",
+    canceled:"Cancelled"
+  };
+  return labels[value] || value.replace(/_/g," ") || "Unknown";
+}
+
+function statusClass(status){
+  const value = normalizeStatus(status);
+  if(value === "open") return "status-open";
+  if(value === "in_progress" || value === "assigned") return "status-progress";
+  if(value === "completed") return "status-completed";
+  if(value === "cancelled" || value === "canceled") return "status-cancelled";
+  return "status-default";
+}
+  function showLoading(show){
+  $("loadingState").classList.toggle("hidden",!show);
+  if(show){
+    $("errorState").classList.add("hidden");
+    $("notFoundState").classList.add("hidden");
+    $("contentState").classList.add("hidden");
+  }
+}
+
+function showError(message){
+  $("loadingState").classList.add("hidden");
+  $("notFoundState").classList.add("hidden");
+  $("contentState").classList.add("hidden");
+  $("errorState").classList.remove("hidden");
+  $("errorMessage").textContent =
+    message || "We couldn't load this task.";
+}
+
+function showNotFound(){
+  $("loadingState").classList.add("hidden");
+  $("errorState").classList.add("hidden");
+  $("contentState").classList.add("hidden");
+  $("notFoundState").classList.remove("hidden");
+}
+
+function showContent(){
+  $("loadingState").classList.add("hidden");
+  $("errorState").classList.add("hidden");
+  $("notFoundState").classList.add("hidden");
+  $("contentState").classList.remove("hidden");
+}
+
+function showToast(message){
+  const toast = $("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(()=>{
+    toast.classList.remove("show");
+  },2500);
+}
+
+function profileAvatar(element,profile){
+  if(!element) return;
+  const name = displayName(profile);
+  if(profile && profile.avatar_url){
+    element.innerHTML =
+      `<img src="${escapeHtml(profile.avatar_url)}" alt="">`;
+  }else{
+    element.textContent = getInitials(name);
+  }
+}
+
+function isOwner(){
+  return !!(
+    currentUser &&
+    currentTask &&
+    currentTask.user_id === currentUser.id
+  );
+}
+
+function isRunner(){
+  return !!(
+    currentUser &&
+    currentTask &&
+    currentTask.runner_id === currentUser.id
+  );
+}
+
+function isParticipant(){
+  return isOwner() || isRunner();
+}
+
+function canUseChat(){
+  return !!(
+    currentUser &&
+    currentTask &&
+    currentTask.runner_id &&
+    isParticipant()
+  );
+}
+
+function renderTask(){
+  $("headerTitle").textContent =
+    currentTask.title || "Task Details";
+
+  $("taskCategory").textContent =
+    currentTask.category || "Task";
+
+  const status = normalizeStatus(currentTask.status);
+  $("taskStatus").textContent = statusLabel(status);
+  $("taskStatus").className =
+    "status " + statusClass(status);
+
+  $("taskTitle").textContent =
+    currentTask.title || "Untitled task";
+
+  $("taskDescription").textContent =
+    currentTask.description || "No description provided.";
+
+  $("taskBudget").textContent =
+    formatMoney(currentTask.budget);
+
+  $("taskLocation").textContent =
+    currentTask.location || "Not specified";
+
+  $("taskDeadline").textContent =
+    formatDateTime(currentTask.deadline);
+
+  $("taskCreated").textContent =
+    formatDateTime(currentTask.created_at);
+}
+
+function renderPoster(){
+  const name = displayName(ownerProfile);
+
+  $("posterName").textContent = name;
+  $("posterLocation").textContent =
+    ownerProfile?.location || "Location not provided";
+
+  $("posterXp").textContent =
+    "XP " + Number(ownerProfile?.xp || 0);
+
+  $("posterRep").textContent =
+    "Reputation " + Number(ownerProfile?.reputation || 0);
+
+  profileAvatar($("posterAvatar"),ownerProfile);
+}
+
+function renderRunner(){
+  if(!currentTask.runner_id){
+    $("runnerContent").innerHTML = `
+      <div class="runner-empty">
+        No runner has been assigned to this task yet.
+      </div>`;
+    return;
+  }
+
+  if(!runnerProfile){
+    $("runnerContent").innerHTML = `
+      <div class="runner-empty">
+        A runner has been assigned, but their profile could not be loaded.
+      </div>`;
+    return;
+  }
+
+  const name = displayName(runnerProfile);
+  const avatar = runnerProfile.avatar_url
+    ? `<img src="${escapeHtml(runnerProfile.avatar_url)}" alt="">`
+    : escapeHtml(getInitials(name));
+
+  $("runnerContent").innerHTML = `
+    <div class="poster-card">
+      <div class="avatar">${avatar}</div>
+      <div class="person-info">
+        <div class="person-name">${escapeHtml(name)}</div>
+        <div class="person-meta">
+          ${escapeHtml(runnerProfile.location || "Location not provided")}
+        </div>
+        <div class="person-stats">
+          <span class="stat">XP ${Number(runnerProfile.xp || 0)}</span>
+          <span class="stat">
+            Reputation ${Number(runnerProfile.reputation || 0)}
+          </span>
+        </div>
       </div>
+    </div>`;
+  }
+  function formatFileSize(bytes){
+  const value = Number(bytes);
+  if(!Number.isFinite(value) || value <= 0) return "";
+  if(value < 1024) return value + " B";
+  if(value < 1024 * 1024)
+    return (value / 1024).toFixed(1) + " KB";
+  return (value / (1024 * 1024)).toFixed(1) + " MB";
+}
 
-      <div id="modalText" class="modal-text">
-        Are you sure?
+async function renderAttachments(){
+  const box = $("attachmentContent");
+
+  if(!taskAttachments.length){
+    box.innerHTML =
+      `<div class="no-files">No attachments for this task.</div>`;
+    return;
+  }
+
+  const items = [];
+
+  for(const file of taskAttachments){
+    let url = "";
+
+    try{
+      const result = await supabaseClient
+        .storage
+        .from("TaskFiles")
+        .createSignedUrl(file.file_path,600);
+
+      if(!result.error && result.data){
+        url = result.data.signedUrl || "";
+      }
+    }catch(error){
+      console.warn("Attachment URL error:",error);
+    }
+
+    const safeName = escapeHtml(file.file_name || "Attachment");
+    const size = formatFileSize(file.file_size);
+
+    items.push(`
+      <div class="attachment">
+        <div class="file-icon">📄</div>
+        <div class="file-info">
+          <div class="file-name">${safeName}</div>
+          <div class="file-size">${escapeHtml(size)}</div>
+        </div>
+        ${
+          url
+          ? `<button class="file-link"
+                type="button"
+                data-url="${escapeHtml(url)}">
+                Open
+             </button>`
+          : `<span class="file-size">Unavailable</span>`
+        }
       </div>
+    `);
+  }
 
-      <div class="modal-actions">
+  box.innerHTML = `<div class="attachment-list">${items.join("")}</div>`;
 
-        <button
-          class="btn btn-secondary"
-          type="button"
-          onclick="closeModal()"
-        >
-          Cancel
-        </button>
+  box.querySelectorAll(".file-link").forEach(button=>{
+    button.addEventListener("click",()=>{
+      const url = button.getAttribute("data-url");
+      if(url) window.open(url,"_blank","noopener");
+    });
+  });
+}
 
-        <button
-          id="modalConfirmButton"
-          class="btn btn-primary"
-          type="button"
-        >
-          Continue
-        </button>
+function renderTimeline(){
+  const status = normalizeStatus(currentTask.status);
+  const items = [
+    {
+      title:"Task posted",
+      text:`Posted ${formatDateTime(currentTask.created_at)}`
+    }
+  ];
 
-      </div>
+  if(currentTask.runner_id){
+    items.push({
+      title:"Runner assigned",
+      text:"A runner is assigned to this task."
+    });
+  }
 
+  if(status === "in_progress"){
+    items.push({
+      title:"Task in progress",
+      text:"This task is currently being worked on."
+    });
+  }
+
+  if(status === "completed"){
+    items.push({
+      title:"Task completed",
+      text:"This task has been marked completed."
+    });
+  }
+
+  if(status === "cancelled" || status === "canceled"){
+    items.push({
+      title:"Task cancelled",
+      text:"This task is no longer active."
+    });
+  }
+
+  $("timeline").innerHTML = items.map(item=>`
+    <div class="timeline-item">
+      <span class="timeline-dot"></span>
+      <h4>${escapeHtml(item.title)}</h4>
+      <p>${escapeHtml(item.text)}</p>
     </div>
+  `).join("");
+}
 
-  </div>
+function renderActions(){
+  const box = $("actionContent");
 
-
-  <!-- =========================
-       TOAST CONTAINER
-       ========================= -->
-
-  <div
-    id="toastContainer"
-    class="toast-container"
-    aria-live="polite"
-    aria-atomic="true"
-  ></div>
-
-
-  <!-- =========================
-       SUPABASE
-       ========================= -->
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-
-  <script>
-
-    /* =========================================================
-       OOULINK TASK DETAILS
-       BLOCK 1
-       CORE SETUP + SAFE UI HELPERS
-       ========================================================= */
-
-
-    /* =========================
-       SUPABASE CONFIG
-       ========================= */
-
-    const SUPABASE_URL =
-      "https://dthvdxgxesomltlruogp.supabase.co";
-
-    const SUPABASE_KEY =
-      "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr4";
-
-    const supabaseClient =
-      window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      );
-
-
-    /* =========================
-       GLOBAL STATE
-       ========================= */
-
-    let currentUser = null;
-
-    let currentTask = null;
-
-    let ownerProfile = null;
-
-    let runnerProfile = null;
-
-    let myApplication = null;
-
-    let taskApplications = [];
-
-    let taskAttachments = [];
-
-    let taskMessages = [];
-
-    let taskReviews = [];
-
-    let isLoading = false;
-
-    let isSubmitting = false;
-
-    let realtimeChannel = null;
-
-
-    /* =========================
-       DOM REFERENCES
-       ========================= */
-
-    const page =
-      document.getElementById("page");
-
-    const modalBackdrop =
-      document.getElementById("modalBackdrop");
-
-    const modalTitle =
-      document.getElementById("modalTitle");
-
-    const modalText =
-      document.getElementById("modalText");
-
-    const modalConfirmButton =
-      document.getElementById("modalConfirmButton");
-
-    const toastContainer =
-      document.getElementById("toastContainer");
-/* =========================
-       BASIC HELPERS
-       ========================= */
-
-    function escapeHtml(value){
-
-      if(value === null || value === undefined){
-        return "";
-      }
-
-      return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-
-    function escapeAttribute(value){
-
-      return escapeHtml(value)
-        .replace(/`/g, "&#096;");
-    }
-
-
-    function getTaskId(){
-
-      const params =
-        new URLSearchParams(
-          window.location.search
-        );
-
-      return params.get("id");
-    }
-
-
-    function goBack(){
-
-      if(
-        document.referrer &&
-        document.referrer.includes(
-          window.location.host
-        )
-      ){
-        window.history.back();
-        return;
-      }
-
+  if(canUseChat()){
+    box.innerHTML = `
+      <button class="action-btn chat-btn" id="chatBtn">
+        💬 Open Task Chat
+      </button>
+      <div class="helper-text">
+        Chat is available because you are involved in this task.
+      </div>`;
+    
+    $("chatBtn").addEventListener("click",()=>{
       window.location.href =
-        "index.html";
+        "chat.html?id=" + encodeURIComponent(currentTask.id);
+    });
+    return;
+  }
+
+  if(isOwner()){
+    box.innerHTML = `
+      <button class="action-btn disabled-btn" type="button" disabled>
+        Task acceptance & payment
+      </button>
+      <div class="helper-text">
+        Task management and payment features are coming next.
+      </div>`;
+    return;
+  }
+
+  if(normalizeStatus(currentTask.status) === "open"){
+    box.innerHTML = `
+      <button class="action-btn disabled-btn" type="button" disabled>
+        Accept Task
+      </button>
+      <div class="helper-text">
+        Task acceptance and payment are coming next.
+      </div>`;
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="helper-text">
+      There are no actions available for this task right now.
+    </div>`;
+}
+
+async function loadTask(){
+  const taskId = getTaskId();
+
+  if(!taskId){
+    showNotFound();
+    return;
+  }
+
+  showLoading(true);
+  isLoading = true;
+
+  try{
+    const {data:userData,error:userError} =
+      await supabaseClient.auth.getUser();
+
+    if(userError){
+      console.warn("Auth check:",userError);
     }
 
+    currentUser = userData?.user || null;
 
-    function formatMoney(value){
+    const {data:task,error:taskError} =
+      await supabaseClient
+        .from("tasks")
+        .select(`
+          id,
+          user_id,
+          title,
+          description,
+          category,
+          location,
+          budget,
+          deadline,
+          status,
+          runner_id,
+          created_at
+        `)
+        .eq("id",taskId)
+        .maybeSingle();
 
-      const number =
-        Number(value);
+    if(taskError) throw taskError;
 
-      if(
-        Number.isNaN(number)
-      ){
-        return "₦0";
+    if(!task){
+      showNotFound();
+      return;
+    }
+
+    currentTask = task;
+
+    const ownerId = task.user_id;
+    const runnerId = task.runner_id;
+
+    const profileIds = [ownerId,runnerId]
+      .filter(Boolean);
+
+    ownerProfile = null;
+    runnerProfile = null;
+
+    if(profileIds.length){
+      const {data:profiles,error:profileError} =
+        await supabaseClient
+          .from("profiles")
+          .select(`
+            id,
+            username,
+            full_name,
+            location,
+            avatar_url,
+            xp,
+            reputation
+          `)
+          .in("id",profileIds);
+
+      if(profileError){
+        console.warn("Profile load error:",profileError);
+      }else{
+        ownerProfile =
+          profiles?.find(p=>p.id === ownerId) || null;
+
+        runnerProfile =
+          profiles?.find(p=>p.id === runnerId) || null;
       }
+  }
+        const {data:attachments,error:attachmentError} =
+      await supabaseClient
+        .from("task_attachments")
+        .select(`
+          id,
+          task_id,
+          user_id,
+          file_name,
+          file_path,
+          file_size,
+          mime_type,
+          created_at
+        `)
+        .eq("task_id",task.id)
+        .order("created_at",{ascending:true});
 
-      return "₦" +
-        number.toLocaleString(
-          "en-NG",
-          {
-            maximumFractionDigits:0
-          }
-        );
+    if(attachmentError){
+      console.warn("Attachment load error:",attachmentError);
+      taskAttachments = [];
+    }else{
+      taskAttachments = attachments || [];
     }
 
-
-    function formatDate(value){
-
-      if(!value){
-        return "Not specified";
-      }
-
-      const date =
-        new Date(value);
-
-      if(
-        Number.isNaN(
-          date.getTime()
-        )
-      ){
-        return "Not specified";
-      }
-
-      return date.toLocaleDateString(
-        "en-NG",
-        {
-          day:"numeric",
-          month:"short",
-          year:"numeric"
-        }
-      );
-    }
-
-
-    function formatDateTime(value){
-
-      if(!value){
-        return "Not specified";
-      }
-
-      const date =
-        new Date(value);
-
-      if(
-        Number.isNaN(
-          date.getTime()
-        )
-      ){
-        return "Not specified";
-      }
-
-      return date.toLocaleString(
-        "en-NG",
-        {
-          day:"numeric",
-          month:"short",
-          year:"numeric",
-          hour:"numeric",
-          minute:"2-digit"
-        }
-      );
-    }
-
-
-    function getInitials(name){
-
-      const clean =
-        String(name || "")
-          .trim();
-
-      if(!clean){
-        return "U";
-      }
-
-      const parts =
-        clean
-          .split(/\s+/)
-          .filter(Boolean);
-
-      if(parts.length === 1){
-        return parts[0]
-          .slice(0,1)
-          .toUpperCase();
-      }
-
-      return (
-        parts[0].slice(0,1) +
-        parts[parts.length - 1]
-          .slice(0,1)
-      ).toUpperCase();
-    }
-
-
-    function displayName(profile){
-
-      if(!profile){
-        return "OOULink User";
-      }
-
-      return (
-        profile.full_name ||
-        profile.username ||
-        "OOULink User"
-      );
-    }
-
-
-    function profileAvatar(profile){
-
-      if(
-        profile &&
-        profile.avatar_url
-      ){
-
-        return `
-          <img
-            src="${escapeAttribute(
-              profile.avatar_url
-            )}"
-            alt="${escapeAttribute(
-              displayName(profile)
-            )}"
-            loading="lazy"
-          >
-        `;
-
-      }
-
-      return escapeHtml(
-        getInitials(
-          displayName(profile)
-        )
-      );
-    }
-
-
-    function profileLocation(profile){
-
-      if(
-        !profile ||
-        !profile.location
-      ){
-        return "";
-      }
-
-      return escapeHtml(
-        profile.location
-      );
-    }
-
-
-    function profileXp(profile){
-
-      const xp =
-        Number(
-          profile?.xp ?? 0
-        );
-
-      return Number.isFinite(xp)
-        ? xp
-        : 0;
-    }
-
-
-    function profileReputation(profile){
-
-      const reputation =
-        Number(
-          profile?.reputation ?? 0
-        );
-
-      return Number.isFinite(reputation)
-        ? reputation
-        : 0;
-    }
-/* =========================
-       STATUS HELPERS
-       ========================= */
-
-    function normalizeStatus(status){
-
-      return String(
-        status || "open"
-      )
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, "_");
-    }
-
-
-    function statusLabel(status){
-
-      const normalized =
-        normalizeStatus(status);
-
-      const labels = {
-
-        open:"Open",
-
-        assigned:"Runner Selected",
-
-        accepted:"Runner Selected",
-
-        in_progress:"In Progress",
-
-        "in-progress":"In Progress",
-
-        submitted:"Submitted",
-
-        completed:"Completed",
-
-        rejected:"Rejected",
-
-        cancelled:"Cancelled",
-
-        canceled:"Cancelled"
-
-      };
-
-      return (
-        labels[normalized] ||
-        String(status || "Open")
-          .replace(/_/g," ")
-          .replace(
-            /\b\w/g,
-            char => char.toUpperCase()
-          )
-      );
-    }
-
-
-    function statusClass(status){
-
-      const normalized =
-        normalizeStatus(status);
-
-      if(
-        normalized === "completed"
-      ){
-        return "status-completed";
-      }
-
-      if(
-        normalized === "rejected"
-      ){
-        return "status-rejected";
-      }
-
-      if(
-        normalized === "cancelled" ||
-        normalized === "canceled"
-      ){
-        return "status-cancelled";
-      }
-
-      if(
-        normalized === "submitted"
-      ){
-        return "status-submitted";
-      }
-
-      if(
-        normalized === "in_progress" ||
-        normalized === "in-progress" ||
-        normalized === "assigned" ||
-        normalized === "accepted"
-      ){
-        return "status-progress";
-      }
-
-      return "status-open";
-    }
-
-
-    function isStatus(status){
-
-      return (
-        normalizeStatus(
-          currentTask?.status
-        ) === normalizeStatus(status)
-      );
-    }
-
-
-    /* =========================
-       USER / ROLE HELPERS
-       ========================= */
-
-    function isOwner(){
-
-      return Boolean(
-        currentUser &&
-        currentTask &&
-        currentTask.user_id &&
-        currentUser.id ===
-          currentTask.user_id
-      );
-    }
-
-
-    function isRunner(){
-
-      return Boolean(
-        currentUser &&
-        currentTask &&
-        currentTask.runner_id &&
-        currentUser.id ===
-          currentTask.runner_id
-      );
-    }
-
-
-    function isParticipant(){
-
-      return (
-        isOwner() ||
-        isRunner()
-      );
-    }
-
-function canApply(){
-
-      if(!currentUser){
-        return false;
-      }
-
-      if(isOwner()){
-        return false;
-      }
-
-      if(isRunner()){
-        return false;
-      }
-
-      if(
-        !currentTask ||
-        !isStatus("open")
-      ){
-        return false;
-      }
-
-      return true;
-    }
-
-
-    function canUseChat(){
-
-      return Boolean(
-        currentUser &&
-        isParticipant()
-      );
-    }
-
-
-    /* =========================
-       LOADING UI
-       ========================= */
-
-    function showLoading(){
-
-      page.innerHTML = `
-
-        <div class="loading-state">
-
-          <div class="skeleton skeleton-title"></div>
-
-          <div class="skeleton skeleton-line"></div>
-
-          <div class="skeleton skeleton-line short"></div>
-
-          <div class="skeleton skeleton-card"></div>
-
-          <div class="skeleton skeleton-line"></div>
-
-          <div class="skeleton skeleton-line short"></div>
-
-        </div>
-
-      `;
-    }
-
-
-    function showError(
-      title,
-      message
-    ){
-
-      page.innerHTML = `
-
-        <section class="state-card error">
-
-          <div class="state-icon">
-            ⚠️
-          </div>
-
-          <div class="state-title">
-            ${escapeHtml(title)}
-          </div>
-
-          <div class="state-text">
-            ${escapeHtml(message)}
-          </div>
-
-          <button
-            type="button"
-            class="btn btn-primary retry-button"
-            onclick="initializePage()"
-          >
-            Try Again
-          </button>
-
-        </section>
-
-      `;
-    }
-
-
-    function showNotFound(){
-
-      page.innerHTML = `
-
-        <section class="state-card">
-
-          <div class="state-icon">
-            🔎
-          </div>
-
-          <div class="state-title">
-            Task not found
-          </div>
-
-          <div class="state-text">
-            This task may have been deleted,
-            or the task link is invalid.
-          </div>
-
-          <button
-            type="button"
-            class="btn btn-primary retry-button"
-            onclick="window.location.href='index.html'"
-          >
-            Back Home
-          </button>
-
-        </section>
-
-      `;
-    }
-/* =========================
-       TOASTS
-       ========================= */
-
-    function showToast(
-      message,
-      type = ""
-    ){
-
-      if(!toastContainer){
-        return;
-      }
-
-      const toast =
-        document.createElement("div");
-
-      toast.className =
-        `toast ${type}`.trim();
-
-      toast.textContent =
-        String(message || "");
-
-      toastContainer.appendChild(
-        toast
-      );
-
-      window.setTimeout(() => {
-
-        toast.style.opacity = "0";
-
-        toast.style.transform =
-          "translateY(8px)";
-
-        window.setTimeout(() => {
-
-          toast.remove();
-
-        },180);
-
-      },2800);
-    }
-
-
-    /* =========================
-       MODAL
-       ========================= */
-
-    let modalAction = null;
-
-
-    function openModal(
-      title,
-      text,
-      confirmText,
-      action,
-      confirmClass = "btn-primary"
-    ){
-
-      modalTitle.textContent =
-        title || "Confirm action";
-
-      modalText.textContent =
-        text || "Are you sure?";
-
-      modalConfirmButton.textContent =
-        confirmText || "Continue";
-
-      modalConfirmButton.className =
-        `btn ${confirmClass}`;
-
-      modalAction =
-        typeof action === "function"
-          ? action
-          : null;
-
-      modalBackdrop.classList.add(
-        "show"
-      );
-
-      document.body.style.overflow =
-        "hidden";
-    }
-
-
-    function closeModal(){
-
-      modalBackdrop.classList.remove(
-        "show"
-      );
-
-      document.body.style.overflow =
-        "";
-
-      modalAction = null;
-    }
-
-
-    function closeModalFromBackdrop(
-      event
-    ){
-
-      if(
-        event.target ===
-        modalBackdrop
-      ){
-        closeModal();
-      }
-    }
-
-
-    async function confirmModal(){
-
-      if(
-        typeof modalAction !==
-        "function"
-      ){
-        closeModal();
-        return;
-      }
-
-      const action =
-        modalAction;
-
-      closeModal();
-
-      try{
-
-        await action();
-
-      }catch(error){
-
-        console.error(
-          "MODAL ACTION:",
-          error
-        );
-
-        showToast(
-          error?.message ||
-          "Something went wrong.",
-          "error"
-        );
-
-      }
-    }
-/* =========================
-       EVENT SETUP
-       ========================= */
-
-    modalConfirmButton.addEventListener(
-      "click",
-      confirmModal
+    renderTask();
+    renderPoster();
+    renderRunner();
+    renderTimeline();
+    renderActions();
+    await renderAttachments();
+
+    showContent();
+
+  }catch(error){
+    console.error("Task details error:",error);
+    showError(
+      error?.message ||
+      "We couldn't load this task. Please try again."
     );
+  }finally{
+    isLoading = false;
+  }
+}
 
+async function initializePage(){
+  await loadTask();
+}
 
-    document.addEventListener(
-      "keydown",
-      event => {
+$("backBtn").addEventListener("click",()=>{
+  if(history.length > 1){
+    history.back();
+  }else{
+    window.location.href = "index.html";
+  }
+});
 
-        if(
-          event.key === "Escape" &&
-          modalBackdrop.classList.contains(
-            "show"
-          )
-        ){
+$("retryBtn").addEventListener("click",()=>{
+  initializePage();
+});
 
-          closeModal();
+$("backHomeBtn").addEventListener("click",()=>{
+  window.location.href = "index.html";
+});
 
-        }
+document.addEventListener("DOMContentLoaded",()=>{
+  initializePage();
+});
+</script>
 
-      }
-    );
-
-
-    /* =========================
-       SAFE IMAGE HANDLING
-       ========================= */
-
-    document.addEventListener(
-      "error",
-      event => {
-
-        const target =
-          event.target;
-
-        if(
-          target &&
-          target.tagName === "IMG"
-        ){
-
-          target.style.display =
-            "none";
-
-        }
-
-      },
-      true
-    );
-
-
-    /* =========================
-       INITIAL PAGE START
-       ========================= */
-
-    document.addEventListener(
-      "DOMContentLoaded",
-      () => {
-
-        initializePage();
-
-      }
-    );
-
-  </script>
-
+</div>
 </body>
 </html>
+  
