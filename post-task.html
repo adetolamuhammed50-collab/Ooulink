@@ -957,10 +957,36 @@
 
       createdTask = task;
 
+/* =========================
+AWARD XP FOR POSTING
+========================= */
 
-      /* =========================
-         UPLOAD PDF FILES
-         ========================= */
+try {
+  const { error: xpError } =
+    await supabaseClient.rpc(
+      "award_task_xp",
+      {
+        target_task_id: createdTask.id,
+        target_reward_type: "task_posted"
+      }
+    );
+
+  if (xpError) {
+    console.error(
+      "Task posting XP error:",
+      xpError
+    );
+  }
+} catch (xpError) {
+  console.error(
+    "Task posting XP exception:",
+    xpError
+  );
+}
+
+/* =========================
+UPLOAD PDF FILES
+========================= */
 
       for (
         let i = 0;
