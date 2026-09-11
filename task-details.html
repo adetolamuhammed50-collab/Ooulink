@@ -1876,23 +1876,43 @@ async function loadTask(){
       return;
     }
 
-        currentTask = task;
+    currentTask = task;
 
-    // Load the current user's application.
-    await loadMyApplication(task.id);
-
-    // Load all applicants when the current user is the task owner.
-    await loadTaskApplications(task.id);
-
-    const ownerId = task.user_id;
-    const runnerId = task.runner_id;
-
-    const profileIds = [ownerId,runnerId]
-      .filter(Boolean);
+    /*
+     * Render the main task immediately.
+     * The task itself is the most important data.
+     */
     ownerProfile = null;
     runnerProfile = null;
+    taskAttachments = [];
+    taskApplications = [];
+    applicantProfiles = {};
+    myApplication = null;
 
-    if(profileIds.length){
+    renderTask();
+    renderRunner();
+    renderTimeline();
+    renderActions();
+    showContent();
+
+    /*
+     * Load secondary data in parallel.
+     * None of these should block the initial task display.
+     */
+    const myApplicationPromise =
+      loadMyApplication(task.id);
+
+    const applicationsPromise =
+      loadTaskApplications(task.id);
+
+    const profilesPromise = (async()=>{
+      const profileIds = [
+        task.user_id,
+        task.runner_id
+      ].filter(Boolean);
+
+      if(!profileIds.length) return;
+
       const {data:profiles,error:profileError} =
         await supabaseClient
           .from("profiles")
@@ -1909,59 +1929,86 @@ async function loadTask(){
 
       if(profileError){
         console.warn("Profile load error:",profileError);
-      }else{
-        ownerProfile =
-          profiles?.find(p=>p.id === ownerId) || null;
-
-        runnerProfile =
-          profiles?.find(p=>p.id === runnerId) || null;
+        return;
       }
-  }
-        const {data:attachments,error:attachmentError} =
-      await supabaseClient
-        .from("task_attachments")
-        .select(`
-          id,
-          task_id,
-          user_id,
-          file_name,
-          file_path,
-          file_size,
-          mime_type,
-          created_at
-        `)
-        .eq("task_id",task.id)
-        .order("created_at",{ascending:true});
 
-    if(attachmentError){
-      console.warn("Attachment load error:",attachmentError);
-      taskAttachments = [];
-    }else{
+      ownerProfile =
+        profiles?.find(
+          profile => profile.id === task.user_id
+        ) || null;
+
+      runnerProfile =
+        profiles?.find(
+          profile => profile.id === task.runner_id
+        ) || null;
+    })();
+
+    const attachmentsPromise = (async()=>{
+      const {data:attachments,error:attachmentError} =
+        await supabaseClient
+          .from("task_attachments")
+          .select(`
+            id,
+            task_id,
+            user_id,
+            file_name,
+            file_path,
+            file_size,
+            mime_type,
+            created_at
+          `)
+          .eq("task_id",task.id)
+          .order("created_at",{ascending:true});
+
+      if(attachmentError){
+        console.warn(
+          "Attachment load error:",
+          attachmentError
+        );
+        return;
+      }
+
       taskAttachments = attachments || [];
-    }
+    })();
 
-    renderTask();
-renderPoster();
-renderRunner();
-renderTimeline();
-renderActions();
+    /*
+     * Wait for the secondary data together.
+     * The page is already visible while this happens.
+     */
+    await Promise.all([
+      myApplicationPromise,
+      applicationsPromise,
+      profilesPromise,
+      attachmentsPromise
+    ]);
 
-showContent();
+    /*
+     * Refresh the parts that depend on the secondary data.
+     */
+    renderPoster();
+    renderRunner();
+    renderActions();
 
-renderAttachments().catch(error=>{
-  console.warn("Attachment rendering error:",error);
-});
-    
+    renderAttachments().catch(error=>{
+      console.warn(
+        "Attachment rendering error:",
+        error
+      );
+    });
+
   }catch(error){
     console.error("Task details error:",error);
+
     showError(
       error?.message ||
       "We couldn't load this task. Please try again."
     );
+
   }finally{
     isLoading = false;
   }
-}
+  }
+
 
 async function initializePage(){
   await loadTask();
