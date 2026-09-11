@@ -410,6 +410,82 @@ main{padding:14px 14px 90px}
   line-height:1.45;
   text-align:center;
 }
+  .review-card{
+  margin-top:12px;
+  padding:14px;
+  background:#f8faf9;
+  border:1px solid var(--border);
+  border-radius:14px;
+}
+
+.review-title{
+  font-size:14px;
+  font-weight:800;
+  margin-bottom:5px;
+}
+
+.review-subtitle{
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.45;
+  margin-bottom:12px;
+}
+
+.rating-row{
+  display:flex;
+  gap:7px;
+  margin-bottom:12px;
+}
+
+.rating-btn{
+  flex:1;
+  min-height:42px;
+  border:1px solid var(--border);
+  background:#fff;
+  border-radius:10px;
+  font-size:18px;
+  transition:.15s;
+}
+
+.rating-btn:active{
+  transform:scale(.94);
+}
+
+.rating-btn.selected{
+  background:#fef3c7;
+  border-color:#f59e0b;
+}
+
+.review-note{
+  width:100%;
+  min-height:90px;
+  resize:vertical;
+  border:1px solid var(--border);
+  border-radius:11px;
+  padding:10px;
+  font:inherit;
+  font-size:12px;
+  outline:none;
+  background:#fff;
+}
+
+.review-note:focus{
+  border-color:var(--green);
+}
+
+.review-stars{
+  color:#f59e0b;
+  letter-spacing:2px;
+  font-size:16px;
+  margin-top:5px;
+}
+
+.review-existing{
+  margin-top:10px;
+  color:#4b5563;
+  font-size:12px;
+  line-height:1.5;
+}
 .helper-text{
   text-align:center;
   color:var(--muted);
@@ -1334,6 +1410,265 @@ async function completeTask(){
     );
   }
   }
+  let selectedReviewRating = 0;
+
+function renderReviewStars(rating){
+  const value = Math.max(0,Math.min(5,Number(rating) || 0));
+
+  return "★".repeat(value) + "☆".repeat(5 - value);
+}
+
+async function loadMyReview(){
+  if(
+    !currentUser ||
+    !currentTask ||
+    normalizeStatus(currentTask.status) !== "completed" ||
+    !isParticipant()
+  ){
+    return null;
+  }
+
+  const {data,error} = await supabaseClient
+    .from("reviews")
+    .select("id,rating,note,created_at")
+    .eq("task_id",currentTask.id)
+    .eq("reviewer_id",currentUser.id)
+    .maybeSingle();
+
+  if(error){
+    console.error("Load review error:",error);
+    return null;
+  }
+
+  return data || null;
+}
+
+function revieweeName(){
+  if(isOwner()){
+    return displayName(runnerProfile);
+  }
+
+  if(isRunner()){
+    return displayName(ownerProfile);
+  }
+
+  return "the other participant";
+}
+
+async function submitReview(){
+  if(
+    !currentUser ||
+    !currentTask ||
+    normalizeStatus(currentTask.status) !== "completed"
+  ){
+    showToast("Reviews are available after task completion.");
+    return;
+  }
+
+  if(!isParticipant()){
+    showToast("Only task participants can leave a review.");
+    return;
+  }
+
+  const revieweeId =
+    isOwner()
+      ? currentTask.runner_id
+      : currentTask.user_id;
+
+  if(!revieweeId || revieweeId === currentUser.id){
+    showToast("This review cannot be submitted.");
+    return;
+  }
+
+  if(!selectedReviewRating){
+    showToast("Please choose a rating.");
+    return;
+  }
+
+  const noteElement = $("reviewNote");
+  const note = noteElement
+    ? noteElement.value.trim()
+    : "";
+
+  const button = $("submitReviewBtn");
+
+  if(button){
+    button.disabled = true;
+    button.textContent = "Submitting...";
+  }
+
+  try{
+    const {data,error} = await supabaseClient
+      .from("reviews")
+      .insert({
+        task_id:currentTask.id,
+        reviewer_id:currentUser.id,
+        reviewee_id:revieweeId,
+        rating:selectedReviewRating,
+        note:note || null
+      })
+      .select("id,rating,note,created_at")
+      .single();
+
+    if(error){
+      if(error.code === "23505"){
+        showToast("You have already reviewed this person.");
+        await renderReviewSection();
+        return;
+      }
+
+      throw error;
+    }
+
+    showToast("Review submitted. ⭐");
+
+    selectedReviewRating = 0;
+
+    renderSubmittedReview(data);
+
+  }catch(error){
+    console.error("Submit review error:",error);
+
+    if(button){
+      button.disabled = false;
+      button.textContent = "Submit Review";
+    }
+
+    showToast(
+      error?.message ||
+      "Could not submit your review."
+    );
+  }
+}
+
+function renderSubmittedReview(review){
+  const box = $("reviewContent");
+
+  if(!box || !review){
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="review-card">
+      <div class="review-title">⭐ Your Review</div>
+
+      <div class="review-stars">
+        ${renderReviewStars(review.rating)}
+      </div>
+
+      ${
+        review.note
+          ? `
+            <div class="review-existing">
+              ${escapeHtml(review.note)}
+            </div>
+          `
+          : `
+            <div class="review-existing">
+              You left a ${Number(review.rating)}/5 rating.
+            </div>
+          `
+      }
+    </div>
+  `;
+}
+
+function selectReviewRating(rating){
+  selectedReviewRating = Number(rating);
+
+  document
+    .querySelectorAll(".rating-btn")
+    .forEach(button=>{
+      button.classList.toggle(
+        "selected",
+        Number(button.dataset.rating) === selectedReviewRating
+      );
+    });
+}
+
+async function renderReviewSection(){
+  const box = $("reviewContent");
+
+  if(!box){
+    return;
+  }
+
+  if(
+    !currentUser ||
+    !currentTask ||
+    normalizeStatus(currentTask.status) !== "completed" ||
+    !isParticipant()
+  ){
+    box.innerHTML = "";
+    return;
+  }
+
+  const existingReview = await loadMyReview();
+
+  if(existingReview){
+    renderSubmittedReview(existingReview);
+    return;
+  }
+
+  selectedReviewRating = 0;
+
+  box.innerHTML = `
+    <div class="review-card">
+
+      <div class="review-title">
+        ⭐ Review ${escapeHtml(revieweeName())}
+      </div>
+
+      <div class="review-subtitle">
+        How was your experience with this task?
+      </div>
+
+      <div class="rating-row">
+        ${[1,2,3,4,5].map(rating=>`
+          <button
+            class="rating-btn"
+            type="button"
+            data-rating="${rating}"
+          >
+            ★
+          </button>
+        `).join("")}
+      </div>
+
+      <textarea
+        id="reviewNote"
+        class="review-note"
+        maxlength="500"
+        placeholder="Write a short review (optional)..."
+      ></textarea>
+
+      <button
+        class="action-btn chat-btn"
+        type="button"
+        id="submitReviewBtn"
+        style="margin-top:10px"
+      >
+        Submit Review
+      </button>
+
+      <div class="helper-text">
+        Your rating helps build trust on OOULink.
+      </div>
+
+    </div>
+  `;
+
+  box
+    .querySelectorAll(".rating-btn")
+    .forEach(button=>{
+      button.addEventListener("click",()=>{
+        selectReviewRating(button.dataset.rating);
+      });
+    });
+
+  $("submitReviewBtn")
+    .addEventListener("click",submitReview);
+    }
   async function deleteTask(){
   if(!currentUser || !currentTask){
     showToast("Please try again.");
