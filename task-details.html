@@ -924,7 +924,177 @@ function renderTimeline(){
     </div>
   `).join("");
 }
+function renderApplicantActions(){
+  const box = $("actionContent");
+  const status = normalizeStatus(currentTask.status);
 
+  if(status !== "open"){
+    box.innerHTML = `
+      <div class="helper-text">
+        This task is no longer accepting applicants.
+      </div>
+    `;
+    return;
+  }
+
+  if(isOwner()){
+    const pendingApplications =
+      taskApplications.filter(
+        application => application.status === "pending"
+      );
+
+    if(!pendingApplications.length){
+      box.innerHTML = `
+        <div class="helper-text">
+          No students have applied for this task yet.
+        </div>
+      `;
+      return;
+    }
+
+    box.innerHTML = `
+      <div class="helper-text" style="margin-bottom:10px">
+        ${pendingApplications.length}
+        applicant${pendingApplications.length === 1 ? "" : "s"}
+        ${pendingApplications.length === 1 ? "is" : "are"} waiting.
+      </div>
+
+      <div class="applicant-list">
+        ${pendingApplications.map(application=>{
+          const profile =
+            applicantProfiles[application.runner_id];
+
+          const name = displayName(profile);
+          const avatar = profile?.avatar_url
+            ? `<img src="${escapeHtml(profile.avatar_url)}" alt="">`
+            : escapeHtml(getInitials(name));
+
+          return `
+            <div class="applicant-card">
+              <div class="avatar">${avatar}</div>
+
+              <div class="person-info">
+                <div class="person-name">
+                  ${escapeHtml(name)}
+                </div>
+
+                <div class="person-meta">
+                  ${escapeHtml(
+                    profile?.location || "Location not provided"
+                  )}
+                </div>
+
+                <div class="person-stats">
+                  <span class="stat">
+                    XP ${Number(profile?.xp || 0)}
+                  </span>
+
+                  <span class="stat">
+                    Reputation ${Number(profile?.reputation || 0)}
+                  </span>
+                </div>
+
+                <button
+                  class="action-btn chat-btn select-runner-btn"
+                  type="button"
+                  data-application-id="${escapeHtml(application.id)}"
+                >
+                  Select Runner
+                </button>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+
+    box.querySelectorAll(".select-runner-btn").forEach(button=>{
+      button.addEventListener("click",()=>{
+        selectRunner(button.dataset.applicationId);
+      });
+    });
+
+    return;
+  }
+
+  if(myApplication){
+    const applicationStatus =
+      normalizeStatus(myApplication.status);
+
+    if(applicationStatus === "pending"){
+      box.innerHTML = `
+        <button
+          class="action-btn disabled-btn"
+          type="button"
+          disabled
+        >
+          ✓ Application Sent
+        </button>
+
+        <div class="helper-text">
+          Your application is waiting for the poster to choose a runner.
+        </div>
+      `;
+      return;
+    }
+
+    if(applicationStatus === "selected"){
+      box.innerHTML = `
+        <button
+          class="action-btn chat-btn"
+          type="button"
+          id="selectedRunnerBtn"
+        >
+          ✓ You Were Selected
+        </button>
+
+        <div class="helper-text">
+          You have been selected for this task.
+        </div>
+      `;
+
+      $("selectedRunnerBtn").addEventListener("click",()=>{
+        if(canUseChat()){
+          window.location.href =
+            "chat.html?id=" +
+            encodeURIComponent(currentTask.id);
+        }
+      });
+
+      return;
+    }
+
+    if(applicationStatus === "rejected"){
+      box.innerHTML = `
+        <div class="helper-text">
+          Your application was not selected for this task.
+        </div>
+      `;
+      return;
+    }
+
+    if(applicationStatus === "withdrawn"){
+      myApplication = null;
+    }
+  }
+
+  box.innerHTML = `
+    <button
+      class="action-btn chat-btn"
+      type="button"
+      id="applyBtn"
+    >
+      Apply for Task
+    </button>
+
+    <div class="helper-text">
+      Apply if you are available and can complete this task.
+    </div>
+  `;
+
+  $("applyBtn").addEventListener("click",applyForTask);
+  }
+  
 function renderActions(){
   const box = $("actionContent");
 
