@@ -1110,14 +1110,19 @@ async function loadTask(){
       return;
     }
 
-    currentTask = task;
+        currentTask = task;
+
+    // Load the current user's application.
+    await loadMyApplication(task.id);
+
+    // Load all applicants when the current user is the task owner.
+    await loadTaskApplications(task.id);
 
     const ownerId = task.user_id;
     const runnerId = task.runner_id;
 
     const profileIds = [ownerId,runnerId]
       .filter(Boolean);
-
     ownerProfile = null;
     runnerProfile = null;
 
