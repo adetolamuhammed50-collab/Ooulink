@@ -554,6 +554,9 @@ let currentTask = null;
 let ownerProfile = null;
 let runnerProfile = null;
 let taskAttachments = [];
+let taskApplications = [];
+let myApplication = null;
+let applicantProfiles = {};
 let isLoading = false;
 
 const $ = id => document.getElementById(id);
@@ -968,7 +971,98 @@ function renderActions(){
       There are no actions available for this task right now.
     </div>`;
 }
+async function loadMyApplication(taskId){
+  myApplication = null;
 
+  if(!currentUser){
+    return;
+  }
+
+  const {data,error} = await supabaseClient
+    .from("task_applications")
+    .select(`
+      id,
+      task_id,
+      runner_id,
+      status,
+      created_at
+    `)
+    .eq("task_id",taskId)
+    .eq("runner_id",currentUser.id)
+    .order("created_at",{ascending:false})
+    .limit(1)
+    .maybeSingle();
+
+  if(error){
+    console.warn("My application load error:",error);
+    return;
+  }
+
+  myApplication = data || null;
+}
+
+async function loadTaskApplications(taskId){
+  taskApplications = [];
+  applicantProfiles = {};
+
+  if(!isOwner()){
+    return;
+  }
+
+  const {data,error} = await supabaseClient
+    .from("task_applications")
+    .select(`
+      id,
+      task_id,
+      runner_id,
+      status,
+      created_at
+    `)
+    .eq("task_id",taskId)
+    .order("created_at",{ascending:true});
+
+  if(error){
+    console.warn("Task applications load error:",error);
+    return;
+  }
+
+  taskApplications = data || [];
+
+  const runnerIds = [
+    ...new Set(
+      taskApplications
+        .map(application => application.runner_id)
+        .filter(Boolean)
+    )
+  ];
+
+  if(!runnerIds.length){
+    return;
+  }
+
+  const {data:profiles,error:profileError} =
+    await supabaseClient
+      .from("profiles")
+      .select(`
+        id,
+        username,
+        full_name,
+        location,
+        avatar_url,
+        xp,
+        reputation
+      `)
+      .in("id",runnerIds);
+
+  if(profileError){
+    console.warn("Applicant profile load error:",profileError);
+    return;
+  }
+
+  (profiles || []).forEach(profile=>{
+    applicantProfiles[profile.id] = profile;
+  });
+      }
 async function loadTask(){
   const taskId = getTaskId();
 
