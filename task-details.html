@@ -552,7 +552,10 @@ main{padding:14px 14px 90px}
       <div class="section-title">⚡ Actions</div>
       <div id="actionContent"></div>
     </section>
-
+     <section class="section action-section" id="managementSection">
+  <div class="section-title">🛡️ Task Management & Safety</div>
+  <div id="managementContent"></div>
+     </section>
     <div class="bottom-space"></div>
   </div>
 </main>
@@ -1469,7 +1472,66 @@ async function reportTask(){
 function renderActions(){
   const box = $("actionContent");
   const status = normalizeStatus(currentTask.status);
+  const managementBox = $("managementContent");
 
+  if(managementBox){
+    let managementHtml = "";
+
+    if(
+      isOwner() &&
+      status === "open" &&
+      !currentTask.runner_id
+    ){
+      managementHtml += `
+        <button
+          class="action-btn danger-btn"
+          type="button"
+          id="deleteTaskBtn"
+        >
+          🗑 Delete Task
+        </button>
+
+        <div class="safety-note">
+          You can delete this task while it is still open and has no runner.
+        </div>
+      `;
+    }
+
+    if(
+      isParticipant() &&
+      currentTask.runner_id
+    ){
+      managementHtml += `
+        <button
+          class="action-btn danger-btn"
+          type="button"
+          id="reportTaskBtn"
+        >
+          ⚑ Report Task / User
+        </button>
+
+        <div class="safety-note">
+          Use this if there is a serious problem with the task or the other participant.
+        </div>
+      `;
+    }
+
+    managementBox.innerHTML = managementHtml;
+
+    if($("deleteTaskBtn")){
+      $("deleteTaskBtn").addEventListener(
+        "click",
+        deleteTask
+      );
+    }
+
+    if($("reportTaskBtn")){
+      $("reportTaskBtn").addEventListener(
+        "click",
+        reportTask
+      );
+    }
+  }
   /*
    * OPEN
    * Poster manages applicants.
