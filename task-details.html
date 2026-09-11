@@ -392,6 +392,24 @@ main{padding:14px 14px 90px}
   color:#374151;
   border:1px solid var(--border);
 }
+  .danger-btn{
+  margin-top:9px;
+  background:#fff;
+  color:#dc2626;
+  border:1px solid #fecaca;
+}
+
+.danger-btn:active{
+  transform:scale(.97);
+}
+
+.safety-note{
+  margin-top:9px;
+  color:#6b7280;
+  font-size:11px;
+  line-height:1.45;
+  text-align:center;
+}
 .helper-text{
   text-align:center;
   color:var(--muted);
@@ -1313,7 +1331,141 @@ async function completeTask(){
     );
   }
   }
-  
+  async function deleteTask(){
+  if(!currentUser || !currentTask){
+    showToast("Please try again.");
+    return;
+  }
+
+  if(!isOwner()){
+    showToast("Only the task poster can delete this task.");
+    return;
+  }
+
+  if(
+    normalizeStatus(currentTask.status) !== "open" ||
+    currentTask.runner_id
+  ){
+    showToast(
+      "Only an open task with no assigned runner can be deleted."
+    );
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "Delete this task permanently? This cannot be undone."
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  const button = $("deleteTaskBtn");
+
+  if(button){
+    button.disabled = true;
+    button.textContent = "Deleting...";
+  }
+
+  try{
+    const {error} = await supabaseClient
+      .from("tasks")
+      .delete()
+      .eq("id",currentTask.id)
+      .eq("user_id",currentUser.id)
+      .eq("status","open")
+      .is("runner_id",null);
+
+    if(error) throw error;
+
+    showToast("Task deleted.");
+
+    setTimeout(()=>{
+      window.location.href = "my-tasks.html";
+    },700);
+
+  }catch(error){
+    console.error("Delete task error:",error);
+
+    if(button){
+      button.disabled = false;
+      button.textContent = "🗑 Delete Task";
+    }
+
+    showToast(
+      error?.message ||
+      "Could not delete this task."
+    );
+  }
+}
+
+
+async function reportTask(){
+  if(!currentUser || !currentTask){
+    showToast("Please try again.");
+    return;
+  }
+
+  if(!isParticipant()){
+    showToast(
+      "Only the task poster or assigned runner can report this task."
+    );
+    return;
+  }
+
+  if(!currentTask.runner_id){
+    showToast(
+      "A user report is available once a runner has been assigned."
+    );
+    return;
+  }
+
+  const reportedUserId =
+    isOwner()
+      ? currentTask.runner_id
+      : currentTask.user_id;
+
+  if(!reportedUserId || reportedUserId === currentUser.id){
+    showToast("This report cannot be submitted.");
+    return;
+  }
+
+  const reason = window.prompt(
+    "Why are you reporting this task or user?"
+  );
+
+  if(!reason || !reason.trim()){
+    return;
+  }
+
+  const details = window.prompt(
+    "Add more details if needed. You can leave this blank."
+  ) || "";
+
+  try{
+    const {error} = await supabaseClient
+      .from("reports")
+      .insert({
+        task_id: currentTask.id,
+        reporter_id: currentUser.id,
+        reported_user_id: reportedUserId,
+        reason: reason.trim(),
+        details: details.trim()
+      });
+
+    if(error) throw error;
+
+    showToast("Report submitted. Thank you.");
+
+  }catch(error){
+    console.error("Report error:",error);
+
+    showToast(
+      error?.message ||
+      "Could not submit the report."
+    );
+  }
+  }
 function renderActions(){
   const box = $("actionContent");
   const status = normalizeStatus(currentTask.status);
