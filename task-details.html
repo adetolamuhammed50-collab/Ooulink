@@ -1,4477 +1,2179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#111827">
-<title>Task Details — OOULink</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-*{
-box-sizing:border-box;
-margin:0;
-padding:0;
-}
+  <title>Task Details • OOULink</title>
 
-html{
-scroll-behavior:smooth;
-}
+  <meta
+    name="description"
+    content="View task details, applications, files, chat and task progress on OOULink."
+  >
 
-body{
-font-family:Arial,sans-serif;
-background:#f5f7fb;
-color:#172033;
-padding-bottom:90px;
-line-height:1.45;
-}
+  <style>
+    :root{
+      --green:#16a34a;
+      --green-dark:#15803d;
+      --green-light:#dcfce7;
+      --green-soft:#f0fdf4;
 
-button,
-a,
-input,
-textarea,
-select{
--webkit-tap-highlight-color:transparent;
-}
+      --text:#17211b;
+      --muted:#64748b;
 
-button:active,
-a:active{
-transform:scale(.97);
-}
+      --white:#ffffff;
+      --bg:#f6faf7;
+      --border:#e2e8f0;
 
-button,
-a{
-transition:transform .12s ease,opacity .15s ease,background .15s ease;
-}
+      --danger:#dc2626;
+      --danger-bg:#fef2f2;
 
-button:disabled{
-opacity:.55;
-cursor:not-allowed;
-}
+      --warning:#d97706;
+      --warning-bg:#fffbeb;
 
-a{
-color:inherit;
-}
+      --blue:#2563eb;
+      --blue-bg:#eff6ff;
 
-.top{
-background:#fff;
-padding:15px 18px;
+      --shadow:
+        0 8px 25px rgba(15,23,42,.07);
+
+      --radius:18px;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      min-height:100vh;
+      background:var(--bg);
+      color:var(--text);
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+      line-height:1.5;
+    }
+
+    button,
+    input,
+    textarea,
+    select{
+      font:inherit;
+    }
+
+    button{
+      cursor:pointer;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .app{
+      width:100%;
+      max-width:480px;
+      min-height:100vh;
+      margin:0 auto;
+      background:var(--bg);
+      padding-bottom:92px;
+    }
+
+    /* =========================
+       HEADER
+       ========================= */
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+
+      min-height:64px;
+      padding:12px 16px;
+
+      background:rgba(255,255,255,.96);
+      border-bottom:1px solid var(--border);
+
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+    }
+
+    .back-button{
+      width:42px;
+      height:42px;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      border:1px solid var(--border);
+      border-radius:14px;
+
+      background:var(--white);
+      color:var(--text);
+
+      font-size:21px;
+
+      transition:
+        transform .15s ease,
+        background .15s ease;
+    }
+
+    .back-button:active{
+      transform:scale(.94);
+      background:#f1f5f9;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:8px;
+
+      font-size:19px;
+      font-weight:800;
+      letter-spacing:-.3px;
+    }
+
+    .brand-mark{
+      width:32px;
+      height:32px;
 display:flex;
-align-items:center;
-gap:13px;
-border-bottom:1px solid #e7eaf0;
-position:sticky;
-top:0;
-z-index:50;
-}
-
-.back{
-width:38px;
-height:38px;
-display:flex;
-align-items:center;
-justify-content:center;
-text-decoration:none;
-font-size:24px;
-border-radius:10px;
-}
-
-.back:hover{
-background:#f3f4f6;
-}
-
-.logo{
-font-size:21px;
-font-weight:900;
-letter-spacing:-.4px;
-}
-
-.top-spacer{
-flex:1;
-}
-
-.top-status{
-font-size:11px;
-font-weight:800;
-color:#667085;
-}
-
-.container{
-width:100%;
-max-width:680px;
-margin:0 auto;
-padding:18px;
-}
-
-.card{
-background:#fff;
-border-radius:18px;
-padding:20px;
-box-shadow:0 4px 18px rgba(0,0,0,.055);
-}
-
-.loading{
-text-align:center;
-padding:55px 12px;
-color:#667085;
-font-size:14px;
-}
-
-.loading-spinner{
-width:28px;
-height:28px;
-border:3px solid #e5e7eb;
-border-top-color:#2563eb;
-border-radius:50%;
-margin:0 auto 13px;
-animation:spin .8s linear infinite;
-}
-
-@keyframes spin{
-to{transform:rotate(360deg)}
-}
-
-.error{
-text-align:center;
-padding:45px 15px;
-color:#b42318;
-}
-
-.error-icon{
-font-size:35px;
-margin-bottom:8px;
-}
-
-.category{
-display:inline-block;
-background:#eef2ff;
-color:#4054b2;
-padding:7px 11px;
-border-radius:20px;
-font-size:12px;
-font-weight:800;
-margin-bottom:13px;
-}
-
-h1{
-font-size:26px;
-line-height:1.2;
-margin-bottom:11px;
-letter-spacing:-.4px;
-}
-
-.description{
-color:#5d6678;
-line-height:1.65;
-white-space:pre-wrap;
-margin-bottom:18px;
-font-size:14px;
-word-break:break-word;
-}
-
-.budget{
-font-size:25px;
-font-weight:900;
-margin:18px 0;
-letter-spacing:-.4px;
-}
-
-.info{
-border-top:1px solid #edf0f4;
-}
-
-.info-row{
-display:flex;
-justify-content:space-between;
-gap:15px;
-padding:12px 0;
-border-bottom:1px solid #edf0f4;
-}
-
-.label{
-color:#7a8291;
-font-size:12px;
-flex:0 0 auto;
-}
-
-.value{
-font-weight:700;
-font-size:13px;
-text-align:right;
-word-break:break-word;
-}
-
-.status-pill{
-display:inline-block;
-padding:6px 10px;
-border-radius:999px;
-font-size:10px;
-font-weight:900;
-letter-spacing:.2px;
-}
-
-.status-open{
-background:#dcfce7;
-color:#166534;
-}
-
-.status-accepted{
-background:#dbeafe;
-color:#1d4ed8;
-}
-
-.status-in_progress,
-.status-awaiting_verification{
-background:#fef3c7;
-color:#92400e;
-}
-
-.status-completed{
-background:#dcfce7;
-color:#166534;
-}
-
-.status-rejected{
-background:#fee2e2;
-color:#991b1b;
-}
-
-.status-cancelled,
-.status-withdrawn{
-background:#e5e7eb;
-color:#4b5563;
-}
-
-.status-pending{
-background:#fef3c7;
-color:#92400e;
-}
-
-.status-selected{
-background:#dbeafe;
-color:#1d4ed8;
-}
-
-.status-unknown{
-background:#e5e7eb;
-color:#4b5563;
-}
-
-.task-message{
-margin-top:14px;
-}
-
-.section{
-margin-top:25px;
-padding-top:20px;
-border-top:1px solid #edf0f4;
-}
-
-.section-title{
-font-size:18px;
-font-weight:900;
-margin-bottom:9px;
-letter-spacing:-.2px;
-}
-
-.section-note{
-color:#6b7280;
-font-size:12px;
-line-height:1.55;
-margin-bottom:12px;
-}
-
-.notice{
-background:#f8fafc;
-border-radius:11px;
-padding:13px;
-color:#667085;
-font-size:13px;
-line-height:1.55;
-}
-
-.notice.success{
-background:#ecfdf3;
-color:#166534;
-}
-
-.notice.warn{
-background:#fff7ed;
-color:#9a3412;
-}
-
-.notice.danger{
-background:#fef2f2;
-color:#991b1b;
-}
-
-.notice.info{
-background:#eff6ff;
-color:#1d4ed8;
-}
-
-.btn{
-width:100%;
-border:0;
-border-radius:12px;
-padding:14px;
-font-size:13px;
-font-weight:900;
-cursor:pointer;
-text-align:center;
-text-decoration:none;
-display:block;
-margin-top:10px;
-}
-
-.btn-inline{
-display:inline-flex;
-align-items:center;
-justify-content:center;
-gap:7px;
-}
-
-.dark{
-background:#111827;
-color:#fff;
-}
-
-.blue{
-background:#2563eb;
-color:#fff;
-}
-
-.green{
-background:#16834b;
-color:#fff;
-}
-
-.gray{
-background:#eef2f7;
-color:#172033;
-}
-
-.red{
-background:#dc2626;
-color:#fff;
-}
-
-.orange{
-background:#ea580c;
-color:#fff;
-}
-
-.outline{
-background:#fff;
-color:#172033;
-border:1px solid #d9dee8;
-}
-
-.btn-row{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:9px;
-}
-
-.small-btn{
-padding:10px 11px;
-border:0;
-border-radius:9px;
-font-size:11px;
-font-weight:900;
-cursor:pointer;
-text-align:center;
-text-decoration:none;
-}
-
-.owner-box{
-background:#f8fafc;
-border:1px solid #e5e7eb;
-border-radius:13px;
-padding:13px;
-display:flex;
-gap:11px;
-align-items:center;
-}
-
-.owner-avatar{
-width:48px;
-height:48px;
-border-radius:50%;
-object-fit:cover;
-background:#e5e7eb;
-flex:none;
-}
-
-.avatar-fallback{
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:20px;
-}
-
-.owner-info{
-min-width:0;
-flex:1;
-}
-
-.owner-name{
-font-weight:900;
-word-break:break-word;
-}
-
-.owner-username{
-font-size:12px;
-color:#2563eb;
-margin-top:2px;
-}
-
-.owner-meta{
-font-size:11px;
-color:#6b7280;
-margin-top:4px;
-}
-
-.applicant-card,
-.file-card,
-.review-card,
-.message-card,
-.report-card{
-background:#f8fafc;
-border:1px solid #e5e7eb;
-border-radius:13px;
-padding:13px;
-margin-bottom:10px;
-}
-
-.applicant-top{
-display:flex;
-gap:11px;
-align-items:center;
-}
-
-.avatar{
-width:46px;
-height:46px;
-border-radius:50%;
-object-fit:cover;
-background:#e5e7eb;
-flex:none;
-}
-
-.applicant-info{
-min-width:0;
-flex:1;
-}
-
-.name{
-font-weight:900;
-word-break:break-word;
-}
-
-.username{
-font-size:12px;
-color:#2563eb;
-margin-top:3px;
-}
-
-.meta{
-font-size:11px;
-color:#6b7280;
-margin-top:4px;
-}
-
-.applicant-status{
-margin-top:9px;
-}
-
-.actions{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px;
-margin-top:11px;
-}
-
-.small{
-padding:10px;
-border-radius:9px;
-border:0;
-text-decoration:none;
-text-align:center;
-font-size:11px;
-font-weight:900;
-cursor:pointer;
-}
-
-.view{
-background:#e8eefc;
-color:#2451a6;
-}
-
-.choose{
-background:#16834b;
-color:#fff;
-}
-
-.reject-small{
-background:#fee2e2;
-color:#991b1b;
-}
-
-.file-card{
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.pdf{
-width:40px;
-height:40px;
-border-radius:9px;
-background:#fee2e2;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:20px;
-flex:none;
-}
-
-.file-info{
-flex:1;
-min-width:0;
-}
-
-.file-name{
-font-weight:800;
-font-size:12px;
-word-break:break-word;
-}
-
-.file-size{
-font-size:10px;
-color:#6b7280;
-margin-top:3px;
-}
-
-.file-link{
-background:#2563eb;
-color:#fff;
-text-decoration:none;
-padding:8px 10px;
-border-radius:8px;
-font-size:10px;
-font-weight:900;
-flex:none;
-}
-
-.empty{
-background:#f8fafc;
-border-radius:10px;
-padding:13px;
-color:#6b7280;
-font-size:12px;
-line-height:1.5;
-}
-
-.rejection-box{
-margin-top:11px;
-}
-
-textarea,
-input,
-select{
-width:100%;
-padding:11px;
-border:1px solid #d9dee8;
-border-radius:9px;
-font-family:inherit;
-font-size:13px;
-background:#fff;
-color:#172033;
-outline:none;
-}
-
-textarea{
-min-height:90px;
-resize:vertical;
-}
-
-textarea:focus,
-input:focus,
-select:focus{
-border-color:#2563eb;
-box-shadow:0 0 0 3px rgba(37,99,235,.08);
-}
-
-.stars{
-display:flex;
-gap:5px;
-margin:10px 0;
-}
-
-.star{
-border:0;
-background:transparent;
-font-size:29px;
-padding:0;
-cursor:pointer;
-line-height:1;
-}
-
-.review-head{
-display:flex;
-justify-content:space-between;
-gap:10px;
-align-items:flex-start;
-}
-
-.review-author{
-font-weight:900;
-font-size:13px;
-}
-
-.review-date{
-font-size:10px;
-color:#7a8291;
-margin-top:2px;
-}
-
-.review-rating{
-color:#f59e0b;
-white-space:nowrap;
-font-size:14px;
-}
-
-.review-note{
-font-size:12px;
-color:#5d6678;
-line-height:1.55;
-margin-top:7px;
-white-space:pre-wrap;
-word-break:break-word;
-}
-
-.chat-box{
-background:#f8fafc;
-border:1px solid #e5e7eb;
-border-radius:13px;
-padding:13px;
-}
-
-.message-list{
-max-height:400px;
-overflow-y:auto;
-padding-right:2px;
-}
-
-.message{
-max-width:84%;
-padding:9px 11px;
-border-radius:12px;
-margin-bottom:8px;
-font-size:12px;
-line-height:1.5;
-word-break:break-word;
-}
-
-.message.mine{
-margin-left:auto;
-background:#2563eb;
-color:#fff;
-border-bottom-right-radius:4px;
-}
-
-.message.theirs{
-margin-right:auto;
-background:#e5e7eb;
-color:#172033;
-border-bottom-left-radius:4px;
-}
-
-.message-time{
-font-size:9px;
-opacity:.7;
-margin-top:3px;
-}
-
-.chat-compose{
-display:flex;
-gap:8px;
-margin-top:10px;
-}
-
-.chat-compose textarea{
-min-height:45px;
-height:45px;
-resize:none;
-}
-
-.chat-send{
-width:90px;
-border:0;
-border-radius:9px;
-background:#111827;
-color:#fff;
-font-weight:900;
-font-size:11px;
-cursor:pointer;
-}
-
-.report{
-text-align:center;
-display:block;
-margin-top:20px;
-color:#777;
-font-size:12px;
-text-decoration:none;
-}
-
-.report:hover{
-color:#dc2626;
-}
-
-.report-form{
-display:none;
-margin-top:10px;
-}
-
-.report-form.open{
-display:block;
-}
-
-.bottom-nav{
-position:fixed;
-left:0;
-right:0;
-bottom:0;
-height:70px;
-background:#fff;
-border-top:1px solid #e6e9ef;
-display:flex;
-justify-content:space-around;
-align-items:center;
-z-index:80;
-box-shadow:0 -3px 12px rgba(0,0,0,.035);
-}
-
-.bottom-nav a{
-text-decoration:none;
-color:#777;
-font-size:10px;
-text-align:center;
-min-width:52px;
-position:relative;
-}
-
-.bottom-nav a.active{
-color:#111827;
-font-weight:900;
-}
-
-.bottom-nav span{
-display:block;
-font-size:20px;
-margin-bottom:3px;
-}
-
-.dot{
-position:absolute;
-width:8px;
-height:8px;
-border-radius:50%;
-background:#ef4444;
-display:none;
-right:8px;
-top:-2px;
-border:2px solid #fff;
-}
-
-.hidden{
-display:none!important;
-}
-
-.muted{
-color:#6b7280;
-}
-
-.bold{
-font-weight:900;
-}
-
-.divider{
-height:1px;
-background:#edf0f4;
-margin:13px 0;
-}
-
-.flex{
-display:flex;
-}
-
-.gap{
-gap:8px;
-}
-
-.center{
-align-items:center;
-}
-
-.space{
-justify-content:space-between;
-}
-
-.wrap{
-flex-wrap:wrap;
-}
-
-@media(max-width:430px){
-.container{
-padding:14px;
-}
-
-.card{
-padding:17px;
-}
-
-h1{
-font-size:23px;
-}
-
-.actions{
-grid-template-columns:1fr;
-}
-
-.btn-row{
-grid-template-columns:1fr;
-}
-
-.file-card{
-align-items:flex-start;
-}
-
-.chat-compose{
-display:block;
-}
-
-.chat-send{
-width:100%;
-height:42px;
-margin-top:7px;
-}
-}
-
-@media(min-width:700px){
-.bottom-nav{
-max-width:680px;
-left:50%;
-right:auto;
-width:680px;
-transform:translateX(-50%);
-border-radius:15px 15px 0 0;
-}
-}
-</style>
+      align-items:center;
+      justify-content:center;
+
+      border-radius:10px;
+
+      background:var(--green);
+      color:white;
+
+      font-size:15px;
+      font-weight:900;
+    }
+
+    .header-spacer{
+      width:42px;
+      height:42px;
+    }
+
+    /* =========================
+       MAIN
+       ========================= */
+
+    main{
+      padding:16px;
+    }
+
+    .page{
+      width:100%;
+    }
+
+    /* =========================
+       LOADING
+       ========================= */
+
+    .loading-state{
+      padding:28px 0;
+    }
+
+    .skeleton{
+      position:relative;
+      overflow:hidden;
+
+      background:#e8eef0;
+      border-radius:12px;
+    }
+
+    .skeleton::after{
+      content:"";
+
+      position:absolute;
+      inset:0;
+
+      transform:translateX(-100%);
+
+      background:
+        linear-gradient(
+          90deg,
+          transparent,
+          rgba(255,255,255,.65),
+          transparent
+        );
+
+      animation:skeleton-shimmer 1.4s infinite;
+    }
+
+    @keyframes skeleton-shimmer{
+      100%{
+        transform:translateX(100%);
+      }
+    }
+
+    .skeleton-title{
+      width:72%;
+      height:28px;
+      margin-bottom:14px;
+    }
+
+    .skeleton-line{
+      width:100%;
+      height:14px;
+      margin-bottom:10px;
+    }
+
+    .skeleton-line.short{
+      width:65%;
+    }
+
+    .skeleton-card{
+      height:160px;
+      margin-top:18px;
+    }
+
+    /* =========================
+       ERROR / EMPTY
+       ========================= */
+
+    .state-card{
+      padding:28px 20px;
+      margin-top:20px;
+
+      background:var(--white);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+
+      box-shadow:var(--shadow);
+      text-align:center;
+    }
+
+    .state-icon{
+      width:54px;
+      height:54px;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      margin:0 auto 14px;
+
+      border-radius:16px;
+
+      background:var(--green-light);
+
+      font-size:25px;
+    }
+
+    .state-card.error .state-icon{
+      background:var(--danger-bg);
+    }
+
+    .state-title{
+      margin-bottom:7px;
+
+      font-size:19px;
+      font-weight:800;
+    }
+ .state-text{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .retry-button{
+      margin-top:18px;
+    }
+
+    /* =========================
+       BUTTONS
+       ========================= */
+
+    .btn{
+      width:100%;
+      min-height:46px;
+
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+
+      padding:11px 16px;
+
+      border:0;
+      border-radius:13px;
+
+      font-size:14px;
+      font-weight:750;
+
+      transition:
+        transform .15s ease,
+        opacity .15s ease,
+        background .15s ease;
+    }
+
+    .btn:active{
+      transform:scale(.97);
+    }
+
+    .btn:disabled{
+      cursor:not-allowed;
+      opacity:.55;
+      transform:none;
+    }
+
+    .btn-primary{
+      background:var(--green);
+      color:white;
+    }
+
+    .btn-primary:hover{
+      background:var(--green-dark);
+    }
+
+    .btn-secondary{
+      background:#f1f5f9;
+      color:var(--text);
+    }
+
+    .btn-secondary:hover{
+      background:#e2e8f0;
+    }
+
+    .btn-danger{
+      background:var(--danger);
+      color:white;
+    }
+
+    .btn-danger-outline{
+      background:transparent;
+      color:var(--danger);
+      border:1px solid #fecaca;
+    }
+
+    .btn-warning{
+      background:var(--warning);
+      color:white;
+    }
+
+    .btn-blue{
+      background:var(--blue);
+      color:white;
+    }
+
+    .button-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .button-row .btn{
+      flex:1 1 140px;
+    }
+
+    /* =========================
+       TASK HERO
+       ========================= */
+
+    .task-hero{
+      padding:20px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #ffffff,
+          #f0fdf4
+        );
+
+      border:1px solid #d9f3df;
+      border-radius:22px;
+
+      box-shadow:var(--shadow);
+    }
+
+    .task-category{
+      display:inline-flex;
+      align-items:center;
+
+      padding:6px 10px;
+
+      border-radius:999px;
+
+      background:var(--green-light);
+      color:var(--green-dark);
+
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .task-title{
+      margin-top:13px;
+
+      font-size:25px;
+      line-height:1.18;
+      letter-spacing:-.5px;
+      font-weight:850;
+      word-break:break-word;
+    }
+
+    .task-description{
+      margin-top:12px;
+
+      color:#475569;
+      font-size:14px;
+
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    /* =========================
+       STATUS
+       ========================= */
+
+    .status-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+
+      margin-top:15px;
+      padding:7px 11px;
+
+      border-radius:999px;
+
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .status-open{
+      background:var(--green-light);
+      color:var(--green-dark);
+    }
+
+    .status-progress{
+      background:var(--blue-bg);
+      color:#1d4ed8;
+    }
+
+    .status-submitted{
+      background:var(--warning-bg);
+      color:#b45309;
+    }
+
+    .status-completed{
+      background:#ecfdf5;
+      color:#047857;
+    }
+
+    .status-rejected{
+      background:var(--danger-bg);
+      color:#b91c1c;
+    }
+
+    .status-cancelled{
+      background:#f1f5f9;
+      color:#475569;
+    }
+
+/* =========================
+       INFORMATION GRID
+       ========================= */
+
+    .info-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+
+      margin-top:18px;
+    }
+
+    .info-item{
+      min-width:0;
+      padding:13px;
+
+      background:rgba(255,255,255,.9);
+      border:1px solid var(--border);
+      border-radius:14px;
+    }
+
+    .info-label{
+      color:var(--muted);
+
+      font-size:11px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.4px;
+    }
+
+    .info-value{
+      margin-top:4px;
+
+      font-size:14px;
+      font-weight:800;
+
+      overflow-wrap:anywhere;
+    }
+
+    .budget-value{
+      color:var(--green-dark);
+      font-size:17px;
+    }
+
+    /* =========================
+       SECTIONS
+       ========================= */
+
+    .section{
+      margin-top:16px;
+      padding:18px;
+
+      background:var(--white);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+
+      box-shadow:0 4px 16px rgba(15,23,42,.04);
+    }
+
+    .section-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+
+      margin-bottom:14px;
+    }
+
+    .section-title{
+      font-size:16px;
+      font-weight:850;
+    }
+
+    .section-subtitle{
+      margin-top:3px;
+
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    /* =========================
+       POSTER / PROFILE
+       ========================= */
+
+    .person{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .avatar{
+      width:48px;
+      height:48px;
+
+      flex:0 0 48px;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      overflow:hidden;
+
+      border-radius:50%;
+
+      background:var(--green-light);
+      color:var(--green-dark);
+
+      font-size:17px;
+      font-weight:850;
+    }
+
+    .avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .person-info{
+      min-width:0;
+      flex:1;
+    }
+
+    .person-name{
+      font-size:14px;
+      font-weight:800;
+
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .person-meta{
+      margin-top:2px;
+
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .profile-link{
+      flex:0 0 auto;
+
+      padding:8px 10px;
+
+      border-radius:10px;
+
+      background:var(--green-soft);
+      color:var(--green-dark);
+
+      font-size:12px;
+      font-weight:800;
+    }
+
+    /* =========================
+       ALERTS / NOTICES
+       ========================= */
+
+    .notice{
+      padding:13px 14px;
+
+      border-radius:13px;
+
+      font-size:13px;
+    }
+
+    .notice.info{
+      background:var(--blue-bg);
+      color:#1e40af;
+    }
+
+    .notice.success{
+      background:var(--green-soft);
+      color:var(--green-dark);
+    }
+
+    .notice.warning{
+      background:var(--warning-bg);
+      color:#92400e;
+    }
+
+    .notice.danger{
+      background:var(--danger-bg);
+      color:#991b1b;
+    }
+
+    /* =========================
+       TIMELINE
+       ========================= */
+
+    .timeline{
+      display:flex;
+      flex-direction:column;
+      gap:0;
+    }
+
+    .timeline-item{
+      position:relative;
+
+      display:flex;
+      gap:12px;
+
+      padding-bottom:18px;
+    }
+
+    .timeline-item:last-child{
+      padding-bottom:0;
+    }
+
+    .timeline-dot-wrap{
+      position:relative;
+
+      flex:0 0 24px;
+
+      display:flex;
+      justify-content:center;
+    }
+
+    .timeline-dot{
+      width:12px;
+      height:12px;
+
+      margin-top:4px;
+
+      border-radius:50%;
+
+      background:#cbd5e1;
+      border:3px solid white;
+      box-shadow:0 0 0 1px #cbd5e1;
+
+      z-index:2;
+    }
+
+    .timeline-item.active .timeline-dot{
+      background:var(--green);
+      box-shadow:0 0 0 1px var(--green);
+    }
+
+    .timeline-item.done .timeline-dot{
+      background:var(--green-dark);
+      box-shadow:0 0 0 1px var(--green-dark);
+    }
+
+    .timeline-line{
+      position:absolute;
+
+      top:16px;
+      bottom:-2px;
+
+      width:1px;
+
+      background:#e2e8f0;
+    }
+
+    .timeline-content{
+      min-width:0;
+    }
+
+    .timeline-title{
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .timeline-text{
+      margin-top:2px;
+
+      color:var(--muted);
+      font-size:12px;
+    }
+    /* =========================
+       CHAT
+       ========================= */
+
+    .chat-box{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+
+      max-height:320px;
+      overflow-y:auto;
+
+      padding:4px 0;
+    }
+
+    .chat-empty{
+      padding:16px;
+
+      border-radius:12px;
+
+      background:#f8fafc;
+
+      color:var(--muted);
+
+      font-size:12px;
+      text-align:center;
+    }
+
+    .message{
+      max-width:84%;
+      padding:9px 11px;
+
+      border-radius:14px;
+
+      font-size:12px;
+      word-break:break-word;
+    }
+
+    .message.mine{
+      align-self:flex-end;
+
+      background:var(--green);
+      color:white;
+
+      border-bottom-right-radius:5px;
+    }
+
+    .message.theirs{
+      align-self:flex-start;
+
+      background:#f1f5f9;
+      color:var(--text);
+
+      border-bottom-left-radius:5px;
+    }
+
+    .message-author{
+      margin-bottom:3px;
+
+      font-size:10px;
+      font-weight:800;
+      opacity:.75;
+    }
+
+    .message-time{
+      margin-top:4px;
+
+      font-size:9px;
+      opacity:.65;
+    }
+
+    .chat-compose{
+      display:flex;
+      gap:8px;
+
+      margin-top:11px;
+    }
+
+    .chat-input{
+      flex:1;
+
+      min-width:0;
+      min-height:42px;
+
+      padding:10px 12px;
+
+      border:1px solid var(--border);
+      border-radius:12px;
+
+      outline:none;
+
+      background:white;
+
+      font-size:12px;
+    }
+
+    .chat-input:focus{
+      border-color:#86efac;
+      box-shadow:0 0 0 3px rgba(34,197,94,.08);
+    }
+
+    .send-btn{
+      width:44px;
+      min-height:42px;
+
+      flex:0 0 44px;
+
+      padding:0;
+
+      border:0;
+      border-radius:12px;
+
+      background:var(--green);
+      color:white;
+
+      font-size:16px;
+    }
+
+    /* =========================
+       REVIEWS
+       ========================= */
+
+    .review-list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .review{
+      padding:12px;
+
+      border:1px solid var(--border);
+      border-radius:13px;
+
+      background:#fafafa;
+    }
+
+    .review-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .reviewer{
+      display:flex;
+      align-items:center;
+      gap:8px;
+
+      min-width:0;
+    }
+
+    .reviewer-avatar{
+      width:30px;
+      height:30px;
+
+      flex:0 0 30px;
+
+      overflow:hidden;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      border-radius:50%;
+
+      background:var(--green-light);
+      color:var(--green-dark);
+
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .reviewer-avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .reviewer-name{
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .stars{
+      color:#d97706;
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .review-text{
+      margin-top:8px;
+
+      color:#475569;
+      font-size:12px;
+      white-space:pre-wrap;
+    }
+/* =========================
+       REPORT
+       ========================= */
+
+    .report-link{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+
+      color:var(--danger);
+
+      font-size:12px;
+      font-weight:750;
+    }
+
+    /* =========================
+       BOTTOM NAV
+       ========================= */
+
+    .bottom-nav{
+      position:fixed;
+      left:50%;
+      bottom:0;
+      z-index:60;
+
+      width:100%;
+      max-width:480px;
+
+      transform:translateX(-50%);
+
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+
+      padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+
+      background:rgba(255,255,255,.97);
+      border-top:1px solid var(--border);
+
+      box-shadow:0 -5px 20px rgba(15,23,42,.06);
+
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+    }
+
+    .nav-item{
+      min-height:54px;
+
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
+
+      border-radius:13px;
+
+      color:#64748b;
+
+      font-size:10px;
+      font-weight:700;
+
+      transition:
+        transform .15s ease,
+        background .15s ease,
+        color .15s ease;
+    }
+
+    .nav-item:active{
+      transform:scale(.94);
+    }
+
+    .nav-item.active{
+      background:var(--green-soft);
+      color:var(--green-dark);
+    }
+
+    .nav-icon{
+      font-size:18px;
+      line-height:1;
+    }
+
+    /* =========================
+       MODAL
+       ========================= */
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      z-index:100;
+
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+
+      padding:16px;
+
+      background:rgba(15,23,42,.48);
+    }
+
+    .modal-backdrop.show{
+      display:flex;
+    }
+
+    .modal{
+      width:100%;
+      max-width:480px;
+      max-height:85vh;
+      overflow-y:auto;
+
+      padding:20px;
+
+      background:white;
+      border-radius:22px 22px 16px 16px;
+
+      box-shadow:0 20px 50px rgba(15,23,42,.2);
+
+      animation:modal-in .18s ease;
+    }
+
+    @keyframes modal-in{
+      from{
+        opacity:0;
+        transform:translateY(20px);
+      }
+
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    .modal-title{
+      font-size:18px;
+      font-weight:850;
+    }
+
+    .modal-text{
+      margin-top:6px;
+
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .modal-actions{
+      display:flex;
+      gap:9px;
+
+      margin-top:18px;
+    }
+
+    .modal-actions .btn{
+      flex:1;
+    }
+
+    /* =========================
+       TOAST
+       ========================= */
+
+    .toast-container{
+      position:fixed;
+      left:50%;
+      bottom:82px;
+      z-index:120;
+
+      width:calc(100% - 32px);
+      max-width:448px;
+
+      transform:translateX(-50%);
+
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+
+      pointer-events:none;
+    }
+
+    .toast{
+      padding:12px 14px;
+
+      border-radius:13px;
+
+      background:#17211b;
+      color:white;
+
+      box-shadow:0 10px 30px rgba(15,23,42,.18);
+
+      font-size:12px;
+      font-weight:700;
+
+      animation:toast-in .18s ease;
+    }
+
+    .toast.success{
+      background:var(--green-dark);
+    }
+
+    .toast.error{
+      background:#b91c1c;
+    }
+
+    @keyframes toast-in{
+      from{
+        opacity:0;
+        transform:translateY(8px);
+      }
+
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+/* =========================
+       RESPONSIVE
+       ========================= */
+
+    @media (max-width:360px){
+      main{
+        padding:12px;
+      }
+
+      .task-hero{
+        padding:16px;
+      }
+
+      .task-title{
+        font-size:22px;
+      }
+
+      .info-grid{
+        grid-template-columns:1fr;
+      }
+
+      .section{
+        padding:15px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<header class="top">
-<a class="back" href="find-tasks.html" aria-label="Back">←</a>
-<div class="logo">OOULink</div>
-<div class="top-spacer"></div>
-<div id="topStatus" class="top-status">TASK</div>
-</header>
-
-<main class="container">
-<div id="content" class="card">
-<div class="loading">
-<div class="loading-spinner"></div>
-Loading task...
-</div>
-</div>
-</main>
-
-<nav class="bottom-nav">
-
-<a href="index.html">
-<span>⌂</span>
-Home
-</a>
-
-<a href="my-tasks.html">
-<span>✓</span>
-My Tasks
-</a>
-
-<a href="post-task.html">
-<span>＋</span>
-Post
-</a>
-
-<a href="alerts.html">
-<span>🔔</span>
-Alerts
-<i id="dot" class="dot"></i>
-</a>
-
-<a href="profile.html">
-<span>👤</span>
-Profile
-</a>
-
-</nav>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-
-const SUPABASE_URL="https://dthvdxgxesomltlruogp.supabase.co";
-
-const SUPABASE_KEY="sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
-
-const supabaseClient=
-window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
-);
-
-const content=document.getElementById("content");
-const dot=document.getElementById("dot");
-const topStatus=document.getElementById("topStatus");
-
-let currentUser=null;
-let currentTask=null;
-let myApplication=null;
-let taskOwnerProfile=null;
-let taskRunnerProfile=null;
-let selectedRating=0;
-let busy=false;
-let chatChannel=null;
-let taskMessages=[];
-let taskReviews=[];
-let pageReady=false;
-
-function escapeHtml(value){
-return String(value??"")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
-}
-
-function money(value){
-const amount=Number(value||0);
-return "₦"+amount.toLocaleString("en-NG");
-}
-
-function dateText(value){
-if(!value){
-return "Not specified";
-}
-
-const date=new Date(value);
-
-if(Number.isNaN(date.getTime())){
-return "Not specified";
-}
-
-return date.toLocaleString(
-"en-NG",
-{
-dateStyle:"medium",
-timeStyle:"short"
-}
-);
-}
+  <div class="app">
 
-function shortDate(value){
-if(!value){
-return "";
-}
-
-const date=new Date(value);
+    <!-- =========================
+         TOP BAR
+         ========================= -->
 
-if(Number.isNaN(date.getTime())){
-return "";
-}
-
-return date.toLocaleDateString(
-"en-NG",
-{
-day:"numeric",
-month:"short",
-year:"numeric"
-}
-);
-}
+    <header class="topbar">
 
-function fileSize(bytes){
+      <button
+        class="back-button"
+        type="button"
+        onclick="goBack()"
+        aria-label="Go back"
+      >
+        ←
+      </button>
 
-const size=Number(bytes||0);
+      <div class="brand">
+        <span class="brand-mark">O</span>
+        <span>OOULink</span>
+      </div>
+
+      <div class="header-spacer"></div>
+
+    </header>
+
+
+    <!-- =========================
+         MAIN CONTENT
+         ========================= -->
+
+    <main>
+
+      <div id="page" class="page">
+
+        <div class="loading-state">
+
+          <div class="skeleton skeleton-title"></div>
+
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line short"></div>
+
+          <div class="skeleton skeleton-card"></div>
+
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line short"></div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <!-- =========================
+       BOTTOM NAVIGATION
+       ========================= -->
+
+  <nav class="bottom-nav">
+
+    <a
+      class="nav-item"
+      href="index.html"
+      aria-label="Home"
+    >
+      <span class="nav-icon">⌂</span>
+      <span>Home</span>
+    </a>
+
+    <a
+      class="nav-item"
+      href="my-tasks.html"
+      aria-label="My Tasks"
+    >
+      <span class="nav-icon">✓</span>
+      <span>My Tasks</span>
+    </a>
 
-if(!size){
-return "";
-}
+    <a
+      class="nav-item"
+      href="post-task.html"
+      aria-label="Post Task"
+    >
+      <span class="nav-icon">＋</span>
+      <span>Post</span>
+    </a>
 
-if(size<1024){
-return size+" B";
-}
+    <a
+      class="nav-item"
+      href="alerts.html"
+      aria-label="Alerts"
+    >
+      <span class="nav-icon">♢</span>
+      <span>Alerts</span>
+    </a>
 
-if(size<1048576){
-return (size/1024).toFixed(1)+" KB";
-}
+    <a
+      class="nav-item"
+      href="profile.html"
+      aria-label="Profile"
+    >
+      <span class="nav-icon">◉</span>
+      <span>Profile</span>
+    </a>
 
-return (size/1048576).toFixed(1)+" MB";
-}
+  </nav>
+<!-- =========================
+       MODAL
+       ========================= -->
 
-function statusLabel(status){
+  <div
+    id="modalBackdrop"
+    class="modal-backdrop"
+    onclick="closeModalFromBackdrop(event)"
+  >
 
-const labels={
-open:"OPEN",
-accepted:"ACCEPTED",
-in_progress:"IN PROGRESS",
-awaiting_verification:"AWAITING VERIFICATION",
-completed:"COMPLETED",
-rejected:"REJECTED",
-cancelled:"CANCELLED",
-pending:"PENDING",
-selected:"SELECTED",
-withdrawn:"WITHDRAWN"
-};
+    <div
+      id="modal"
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+      onclick="event.stopPropagation()"
+    >
 
-return labels[status]||
-String(status||"UNKNOWN").replace(/_/g," ").toUpperCase();
-}
+      <div id="modalTitle" class="modal-title">
+        Confirm action
+      </div>
 
-function statusText(status){
+      <div id="modalText" class="modal-text">
+        Are you sure?
+      </div>
 
-const messages={
+      <div class="modal-actions">
 
-open:
-"This task is open for applications.",
+        <button
+          class="btn btn-secondary"
+          type="button"
+          onclick="closeModal()"
+        >
+          Cancel
+        </button>
 
-accepted:
-"A runner has been selected and can start the task.",
+        <button
+          id="modalConfirmButton"
+          class="btn btn-primary"
+          type="button"
+        >
+          Continue
+        </button>
 
-in_progress:
-"The selected runner is currently working on the task.",
+      </div>
 
-awaiting_verification:
-"The runner submitted the task and is waiting for verification.",
+    </div>
 
-completed:
-"The owner approved the work. This task is completed.",
+  </div>
 
-rejected:
-"The owner rejected the submitted work.",
 
-cancelled:
-"This task has been cancelled."
+  <!-- =========================
+       TOAST CONTAINER
+       ========================= -->
 
-};
+  <div
+    id="toastContainer"
+    class="toast-container"
+    aria-live="polite"
+    aria-atomic="true"
+  ></div>
 
-return messages[status]||
-"Task status information is unavailable.";
 
-}
+  <!-- =========================
+       SUPABASE
+       ========================= -->
 
-function statusClass(status){
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-const allowed=[
-"open",
-"accepted",
-"in_progress",
-"awaiting_verification",
-"completed",
-"rejected",
-"cancelled",
-"pending",
-"selected",
-"withdrawn"
-];
 
-return allowed.includes(status)
-?"status-"+status
-:"status-unknown";
-}
+  <script>
 
-function taskId(){
+    /* =========================================================
+       OOULINK TASK DETAILS
+       BLOCK 1
+       CORE SETUP + SAFE UI HELPERS
+       ========================================================= */
 
-return new URLSearchParams(
-location.search
-).get("id");
 
-}
+    /* =========================
+       SUPABASE CONFIG
+       ========================= */
 
-function isOwner(){
+    const SUPABASE_URL =
+      "https://dthvdxgxesomltlruogp.supabase.co";
 
-return !!currentTask &&
-!!currentUser &&
-currentTask.user_id===currentUser.id;
+    const SUPABASE_KEY =
+      "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr4";
 
-}
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
 
-function isRunner(){
 
-return !!currentTask &&
-!!currentUser &&
-currentTask.runner_id===currentUser.id;
+    /* =========================
+       GLOBAL STATE
+       ========================= */
 
-}
+    let currentUser = null;
 
-function participant(){
+    let currentTask = null;
 
-return isOwner()||isRunner();
+    let ownerProfile = null;
 
-}
+    let runnerProfile = null;
 
-function hasRunner(){
+    let myApplication = null;
 
-return !!currentTask?.runner_id;
+    let taskApplications = [];
 
-}
+    let taskAttachments = [];
+
+    let taskMessages = [];
+
+    let taskReviews = [];
+
+    let isLoading = false;
+
+    let isSubmitting = false;
+
+    let realtimeChannel = null;
+
+
+    /* =========================
+       DOM REFERENCES
+       ========================= */
+
+    const page =
+      document.getElementById("page");
+
+    const modalBackdrop =
+      document.getElementById("modalBackdrop");
+
+    const modalTitle =
+      document.getElementById("modalTitle");
+
+    const modalText =
+      document.getElementById("modalText");
+
+    const modalConfirmButton =
+      document.getElementById("modalConfirmButton");
+
+    const toastContainer =
+      document.getElementById("toastContainer");
+/* =========================
+       BASIC HELPERS
+       ========================= */
+
+    function escapeHtml(value){
+
+      if(value === null || value === undefined){
+        return "";
+      }
+
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+
+    function escapeAttribute(value){
+
+      return escapeHtml(value)
+        .replace(/`/g, "&#096;");
+    }
+
+
+    function getTaskId(){
+
+      const params =
+        new URLSearchParams(
+          window.location.search
+        );
+
+      return params.get("id");
+    }
+
+
+    function goBack(){
+
+      if(
+        document.referrer &&
+        document.referrer.includes(
+          window.location.host
+        )
+      ){
+        window.history.back();
+        return;
+      }
+
+      window.location.href =
+        "index.html";
+    }
+
+
+    function formatMoney(value){
+
+      const number =
+        Number(value);
+
+      if(
+        Number.isNaN(number)
+      ){
+        return "₦0";
+      }
+
+      return "₦" +
+        number.toLocaleString(
+          "en-NG",
+          {
+            maximumFractionDigits:0
+          }
+        );
+    }
+
+
+    function formatDate(value){
+
+      if(!value){
+        return "Not specified";
+      }
+
+      const date =
+        new Date(value);
+
+      if(
+        Number.isNaN(
+          date.getTime()
+        )
+      ){
+        return "Not specified";
+      }
+
+      return date.toLocaleDateString(
+        "en-NG",
+        {
+          day:"numeric",
+          month:"short",
+          year:"numeric"
+        }
+      );
+    }
+
+
+    function formatDateTime(value){
+
+      if(!value){
+        return "Not specified";
+      }
+
+      const date =
+        new Date(value);
+
+      if(
+        Number.isNaN(
+          date.getTime()
+        )
+      ){
+        return "Not specified";
+      }
+
+      return date.toLocaleString(
+        "en-NG",
+        {
+          day:"numeric",
+          month:"short",
+          year:"numeric",
+          hour:"numeric",
+          minute:"2-digit"
+        }
+      );
+    }
+
+
+    function getInitials(name){
+
+      const clean =
+        String(name || "")
+          .trim();
+
+      if(!clean){
+        return "U";
+      }
+
+      const parts =
+        clean
+          .split(/\s+/)
+          .filter(Boolean);
+
+      if(parts.length === 1){
+        return parts[0]
+          .slice(0,1)
+          .toUpperCase();
+      }
+
+      return (
+        parts[0].slice(0,1) +
+        parts[parts.length - 1]
+          .slice(0,1)
+      ).toUpperCase();
+    }
+
+
+    function displayName(profile){
+
+      if(!profile){
+        return "OOULink User";
+      }
+
+      return (
+        profile.full_name ||
+        profile.username ||
+        "OOULink User"
+      );
+    }
+
+
+    function profileAvatar(profile){
+
+      if(
+        profile &&
+        profile.avatar_url
+      ){
+
+        return `
+          <img
+            src="${escapeAttribute(
+              profile.avatar_url
+            )}"
+            alt="${escapeAttribute(
+              displayName(profile)
+            )}"
+            loading="lazy"
+          >
+        `;
+
+      }
+
+      return escapeHtml(
+        getInitials(
+          displayName(profile)
+        )
+      );
+    }
+
+
+    function profileLocation(profile){
+
+      if(
+        !profile ||
+        !profile.location
+      ){
+        return "";
+      }
+
+      return escapeHtml(
+        profile.location
+      );
+    }
+
+
+    function profileXp(profile){
+
+      const xp =
+        Number(
+          profile?.xp ?? 0
+        );
+
+      return Number.isFinite(xp)
+        ? xp
+        : 0;
+    }
+
+
+    function profileReputation(profile){
+
+      const reputation =
+        Number(
+          profile?.reputation ?? 0
+        );
+
+      return Number.isFinite(reputation)
+        ? reputation
+        : 0;
+    }
+/* =========================
+       STATUS HELPERS
+       ========================= */
+
+    function normalizeStatus(status){
+
+      return String(
+        status || "open"
+      )
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "_");
+    }
+
+
+    function statusLabel(status){
+
+      const normalized =
+        normalizeStatus(status);
+
+      const labels = {
+
+        open:"Open",
+
+        assigned:"Runner Selected",
+
+        accepted:"Runner Selected",
+
+        in_progress:"In Progress",
+
+        "in-progress":"In Progress",
+
+        submitted:"Submitted",
+
+        completed:"Completed",
+
+        rejected:"Rejected",
+
+        cancelled:"Cancelled",
+
+        canceled:"Cancelled"
+
+      };
+
+      return (
+        labels[normalized] ||
+        String(status || "Open")
+          .replace(/_/g," ")
+          .replace(
+            /\b\w/g,
+            char => char.toUpperCase()
+          )
+      );
+    }
+
+
+    function statusClass(status){
+
+      const normalized =
+        normalizeStatus(status);
+
+      if(
+        normalized === "completed"
+      ){
+        return "status-completed";
+      }
+
+      if(
+        normalized === "rejected"
+      ){
+        return "status-rejected";
+      }
+
+      if(
+        normalized === "cancelled" ||
+        normalized === "canceled"
+      ){
+        return "status-cancelled";
+      }
+
+      if(
+        normalized === "submitted"
+      ){
+        return "status-submitted";
+      }
+
+      if(
+        normalized === "in_progress" ||
+        normalized === "in-progress" ||
+        normalized === "assigned" ||
+        normalized === "accepted"
+      ){
+        return "status-progress";
+      }
+
+      return "status-open";
+    }
+
+
+    function isStatus(status){
+
+      return (
+        normalizeStatus(
+          currentTask?.status
+        ) === normalizeStatus(status)
+      );
+    }
+
+
+    /* =========================
+       USER / ROLE HELPERS
+       ========================= */
+
+    function isOwner(){
+
+      return Boolean(
+        currentUser &&
+        currentTask &&
+        currentTask.user_id &&
+        currentUser.id ===
+          currentTask.user_id
+      );
+    }
+
+
+    function isRunner(){
+
+      return Boolean(
+        currentUser &&
+        currentTask &&
+        currentTask.runner_id &&
+        currentUser.id ===
+          currentTask.runner_id
+      );
+    }
+
+
+    function isParticipant(){
+
+      return (
+        isOwner() ||
+        isRunner()
+      );
+    }
 
 function canApply(){
 
-return !!currentUser &&
-!!currentTask &&
-!isOwner() &&
-!hasRunner() &&
-currentTask.status==="open" &&
-(!myApplication||
-["withdrawn"].includes(myApplication.status));
-
-}
-
-function canStartTask(){
-
-return isRunner()&&
-currentTask?.status==="accepted";
-
-}
-
-function canSubmitTask(){
-
-return isRunner()&&
-currentTask?.status==="in_progress";
-
-}
-
-function canApproveTask(){
-
-return isOwner()&&
-currentTask?.status==="awaiting_verification";
-
-}
-
-function canRejectTask(){
-
-return isOwner()&&
-currentTask?.status==="awaiting_verification";
-
-}
-
-function canCancelTask(){
-
-return isOwner()&&
-currentTask?.status==="open";
-
-}
-
-function canReview(){
-
-return !!currentUser &&
-!!currentTask &&
-currentTask.status==="completed" &&
-participant();
-
-}
-
-function getProfileName(profile){
-
-return profile?.full_name||
-profile?.username||
-"OOULink User";
-
-}
-
-function getProfileUsername(profile){
-
-if(!profile?.username){
-return "";
-}
-
-return "@"+profile.username;
-
-}
-
-function avatarHtml(profile,className="avatar"){
-
-const name=escapeHtml(
-getProfileName(profile)
-);
-
-if(profile?.avatar_url){
-
-return `
-<img
-class="${className}"
-src="${escapeHtml(profile.avatar_url)}"
-alt="${name}"
-loading="lazy"
-onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
->
-<div
-class="${className} avatar-fallback"
-style="display:none"
-aria-hidden="true"
->
-👤
-</div>
-`;
-
-}
-
-return `
-<div class="${className} avatar-fallback"
-aria-label="${name}">
-👤
-</div>
-`;
-
-}
-
-async function getCurrentUser(){
-
-const {
-data,
-error
-}=await supabaseClient.auth.getUser();
-
-if(error){
-
-console.error(
-"AUTH USER:",
-error
-);
-
-return null;
-}
-
-return data?.user||null;
-
-}
-
-async function loadTask(){
-
-const id=taskId();
-
-if(!id){
-
-showError(
-"Missing task",
-"This page needs a task ID."
-);
-
-return false;
-}
-
-const {
-data,
-error
-}=await supabaseClient
-.from("tasks")
-.select("*")
-.eq("id",id)
-.single();
-
-if(error){
-
-console.error(
-"TASK LOAD:",
-error
-);
-
-showError(
-"Unable to load task",
-error.message||
-"The task could not be loaded."
-);
-
-return false;
-}
-
-if(!data){
-
-showError(
-"Task not found",
-"This task may have been deleted."
-);
-
-return false;
-}
-
-currentTask=data;
-
-return true;
-
-}
-
-async function loadProfiles(){
-
-if(!currentTask){
-return;
-}
-
-const profileIds=[];
-
-if(currentTask.user_id){
-profileIds.push(currentTask.user_id);
-}
-
-if(
-currentTask.runner_id&&
-!profileIds.includes(currentTask.runner_id)
-){
-profileIds.push(currentTask.runner_id);
-}
-
-if(!profileIds.length){
-return;
-}
-
-const {
-data,
-error
-}=await supabaseClient
-.from("profiles")
-.select(
-"id,username,full_name,location,avatar_url,reputation,xp"
-)
-.in("id",profileIds);
-
-if(error){
-
-console.error(
-"PROFILE LOAD:",
-error
-);
-
-return;
-}
-
-for(const profile of data||[]){
-
-if(profile.id===currentTask.user_id){
-taskOwnerProfile=profile;
-}
-
-if(profile.id===currentTask.runner_id){
-taskRunnerProfile=profile;
-}
-
-}
-
-}
-
-async function loadMyApplication(){
-
-if(!currentUser||!currentTask){
-return null;
-}
-
-const {
-data,
-error
-}=await supabaseClient
-.from("task_applications")
-.select(
-"id,task_id,runner_id,status,created_at,updated_at"
-)
-.eq("task_id",currentTask.id)
-.eq("runner_id",currentUser.id)
-.maybeSingle();
-
-if(error){
-
-console.error(
-"APPLICATION:",
-error
-);
-
-return null;
-}
-
-return data||null;
-
-}
-async function applyForTask(){
-
-  if(busy){
-    return;
-  }
-
-  if(!currentUser||!currentTask||!canApply()){
-    alert("You cannot apply for this task.");
-    return;
-  }
-
-  busy=true;
-
-  try{
-
-    const {
-      data,
-      error
-    }=await supabaseClient
-      .from("task_applications")
-      .insert({
-        task_id:currentTask.id,
-        runner_id:currentUser.id,
-        status:"pending"
-      })
-      .select(
-        "id,task_id,runner_id,status,created_at,updated_at"
-      )
-      .single();
-
-    if(error){
-      console.error("APPLY:",error);
-      alert(error.message||"Unable to apply for this task.");
-      return;
+      if(!currentUser){
+        return false;
+      }
+
+      if(isOwner()){
+        return false;
+      }
+
+      if(isRunner()){
+        return false;
+      }
+
+      if(
+        !currentTask ||
+        !isStatus("open")
+      ){
+        return false;
+      }
+
+      return true;
     }
 
-    myApplication=data;
 
-    await notify(
-      currentTask.user_id,
-      "task_application",
-      "New task application",
-      "Someone applied for your task."
-    );
+    function canUseChat(){
 
-    await reloadEverything();
-
-  }catch(error){
-
-    console.error("APPLY ERROR:",error);
-
-    alert(
-      error?.message||
-      "Something went wrong while applying."
-    );
-
-  }finally{
-
-    busy=false;
-
-  }
-
-}
-
-
-async function withdrawApplication(){
-
-  if(busy){
-    return;
-  }
-
-  if(
-    !currentUser||
-    !currentTask||
-    !myApplication
-  ){
-    return;
-  }
-
-  if(myApplication.status!=="pending"){
-    return;
-  }
-
-  const confirmed=confirm(
-    "Withdraw your application for this task?"
-  );
-
-  if(!confirmed){
-    return;
-  }
-
-  busy=true;
-
-  try{
-
-    const {
-      error
-    }=await supabaseClient
-      .from("task_applications")
-      .update({
-        status:"withdrawn",
-        updated_at:new Date().toISOString()
-      })
-      .eq("id",myApplication.id)
-      .eq("runner_id",currentUser.id);
-
-    if(error){
-      console.error(
-        "WITHDRAW:",
-        error
+      return Boolean(
+        currentUser &&
+        isParticipant()
       );
-
-      alert(
-        error.message||
-        "Unable to withdraw application."
-      );
-
-      return;
     }
 
-    myApplication=null;
 
-    await reloadEverything();
+    /* =========================
+       LOADING UI
+       ========================= */
 
-  }catch(error){
+    function showLoading(){
 
-    console.error(
-      "WITHDRAW ERROR:",
-      error
+      page.innerHTML = `
+
+        <div class="loading-state">
+
+          <div class="skeleton skeleton-title"></div>
+
+          <div class="skeleton skeleton-line"></div>
+
+          <div class="skeleton skeleton-line short"></div>
+
+          <div class="skeleton skeleton-card"></div>
+
+          <div class="skeleton skeleton-line"></div>
+
+          <div class="skeleton skeleton-line short"></div>
+
+        </div>
+
+      `;
+    }
+
+
+    function showError(
+      title,
+      message
+    ){
+
+      page.innerHTML = `
+
+        <section class="state-card error">
+
+          <div class="state-icon">
+            ⚠️
+          </div>
+
+          <div class="state-title">
+            ${escapeHtml(title)}
+          </div>
+
+          <div class="state-text">
+            ${escapeHtml(message)}
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary retry-button"
+            onclick="initializePage()"
+          >
+            Try Again
+          </button>
+
+        </section>
+
+      `;
+    }
+
+
+    function showNotFound(){
+
+      page.innerHTML = `
+
+        <section class="state-card">
+
+          <div class="state-icon">
+            🔎
+          </div>
+
+          <div class="state-title">
+            Task not found
+          </div>
+
+          <div class="state-text">
+            This task may have been deleted,
+            or the task link is invalid.
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary retry-button"
+            onclick="window.location.href='index.html'"
+          >
+            Back Home
+          </button>
+
+        </section>
+
+      `;
+    }
+/* =========================
+       TOASTS
+       ========================= */
+
+    function showToast(
+      message,
+      type = ""
+    ){
+
+      if(!toastContainer){
+        return;
+      }
+
+      const toast =
+        document.createElement("div");
+
+      toast.className =
+        `toast ${type}`.trim();
+
+      toast.textContent =
+        String(message || "");
+
+      toastContainer.appendChild(
+        toast
+      );
+
+      window.setTimeout(() => {
+
+        toast.style.opacity = "0";
+
+        toast.style.transform =
+          "translateY(8px)";
+
+        window.setTimeout(() => {
+
+          toast.remove();
+
+        },180);
+
+      },2800);
+    }
+
+
+    /* =========================
+       MODAL
+       ========================= */
+
+    let modalAction = null;
+
+
+    function openModal(
+      title,
+      text,
+      confirmText,
+      action,
+      confirmClass = "btn-primary"
+    ){
+
+      modalTitle.textContent =
+        title || "Confirm action";
+
+      modalText.textContent =
+        text || "Are you sure?";
+
+      modalConfirmButton.textContent =
+        confirmText || "Continue";
+
+      modalConfirmButton.className =
+        `btn ${confirmClass}`;
+
+      modalAction =
+        typeof action === "function"
+          ? action
+          : null;
+
+      modalBackdrop.classList.add(
+        "show"
+      );
+
+      document.body.style.overflow =
+        "hidden";
+    }
+
+
+    function closeModal(){
+
+      modalBackdrop.classList.remove(
+        "show"
+      );
+
+      document.body.style.overflow =
+        "";
+
+      modalAction = null;
+    }
+
+
+    function closeModalFromBackdrop(
+      event
+    ){
+
+      if(
+        event.target ===
+        modalBackdrop
+      ){
+        closeModal();
+      }
+    }
+
+
+    async function confirmModal(){
+
+      if(
+        typeof modalAction !==
+        "function"
+      ){
+        closeModal();
+        return;
+      }
+
+      const action =
+        modalAction;
+
+      closeModal();
+
+      try{
+
+        await action();
+
+      }catch(error){
+
+        console.error(
+          "MODAL ACTION:",
+          error
+        );
+
+        showToast(
+          error?.message ||
+          "Something went wrong.",
+          "error"
+        );
+
+      }
+    }
+/* =========================
+       EVENT SETUP
+       ========================= */
+
+    modalConfirmButton.addEventListener(
+      "click",
+      confirmModal
     );
 
-    alert(
-      error?.message||
-      "Something went wrong."
-    );
 
-  }finally{
+    document.addEventListener(
+      "keydown",
+      event => {
 
-    busy=false;
+        if(
+          event.key === "Escape" &&
+          modalBackdrop.classList.contains(
+            "show"
+          )
+        ){
 
-  }
+          closeModal();
 
-  }
-  async function loadApplicants(){
+        }
 
-  if(!isOwner()||!currentTask){
-    return [];
-  }
-
-  const {
-    data,
-    error
-  }=await supabaseClient
-    .from("task_applications")
-    .select(
-      "id,task_id,runner_id,status,created_at,updated_at"
-    )
-    .eq("task_id",currentTask.id)
-    .order(
-      "created_at",
-      {
-        ascending:true
       }
     );
 
-  if(error){
 
-    console.error(
-      "APPLICANTS:",
-      error
-    );
+    /* =========================
+       SAFE IMAGE HANDLING
+       ========================= */
 
-    return [];
+    document.addEventListener(
+      "error",
+      event => {
 
-  }
+        const target =
+          event.target;
 
-  return data||[];
+        if(
+          target &&
+          target.tagName === "IMG"
+        ){
 
-}
+          target.style.display =
+            "none";
 
-
-async function renderApplicants(){
-
-  const box=
-    document.getElementById("applicants");
-
-  if(!box){
-    return;
-  }
-
-  if(!isOwner()){
-    box.innerHTML="";
-    return;
-  }
-
-  box.innerHTML=`
-    <div class="empty">
-      Loading applicants...
-    </div>
-  `;
-
-  const applications=
-    await loadApplicants();
-
-  if(!applications.length){
-
-    box.innerHTML=`
-      <div class="empty">
-        No applications yet.
-      </div>
-    `;
-
-    return;
-  }
-
-  const runnerIds=[
-    ...new Set(
-      applications
-        .map(item=>item.runner_id)
-        .filter(Boolean)
-    )
-  ];
-
-  let profiles=[];
-
-  if(runnerIds.length){
-
-    const {
-      data,
-      error
-    }=await supabaseClient
-      .from("profiles")
-      .select(
-        "id,username,full_name,location,avatar_url,reputation,xp"
-      )
-      .in("id",runnerIds);
-
-    if(error){
-
-      console.error(
-        "APPLICANT PROFILES:",
-        error
-      );
-
-    }else{
-
-      profiles=data||[];
-
-    }
-
-  }
-
-  let html="";
-
-  for(const application of applications){
-
-    const profile=
-      profiles.find(
-        item=>item.id===application.runner_id
-      )||null;
-
-    const name=
-      escapeHtml(
-        getProfileName(profile)
-      );
-
-    const username=
-      escapeHtml(
-        getProfileUsername(profile)
-      );
-
-    const reputation=
-      Number(
-        profile?.reputation||0
-      ).toFixed(2);
-
-    const selectable=
-      application.status==="pending"&&
-      currentTask.status==="open";
-
-    html+=`
-
-      <div class="applicant-card">
-
-        <div class="applicant-main">
-
-          ${avatarHtml(
-            profile,
-            "owner-avatar"
-          )}
-
-          <div>
-
-            <div class="owner-name">
-              ${name}
-            </div>
-
-            ${
-              username
-              ?
-              `
-              <div class="owner-username">
-                ${username}
-              </div>
-              `
-              :
-              ""
-            }
-
-            <div class="section-note">
-              Reputation: ${reputation}
-            </div>
-
-            <div class="section-note">
-              Applied:
-              ${escapeHtml(
-                dateText(
-                  application.created_at
-                )
-              )}
-            </div>
-
-          </div>
-
-        </div>
-
-        <div style="margin-top:10px">
-
-          <span class="status-pill ${
-            statusClass(
-              application.status
-            )
-          }">
-
-            ${escapeHtml(
-              statusLabel(
-                application.status
-              )
-            )}
-
-          </span>
-
-        </div>
-
-        ${
-          selectable
-          ?
-          `
-          <button
-            class="btn blue"
-            style="margin-top:10px"
-            onclick="selectRunner('${application.id}','${application.runner_id}')"
-          >
-            SELECT RUNNER
-          </button>
-          `
-          :
-          ""
         }
 
-      </div>
-
-    `;
-
-  }
-
-  box.innerHTML=html;
-
-  }
-  async function selectRunner(
-  applicationId,
-  runnerId
-){
-
-  if(busy){
-    return;
-  }
-
-  if(
-    !isOwner()||
-    currentTask.status!=="open"||
-    !applicationId||
-    !runnerId
-  ){
-    return;
-  }
-
-  const confirmed=confirm(
-    "Select this applicant as the runner for this task?"
-  );
-
-  if(!confirmed){
-    return;
-  }
-
-  busy=true;
-
-  try{
-
-    const {
-      error:taskError
-    }=await supabaseClient
-      .from("tasks")
-      .update({
-        runner_id:runnerId,
-        status:"accepted"
-      })
-      .eq("id",currentTask.id)
-      .eq("user_id",currentUser.id)
-      .eq("status","open");
-
-    if(taskError){
-
-      console.error(
-        "SELECT RUNNER TASK:",
-        taskError
-      );
-
-      alert(
-        taskError.message||
-        "Unable to select runner."
-      );
-
-      return;
-    }
-
-    const {
-      error:applicationError
-    }=await supabaseClient
-      .from("task_applications")
-      .update({
-        status:"selected",
-        updated_at:new Date().toISOString()
-      })
-      .eq("id",applicationId)
-      .eq("runner_id",runnerId);
-
-    if(applicationError){
-
-      console.error(
-        "SELECT RUNNER APPLICATION:",
-        applicationError
-      );
-
-      alert(
-        "Runner was selected, but the application status could not be updated."
-      );
-
-    }
-
-    await supabaseClient
-      .from("task_applications")
-      .update({
-        status:"rejected",
-        updated_at:new Date().toISOString()
-      })
-      .eq("task_id",currentTask.id)
-      .neq("id",applicationId)
-      .eq("status","pending");
-
-    await notify(
-      runnerId,
-      "runner_selected",
-      "You were selected",
-      "You have been selected to handle a task."
+      },
+      true
     );
 
-    await reloadEverything();
 
-  }catch(error){
+    /* =========================
+       INITIAL PAGE START
+       ========================= */
 
-    console.error(
-      "SELECT RUNNER ERROR:",
-      error
+    document.addEventListener(
+      "DOMContentLoaded",
+      () => {
+
+        initializePage();
+
+      }
     );
 
-    alert(
-      error?.message||
-      "Something went wrong while selecting the runner."
-    );
+  </script>
 
-  }finally{
-
-    busy=false;
-
-  }
-
-}
-
-
-async function startTask(){
-
-  if(busy){
-    return;
-  }
-
-  if(!canStartTask()){
-    return;
-  }
-
-  busy=true;
-
-  try{
-
-    const {
-      error
-    }=await supabaseClient
-      .from("tasks")
-      .update({
-        status:"in_progress"
-      })
-      .eq("id",currentTask.id)
-      .eq("runner_id",currentUser.id)
-      .eq("status","accepted");
-
-    if(error){
-
-      console.error(
-        "START TASK:",
-        error
-      );
-
-      alert(
-        error.message||
-        "Unable to start task."
-      );
-
-      return;
-    }
-
-    await notify(
-      currentTask.user_id,
-      "task_started",
-      "Task started",
-      "The selected runner has started working on your task."
-    );
-
-    await reloadEverything();
-
-  }catch(error){
-
-    console.error(
-      "START TASK ERROR:",
-      error
-    );
-
-    alert(
-      error?.message||
-      "Something went wrong."
-    );
-
-  }finally{
-
-    busy=false;
-
-  }
-
-}
-
-
-async function submitTask(){
-
-  if(busy){
-    return;
-  }
-
-  if(!canSubmitTask()){
-    return;
-  }
-
-  const confirmed=confirm(
-    "Submit this task for the owner's verification?"
-  );
-
-  if(!confirmed){
-    return;
-  }
-
-  busy=true;
-
-  try{
-
-    const {
-      error
-    }=await supabaseClient
-      .from("tasks")
-      .update({
-        status:"awaiting_verification"
-      })
-      .eq("id",currentTask.id)
-      .eq("runner_id",currentUser.id)
-      .eq("status","in_progress");
-
-    if(error){
-
-      console.error(
-        "SUBMIT TASK:",
-        error
-      );
-    alert(
-        error.message||
-        "Unable to submit task."
-      );
-
-      return;
-    }
-
-    await notify(
-      currentTask.user_id,
-      "task_submitted",
-      "Task submitted",
-      "The runner submitted the task for your verification."
-    );
-
-    await reloadEverything();
-
-  }catch(error){
-
-    console.error(
-      "SUBMIT TASK ERROR:",
-      error
-    );
-
-    alert(
-      error?.message||
-      "Something went wrong."
-    );
-
-  }finally{
-
-    busy=false;
-
-  }
-
-}
-
-
-async function approveTask(){
-
-  if(busy){
-    return;
-  }
-
-  if(!canApproveTask()){
-    return;
-  }
-
-  const confirmed=confirm(
-    "Approve this submission and mark the task as completed?"
-  );
-
-  if(!confirmed){
-    return;
-  }
-
-  busy=true;
-
-  try{
-
-    const {
-      error
-    }=await supabaseClient
-      .from("tasks")
-      .update({
-        status:"completed"
-      })
-      .eq("id",currentTask.id)
-      .eq("user_id",currentUser.id)
-      .eq("status","awaiting_verification");
-
-    if(error){
-
-      console.error(
-        "APPROVE TASK:",
-        error
-      );
-
-      alert(
-        error.message||
-        "Unable to approve task."
-      );
-
-      return;
-    }
-
-    if(currentTask.runner_id){
-
-      await notify(
-        currentTask.runner_id,
-        "task_completed",
-        "Task completed",
-        "The task owner approved your submission."
-      );
-
-    }
-
-    await reloadEverything();
-
-  }catch(error){
-
-    console.error(
-      "APPROVE TASK ERROR:",
-      error
-    );
-
-    alert(
-      error?.message||
-      "Something went wrong."
-    );
-
-  }finally{
-
-    busy=false;
-
-  }
-
-}
-
-
-async function rejectTask(){
-
-  if(busy){
-    return;
-  }
-
-  if(!canRejectTask()){
-    return;
-  }
-
-  const confirmed=confirm(
-    "Reject this submission and allow the runner to continue?"
-  );
-
-  if(!confirmed){
-    return;
-  }
-
-  busy=true;
-
-  try{
-
-    const {
-      error
-    }=await supabaseClient
-      .from("tasks")
-      .update({
-        status:"rejected"
-      })
-      .eq("id",currentTask.id)
-      .eq("user_id",currentUser.id)
-      .eq("status","awaiting_verification");
-
-    if(error){
-
-      console.error(
-        "REJECT TASK:",
-        error
-      );
-
-      alert(
-        error.message||
-        "Unable to reject submission."
-      );
-
-      return;
-    }
-
-    if(currentTask.runner_id){
-
-      await notify(
-        currentTask.runner_id,
-        "task_rejected",
-        "Submission rejected",
-        "Your submission was rejected. You can continue working on the task."
-      );
-
-    }
-
-    await reloadEverything();
-
-  }catch(error){
-
-    console.error(
-      "REJECT TASK ERROR:",
-      error
-    );
-
-    alert(
-      error?.message||
-      "Something went wrong."
-    );
-
-  }finally{
-
-    busy=false;
-
-  }
-
-}
-
-
-async function cancelTask(){
-
-  if(busy){
-    return;
-  }
-
-  if(!canCancelTask()){
-    return;
-  }
-
-  const confirmed=confirm(
-    "Cancel this task? This cannot be undone."
-  );
-
-  if(!confirmed){
-    return;
-  }
-
-  busy=true;
-
-  try{
-
-    const {
-      error
-    }=await supabaseClient
-      .from("tasks")
-      .update({
-        status:"cancelled"
-      })
-      .eq("id",currentTask.id)
-      .eq("user_id",currentUser.id)
-      .eq("status","open");
-
-    if(error){
-
-      console.error(
-        "CANCEL TASK:",
-        error
-      );
-
-      alert(
-        error.message||
-        "Unable to cancel task."
-      );
-
-      return;
-    }
-
-    if(currentTask.runner_id){
-
-      await notify(
-        currentTask.runner_id,
-        "task_cancelled",
-        "Task cancelled",
-        "The task owner cancelled this task."
-      );
-
-    }
-
-    await reloadEverything();
-
-  }catch(error){
-
-    console.error(
-      "CANCEL TASK ERROR:",
-      error
-    );
-
-    alert(
-      error?.message||
-      "Something went wrong."
-    );
-
-  }finally{
-
-    busy=false;
-
-  }
-
-  }
-async function updateDot(){
-
-if(!currentUser){
-dot.style.display="none";
-return;
-}
-
-const {
-count,
-error
-}=await supabaseClient
-.from("notifications")
-.select(
-"id",
-{
-count:"exact",
-head:true
-}
-)
-.eq("user_id",currentUser.id)
-.eq("is_read",false);
-
-if(error){
-
-console.error(
-"NOTIFICATION COUNT:",
-error
-);
-
-return;
-}
-
-dot.style.display=
-count>0?"block":"none";
-
-}
-
-async function notify(
-userId,
-type,
-title,
-message
-){
-
-if(!userId){
-return;
-}
-
-const {
-error
-}=await supabaseClient
-.from("notifications")
-.insert({
-user_id:userId,
-task_id:currentTask?.id||null,
-type:type,
-title:title,
-message:message
-});
-
-if(error){
-
-console.error(
-"NOTIFICATION:",
-error
-);
-
-}
-
-}
-
-function showError(title,message){
-
-content.innerHTML=`
-<div class="error">
-<div class="error-icon">⚠️</div>
-<div class="bold">${escapeHtml(title)}</div>
-<div style="margin-top:6px">
-${escapeHtml(message)}
-</div>
-<a
-class="btn gray"
-href="find-tasks.html"
-style="margin-top:16px"
->
-BACK TO TASKS
-</a>
-</div>
-`;
-
-}
-
-function ownerHtml(){
-
-if(!taskOwnerProfile){
-return "";
-}
-
-const name=escapeHtml(
-getProfileName(taskOwnerProfile)
-);
-
-const username=escapeHtml(
-getProfileUsername(taskOwnerProfile)
-);
-
-const reputation=
-Number(taskOwnerProfile.reputation||0)
-.toFixed(2);
-
-return `
-<div class="section">
-<div class="section-title">👤 Task Owner</div>
-
-<div class="owner-box">
-
-${avatarHtml(
-taskOwnerProfile,
-"owner-avatar"
-)}
-
-<div class="owner-info">
-
-<div class="owner-name">
-${name}
-</div>
-
-${username?
-`<div class="owner-username">
-${username}
-</div>`
-:""}
-
-<div class="owner-meta">
-⭐ ${reputation}
-${taskOwnerProfile.location?
-" • "+escapeHtml(taskOwnerProfile.location)
-:""}
-</div>
-
-</div>
-
-<a
-class="small view"
-href="profile.html?id=${encodeURIComponent(taskOwnerProfile.id)}"
->
-VIEW
-</a>
-
-</div>
-</div>
-`;
-
-}
-
-function runnerHtml(){
-
-if(!currentTask?.runner_id){
-return "";
-}
-
-if(!taskRunnerProfile){
-
-return `
-<div class="section">
-<div class="section-title">🏃 Selected Runner</div>
-<div class="notice">
-A runner has been selected for this task.
-</div>
-</div>
-`;
-
-}
-
-const name=escapeHtml(
-getProfileName(taskRunnerProfile)
-);
-
-const username=escapeHtml(
-getProfileUsername(taskRunnerProfile)
-);
-
-const reputation=
-Number(taskRunnerProfile.reputation||0)
-.toFixed(2);
-
-return `
-<div class="section">
-<div class="section-title">🏃 Selected Runner</div>
-
-<div class="owner-box">
-
-${avatarHtml(
-taskRunnerProfile,
-"owner-avatar"
-)}
-
-<div class="owner-info">
-
-<div class="owner-name">
-${name}
-</div>
-
-${username?
-`<div class
-function applicationStatusHtml(){
-
-if(!myApplication){
-return "";
-}
-
-const status=myApplication.status||"pending";
-
-let message="";
-
-if(status==="pending"){
-message="Your application is waiting for the task owner's decision.";
-}
-
-if(status==="selected"){
-message="You were selected for this task.";
-}
-
-if(status==="rejected"){
-message="Your application was not selected.";
-}
-
-if(status==="withdrawn"){
-message="You withdrew this application.";
-}
-
-return `
-<div class="notice ${
-status==="selected"
-?"success"
-:
-status==="rejected"
-?"danger"
-:
-"info"
-}">
-<div class="bold">
-Application: ${escapeHtml(statusLabel(status))}
-</div>
-
-<div style="margin-top:4px">
-${escapeHtml(message)}
-</div>
-</div>
-`;
-
-}
-
-function taskTimelineHtml(){
-
-if(!currentTask){
-return "";
-}
-
-const steps=[
-{
-status:"open",
-label:"Task posted"
-},
-{
-status:"accepted",
-label:"Runner selected"
-},
-{
-status:"in_progress",
-label:"Work started"
-},
-{
-status:"awaiting_verification",
-label:"Submitted for verification"
-},
-{
-status:"completed",
-label:"Completed"
-}
-];
-
-const current=currentTask.status;
-
-const order={
-open:0,
-accepted:1,
-in_progress:2,
-awaiting_verification:3,
-completed:4,
-rejected:3,
-cancelled:-1
-};
-
-const currentIndex=
-Object.prototype.hasOwnProperty.call(
-order,
-current
-)
-?
-order[current]
-:
-0;
-
-let html=`
-<div class="section">
-<div class="section-title">
-📍 Task Progress
-</div>
-
-<div class="section-note">
-Follow the task from posting to completion.
-</div>
-`;
-
-steps.forEach((step,index)=>{
-
-let state="";
-
-if(current==="cancelled"){
-state=index===0?"done":"";
-}else if(current==="rejected"){
-state=
-index<3
-?"done"
-:
-index===3
-?"current"
-:"";
-}else{
-state=
-index<currentIndex
-?"done"
-:
-index===currentIndex
-?"current"
-:"";
-}
-
-html+=`
-<div style="
-display:flex;
-align-items:center;
-gap:10px;
-padding:8px 0;
-">
-
-<div style="
-width:27px;
-height:27px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-flex:none;
-font-size:11px;
-font-weight:900;
-background:${
-state==="done"
-?"#dcfce7"
-:
-state==="current"
-?"#dbeafe"
-:"#eef2f7"
-};
-color:${
-state==="done"
-?"#166534"
-:
-state==="current"
-?"#1d4ed8"
-:"#6b7280"
-};
-">
-${
-state==="done"
-?"✓"
-:
-index+1
-}
-</div>
-
-<div style="
-font-size:12px;
-font-weight:${
-state==="current"
-?"900"
-:"700"
-};
-color:${
-state==="current"
-?"#172033"
-:"#667085"
-};
-">
-${escapeHtml(step.label)}
-</div>
-
-</div>
-`;
-
-});
-
-if(current==="cancelled"){
-
-html+=`
-<div class="notice danger" style="margin-top:8px">
-This task was cancelled before completion.
-</div>
-`;
-
-}
-
-if(current==="rejected"){
-
-html+=`
-<div class="notice danger" style="margin-top:8px">
-The latest submission was rejected and the runner can continue working on the task.
-</div>
-`;
-
-}
-
-html+=`</div>`;
-
-return html;
-
-}
-
-function taskRulesHtml(){
-
-if(!currentTask){
-return "";
-}
-
-return `
-<div class="section">
-
-<div class="section-title">
-📋 Task Information
-</div>
-
-<div class="notice">
-
-<div class="bold">
-Before proceeding
-</div>
-
-<div style="margin-top:6px">
-Only work related to the task description should be requested or completed.
-Keep communication respectful and use the OOULink task chat for important task-related messages.
-</div>
-
-</div>
-
-</div>
-`;
-
-}
-
-function taskHeaderHtml(){
-  if(!currentTask){
-    return "";
-  }
-
-  const status=currentTask.status||"open";
-
-  return `
-    <div>
-      <div class="category">
-        ${escapeHtml(currentTask.category||"Other")}
-      </div>
-
-      <h1>
-        ${escapeHtml(currentTask.title||"Untitled Task")}
-      </h1>
-
-      <div class="description">
-        ${escapeHtml(currentTask.description||"No description provided.")}
-      </div>
-
-      <div class="budget">
-        ${money(currentTask.budget)}
-      </div>
-
-      <div class="info">
-
-        <div class="info-row">
-          <div class="label">Location</div>
-          <div class="value">
-            ${escapeHtml(currentTask.location||"Not specified")}
-          </div>
-        </div>
-
-        <div class="info-row">
-          <div class="label">Deadline</div>
-          <div class="value">
-            ${escapeHtml(dateText(currentTask.deadline))}
-          </div>
-        </div>
-
-        <div class="info-row">
-          <div class="label">Status</div>
-          <div class="value">
-            <span class="status-pill ${statusClass(status)}">
-              ${escapeHtml(statusLabel(status))}
-            </span>
-          </div>
-        </div>
-
-        <div class="info-row">
-          <div class="label">Posted</div>
-          <div class="value">
-            ${escapeHtml(dateText(currentTask.created_at))}
-          </div>
-        </div>
-
-      </div>
-
-      <div class="notice info task-message">
-        ${escapeHtml(statusText(status))}
-      </div>
-    </div>
-  `;
-}
-
-
-function applicationHtml(){
-  if(!currentUser){
-    return "";
-  }
-
-  if(isOwner()){
-    return "";
-  }
-
-  let html="";
-
-  if(canApply()){
-    html+=`
-      <div class="section">
-        <div class="section-title">
-          🙋 Apply for this task
-        </div>
-
-        <div class="section-note">
-          Apply only if you are available and able to complete the task.
-        </div>
-
-        <button
-          class="btn blue"
-          onclick="applyForTask()"
-        >
-          APPLY FOR TASK
-        </button>
-      </div>
-    `;
-  }
-
-  if(myApplication){
-    html+=`
-      <div class="section">
-        <div class="section-title">
-          📄 Your Application
-        </div>
-
-        ${applicationStatusHtml()}
-
-        ${
-          myApplication.status==="pending"
-          ?
-          `
-          <button
-            class="btn gray"
-            onclick="withdrawApplication()"
-          >
-            WITHDRAW APPLICATION
-          </button>
-          `
-          :
-          ""
-        }
-      </div>
-    `;
-  }
-
-  return html;
-}
-
-
-function ownerActionsHtml(){
-  if(!isOwner()){
-    return "";
-  }
-
-  let html="";
-
-  if(canCancelTask()){
-    html+=`
-      <div class="section">
-        <div class="section-title">
-          ⚙️ Task Controls
-        </div>
-
-        <button
-          class="btn red"
-          onclick="cancelTask()"
-        >
-          CANCEL TASK
-        </button>
-      </div>
-    `;
-  }
-
-  if(canApproveTask()){
-    html+=`
-      <div class="section">
-        <div class="section-title">
-          ✅ Verify Submission
-        </div>
-
-        <div class="section-note">
-          Approve the runner's submission when the work has been completed correctly.
-        </div>
-
-        <button
-          class="btn green"
-          onclick="approveTask()"
-        >
-          APPROVE & COMPLETE
-        </button>
-
-        <button
-          class="btn red"
-          onclick="rejectTask()"
-        >
-          REJECT SUBMISSION
-        </button>
-      </div>
-    `;
-  }
-
-  return html;
-}
-
-
-function runnerActionsHtml(){
-  if(!isRunner()){
-    return "";
-  }
-
-  let html="";
-
-  if(canStartTask()){
-    html+=`
-      <div class="section">
-        <div class="section-title">
-          🚀 Start Task
-        </div>
-
-        <div class="section-note">
-          Start working when you are ready to complete the task.
-        </div>
-
-        <button
-          class="btn blue"
-          onclick="startTask()"
-        >
-          START TASK
-        </button>
-      </div>
-    `;
-  }
-
-  if(canSubmitTask()){
-    html+=`
-      <div class="section">
-        <div class="section-title">
-          📤 Submit Work
-        </div>
-
-        <div class="section-note">
-          Submit the task when you have finished the requested work.
-        </div>
-
-        <button
-          class="btn green"
-          onclick="submitTask()"
-        >
-          SUBMIT FOR VERIFICATION
-        </button>
-      </div>
-    `;
-  }
-
-  return html;
-}
-
-
-function applicantsContainerHtml(){
-  if(!isOwner()){
-    return "";
-  }
-
-  if(currentTask.status!=="open"){
-    return "";
-  }
-
-  return `
-    <div class="section">
-      <div class="section-title">
-        👥 Applicants
-      </div>
-
-      <div class="section-note">
-        Review applicants and select the person who will handle this task.
-      </div>
-
-      <div id="applicants">
-        <div class="empty">
-          Loading applicants...
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function rejectionHtml(){
-  if(!currentTask){
-    return "";
-  }
-
-  if(
-    !isRunner() ||
-    currentTask.status!=="rejected"
-  ){
-    return "";
-  }
-
-  return `
-    <div class="section">
-      <div class="section-title">
-        ⚠️ Submission Rejected
-      </div>
-
-      <div class="notice danger">
-        Your latest submission was rejected by the task owner.
-        Please review the task and continue working on it.
-      </div>
-    </div>
-  `;
-  }
-function renderBaseTask(){
-  if(!currentTask){
-    return "";
-  }
-
-  return `
-    ${taskHeaderHtml()}
-
-    ${taskTimelineHtml()}
-
-    ${ownerHtml()}
-
-    ${runnerHtml()}
-
-    ${taskRulesHtml()}
-
-    ${applicationHtml()}
-
-    ${ownerActionsHtml()}
-
-    ${runnerActionsHtml()}
-
-    ${rejectionHtml()}
-
-    ${applicantsContainerHtml()}
-
-    <div id="files"></div>
-
-    <div id="chat"></div>
-
-    <div id="reviews"></div>
-
-    ${reportHtml()}
-  `;
-  }
-async function renderTask(){
-
-  if(!currentTask){
-    return;
-  }
-
-  try{
-
-    const html = renderBaseTask();
-
-    content.innerHTML = html;
-
-    pageReady = true;
-
-  }catch(error){
-
-    console.error("RENDER TASK:",error);
-
-    showError(
-      "Unable to display task",
-      error?.message ||
-      "There is an error in the task display."
-    );
-
-    return;
-  }
-
-  loadFiles().catch(error=>{
-    console.error("FILES RENDER:",error);
-  });
-
-  loadChat().catch(error=>{
-    console.error("CHAT RENDER:",error);
-  });
-
-  loadReviews().catch(error=>{
-    console.error("REVIEWS RENDER:",error);
-  });
-
-  renderApplicants().catch(error=>{
-    console.error("APPLICANTS RENDER:",error);
-  });
-
-  }
-  
-async function refreshTaskOnly(){
-
-if(!currentTask){
-return false;
-}
-
-const {
-data,
-error
-}=await supabaseClient
-.from("tasks")
-.select("*")
-.eq("id",currentTask.id)
-.single();
-
-if(error){
-
-console.error(
-"REFRESH TASK:",
-error
-);
-
-return false;
-
-}
-
-if(!data){
-return false;
-}
-
-currentTask=data;
-
-taskOwnerProfile=null;
-taskRunnerProfile=null;
-
-await loadProfiles();
-
-if(currentUser){
-
-myApplication=
-await loadMyApplication();
-
-}
-
-return true;
-
-}
-async function reloadEverything(){
-
-  const refreshed =
-    await refreshTaskOnly();
-
-  if(!refreshed){
-    return;
-  }
-
-  await renderTask();
-
-  }
-
-async function loadFiles(){
-
-const box=
-document.getElementById("files");
-
-if(!box){
-return;
-}
-
-if(!participant()){
-
-box.innerHTML="";
-
-return;
-
-}
-
-box.innerHTML=`
-<div class="section">
-<div class="section-title">
-📎 Task Files
-</div>
-
-<div class="section-note">
-Loading attached files...
-</div>
-</div>
-`;
-
-const {
-data:files,
-error
-}=await supabaseClient
-.from("task_attachments")
-.select(
-"id,task_id,file_name,file_path,file_size,mime_type,created_at"
-)
-.eq("task_id",currentTask.id)
-.order(
-"created_at",
-{
-ascending:true
-}
-);
-
-if(error){
-
-console.error(
-"FILES:",
-error
-);
-
-box.innerHTML=`
-<div class="section">
-
-<div class="section-title">
-📎 Task Files
-</div>
-
-<div class="empty">
-Unable to load task files.
-</div>
-
-</div>
-`;
-
-return;
-
-}
-
-if(!files?.length){
-
-box.innerHTML=`
-<div class="section">
-
-<div class="section-title">
-📎 Task Files
-</div>
-
-<div class="empty">
-No files have been attached to this task.
-</div>
-
-</div>
-`;
-
-return;
-
-}
-
-let html=`
-<div class="section">
-
-<div class="section-title">
-📎 Task Files
-</div>
-
-<div class="section-note">
-Files are available only to the task participants.
-</div>
-`;
-
-for(const file of files){
-
-let signedUrl=null;
-
-if(file.file_path){
-
-const {
-data:signed,
-error:signedError
-}=await supabaseClient
-.storage
-.from("TaskFiles")
-.createSignedUrl(
-file.file_path,
-600
-);
-
-if(
-signedError||
-!signed?.signedUrl
-){
-
-console.error(
-"FILE URL:",
-signedError
-);
-
-}else{
-
-signedUrl=signed.signedUrl;
-
-}
-
-}
-
-html+=`
-
-<div class="file-card">
-
-<div class="pdf">
-📄
-</div>
-
-<div class="file-info">
-
-<div class="file-name">
-${escapeHtml(
-file.file_name||
-"Unnamed file"
-)}
-</div>
-
-<div class="file-size">
-${fileSize(file.file_size)}
-${file.created_at?
-" • "+escapeHtml(
-shortDate(file.created_at)
-)
-:""}
-</div>
-
-</div>
-
-${
-signedUrl
-?
-`
-<a
-class="file-link"
-href="${escapeHtml(signedUrl)}"
-target="_blank"
-rel="noopener noreferrer"
->
-OPEN
-</a>
-`
-:
-`
-<span
-class="file-link"
-style="background:#9ca3af"
->
-UNAVAILABLE
-</span>
-`
-}
-
-</div>
-`;
-
-}
-
-html+=`
-</div>
-`;
-
-box.innerHTML=html;
-
-}
-
-function chatParticipantIds(){
-
-if(!currentTask){
-return [];
-}
-
-return [
-currentTask.user_id,
-currentTask.runner_id
-].filter(Boolean);
-
-}
-
-function canUseChat(){
-
-if(!currentUser||!currentTask){
-return false;
-}
-
-if(!participant()){
-return false;
-}
-
-return !!currentTask.runner_id;
-
-}
-
-function chatHtml(){
-
-if(!canUseChat()){
-return "";
-}
-
-return `
-<div class="section">
-
-<div class="section-title">
-💬 Task Chat
-</div>
-
-<div class="section-note">
-Use this chat for communication related to this task.
-</div>
-
-<div class="chat-box">
-
-<div
-id="messageList"
-class="message-list"
->
-<div class="empty">
-Loading messages...
-</div>
-</div>
-
-<div class="chat-compose">
-
-<textarea
-id="chatInput"
-maxlength="1000"
-placeholder="Type a message..."
-></textarea>
-
-<button
-id="chatSend"
-class="chat-send"
-onclick="sendChatMessage()"
->
-SEND
-</button>
-
-</div>
-
-</div>
-
-</div>
-`;
-
-}
-
-async function loadChat(){
-
-const box=
-document.getElementById("chat");
-
-if(!box){
-return;
-}
-
-if(!canUseChat()){
-
-box.innerHTML="";
-
-cleanupChatChannel();
-
-return;
-
-}
-
-box.innerHTML=
-chatHtml();
-
-const {
-data,
-error
-}=await supabaseClient
-.from("task_messages")
-.select(
-"id,task_id,sender_id,message,created_at"
-)
-.eq("task_id",currentTask.id)
-.order(
-"created_at",
-{
-ascending:true
-}
-);
-
-if(error){
-
-console.error(
-"CHAT LOAD:",
-error
-);
-
-const list=
-document.getElementById(
-"messageList"
-);
-
-if(list){
-
-list.innerHTML=`
-<div class="empty">
-Unable to load chat messages.
-</div>
-`;
-
-}
-
-}else{
-
-taskMessages=data||[];
-
-renderMessages();
-
-}
-
-subscribeToChat();
-
-}
-
-function renderMessages(){
-
-const list=
-document.getElementById(
-"messageList"
-);
-
-if(!list){
-return;
-}
-
-if(!taskMessages.length){
-
-list.innerHTML=`
-<div class="empty">
-No messages yet. Start the conversation.
-</div>
-`;
-
-return;
-
-}
-
-let html="";
-
-for(const message of taskMessages){
-
-const mine=
-message.sender_id===
-currentUser?.id;
-
-html+=`
-
-<div class="message ${
-mine
-?"mine"
-:"theirs"
-}">
-
-<div>
-${escapeHtml(
-message.message
-)}
-</div>
-
-<div class="message-time">
-${dateText(
-message.created_at
-)}
-</div>
-
-</div>
-`;
-
-}
-
-list.innerHTML=html;
-
-list.scrollTop=list.scrollHeight;
-
-}
-
-function cleanupChatChannel(){
-
-if(!chatChannel){
-return;
-}
-
-supabaseClient
-.removeChannel(chatChannel)
-.catch(
-error=>{
-console.error(
-"CHAT CHANNEL CLEANUP:",
-error
-);
-}
-);
-
-chatChannel=null;
-
-}
-
-function subscribeToChat(){
-
-cleanupChatChannel();
-
-if(!canUseChat()){
-return;
-}
-
-chatChannel=
-supabaseClient
-.channel(
-"task-chat-"+currentTask.id
-)
-.on(
-"postgres_changes",
-{
-event:"INSERT",
-schema:"public",
-table:"task_messages",
-filter:"task_id=eq."+currentTask.id
-},
-payload=>{
-
-const incoming=
-payload.new;
-
-if(!incoming){
-return;
-}
-
-if(
-taskMessages.some(
-message=>
-String(message.id)===
-String(incoming.id)
-)
-){
-return;
-}
-
-taskMessages.push(
-incoming
-);
-
-renderMessages();
-
-}
-)
-.subscribe(
-status=>{
-
-if(status==="CHANNEL_ERROR"){
-console.error(
-"CHAT CHANNEL ERROR"
-);
-}
-
-}
-);
-
-}
-
-async function sendChatMessage(){
-
-if(
-busy||
-!canUseChat()||
-!currentUser
-){
-return;
-}
-
-const input=
-document.getElementById(
-"chatInput"
-);
-
-if(!input){
-return;
-}
-
-const message=
-input.value.trim();
-
-if(!message){
-return;
-}
-
-if(message.length>1000){
-
-alert(
-"Keep messages under 1000 characters."
-);
-
-return;
-
-}
-
-const sendButton=
-document.getElementById(
-"chatSend"
-);
-
-busy=true;
-
-if(sendButton){
-
-sendButton.disabled=true;
-sendButton.textContent="SENDING...";
-
-}
-
-const {
-data,
-error
-}=await supabaseClient
-.from("task_messages")
-.insert({
-task_id:currentTask.id,
-sender_id:currentUser.id,
-message:message
-})
-.select(
-"id,task_id,sender_id,message,created_at"
-)
-.single();
-
-if(error){
-
-console.error(
-"SEND MESSAGE:",
-error
-);
-
-alert(
-error.message||
-"Could not send message."
-);
-
-busy=false;
-
-if(sendButton){
-
-sendButton.disabled=false;
-sendButton.textContent="SEND";
-
-}
-
-return;
-
-}
-
-if(data){
-
-if(
-!taskMessages.some(
-item=>
-String(item.id)===
-String(data.id)
-)
-){
-
-taskMessages.push(data);
-
-}
-
-}
-
-input.value="";
-
-busy=false;
-
-if(sendButton){
-
-sendButton.disabled=false;
-sendButton.textContent="SEND";
-
-}
-
-renderMessages();
-
-}
-
-function reviewStarsHtml(
-rating,
-interactive=false
-){
-
-const value=
-Math.max(
-0,
-Math.min(
-5,
-Number(rating)||0
-)
-);
-
-let html="";
-
-for(let i=1;i<=5;i++){
-
-if(interactive){
-
-html+=`
-<button
-type="button"
-class="star"
-onclick="setRating(${i})"
-aria-label="${i} star"
->
-${i<=value?"★":"☆"}
-</button>
-`;
-
-}else{
-
-html+=
-i<=value
-?"★"
-:"☆";
-
-}
-
-}
-
-return html;
-
-}
-
-function reviewFormHtml(){
-
-if(!canReview()){
-return "";
-}
-
-const alreadyReviewed=
-taskReviews.some(
-review=>
-review.reviewer_id===
-currentUser.id
-);
-
-if(alreadyReviewed){
-
-return `
-<div class="notice success">
-You have already reviewed this task.
-</div>
-`;
-
-}
-
-const targetId=
-isOwner()
-?
-currentTask.runner_id
-:
-currentTask.user_id;
-
-if(!targetId){
-
-return `
-<div class="empty">
-The other participant could not be identified for review.
-</div>
-`;
-
-}
-
-return `
-<div class="section">
-
-<div class="section-title">
-⭐ Leave a Review
-</div>
-
-<div class="section-note">
-Your review helps other OOULink users know who they can trust.
-</div>
-
-<div
-id="ratingStars"
-class="stars"
->
-${reviewStarsHtml(
-selectedRating,
-true
-)}
-</div>
-
-<textarea
-id="reviewComment"
-maxlength="500"
-placeholder="Share your experience..."
-></textarea>
-
-<button
-class="btn dark"
-onclick="submitReview('${escapeHtml(targetId)}')"
->
-SUBMIT REVIEW
-</button>
-
-</div>
-`;
-
-}
-
-function reviewsHtml(){
-
-let html=`
-<div class="section">
-
-<div class="section-title">
-⭐ Reviews
-</div>
-`;
-
-if(!taskReviews.length){
-
-html+=`
-<div class="empty">
-No reviews have been posted for this task yet.
-</div>
-`;
-
-}else{
-
-for(const review of taskReviews){
-
-const rating=
-Math.max(
-0,
-Math.min(
-5,
-Number(review.rating)||0
-)
-);
-
-const reviewerName=
-escapeHtml(
-review.reviewer_profile?.full_name||
-review.reviewer_profile?.username||
-"OOULink User"
-);
-
-html+=`
-
-<div class="review-card">
-
-<div class="review-head">
-
-<div>
-
-<div class="review-author">
-${reviewerName}
-</div>
-
-<div class="review-date">
-${shortDate(
-review.created_at
-)}
-</div>
-
-</div>
-
-<div class="review-rating">
-${reviewStarsHtml(rating)}
-</div>
-
-</div>
-
-${
-review.comment
-?
-`
-<div class="review-note">
-${escapeHtml(review.comment)}
-</div>
-`
-:
-""
-}
-
-</div>
-`;
-
-}
-
-}
-
-html+=`
-</div>
-`;
-
-return html;
-
-}
-
-async function loadReviews(){
-
-const box=
-document.getElementById(
-"reviews"
-);
-
-if(!box||!currentTask){
-return;
-}
-
-const {
-data,
-error
-}=await supabaseClient
-.from("task_reviews")
-.select(
-"id,task_id,reviewer_id,reviewee_id,rating,comment,created_at"
-)
-.eq("task_id",currentTask.id)
-.order(
-"created_at",
-{
-ascending:false
-}
-);
-
-if(error){
-
-console.error(
-"REVIEWS:",
-error
-);
-
-taskReviews=[];
-
-box.innerHTML=`
-<div class="section">
-
-<div class="section-title">
-⭐ Reviews
-</div>
-
-<div class="empty">
-Unable to load reviews right now.
-</div>
-
-</div>
-`;
-
-return;
-
-}
-
-taskReviews=data||[];
-
-const reviewerIds=[
-...new Set(
-taskReviews
-.map(review=>review.reviewer_id)
-.filter(Boolean)
-)
-];
-
-if(reviewerIds.length){
-
-const {
-data:profiles,
-error:profileError
-}=await supabaseClient
-.from("profiles")
-.select(
-"id,username,full_name,avatar_url"
-)
-.in("id",reviewerIds);
-
-if(!profileError){
-
-const map=
-new Map(
-(profiles||[]).map(
-profile=>[
-profile.id,
-profile
-]
-)
-);
-
-taskReviews=
-taskReviews.map(
-review=>({
-...review,
-reviewer_profile:
-map.get(
-review.reviewer_id
-)||null
-})
-);
-
-}
-
-}
-
-box.innerHTML=
-reviewsHtml()+
-reviewFormHtml();
-
-}
-
-function setRating(rating){
-
-const value=
-Number(rating);
-
-if(
-value<1||
-value>5
-){
-return;
-}
-
-selectedRating=value;
-
-const stars=
-document.getElementById(
-"ratingStars"
-);
-
-if(stars){
-
-stars.innerHTML=
-reviewStarsHtml(
-selectedRating,
-true
-);
-
-}
-
-}
-
-async function submitReview(revieweeId){
-
-if(
-busy||
-!canReview()||
-!currentUser
-){
-return;
-}
-
-if(!revieweeId){
-
-alert(
-"Review recipient not found."
-);
-
-return;
-
-}
-
-const rating=
-Number(selectedRating);
-
-if(
-rating<1||
-rating>5
-){
-
-alert(
-"Please select a rating from 1 to 5."
-);
-
-return;
-
-}
-
-const comment=
-document
-.getElementById("reviewComment")
-?.value
-.trim()||"";
-
-if(comment.length>500){
-
-alert(
-"Keep the review under 500 characters."
-);
-
-return;
-
-}
-
-if(
-taskReviews.some(
-review=>
-review.reviewer_id===
-currentUser.id
-)
-){
-
-alert(
-"You have already reviewed this task."
-);
-
-return;
-
-}
-
-busy=true;
-
-const {
-data,
-error
-}=await supabaseClient
-.from("task_reviews")
-.insert({
-task_id:currentTask.id,
-reviewer_id:currentUser.id,
-reviewee_id:revieweeId,
-rating:rating,
-comment:comment||null
-})
-.select()
-.single();
-
-if(error){
-
-console.error(
-"SUBMIT REVIEW:",
-error
-);
-
-alert(
-error.message||
-"Could not submit your review."
-);
-
-busy=false;
-
-return;
-
-}
-
-if(data){
-
-taskReviews.unshift({
-...data,
-reviewer_profile:{
-id:currentUser.id,
-full_name:
-currentUser.user_metadata?.full_name||
-currentUser.email||
-"OOULink User",
-username:
-currentUser.user_metadata?.username||
-null
-}
-});
-
-}
-
-const targetName=
-isOwner()
-?
-"runner"
-:
-"task owner";
-
-await notify(
-revieweeId,
-"task_review",
-"New task review",
-`You received a review from the ${targetName} for "${currentTask.title}".`
-);
-
-selectedRating=0;
-
-busy=false;
-
-await loadReviews();
-
-}
-
-function setupRealtimeTaskUpdates(){
-
-if(!currentTask){
-return;
-}
-
-const channelName=
-"task-details-"+currentTask.id;
-
-const channel=
-supabaseClient
-.channel(channelName)
-.on(
-"postgres_changes",
-{
-event:"UPDATE",
-schema:"public",
-table:"tasks",
-filter:"id=eq."+currentTask.id
-},
-async payload=>{
-
-if(!payload?.new){
-return;
-}
-
-const previousStatus=
-currentTask.status;
-
-currentTask=
-payload.new;
-
-if(
-previousStatus!==
-currentTask.status
-){
-
-await loadProfiles();
-
-if(currentUser){
-
-myApplication=
-await loadMyApplication();
-
-}
-
-await renderTask();
-
-}
-
-}
-)
-.subscribe(
-status=>{
-
-if(status==="CHANNEL_ERROR"){
-
-console.error(
-"TASK REALTIME CHANNEL ERROR"
-);
-
-}
-
-}
-);
-
-return channel;
-
-}
-
-let taskRealtimeChannel=null;
-
-function cleanupTaskRealtime(){
-
-if(!taskRealtimeChannel){
-return;
-}
-
-supabaseClient
-.removeChannel(
-taskRealtimeChannel
-)
-.catch(
-error=>{
-console.error(
-"TASK CHANNEL CLEANUP:",
-error
-);
-}
-);
-
-taskRealtimeChannel=null;
-
-}
-
-async function initializePage(){
-
-  try{
-
-    // Load the task first.
-    const loaded=await loadTask();
-
-    if(!loaded){
-      return;
-    }
-
-    // Show task information immediately.
-    await renderTask();
-
-    // Authentication is secondary.
-    currentUser=await getCurrentUser();
-
-    if(currentUser){
-
-      await loadProfiles();
-
-      myApplication=
-        await loadMyApplication();
-
-      // Refresh buttons/owner information.
-      await renderTask();
-
-      updateDot();
-    }
-
-    cleanupTaskRealtime();
-
-    taskRealtimeChannel=
-      setupRealtimeTaskUpdates();
-
-  }catch(error){
-
-    console.error(
-      "PAGE INIT:",
-      error
-    );
-
-    showError(
-      "Task loading failed",
-      error?.message||
-      "OOULink could not load this task."
-    );
-
-  }
-
-  }
-
-window.addEventListener(
-"beforeunload",
-()=>{
-
-cleanupChatChannel();
-cleanupTaskRealtime();
-
-}
-);
-
-document.addEventListener(
-"visibilitychange",
-()=>{
-
-if(
-document.visibilityState==="visible"&&
-pageReady
-){
-
-updateDot();
-
-}
-
-}
-);
-
-initializePage();
-
-</script>
 </body>
 </html>
