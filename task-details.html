@@ -625,9 +625,14 @@ main{padding:14px 14px 90px}
     </section>
 
     <section class="section action-section" id="actionSection">
-      <div class="section-title">⚡ Actions</div>
-      <div id="actionContent"></div>
-    </section>
+  <div class="section-title">⚡ Actions</div>
+  <div id="actionContent"></div>
+</section>
+
+<section class="section action-section" id="reviewSection">
+  <div class="section-title">⭐ Reviews</div>
+  <div id="reviewContent"></div>
+</section>
      <section class="section action-section" id="managementSection">
   <div class="section-title">🛡️ Task Management & Safety</div>
   <div id="managementContent"></div>
@@ -2109,7 +2114,7 @@ function renderActions(){
     }
 
     box.innerHTML = html;
-
+    renderReviewSection();
     if($("chatBtn")){
       $("chatBtn").addEventListener("click",()=>{
         window.location.href =
