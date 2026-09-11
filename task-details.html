@@ -1399,8 +1399,30 @@ async function completeTask(){
 
     showToast("Task completed successfully.");
 
-    await loadTask();
+try {
+  const { error: xpError } =
+    await supabaseClient.rpc(
+      "award_task_xp",
+      {
+        target_task_id: currentTask.id,
+        target_reward_type: "task_completed"
+      }
+    );
 
+  if (xpError) {
+    console.error(
+      "Task completion XP error:",
+      xpError
+    );
+  }
+} catch (xpError) {
+  console.error(
+    "Task completion XP exception:",
+    xpError
+  );
+}
+
+await loadTask();
   }catch(error){
     console.error("Complete task error:",error);
 
