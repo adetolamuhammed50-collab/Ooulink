@@ -1142,6 +1142,159 @@ function renderActions(){
   `;
 }
 
+  async function applyForTask(){
+  if(!currentUser){
+    showToast("Please log in to apply for a task.");
+    return;
+  }
+
+  if(!currentTask){
+    showToast("Task information is not ready yet.");
+    return;
+  }
+
+  if(isOwner()){
+    showToast("You cannot apply for your own task.");
+    return;
+  }
+
+  if(normalizeStatus(currentTask.status) !== "open"){
+    showToast("This task is no longer accepting applications.");
+    return;
+  }
+
+  if(myApplication &&
+     normalizeStatus(myApplication.status) === "pending"){
+    showToast("You have already applied.");
+    return;
+  }
+
+  const button = $("applyBtn");
+
+  if(button){
+    button.disabled = true;
+    button.textContent = "Applying...";
+  }
+
+  try{
+    const {data,error} = await supabaseClient
+      .from("task_applications")
+      .insert({
+        task_id: currentTask.id,
+        runner_id: currentUser.id,
+        status: "pending"
+      })
+      .select(`
+        id,
+        task_id,
+        runner_id,
+        status,
+        created_at
+      `)
+      .single();
+
+    if(error) throw error;
+
+    myApplication = data || null;
+
+    showToast("Application sent successfully.");
+
+    renderActions();
+
+  }catch(error){
+    console.error("Apply for task error:",error);
+
+    if(button){
+      button.disabled = false;
+      button.textContent = "Apply for Task";
+    }
+
+    showToast(
+      error?.message ||
+      "Could not apply for this task."
+    );
+  }
+}
+
+async function selectRunner(applicationId){
+  if(!currentUser || !currentTask){
+    showToast("Please try again.");
+    return;
+  }
+
+  if(!isOwner()){
+    showToast("Only the task poster can select a runner.");
+    return;
+  }
+
+  if(normalizeStatus(currentTask.status) !== "open"){
+    showToast("This task is no longer open.");
+    return;
+  }
+
+  if(!applicationId){
+    showToast("No application was selected.");
+    return;
+  }
+
+  const application =
+    taskApplications.find(
+      item => item.id === applicationId
+    );
+
+  if(!application ||
+     normalizeStatus(application.status) !== "pending"){
+    showToast("This application is no longer available.");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "Select this student as the runner for this task?"
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  const buttons =
+    document.querySelectorAll(".select-runner-btn");
+
+  buttons.forEach(button=>{
+    button.disabled = true;
+    button.textContent = "Selecting...";
+  });
+
+  try{
+    const {data,error} = await supabaseClient
+      .rpc("select_task_runner",{
+        target_task_id: currentTask.id,
+        target_application_id: applicationId
+      });
+
+    if(error) throw error;
+
+    if(data !== true){
+      throw new Error("Runner selection could not be completed.");
+    }
+
+    showToast("Runner selected successfully.");
+
+    await loadTask();
+
+  }catch(error){
+    console.error("Select runner error:",error);
+
+    showToast(
+      error?.message ||
+      "Could not select this runner."
+    );
+
+    buttons.forEach(button=>{
+      button.disabled = false;
+      button.textContent = "Select Runner";
+    });
+  }
+      }
   
 async function loadMyApplication(taskId){
   myApplication = null;
