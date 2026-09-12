@@ -1,365 +1,1220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Find Tasks - OOULink</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Tasks - OOULink</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* {
+box-sizing: border-box;
+}
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+html {
+scroll-behavior: smooth;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      color: #172033;
-    }
+body {
+margin: 0;
+font-family: Arial, sans-serif;
+background: #f5f7fa;
+color: #172033;
+-webkit-tap-highlight-color: transparent;
+}
 
-    .app {
-      max-width: 480px;
-      margin: auto;
-      min-height: 100vh;
-      background: white;
-      padding-bottom: 75px;
-    }
+button,
+input,
+select {
+font: inherit;
+}
 
-    header {
-      padding: 20px;
-      border-bottom: 1px solid #eee;
-    }
+button,
+.task,
+nav a {
+-webkit-user-select: none;
+user-select: none;
+}
 
-    .back {
-      text-decoration: none;
-      color: #555;
-      font-size: 14px;
-    }
+.app {
+max-width: 480px;
+margin: auto;
+min-height: 100vh;
+background: #fff;
+padding-bottom: 82px;
+}
 
-    h1 {
-      margin: 15px 0 5px;
-      font-size: 26px;
-    }
+header {
+padding: 20px;
+border-bottom: 1px solid #edf0ee;
+background: #fff;
+position: sticky;
+top: 0;
+z-index: 20;
+}
 
-    .subtitle {
-      color: #777;
-      font-size: 14px;
-      margin-bottom: 18px;
-    }
+.back {
+display: inline-block;
+text-decoration: none;
+color: #555;
+font-size: 14px;
+padding: 5px 0;
+transition: transform .15s ease, color .15s ease;
+}
 
-    .search-box {
-      width: 100%;
-      padding: 14px 15px;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      font-size: 15px;
-      outline: none;
-      margin-bottom: 12px;
-    }
+.back:active {
+transform: translateX(-3px);
+color: #16834b;
+}
 
-    .search-box:focus {
-      border-color: #111;
-    }
+h1 {
+margin: 15px 0 5px;
+font-size: 26px;
+letter-spacing: -.4px;
+}
 
-    select {
-      width: 100%;
-      padding: 13px;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      background: white;
-      font-size: 15px;
-      outline: none;
-    }
+.subtitle {
+color: #777;
+font-size: 14px;
+line-height: 1.45;
+margin-bottom: 18px;
+}
 
-    #tasks {
-      padding: 15px 20px;
-    }
+.search-wrap {
+position: relative;
+margin-bottom: 12px;
+}
 
-    .task {
-      border: 1px solid #e6e6e6;
-      border-radius: 15px;
-      padding: 16px;
-      margin-bottom: 14px;
-      cursor: pointer;
-      transition: 0.15s;
-    }
+.search-icon {
+position: absolute;
+left: 14px;
+top: 50%;
+transform: translateY(-50%);
+font-size: 15px;
+pointer-events: none;
+}
 
-    .task:active {
-      transform: scale(0.98);
-    }
+.search-box {
+width: 100%;
+padding: 14px 42px 14px 40px;
+border: 1px solid #ddd;
+border-radius: 13px;
+font-size: 15px;
+outline: none;
+background: #fff;
+transition: border-color .2s ease, box-shadow .2s ease;
+}
 
-    .category {
-      display: inline-block;
-      font-size: 12px;
-      background: #f0f0f0;
-      padding: 5px 9px;
-      border-radius: 20px;
-      margin-bottom: 8px;
-    }
+.search-box:focus {
+border-color: #16834b;
+box-shadow: 0 0 0 3px rgba(22,131,75,.08);
+}
 
-    .task h3 {
-      margin: 3px 0 8px;
-      font-size: 17px;
-    }
+.clear-search {
+position: absolute;
+right: 10px;
+top: 50%;
+transform: translateY(-50%);
+border: 0;
+background: #f0f2f1;
+color: #666;
+width: 27px;
+height: 27px;
+border-radius: 50%;
+display: none;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+}
 
-    .task p {
-      margin: 6px 0;
-      color: #666;
-      font-size: 13px;
-      line-height: 1.4;
-    }
+.clear-search.show {
+display: flex;
+}
 
-    .budget {
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: 10px;
-    }
+.filter-row {
+display: flex;
+gap: 9px;
+}
 
-    .view-btn {
-      width: 100%;
-      border: none;
-      background: #111;
-      color: white;
-      padding: 12px;
-      border-radius: 10px;
-      margin-top: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.filter-select {
+flex: 1;
+min-width: 0;
+padding: 13px 10px;
+border: 1px solid #ddd;
+border-radius: 12px;
+background: white;
+font-size: 14px;
+outline: none;
+color: #172033;
+transition: border-color .2s ease, box-shadow .2s ease;
+}
 
-    .message {
-      text-align: center;
-      padding: 30px 10px;
-      color: #777;
-      font-size: 14px;
-    }
+.filter-select:focus {
+border-color: #16834b;
+box-shadow: 0 0 0 3px rgba(22,131,75,.07);
+}
 
-    nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
-  background: white;
-  border-top: 1px solid #e5e8e6;
-  display: flex;
-  justify-content: space-around;
-  padding: 12px 5px;
-  z-index: 1000;
-      }
-    
-    nav a {
-  text-decoration: none;
-  color: #777;
-  font-size: 11px;
-  text-align: center;
-  transition: transform 0.18s ease, color 0.18s ease;
-      }
-    
-    nav a.active {
-  color: #16834b;
-  font-weight: bold;
-  transform: translateY(-2px);
-      }
-    nav a br {
-  display: block;
-      }
-    
-  </style>
+.results-bar {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 14px 20px 2px;
+font-size: 13px;
+color: #777;
+}
+
+.results-count {
+font-weight: 600;
+color: #555;
+}
+
+.clear-filters {
+border: 0;
+background: transparent;
+color: #16834b;
+font-size: 13px;
+font-weight: 600;
+padding: 4px 0;
+cursor: pointer;
+display: none;
+}
+
+.clear-filters.show {
+display: block;
+}
+
+#tasks {
+padding: 12px 20px 20px;
+}
+
+.task {
+border: 1px solid #e5e9e7;
+border-radius: 17px;
+padding: 16px;
+margin-bottom: 14px;
+background: #fff;
+cursor: pointer;
+box-shadow: 0 2px 7px rgba(20,40,30,.035);
+transition:
+transform .18s ease,
+box-shadow .18s ease,
+border-color .18s ease;
+animation: cardIn .28s ease both;
+}
+
+.task:hover {
+border-color: #cfd8d3;
+box-shadow: 0 5px 16px rgba(20,40,30,.07);
+}
+
+.task:active {
+transform: scale(.985);
+box-shadow: 0 2px 7px rgba(20,40,30,.04);
+}
+
+@keyframes cardIn {
+from {
+opacity: 0;
+transform: translateY(7px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+.task-top {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 8px;
+margin-bottom: 9px;
+}
+
+.category {
+display: inline-flex;
+align-items: center;
+font-size: 11px;
+font-weight: 700;
+color: #16834b;
+background: #eaf7f0;
+padding: 6px 9px;
+border-radius: 20px;
+text-transform: uppercase;
+letter-spacing: .25px;
+}
+
+.status-badge {
+font-size: 11px;
+font-weight: 700;
+color: #347357;
+background: #f1f8f4;
+border: 1px solid #dceee4;
+padding: 5px 8px;
+border-radius: 20px;
+white-space: nowrap;
+}
+
+.task h3 {
+margin: 0 0 9px;
+font-size: 18px;
+line-height: 1.3;
+letter-spacing: -.2px;
+color: #172033;
+}
+
+.task-description {
+margin: 0 0 13px;
+color: #666;
+font-size: 13px;
+line-height: 1.5;
+display: -webkit-box;
+-webkit-line-clamp: 3;
+-webkit-box-orient: vertical;
+overflow: hidden;
+}
+
+.task-meta {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 8px;
+margin-bottom: 13px;
+}
+
+.meta-item {
+min-width: 0;
+background: #f7f9f8;
+border-radius: 11px;
+padding: 9px 10px;
+}
+
+.meta-label {
+display: block;
+font-size: 10px;
+color: #8a928e;
+text-transform: uppercase;
+letter-spacing: .35px;
+margin-bottom: 3px;
+font-weight: 700;
+}
+
+.meta-value {
+display: block;
+font-size: 12px;
+font-weight: 600;
+color: #424b46;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.budget-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 10px;
+padding-top: 12px;
+border-top: 1px solid #edf0ee;
+}
+
+.budget-label {
+font-size: 11px;
+color: #888;
+font-weight: 600;
+}
+
+.budget {
+font-size: 20px;
+font-weight: 800;
+color: #16834b;
+letter-spacing: -.3px;
+}
+
+.view-btn {
+width: 100%;
+border: none;
+background: #16834b;
+color: white;
+padding: 12px;
+border-radius: 11px;
+margin-top: 13px;
+font-weight: 700;
+font-size: 13px;
+cursor: pointer;
+transition:
+transform .15s ease,
+background .15s ease,
+box-shadow .15s ease;
+box-shadow: 0 3px 8px rgba(22,131,75,.15);
+}
+
+.view-btn:hover {
+background: #126d3e;
+}
+
+.view-btn:active {
+transform: scale(.98);
+box-shadow: none;
+}
+
+.message {
+text-align: center;
+padding: 42px 18px;
+color: #777;
+font-size: 14px;
+line-height: 1.5;
+}
+
+.empty-icon {
+font-size: 34px;
+margin-bottom: 9px;
+}
+
+.empty-title {
+font-size: 16px;
+font-weight: 700;
+color: #303934;
+margin-bottom: 5px;
+}
+
+.empty-text {
+font-size: 13px;
+color: #858b88;
+}
+
+.empty-action {
+margin-top: 15px;
+border: 0;
+background: #16834b;
+color: white;
+padding: 10px 15px;
+border-radius: 10px;
+font-weight: 700;
+font-size: 13px;
+cursor: pointer;
+}
+
+.skeleton {
+border: 1px solid #edf0ee;
+border-radius: 17px;
+padding: 16px;
+margin-bottom: 14px;
+overflow: hidden;
+position: relative;
+background: #fff;
+}
+
+.skeleton-line {
+height: 11px;
+border-radius: 7px;
+background: #edf0ee;
+margin-bottom: 10px;
+position: relative;
+overflow: hidden;
+}
+
+.skeleton-line::after {
+content: "";
+position: absolute;
+top: 0;
+left: -100%;
+width: 60%;
+height: 100%;
+background: linear-gradient(
+90deg,
+transparent,
+rgba(255,255,255,.7),
+transparent
+);
+animation: shimmer 1.2s infinite;
+}
+
+.skeleton-pill {
+width: 82px;
+height: 23px;
+border-radius: 20px;
+background: #edf0ee;
+margin-bottom: 13px;
+}
+
+.skeleton-title {
+width: 78%;
+height: 18px;
+margin-bottom: 12px;
+}
+
+.skeleton-short {
+width: 48%;
+}
+
+.skeleton-button {
+width: 100%;
+height: 40px;
+border-radius: 11px;
+margin-top: 13px;
+background: #edf0ee;
+}
+
+@keyframes shimmer {
+100% {
+left: 150%;
+}
+}
+
+nav {
+position: fixed;
+bottom: 0;
+left: 50%;
+transform: translateX(-50%);
+width: 100%;
+max-width: 480px;
+background: rgba(255,255,255,.97);
+border-top: 1px solid #e5e8e6;
+display: flex;
+justify-content: space-around;
+padding: 11px 5px calc(11px + env(safe-area-inset-bottom));
+z-index: 1000;
+backdrop-filter: blur(8px);
+}
+
+nav a {
+text-decoration: none;
+color: #777;
+font-size: 11px;
+text-align: center;
+padding: 3px 9px;
+border-radius: 10px;
+transition:
+transform .18s ease,
+color .18s ease,
+background .18s ease;
+}
+
+nav a.active {
+color: #16834b;
+font-weight: bold;
+transform: translateY(-2px);
+background: #eef8f2;
+}
+
+nav a:active {
+transform: scale(.92);
+}
+
+nav a br {
+display: block;
+}
+
+@media (max-width: 360px) {
+header {
+padding: 18px 16px;
+}
+
+#tasks {
+padding-left: 16px;
+padding-right: 16px;
+}
+
+.results-bar {
+padding-left: 16px;
+padding-right: 16px;
+}
+
+.task {
+padding: 14px;
+}
+
+.task-meta {
+gap: 6px;
+}
+}
+</style>
 </head>
 
 <body>
 
 <div class="app">
 
-  <header>
-    <a href="index.html" class="back">← Back</a>
+<header>
+<a href="index.html" class="back">← Back</a>
 
-    <h1>Find Tasks</h1>
-    <div class="subtitle">Find tasks you can complete and earn.</div>
+<h1>Find Tasks</h1>
 
-    <input
-      type="text"
-      id="searchInput"
-      class="search-box"
-      placeholder="🔎 Search tasks..."
-      oninput="filterTasks()"
-    >
+<div class="subtitle">
+Find tasks you can complete and earn.
+</div>
 
-    <select id="categoryFilter" onchange="filterTasks()">
-      <option value="all">All Categories</option>
-      <option value="Errands">Errands</option>
-      <option value="Physical Help">Physical Help</option>
-      <option value="Digital Work">Digital Work</option>
-      <option value="Creative Skills">Creative Skills</option>
-      <option value="Academic Support">Academic Support</option>
-      <option value="Campus Services">Campus Services</option>
-      <option value="Other">Other</option>
-    </select>
-  </header>
+<div class="search-wrap">
+<span class="search-icon">🔎</span>
 
-  <div id="tasks">
-    <div class="message">Loading tasks...</div>
-  </div>
+<input
+type="text"
+id="searchInput"
+class="search-box"
+placeholder="Search tasks..."
+autocomplete="off"
+>
+
+<button
+type="button"
+id="clearSearch"
+class="clear-search"
+aria-label="Clear search"
+onclick="clearSearch()"
+>
+×
+</button>
+</div>
+
+<div class="filter-row">
+
+<select
+id="categoryFilter"
+class="filter-select"
+>
+<option value="all">All Categories</option>
+<option value="Errands">Errands</option>
+<option value="Physical Help">Physical Help</option>
+<option value="Digital Work">Digital Work</option>
+<option value="Creative Skills">Creative Skills</option>
+<option value="Academic Support">Academic Support</option>
+<option value="Campus Services">Campus Services</option>
+<option value="Other">Other</option>
+</select>
+
+<select
+id="sortFilter"
+class="filter-select"
+>
+<option value="newest">Newest</option>
+<option value="highest">Highest Pay</option>
+<option value="lowest">Lowest Pay</option>
+<option value="deadline">Closest Deadline</option>
+</select>
+
+</header>
+
+<div class="results-bar">
+<span id="resultsCount" class="results-count">
+Loading...
+</span>
+
+<button
+type="button"
+id="clearFilters"
+class="clear-filters"
+onclick="clearFilters()"
+>
+Clear filters
+</button>
+</div>
+
+<div id="tasks">
+<div class="skeleton">
+<div class="skeleton-pill"></div>
+<div class="skeleton-line skeleton-title"></div>
+<div class="skeleton-line"></div>
+<div class="skeleton-line skeleton-short"></div>
+<div class="skeleton-button"></div>
+</div>
+
+<div class="skeleton">
+<div class="skeleton-pill"></div>
+<div class="skeleton-line skeleton-title"></div>
+<div class="skeleton-line"></div>
+<div class="skeleton-line skeleton-short"></div>
+<div class="skeleton-button"></div>
+</div>
+</div>
 
 </div>
 
 <nav>
-  <a href="index.html">🏠<br>Home</a>
-  <a href="my-tasks.html">📋<br>My Tasks</a>
-  <a href="post-task.html">➕<br>Post</a>
-  <a href="alerts.html">🔔<br>Alerts</a>
-  <a href="profile.html">👤<br>Profile</a>
+<a href="index.html">
+🏠<br>Home
+</a>
+
+<a href="my-tasks.html">
+📋<br>My Tasks
+</a>
+
+<a href="post-task.html">
+➕<br>Post
+</a>
+
+<a href="alerts.html">
+🔔<br>Alerts
+</a>
+
+<a href="profile.html">
+👤<br>Profile
+</a>
 </nav>
 
 <script>
-  const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
+const SUPABASE_URL =
+"https://dthvdxgxesomltlruogp.supabase.co";
 
-  const SUPABASE_KEY =
-    "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+const SUPABASE_KEY =
+"sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
 
-  const supabaseClient =
-    supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
 
-  let allTasks = [];
+let allTasks = [];
 
-  async function loadTasks() {
+const searchInput =
+document.getElementById("searchInput");
 
-    const {
-      data: { session }
-    } = await supabaseClient.auth.getSession();
+const categoryFilter =
+document.getElementById("categoryFilter");
 
-    if (!session) {
-      window.location.href = "login.html";
-      return;
-    }
+const sortFilter =
+document.getElementById("sortFilter");
 
-    const { data, error } = await supabaseClient
-      .from("tasks")
-      .select("*")
-      .eq("status", "open")
-      .order("created_at", { ascending: false });
+const clearSearchButton =
+document.getElementById("clearSearch");
 
-    if (error) {
-      document.getElementById("tasks").innerHTML =
-        `<div class="message">Unable to load tasks.</div>`;
-      console.error(error);
-      return;
-    }
+const clearFiltersButton =
+document.getElementById("clearFilters");
 
-    allTasks = data || [];
+const resultsCount =
+document.getElementById("resultsCount");
 
-    filterTasks();
-  }
+searchInput.addEventListener(
+"input",
+filterTasks
+);
 
-  function filterTasks() {
+categoryFilter.addEventListener(
+"change",
+filterTasks
+);
 
-    const search =
-      document.getElementById("searchInput")
-        .value
-        .trim()
-        .toLowerCase();
+sortFilter.addEventListener(
+"change",
+filterTasks
+);
 
-    const category =
-      document.getElementById("categoryFilter").value;
+function showSkeletons() {
+const container =
+document.getElementById("tasks");
 
-    const filtered = allTasks.filter(task => {
+container.innerHTML = `
+<div class="skeleton">
+<div class="skeleton-pill"></div>
+<div class="skeleton-line skeleton-title"></div>
+<div class="skeleton-line"></div>
+<div class="skeleton-line skeleton-short"></div>
+<div class="skeleton-button"></div>
+</div>
 
-      const matchesSearch =
-        !search ||
-        (task.title || "").toLowerCase().includes(search) ||
-        (task.description || "").toLowerCase().includes(search) ||
-        (task.location || "").toLowerCase().includes(search);
+<div class="skeleton">
+<div class="skeleton-pill"></div>
+<div class="skeleton-line skeleton-title"></div>
+<div class="skeleton-line"></div>
+<div class="skeleton-line skeleton-short"></div>
+<div class="skeleton-button"></div>
+</div>
 
-      const matchesCategory =
-        category === "all" ||
-        task.category === category;
+<div class="skeleton">
+<div class="skeleton-pill"></div>
+<div class="skeleton-line skeleton-title"></div>
+<div class="skeleton-line"></div>
+<div class="skeleton-line skeleton-short"></div>
+<div class="skeleton-button"></div>
+</div>
+`;
+}
 
-      return matchesSearch && matchesCategory;
-    });
+async function loadTasks() {
 
-    displayTasks(filtered);
-  }
+showSkeletons();
 
-  function displayTasks(tasks) {
+const {
+data: { session }
+} = await supabaseClient.auth.getSession();
 
-    const container = document.getElementById("tasks");
+if (!session) {
+window.location.href = "login.html";
+return;
+}
 
-    if (!tasks.length) {
-      container.innerHTML =
-        `<div class="message">No tasks found.</div>`;
-      return;
-    }
+const {
+data,
+error
+} = await supabaseClient
+.from("tasks")
+.select("*")
+.eq("status", "open")
+.order("created_at", {
+ascending: false
+});
 
-    container.innerHTML = tasks.map(task => {
+if (error) {
 
-      return `
-        <div class="task" onclick="openTask('${task.id}')">
+document.getElementById("tasks").innerHTML = `
+<div class="message">
+<div class="empty-icon">⚠️</div>
+<div class="empty-title">
+Unable to load tasks
+</div>
+<div class="empty-text">
+Please check your connection and try again.
+</div>
+<button
+class="empty-action"
+onclick="loadTasks()"
+>
+Try again
+</button>
+</div>
+`;
 
-          <span class="category">
-            ${escapeHtml(task.category)}
-          </span>
+resultsCount.textContent = "Unable to load";
 
-          <h3>
-            ${escapeHtml(task.title)}
-          </h3>
+console.error(error);
+return;
+}
 
-          <p>
-            📍 ${escapeHtml(task.location)}
-          </p>
+allTasks = data || [];
 
-          <p>
-            🕒 ${formatDate(task.deadline)}
-          </p>
+filterTasks();
+}
 
-          <p>
-            ${escapeHtml(task.description)}
-          </p>
+function filterTasks() {
 
-          <div class="budget">
-            ₦${Number(task.budget).toLocaleString()}
-          </div>
+const search =
+searchInput.value
+.trim()
+.toLowerCase();
 
-          <button
-            class="view-btn"
-            onclick="event.stopPropagation(); openTask('${task.id}')">
-            VIEW TASK
-          </button>
+const category =
+categoryFilter.value;
 
-        </div>
-      `;
+const sort =
+sortFilter.value;
 
-    }).join("");
-  }
+let filtered =
+allTasks.filter(task => {
 
-  function openTask(taskId) {
-    window.location.href =
-      "task-details.html?id=" +
-      encodeURIComponent(taskId);
-  }
+const title =
+(task.title || "")
+.toLowerCase();
 
-  function formatDate(date) {
+const description =
+(task.description || "")
+.toLowerCase();
 
-    if (!date) return "No deadline";
+const location =
+(task.location || "")
+.toLowerCase();
 
-    return new Date(date).toLocaleString();
-  }
+const taskCategory =
+(task.category || "")
+.toLowerCase();
 
-  function escapeHtml(text) {
+const matchesSearch =
+!search ||
+title.includes(search) ||
+description.includes(search) ||
+location.includes(search) ||
+taskCategory.includes(search);
 
-    return String(text || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
+const matchesCategory =
+category === "all" ||
+task.category === category;
 
-  loadTasks();
+return matchesSearch &&
+matchesCategory;
+});
+
+filtered.sort((a, b) => {
+
+if (sort === "highest") {
+return Number(b.budget || 0) -
+Number(a.budget || 0);
+}
+
+if (sort === "lowest") {
+return Number(a.budget || 0) -
+Number(b.budget || 0);
+}
+
+if (sort === "deadline") {
+
+const dateA =
+a.deadline
+? new Date(a.deadline).getTime()
+: Number.MAX_SAFE_INTEGER;
+
+const dateB =
+b.deadline
+? new Date(b.deadline).getTime()
+: Number.MAX_SAFE_INTEGER;
+
+return dateA - dateB;
+}
+
+const dateA =
+a.created_at
+? new Date(a.created_at).getTime()
+: 0;
+
+const dateB =
+b.created_at
+? new Date(b.created_at).getTime()
+: 0;
+
+return dateB - dateA;
+});
+
+updateFilterControls(
+search,
+category,
+sort
+);
+
+displayTasks(filtered);
+}
+
+function updateFilterControls(
+search,
+category,
+sort
+) {
+
+clearSearchButton.classList.toggle(
+"show",
+Boolean(search)
+);
+
+const hasFilters =
+Boolean(search) ||
+category !== "all" ||
+sort !== "newest";
+
+clearFiltersButton.classList.toggle(
+"show",
+hasFilters
+);
+}
+
+function displayTasks(tasks) {
+
+const container =
+document.getElementById("tasks");
+
+resultsCount.textContent =
+tasks.length === 1
+? "1 task available"
+: `${tasks.length} tasks available`;
+
+if (!tasks.length) {
+
+container.innerHTML = `
+<div class="message">
+<div class="empty-icon">🔎</div>
+
+<div class="empty-title">
+No tasks found
+</div>
+
+<div class="empty-text">
+Try another search or remove your filters.
+</div>
+
+<button
+class="empty-action"
+onclick="clearFilters()"
+>
+Clear filters
+</button>
+</div>
+`;
+
+return;
+}
+
+container.innerHTML =
+tasks.map((task, index) => {
+
+const category =
+escapeHtml(
+task.category || "Other"
+);
+
+const title =
+escapeHtml(
+task.title || "Untitled task"
+);
+
+const description =
+escapeHtml(
+task.description ||
+"No description provided."
+);
+
+const location =
+escapeHtml(
+task.location ||
+"Location not specified"
+);
+
+const budget =
+Number(task.budget || 0)
+.toLocaleString();
+
+const deadline =
+formatDeadline(task.deadline);
+
+const deadlineClass =
+getDeadlineClass(task.deadline);
+
+return `
+<div
+class="task"
+style="animation-delay:${Math.min(
+index * 35,
+250
+)}ms"
+onclick="openTask('${escapeJs(
+task.id
+)}')"
+>
+
+<div class="task-top">
+
+<span class="category">
+${category}
+</span>
+
+<span class="status-badge">
+● Open
+</span>
+
+</div>
+
+<h3>
+${title}
+</h3>
+
+<p class="task-description">
+${description}
+</p>
+
+<div class="task-meta">
+
+<div class="meta-item">
+<span class="meta-label">
+Location
+</span>
+
+<span class="meta-value">
+📍 ${location}
+</span>
+</div>
+
+<div class="meta-item">
+<span class="meta-label">
+Deadline
+</span>
+
+<span
+class="meta-value ${deadlineClass}"
+>
+⏰ ${deadline}
+</span>
+</div>
+
+</div>
+
+<div class="budget-row">
+
+<span class="budget-label">
+Task budget
+</span>
+
+<span class="budget">
+₦${budget}
+</span>
+
+</div>
+
+<button
+type="button"
+class="view-btn"
+onclick="
+event.stopPropagation();
+openTask('${escapeJs(task.id)}');
+"
+>
+VIEW TASK →
+</button>
+
+</div>
+`;
+
+}).join("");
+}
+
+function openTask(taskId) {
+
+if (!taskId) return;
+
+window.location.href =
+"task-details.html?id=" +
+encodeURIComponent(taskId);
+}
+
+function clearSearch() {
+
+searchInput.value = "";
+
+filterTasks();
+
+searchInput.focus();
+}
+
+function clearFilters() {
+
+searchInput.value = "";
+
+categoryFilter.value = "all";
+
+sortFilter.value = "newest";
+
+filterTasks();
+}
+
+function formatDeadline(date) {
+
+if (!date) {
+return "No deadline";
+}
+
+const deadline =
+new Date(date);
+
+if (Number.isNaN(
+deadline.getTime()
+)) {
+return "No deadline";
+}
+
+const now =
+new Date();
+
+const diff =
+deadline.getTime() -
+now.getTime();
+
+const day =
+24 * 60 * 60 * 1000;
+
+if (diff < 0) {
+return "Deadline passed";
+}
+
+if (diff < 60 * 60 * 1000) {
+
+const minutes =
+Math.max(
+1,
+Math.ceil(diff / 60000)
+);
+
+return `Due in ${minutes}m`;
+}
+
+if (diff < day) {
+
+const hours =
+Math.max(
+1,
+Math.ceil(diff / 3600000)
+);
+
+return `Due in ${hours}h`;
+}
+
+if (diff < 2 * day) {
+return "Due tomorrow";
+}
+
+if (diff < 7 * day) {
+
+const days =
+Math.ceil(diff / day);
+
+return `Due in ${days} days`;
+}
+
+return deadline.toLocaleDateString(
+undefined,
+{
+day: "numeric",
+month: "short",
+year: "numeric"
+}
+);
+}
+
+function getDeadlineClass(date) {
+
+if (!date) {
+return "";
+}
+
+const deadline =
+new Date(date);
+
+if (Number.isNaN(
+deadline.getTime()
+)) {
+return "";
+}
+
+const diff =
+deadline.getTime() -
+Date.now();
+
+if (diff < 0) {
+return "";
+}
+
+if (diff < 24 * 60 * 60 * 1000) {
+return "deadline-soon";
+}
+
+return "";
+}
+
+function escapeHtml(text) {
+
+return String(text || "")
+.replace(/&/g, "&amp;")
+.replace(/</g, "&lt;")
+.replace(/>/g, "&gt;")
+.replace(/"/g, "&quot;")
+.replace(/'/g, "&#039;");
+}
+
+function escapeJs(text) {
+
+return String(text || "")
+.replace(/\\/g, "\\\\")
+.replace(/'/g, "\\'")
+.replace(/"/g, '\\"')
+.replace(/\n/g, "\\n")
+.replace(/\r/g, "\\r");
+}
+
+loadTasks();
 </script>
 
 </body>
-</html>
+  </html>
