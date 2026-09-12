@@ -919,7 +919,7 @@ supabase.createClient(
 SUPABASE_URL,
 SUPABASE_KEY
 );
-
+let moderationBlocked=false;function showModerationScreen(d){if(moderationBlocked)return;moderationBlocked=true;const t=d.ban_type==="temporary",e=t&&d.banned_until?new Date(d.banned_until).toLocaleString():null;document.body.innerHTML=`<div style="position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px;z-index:99999"><div style="width:100%;max-width:420px;background:#fff;border-radius:20px;padding:28px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)"><div style="font-size:48px;margin-bottom:12px">🚫</div><h2 style="font-size:23px;margin:0 0 10px">OOULink Account Restricted</h2><p style="font-size:14px;line-height:1.6;color:#5f6963">Your account is currently ${t?"temporarily":"permanently"} restricted and you cannot browse or accept tasks.</p>${t&&e?`<p style="font-size:14px;line-height:1.6;color:#5f6963"><strong>Restriction ends:</strong><br>${e}</p>`:""}${d.ban_reason?`<p style="background:#fff4f4;border-radius:12px;padding:12px;color:#8b2020;text-align:left;font-size:14px;line-height:1.5"><strong>Reason:</strong><br>${String(d.ban_reason).replace(/[<>&"]/g,"")}</p>`:""}<p style="font-size:14px;line-height:1.6;color:#5f6963">Please follow OOULink's rules. If you believe this action was made in error, contact OOULink support.</p><button onclick="logoutModerated()" style="width:100%;border:0;border-radius:12px;padding:14px;background:#16834b;color:#fff;font-weight:700;font-size:15px">LOG OUT</button>${t?'<p style="font-size:12px;color:#7b847f;margin-top:12px">Your access will automatically return after the temporary restriction expires.</p>':""}</div></div>`}async function logoutModerated(){await supabaseClient.auth.signOut();location.href="login.html"}async function checkModeration(){const{data:{session}}=await supabaseClient.auth.getSession();if(!session){location.href="login.html";return false}const{data,error}=await supabaseClient.from("user_moderation").select("status,ban_type,banned_until,ban_reason").eq("user_id",session.user.id).maybeSingle();if(error)return true;if(data?.status==="banned"){const a=data.ban_type==="permanent"||(data.ban_type==="temporary"&&data.banned_until&&new Date(data.banned_until)>new Date());if(a){showModerationScreen(data);return false}}return true}
 let allTasks = [];
 
 const tasksContainer =
@@ -1619,8 +1619,7 @@ return String(text || "")
 .replace(/\r/g, "\\r");
 }
 
-
-loadTasks();
+checkModeration().then(a=>{if(a)loadTasks()});
 </script>
 
 </body>
