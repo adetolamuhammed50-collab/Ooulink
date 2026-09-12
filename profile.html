@@ -2253,13 +2253,8 @@
 
   }
 
-  function showVerificationInfo() {
-
-    alert(
-      "Profile verification is planned as an optional OOULink feature. It is not active yet."
-    );
-
-  }
+  async function showVerificationInfo(){if(!isOwnProfile||!currentUser)return;const badge=document.getElementById("verificationBadge");const button=document.querySelector(".verify-button");button.disabled=true;button.textContent="CHECKING...";const{data,error}=await supabaseClient.from("profile_verifications").select("status,reviewer_note").eq("user_id",currentUser.id).maybeSingle();button.disabled=false;if(error){alert("Could not check verification status. Please try again.");button.textContent="🛡️ VERIFY PROFILE";return}if(data?.status==="verified"){badge.textContent="🛡️ Verified";badge.classList.add("verified");alert("Your OOULink profile is verified.");button.textContent="🛡️ VERIFIED";button.disabled=true;return}if(data?.status==="pending"){badge.textContent="⏳ Verification pending";badge.classList.remove("verified");alert("Your verification request is already pending review.");button.textContent="⏳ VERIFICATION PENDING";button.disabled=true;return}if(data?.status==="rejected"){const note=data.reviewer_note?`\n\nNote: ${data.reviewer_note}`:"";if(!confirm("Your previous verification request was not approved."+note+"\n\nWould you like to submit a new request?")){button.textContent="🛡️ VERIFY PROFILE";return}await submitVerification(button,badge);return}if(confirm("Profile verification is optional. Submit a verification request for your OOULink profile?"))await submitVerification(button,badge);else button.textContent="🛡️ VERIFY PROFILE";}
+async function submitVerification(button,badge){button.disabled=true;button.textContent="SUBMITTING...";const{error}=await supabaseClient.from("profile_verifications").insert({user_id:currentUser.id,status:"pending"});if(error){if(error.code==="23505"){badge.textContent="⏳ Verification pending";button.textContent="⏳ VERIFICATION PENDING";button.disabled=true;return}alert("Could not submit verification request. Please try again.");button.textContent="🛡️ VERIFY PROFILE";button.disabled=false;return}badge.textContent="⏳ Verification pending";badge.classList.remove("verified");button.textContent="⏳ VERIFICATION PENDING";button.disabled=true;alert("Verification request submitted. Your profile is now pending review.");}
 
   function showTipInfo() {
 
