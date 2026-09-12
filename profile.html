@@ -75,7 +75,7 @@
       background: white;
       border-radius: 20px;
       padding: 22px;
-      box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+      box-shadow: 0 5px 18px rgba(0, 0, 0, 0.06);
       margin-bottom: 14px;
     }
 
@@ -91,10 +91,21 @@
     }
 
     @keyframes dots {
-      0%, 20% { content: ""; }
-      40% { content: "."; }
-      60% { content: ".."; }
-      80%, 100% { content: "..."; }
+      0%, 20% {
+        content: "";
+      }
+
+      40% {
+        content: ".";
+      }
+
+      60% {
+        content: "..";
+      }
+
+      80%, 100% {
+        content: "...";
+      }
     }
 
     .avatar-area {
@@ -117,7 +128,7 @@
       border: 4px solid #fff;
       box-shadow:
         0 0 0 2px #d9eee2,
-        0 8px 22px rgba(0,0,0,0.08);
+        0 8px 22px rgba(0, 0, 0, 0.08);
     }
 
     .avatar img {
@@ -206,6 +217,450 @@
       margin-top: 6px;
       color: #8993a3;
       font-size: 11px;
+    }
+
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .profile-stat {
+      background: #f7f9fb;
+      border-radius: 14px;
+      padding: 12px 5px;
+      text-align: center;
+    }
+
+    .profile-stat strong {
+      display: block;
+      font-size: 19px;
+    }
+
+    .profile-stat span {
+      display: block;
+      color: #758094;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .reputation-card {
+      margin-top: 14px;
+      padding: 15px;
+      border: 1px solid #e8edf2;
+      border-radius: 15px;
+      background: #fff;
+    }
+
+    .reputation-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .mini-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: #8993a3;
+      letter-spacing: 0.8px;
+    }
+
+    .reputation-score {
+      font-size: 22px;
+      font-weight: 800;
+      margin-top: 3px;
+    }
+
+    .reputation-stars {
+      font-size: 19px;
+      letter-spacing: 1px;
+      color: #f0a500;
+      white-space: nowrap;
+    }
+
+    .reputation-text {
+      font-size: 12px;
+      color: #687386;
+      margin-top: 7px;
+      line-height: 1.45;
+    }
+
+    .trust-card {
+      margin-top: 14px;
+      border-radius: 16px;
+      background: #f8fbf9;
+      border: 1px solid #e0eee5;
+      padding: 15px;
+    }
+
+    .trust-title {
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .trust-item {
+      display: flex;
+      gap: 10px;
+      padding: 10px 0;
+      border-top: 1px solid #e6eee9;
+    }
+
+    .trust-item:first-of-type {
+      border-top: 0;
+    }
+
+    .trust-item > span {
+      width: 22px;
+      text-align: center;
+      color: #16834b;
+      font-weight: 800;
+    }
+
+    .trust-item strong {
+      font-size: 13px;
+    }
+
+    .trust-item p {
+      font-size: 11px;
+      color: #718093;
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+        .achievement-section {
+      margin-top: 18px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .achievement-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+    }
+
+    .achievement {
+      border: 1px solid #e6ebf0;
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .achievement.locked {
+      opacity: 0.5;
+    }
+
+    .achievement-icon {
+      font-size: 22px;
+    }
+
+    .achievement-name {
+      font-weight: 800;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .achievement-note {
+      font-size: 10px;
+      color: #788497;
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+
+    .profile-completion {
+      margin-top: 14px;
+      padding: 15px;
+      border-radius: 15px;
+      background: #f7f9fb;
+    }
+
+    .completion-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    .completion-top span {
+      font-weight: 800;
+      color: #16834b;
+    }
+
+    .completion-track {
+      height: 8px;
+      background: #e6ebef;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 9px;
+    }
+
+    .completion-bar {
+      height: 100%;
+      width: 0%;
+      background: #16834b;
+      border-radius: 999px;
+      transition: width 0.45s ease;
+    }
+
+    .profile-completion p {
+      font-size: 11px;
+      color: #758094;
+      margin-top: 7px;
+    }
+
+    .owner-controls {
+      margin-top: 20px;
+    }
+
+    .username-box {
+      padding: 15px;
+      background: #f7f9fb;
+      border-radius: 15px;
+      margin-bottom: 15px;
+    }
+
+    .username-box label,
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 7px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field input,
+    .username-box input {
+      width: 100%;
+      border: 1px solid #dce2e8;
+      border-radius: 11px;
+      padding: 12px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+
+    .field input:focus,
+    .username-box input:focus {
+      border-color: #16834b;
+      box-shadow: 0 0 0 3px rgba(22, 131, 75, 0.08);
+    }
+
+    .save-button,
+    .action-button,
+    .logout-button {
+      width: 100%;
+      border: 0;
+      border-radius: 11px;
+      padding: 12px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+    }
+
+    .save-button {
+      background: #16834b;
+      color: #fff;
+    }
+
+    .save-button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .action-button {
+      margin-top: 10px;
+      background: #eef4ff;
+      color: #2563eb;
+    }
+
+    .verify-button {
+      background: #eef9f2;
+      color: #16834b;
+    }
+
+    .logout-button {
+      margin-top: 10px;
+      background: #fff0f0;
+      color: #c62828;
+    }
+
+    .status {
+      min-height: 18px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #687386;
+    }
+
+    .status.success {
+      color: #16834b;
+    }
+
+    .status.error {
+      color: #c62828;
+    }
+
+    .public-actions {
+      margin-top: 20px;
+    }
+
+    .tip-button {
+      background: #f6efff;
+      color: #7c3aed;
+    }
+
+    .reviews-section {
+      margin-top: 20px;
+    }
+
+    .review-count {
+      display: inline-flex;
+      min-width: 21px;
+      height: 21px;
+      border-radius: 50%;
+      background: #eef2f6;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      margin-left: 4px;
+      color: #687386;
+    }
+
+    .review-card {
+      border: 1px solid #e8edf2;
+      border-radius: 14px;
+      padding: 13px;
+      margin-bottom: 9px;
+    }
+
+    .review-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .review-rating {
+      color: #f0a500;
+      font-size: 13px;
+    }
+
+    .review-date {
+      font-size: 10px;
+      color: #8b95a4;
+    }
+
+    .review-note {
+      font-size: 12px;
+      color: #596578;
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .no-reviews {
+      text-align: center;
+      color: #8993a3;
+      font-size: 12px;
+      padding: 16px;
+    }
+
+    .error-box {
+      background: #fff1f1;
+      color: #c62828;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: #fff;
+      border-top: 1px solid #e7ebef;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      z-index: 20;
+      box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.04);
+    }
+
+    .bottom-nav a {
+      color: #687386;
+      text-decoration: none;
+      font-size: 10px;
+      text-align: center;
+      padding: 9px 2px 8px;
+    }
+
+    .bottom-nav a span {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 3px;
+    }
+
+    .bottom-nav a.active {
+      color: #16834b;
+      font-weight: 800;
+    }
+
+    .celebration {
+      position: fixed;
+      left: 50%;
+      top: 18px;
+      transform: translateX(-50%) translateY(-20px);
+      width: calc(100% - 32px);
+      max-width: 448px;
+      background: #172033;
+      color: #fff;
+      border-radius: 15px;
+      padding: 13px 15px;
+      text-align: center;
+      font-weight: 800;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      transition: 0.3s;
+    }
+
+    .celebration.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 360px) {
+      .profile-card {
+        padding: 17px;
+      }
+
+      .profile-stats {
+        gap: 5px;
+      }
+
+      .profile-stat span {
+        font-size: 10px;
+      }
+
+      .avatar {
+        width: 96px;
+        height: 96px;
+      }
     }
   </style>
 </head>
@@ -331,8 +786,7 @@
         </div>
 
       </div>
-
-      <div class="profile-stats">
+            <div class="profile-stats">
 
         <div class="profile-stat">
           <strong id="postedCount">0</strong>
@@ -349,12 +803,14 @@
           <span>XP</span>
         </div>
 
-  </div>
-        <div class="reputation-card">
+      </div>
+
+      <div class="reputation-card">
 
         <div class="reputation-main">
 
           <div>
+
             <div class="mini-label">
               REPUTATION
             </div>
@@ -365,6 +821,7 @@
             >
               New
             </div>
+
           </div>
 
           <div
@@ -392,33 +849,63 @@
         </div>
 
         <div class="trust-item">
-          <span id="trustReviewsIcon">○</span>
+
+          <span id="trustReviewsIcon">
+            ○
+          </span>
+
           <div>
-            <strong>Reviews</strong>
+
+            <strong>
+              Reviews
+            </strong>
+
             <p id="trustReviewsText">
               Build trust through completed tasks.
             </p>
+
           </div>
+
         </div>
 
         <div class="trust-item">
-          <span id="trustProfileIcon">○</span>
+
+          <span id="trustProfileIcon">
+            ○
+          </span>
+
           <div>
-            <strong>Profile completeness</strong>
+
+            <strong>
+              Profile completeness
+            </strong>
+
             <p id="trustProfileText">
               Complete your profile to look more trustworthy.
             </p>
+
           </div>
+
         </div>
 
         <div class="trust-item">
-          <span>🛡️</span>
+
+          <span>
+            🛡️
+          </span>
+
           <div>
-            <strong>Verification</strong>
+
+            <strong>
+              Verification
+            </strong>
+
             <p>
               Optional profile verification is coming soon.
             </p>
+
           </div>
+
         </div>
 
       </div>
@@ -457,10 +944,12 @@
         </div>
 
         <div class="completion-track">
+
           <div
             class="completion-bar"
             id="completionBar"
           ></div>
+
         </div>
 
         <p id="completionText">
@@ -594,21 +1083,24 @@
       <div class="reviews-section">
 
         <div class="section-title">
+
           ⭐ Reviews
+
           <span
             class="review-count"
             id="reviewCount"
           >
             0
           </span>
+
         </div>
 
-        <div
-          id="reviewsList"
-        >
+        <div id="reviewsList">
+
           <div class="no-reviews">
             No reviews yet.
           </div>
+
         </div>
 
       </div>
@@ -656,7 +1148,13 @@
 
 </nav>
 
+<div
+  class="celebration"
+  id="celebration"
+></div>
+
 <script>
+
   const SUPABASE_URL =
     "https://dthvdxgxesomltlruogp.supabase.co";
 
@@ -673,8 +1171,11 @@
     "Avatars";
 
   let currentUser = null;
+
   let selectedFile = null;
+
   let profileUserId = null;
+
   let isOwnProfile = false;
 
   let profileStats = {
@@ -686,43 +1187,42 @@
   };
 
   function escapeHTML(value) {
-    if (
-      value === null ||
-      value === undefined
-    ) {
-      return "";
-    }
 
-    return String(value)
+    return String(value ?? "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+
   }
 
   function getProfileIdFromURL() {
+
     const params =
       new URLSearchParams(
         window.location.search
       );
 
     return params.get("id");
+
   }
 
   function isValidUUID(value) {
+
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-      .test(value);
+      .test(value || "");
+
   }
 
-  function formatDate(dateString) {
+  function formatDate(value) {
 
-    if (!dateString) {
+    if (!value) {
       return "";
     }
 
     const date =
-      new Date(dateString);
+      new Date(value);
 
     if (Number.isNaN(date.getTime())) {
       return "";
@@ -736,13 +1236,22 @@
         year: "numeric"
       }
     );
+
   }
 
   function calculateLevel(xp) {
 
-    return Math.floor(
-      Number(xp || 0) / 100
-    ) + 1;
+    const safeXP =
+      Math.max(
+        0,
+        Number(xp || 0)
+      );
+
+    return (
+      Math.floor(
+        safeXP / 100
+      ) + 1
+    );
 
   }
 
@@ -754,7 +1263,10 @@
         Number(xp || 0)
       );
 
-    return safeXP % 100;
+    return {
+      level: calculateLevel(safeXP),
+      progress: safeXP % 100
+    };
 
   }
 
@@ -769,32 +1281,60 @@
       return;
     }
 
+    avatar.innerHTML = "";
+
     if (!url) {
 
-      avatar.innerHTML = "👤";
+      avatar.textContent =
+        "👤";
 
       return;
     }
 
-    avatar.innerHTML = "";
-
-    const img =
+    const image =
       document.createElement(
         "img"
       );
 
-    img.src = url;
+    image.src = url;
 
-    img.alt =
+    image.alt =
       "Profile picture";
 
-    img.onerror =
+    image.onerror =
       function() {
+
         avatar.innerHTML =
           "👤";
+
       };
 
-    avatar.appendChild(img);
+    avatar.appendChild(
+      image
+    );
+
+  }
+
+  function showStatus(
+    message,
+    type = ""
+  ) {
+
+    const status =
+      document.getElementById(
+        "status"
+      );
+
+    if (!status) {
+      return;
+    }
+
+    status.textContent =
+      message || "";
+
+    status.className =
+      "status " + type;
+
   }
 
   function updateLevelUI(xp) {
@@ -805,1733 +1345,1274 @@
         Number(xp || 0)
       );
 
-    const level =
-      calculateLevel(
-        safeXP
-      );
-
-    const progress =
+    const data =
       getLevelProgress(
         safeXP
       );
 
-    const nextLevelXP =
-      level * 100;
-
     document.getElementById(
       "profileLevel"
     ).textContent =
-      `⭐ Level ${level} • ${safeXP} XP`;
+      `⭐ Level ${data.level} • ${safeXP} XP`;
+
+    document.getElementById(
+      "xpCount"
+    ).textContent =
+      safeXP;
 
     document.getElementById(
       "levelProgressBar"
     ).style.width =
-      `${progress}%`;
+      `${data.progress}%`;
 
     document.getElementById(
       "levelNext"
     ).textContent =
-      `${nextLevelXP - safeXP} XP to Level ${level + 1}`;
+      `${data.level * 100 - safeXP} XP to Level ${data.level + 1}`;
+
   }
-      const SUPABASE_URL =
-      "https://dthvdxgxesomltlruogp.supabase.co";
+    function getStars(value) {
 
-    const SUPABASE_KEY =
-      "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
-
-    const supabaseClient =
-      supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      );
-
-    const AVATAR_BUCKET =
-      "Avatars";
-
-    let currentUser = null;
-    let selectedFile = null;
-    let profileUserId = null;
-    let isOwnProfile = false;
-
-    function escapeHTML(value) {
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    function getProfileIdFromURL() {
-      const params = new URLSearchParams(
-        window.location.search
-      );
-
-      return params.get("id");
-    }
-
-    function isValidUUID(value) {
-      return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-        .test(value || "");
-    }
-
-    function formatDate(dateString) {
-      if (!dateString) {
-        return "";
-      }
-
-      const date = new Date(dateString);
-
-      if (Number.isNaN(date.getTime())) {
-        return "";
-      }
-
-      return date.toLocaleDateString(
-        undefined,
-        {
-          day: "numeric",
-          month: "short",
-          year: "numeric"
-        }
-      );
-    }
-
-    function calculateLevel(xp) {
-      const safeXP =
-        Math.max(
-          0,
-          Number(xp || 0)
-        );
-
-      return (
-        Math.floor(safeXP / 100) + 1
-      );
-    }
-
-    function getLevelProgress(xp) {
-      const safeXP =
-        Math.max(
-          0,
-          Number(xp || 0)
-        );
-
-      const currentLevel =
-        calculateLevel(safeXP);
-
-      const levelStart =
-        (currentLevel - 1) * 100;
-
-      const nextLevel =
-        currentLevel * 100;
-
-      const progressXP =
-        safeXP - levelStart;
-
-      const required =
-        nextLevel - levelStart;
-
-      const percent =
+    const rating =
+      Math.max(
+        0,
         Math.min(
-          100,
-          Math.max(
-            0,
-            (progressXP / required) * 100
+          5,
+          Math.round(
+            Number(value) || 0
           )
-        );
-
-      return {
-        currentLevel,
-        levelStart,
-        nextLevel,
-        progressXP,
-        required,
-        percent
-      };
-    }
-
-    function showAvatar(url) {
-      const avatar =
-        document.getElementById("avatar");
-
-      if (!avatar) {
-        return;
-      }
-
-      avatar.innerHTML = "";
-
-      if (!url) {
-        avatar.textContent = "👤";
-        return;
-      }
-
-      const img =
-        document.createElement("img");
-
-      img.src = url;
-      img.alt = "Profile picture";
-
-      img.onerror = () => {
-        avatar.innerHTML = "";
-        avatar.textContent = "👤";
-      };
-
-      avatar.appendChild(img);
-    }
-
-    function showStatus(
-      message,
-      type = ""
-    ) {
-      const status =
-        document.getElementById("status");
-
-      if (!status) {
-        return;
-      }
-
-      status.textContent =
-        message || "";
-
-      status.className =
-        "status " + type;
-    }
-
-    function updateLevelUI(xp) {
-      const data =
-        getLevelProgress(xp);
-
-      const levelMain =
-        document.getElementById(
-          "levelMain"
-        );
-
-      const levelXP =
-        document.getElementById(
-          "levelXP"
-        );
-
-      const levelProgress =
-        document.getElementById(
-          "levelProgress"
-        );
-
-      const levelProgressText =
-        document.getElementById(
-          "levelProgressText"
-        );
-
-      const profileLevel =
-        document.getElementById(
-          "profileLevel"
-        );
-
-      if (profileLevel) {
-        profileLevel.textContent =
-          `⭐ Level ${data.currentLevel} • ${Number(xp || 0)} XP`;
-      }
-
-      if (levelMain) {
-        levelMain.textContent =
-          `Level ${data.currentLevel}`;
-      }
-
-      if (levelXP) {
-        levelXP.textContent =
-          `${Number(xp || 0)} XP`;
-      }
-
-      if (levelProgress) {
-        levelProgress.style.width =
-          `${data.percent}%`;
-      }
-
-      if (levelProgressText) {
-
-        const remaining =
-          Math.max(
-            0,
-            data.nextLevel -
-            Number(xp || 0)
-          );
-
-        if (remaining === 0) {
-          levelProgressText.textContent =
-            "You've reached the next level!";
-        } else {
-          levelProgressText.textContent =
-            `${remaining} XP to Level ${data.currentLevel + 1}`;
-        }
-      }
-    }
-
-    function updateReputationUI(
-      reputation,
-      reviewCount
-    ) {
-      const safeRating =
-        Math.max(
-          0,
-          Math.min(
-            5,
-            Number(reputation || 0)
-          )
-        );
-
-      const ratingNumber =
-        document.getElementById(
-          "ratingNumber"
-        );
-
-      const ratingStars =
-        document.getElementById(
-          "ratingStars"
-        );
-
-      const ratingCopy =
-        document.getElementById(
-          "ratingCopy"
-        );
-
-      if (ratingNumber) {
-        ratingNumber.textContent =
-          safeRating.toFixed(1);
-      }
-
-      if (ratingStars) {
-        const rounded =
-          Math.round(safeRating);
-
-        ratingStars.textContent =
-          "★".repeat(rounded) +
-          "☆".repeat(5 - rounded);
-      }
-
-      if (ratingCopy) {
-
-        if (!reviewCount) {
-          ratingCopy.innerHTML =
-            "No ratings yet. Complete tasks and receive reviews to build your reputation.";
-        } else {
-          ratingCopy.innerHTML =
-            `<strong>${reviewCount} review${reviewCount === 1 ? "" : "s"}</strong><br>
-             Reputation is based on feedback from completed work.`;
-        }
-      }
-    }
-
-    function updateCompletionUI(
-      profile
-    ) {
-      const checks = {
-        name:
-          Boolean(
-            String(
-              profile.full_name || ""
-            ).trim()
-          ),
-
-        username:
-          Boolean(
-            String(
-              profile.username || ""
-            ).trim()
-          ),
-
-        location:
-          Boolean(
-            String(
-              profile.location || ""
-            ).trim()
-          ),
-
-        avatar:
-          Boolean(
-            String(
-              profile.avatar_url || ""
-            ).trim()
-          )
-      };
-
-      const done =
-        Object.values(checks)
-          .filter(Boolean)
-          .length;
-
-      const percent =
-        Math.round(
-          (done / 4) * 100
-        );
-
-      const percentElement =
-        document.getElementById(
-          "completionPercent"
-        );
-
-      const progress =
-        document.getElementById(
-          "completionProgress"
-        );
-
-      if (percentElement) {
-        percentElement.textContent =
-          `${percent}%`;
-      }
-
-      if (progress) {
-        progress.style.width =
-          `${percent}%`;
-      }
-
-      const fields = [
-        [
-          "completionName",
-          checks.name,
-          "Full name"
-        ],
-        [
-          "completionUsername",
-          checks.username,
-          "Username"
-        ],
-        [
-          "completionLocation",
-          checks.location,
-          "Location"
-        ],
-        [
-          "completionAvatar",
-          checks.avatar,
-          "Profile picture"
-        ]
-      ];
-
-      fields.forEach(
-        ([id, isDone, label]) => {
-          const element =
-            document.getElementById(id);
-
-          if (!element) {
-            return;
-          }
-
-          element.className =
-            "completion-item" +
-            (isDone ? " done" : "");
-
-          element.textContent =
-            `${isDone ? "✓" : "○"} ${label}`;
-        }
+        )
       );
+
+    return (
+      "★".repeat(rating) +
+      "☆".repeat(5 - rating)
+    );
+
   }
-      function updateAchievements(
-      profile,
-      postedCount,
-      completedCount,
-      reviewCount
+
+  function updateReputationUI() {
+
+    const score =
+      Number(
+        profileStats.reputation
+      ) || 0;
+
+    const scoreElement =
+      document.getElementById(
+        "reputationScore"
+      );
+
+    const starsElement =
+      document.getElementById(
+        "reputationStars"
+      );
+
+    const textElement =
+      document.getElementById(
+        "reputationText"
+      );
+
+    if (
+      profileStats.reviews === 0
     ) {
-      const container =
-        document.getElementById(
-          "achievements"
-        );
 
-      if (!container) {
-        return;
-      }
+      scoreElement.textContent =
+        "New";
 
-      const xp =
-        Number(profile.xp || 0);
+      starsElement.textContent =
+        "☆☆☆☆☆";
 
-      const achievements = [
-        {
-          icon: "🌱",
-          name: "Getting Started",
-          desc: "Create your OOULink profile.",
-          unlocked: true
-        },
-        {
-          icon: "📝",
-          name: "Task Poster",
-          desc: "Post your first task.",
-          unlocked:
-            Number(postedCount) >= 1
-        },
-        {
-          icon: "⚡",
-          name: "Task Runner",
-          desc: "Complete your first task.",
-          unlocked:
-            Number(completedCount) >= 1
-        },
-        {
-          icon: "⭐",
-          name: "XP Builder",
-          desc: "Reach 100 XP.",
-          unlocked:
-            xp >= 100
-        },
-        {
-          icon: "🏆",
-          name: "High Achiever",
-          desc: "Reach 500 XP.",
-          unlocked:
-            xp >= 500
-        },
-        {
-          icon: "💬",
-          name: "Reviewed",
-          desc: "Receive your first review.",
-          unlocked:
-            Number(reviewCount) >= 1
-        }
-      ];
+      textElement.textContent =
+        "Complete tasks and receive reviews to build your reputation.";
 
-      container.innerHTML =
-        achievements
-          .map(item => `
-            <div class="achievement ${item.unlocked ? "" : "locked"}">
-              <div class="achievement-icon">
-                ${item.icon}
-              </div>
-
-              <div class="achievement-name">
-                ${escapeHTML(item.name)}
-              </div>
-
-              <div class="achievement-desc">
-                ${escapeHTML(item.desc)}
-              </div>
-            </div>
-          `)
-          .join("");
+      return;
     }
 
-    function showCelebration(
-      title,
-      message
-    ) {
-      const box =
-        document.getElementById(
-          "celebration"
-        );
+    scoreElement.textContent =
+      score.toFixed(1) + "/5";
 
-      const titleElement =
-        document.getElementById(
-          "celebrationTitle"
-        );
+    starsElement.textContent =
+      getStars(score);
 
-      const textElement =
-        document.getElementById(
-          "celebrationText"
-        );
+    textElement.textContent =
+      `Based on ${profileStats.reviews} review${profileStats.reviews === 1 ? "" : "s"}.`;
 
-      if (!box) {
-        return;
-      }
-
-      if (titleElement) {
-        titleElement.textContent =
-          title;
-      }
-
-      if (textElement) {
-        textElement.textContent =
-          message;
-      }
-
-      box.classList.add("show");
-
-      window.setTimeout(() => {
-        box.classList.remove("show");
-      }, 2800);
-    }
-
-    function maybeCelebrateProfile(
-      profile
-    ) {
-      if (!isOwnProfile) {
-        return;
-      }
-
-      const key =
-        "ooulink_profile_completion_seen";
-
-      const completed =
-        Boolean(
-          profile.full_name &&
-          profile.username &&
-          profile.location &&
-          profile.avatar_url
-        );
-
-      if (!completed) {
-        return;
-      }
-
-      if (
-        localStorage.getItem(key)
-      ) {
-        return;
-      }
-
-      localStorage.setItem(
-        key,
-        "1"
-      );
-
-      window.setTimeout(() => {
-        showCelebration(
-          "🎉 Profile complete!",
-          "Your OOULink profile is ready to build trust."
-        );
-      }, 700);
-    }
-
-    async function loadProfile() {
-      const loading =
-        document.getElementById(
-          "loadingState"
-        );
-
-      const content =
-        document.getElementById(
-          "profileContent"
-        );
-
-      const errorState =
-        document.getElementById(
-          "errorState"
-        );
-
-      if (loading) {
-        loading.classList.remove(
-          "hidden"
-        );
-      }
-
-      if (content) {
-        content.classList.add(
-          "hidden"
-        );
-      }
-
-      if (errorState) {
-        errorState.classList.add(
-          "hidden"
-        );
-      }
-
-      try {
-        const {
-          data: sessionData,
-          error: sessionError
-        } =
-          await supabaseClient.auth.getSession();
-
-        if (sessionError) {
-          throw sessionError;
-        }
-
-        currentUser =
-          sessionData?.session?.user ||
-          null;
-
-        if (!currentUser) {
-          window.location.href =
-            "login.html?redirect=profile.html";
-          return;
-        }
-
-        const requestedId =
-          getProfileIdFromURL();
-
-        if (requestedId) {
-
-          if (
-            !isValidUUID(requestedId)
-          ) {
-            throw new Error(
-              "Invalid profile ID."
-            );
-          }
-
-          profileUserId =
-            requestedId;
-
-        } else {
-          profileUserId =
-            currentUser.id;
-        }
-
-        isOwnProfile =
-          profileUserId ===
-          currentUser.id;
-
-        const {
-          data: profileInfo,
-          error: profileError
-        } =
-          await supabaseClient
-            .from("profiles")
-            .select(
-              "id,username,full_name,location,avatar_url,xp,reputation"
-            )
-            .eq(
-              "id",
-              profileUserId
-            )
-            .maybeSingle();
-
-        if (profileError) {
-          throw profileError;
-        }
-
-        const profile =
-          profileInfo || {
-            id: profileUserId,
-            username: "",
-            full_name: "",
-            location: "",
-            avatar_url: "",
-            xp: 0,
-            reputation: 0
-          };
-
-        if (isOwnProfile) {
-
-          profile.full_name =
-            profile.full_name ||
-            currentUser.user_metadata?.full_name ||
-            "";
-
-          profile.location =
-            profile.location ||
-            currentUser.user_metadata?.location ||
-            "";
-
-          profile.avatar_url =
-            profile.avatar_url ||
-            currentUser.user_metadata?.avatar_url ||
-            "";
-        }
-
-        const {
-          count: postedCount,
-          error: postedError
-        } =
-          await supabaseClient
-            .from("tasks")
-            .select(
-              "id",
-              {
-                count: "exact",
-                head: true
-              }
-            )
-            .eq(
-              "user_id",
-              profileUserId
-            );
-
-        if (postedError) {
-          throw postedError;
-        }
-
-        const {
-          count: completedCount,
-          error: completedError
-        } =
-          await supabaseClient
-            .from("tasks")
-            .select(
-              "id",
-              {
-                count: "exact",
-                head: true
-              }
-            )
-            .eq(
-              "runner_id",
-              profileUserId
-            )
-            .eq(
-              "status",
-              "completed"
-            );
-
-        if (completedError) {
-          throw completedError;
-        }
-
-        renderProfile(
-          profile,
-          postedCount || 0,
-          completedCount || 0
-        );
-
-        await loadReviews(
-          profileUserId,
-          profile
-        );
-
-        setupProfileMode();
-
-        if (loading) {
-          loading.classList.add(
-            "hidden"
-          );
-        }
-
-        if (content) {
-          content.classList.remove(
-            "hidden"
-          );
-        }
-
-        maybeCelebrateProfile(
-          profile
-        );
-
-      } catch (error) {
-
-        console.error(
-          "Profile load error:",
-          error
-        );
-
-        if (loading) {
-          loading.classList.add(
-            "hidden"
-          );
-        }
-
-        if (errorState) {
-          errorState.classList.remove(
-            "hidden"
-          );
-        }
-
-        const message =
-          document.getElementById(
-            "errorMessage"
-          );
-
-        if (message) {
-          message.textContent =
-            error?.message ||
-            "Unable to load profile.";
-        }
-      }
-    }
-
-    function renderProfile(
-      profile,
-      postedCount,
-      completedCount
-    ) {
-      const fullName =
-        profile.full_name ||
-        "OOULink User";
-
-      const username =
-        profile.username ||
-        "";
-
-      const location =
-        profile.location ||
-        "Location not added";
-
-      const xp =
-        Number(profile.xp || 0);
-
-      const reputation =
-        Number(
-          profile.reputation || 0
-        );
-
-      const profileName =
-        document.getElementById(
-          "profileName"
-        );
-
-      const profileUsername =
-        document.getElementById(
-          "profileUsername"
-        );
-
-      const profileLocation =
-        document.getElementById(
-          "profileLocation"
-        );
-
-      const posted =
-        document.getElementById(
-          "postedCount"
-        );
-
-      const completed =
-        document.getElementById(
-          "completedCount"
-        );
-
-      const xpElement =
-        document.getElementById(
-          "xpCount"
-        );
-
-      if (profileName) {
-        profileName.textContent =
-          fullName;
-      }
-
-      if (profileUsername) {
-        profileUsername.textContent =
-          username
-            ? `@${username}`
-            : "Username not set";
-      }
-
-      if (profileLocation) {
-        profileLocation.textContent =
-          `📍 ${location}`;
-      }
-
-      if (posted) {
-        posted.textContent =
-          Number(postedCount);
-      }
-
-      if (completed) {
-        completed.textContent =
-          Number(completedCount);
-      }
-
-      if (xpElement) {
-        xpElement.textContent =
-          xp;
-      }
-
-      showAvatar(
-        profile.avatar_url
-      );
-
-      updateLevelUI(xp);
-
-      updateReputationUI(
-        reputation,
-        0
-      );
-
-      updateCompletionUI(
-        profile
-      );
-
-      updateAchievements(
-        profile,
-        postedCount,
-        completedCount,
-        0
-      );
-
-      const badge =
-        document.getElementById(
-          "verificationBadge"
-        );
-
-      if (badge) {
-        badge.textContent =
-          "🛡️ Not verified";
-
-        badge.className =
-          "verification-badge";
-      }
-
-      if (isOwnProfile) {
-
-        const fullNameInput =
-          document.getElementById(
-            "fullNameInput"
-          );
-
-        const locationInput =
-          document.getElementById(
-            "locationInput"
-          );
-
-        const usernameInput =
-          document.getElementById(
-            "usernameInput"
-          );
-
-        if (fullNameInput) {
-          fullNameInput.value =
-            profile.full_name || "";
-        }
-
-        if (locationInput) {
-          locationInput.value =
-            profile.location || "";
-        }
-
-        if (usernameInput) {
-          usernameInput.value =
-            profile.username || "";
-        }
-      }
   }
-      function setupProfileMode() {
-      const ownerControls =
-        document.getElementById(
-          "ownerControls"
-        );
 
-      const publicActions =
-        document.getElementById(
-          "publicActions"
-        );
+  function updateCompletionUI(
+    profile
+  ) {
 
-      const photoButton =
-        document.getElementById(
-          "photoButton"
-        );
+    const fields = [
+      profile.full_name,
+      profile.location,
+      profile.avatar_url,
+      profile.username
+    ];
 
-      if (isOwnProfile) {
+    const completed =
+      fields.filter(
+        value =>
+          String(
+            value || ""
+          ).trim()
+      ).length;
 
-        if (ownerControls) {
-          ownerControls.classList.remove(
-            "hidden"
-          );
-        }
+    const percent =
+      Math.round(
+        (completed / 4) * 100
+      );
 
-        if (publicActions) {
-          publicActions.classList.add(
-            "hidden"
-          );
-        }
+    document.getElementById(
+      "completionPercent"
+    ).textContent =
+      percent + "%";
 
-        if (photoButton) {
-          photoButton.classList.remove(
-            "hidden"
-          );
-        }
+    document.getElementById(
+      "completionBar"
+    ).style.width =
+      percent + "%";
 
-      } else {
+    const remaining =
+      4 - completed;
 
-        if (ownerControls) {
-          ownerControls.classList.add(
-            "hidden"
-          );
-        }
+    document.getElementById(
+      "completionText"
+    ).textContent =
+      percent === 100
+        ? "Your profile is complete. Nice!"
+        : `${remaining} profile detail${remaining === 1 ? "" : "s"} left to complete.`;
 
-        if (publicActions) {
-          publicActions.classList.remove(
-            "hidden"
-          );
-        }
+    document.getElementById(
+      "trustProfileIcon"
+    ).textContent =
+      percent === 100
+        ? "✓"
+        : "○";
 
-        if (photoButton) {
-          photoButton.classList.add(
-            "hidden"
-          );
-        }
-      }
+    document.getElementById(
+      "trustProfileText"
+    ).textContent =
+      percent === 100
+        ? "Your profile is complete."
+        : "Complete your profile to look more trustworthy.";
+
+  }
+
+  function updateAchievements() {
+
+    const grid =
+      document.getElementById(
+        "achievementGrid"
+      );
+
+    if (!grid) {
+      return;
     }
 
-    async function loadReviews(
-      userId,
-      profile
-    ) {
-      const reviewsList =
-        document.getElementById(
-          "reviewsList"
-        );
+    const profileComplete =
+      document.getElementById(
+        "completionPercent"
+      ).textContent === "100%";
 
-      const reviewSummary =
-        document.getElementById(
-          "reviewSummary"
-        );
+    const achievements = [
 
-      const reviewSummaryText =
-        document.getElementById(
-          "reviewSummaryText"
-        );
+      {
+        icon: "🌱",
+        name: "Getting Started",
+        note: "Create your OOULink profile",
+        unlocked: true
+      },
 
-      if (!reviewsList) {
-        return;
+      {
+        icon: "👤",
+        name: "Complete Profile",
+        note: "Fill all profile details",
+        unlocked: profileComplete
+      },
+
+      {
+        icon: "⚡",
+        name: "XP Builder",
+        note: "Reach 100 XP",
+        unlocked:
+          profileStats.xp >= 100
+      },
+
+      {
+        icon: "🎯",
+        name: "Task Poster",
+        note: "Post your first task",
+        unlocked:
+          profileStats.posted >= 1
+      },
+
+      {
+        icon: "🏃",
+        name: "Task Finisher",
+        note: "Complete your first task",
+        unlocked:
+          profileStats.completed >= 1
+      },
+
+      {
+        icon: "⭐",
+        name: "Trusted Member",
+        note: "Receive your first review",
+        unlocked:
+          profileStats.reviews >= 1
       }
 
-      const {
-        data: reviews,
-        error
-      } =
-        await supabaseClient
-          .from("reviews")
-          .select(
-            "id,task_id,reviewer_id,rating,note,created_at"
-          )
-          .eq(
-            "reviewee_id",
-            userId
-          )
-          .order(
-            "created_at",
-            {
-              ascending: false
-            }
-          )
-          .limit(10);
+    ];
 
-      if (error) {
-        console.error(
-          "Reviews error:",
-          error
-        );
-
-        reviewsList.innerHTML =
-          `<div class="no-reviews">
-             Reviews could not be loaded.
-           </div>`;
-
-        return;
-      }
-
-      const list =
-        reviews || [];
-
-      const ratings =
-        list
-          .map(item =>
-            Number(item.rating)
-          )
-          .filter(
-            value =>
-              Number.isFinite(value)
-          );
-
-      const average =
-        ratings.length
-          ? ratings.reduce(
-              (sum, value) =>
-                sum + value,
-              0
-            ) / ratings.length
-          : Number(
-              profile?.reputation || 0
-            );
-
-      updateReputationUI(
-        average,
-        list.length
-      );
-
-      updateAchievements(
-        profile || {},
-        document.getElementById(
-          "postedCount"
-        )?.textContent || 0,
-        document.getElementById(
-          "completedCount"
-        )?.textContent || 0,
-        list.length
-      );
-
-      if (reviewSummary) {
-        reviewSummary.classList.toggle(
-          "hidden",
-          list.length === 0
-        );
-      }
-
-      if (reviewSummaryText) {
-        reviewSummaryText.textContent =
-          `${list.length} review${list.length === 1 ? "" : "s"}`;
-      }
-
-      if (!list.length) {
-
-        reviewsList.innerHTML =
-          `<div class="no-reviews">
-             No reviews yet.
-           </div>`;
-
-        return;
-      }
-
-      reviewsList.innerHTML =
-        list
-          .map(review => {
-
-            const rating =
-              Math.max(
-                0,
-                Math.min(
-                  5,
-                  Number(
-                    review.rating || 0
-                  )
-                )
-              );
-
-            const stars =
-              "★".repeat(
-                Math.round(rating)
-              ) +
-              "☆".repeat(
-                5 -
-                Math.round(rating)
-              );
-
-            const note =
-              String(
-                review.note || ""
-              ).trim();
+    grid.innerHTML =
+      achievements
+        .map(
+          achievement => {
 
             return `
-              <div class="review-card">
+              <div class="achievement ${achievement.unlocked ? "" : "locked"}">
 
-                <div class="review-top">
-
-                  <div class="review-rating">
-                    ${stars}
-                  </div>
-
-                  <div class="review-date">
-                    ${escapeHTML(
-                      formatDate(
-                        review.created_at
-                      )
-                    )}
-                  </div>
-
+                <div class="achievement-icon">
+                  ${achievement.icon}
                 </div>
 
-                ${
-                  note
-                    ? `
-                      <div class="review-note">
-                        ${escapeHTML(note)}
-                      </div>
-                    `
-                    : `
-                      <div class="review-note">
-                        Positive task feedback.
-                      </div>
-                    `
-                }
+                <div class="achievement-name">
+                  ${achievement.name}
+                </div>
+
+                <div class="achievement-note">
+                  ${achievement.unlocked ? "Unlocked" : "Locked"} · ${achievement.note}
+                </div>
 
               </div>
             `;
-          })
-          .join("");
-    }
 
-    document
-      .getElementById("avatarInput")
-      ?.addEventListener(
-        "change",
-        function(event) {
-
-          if (!isOwnProfile) {
-            return;
           }
+        )
+        .join("");
 
-          const file =
-            event.target.files?.[0];
+  }
 
-          if (!file) {
-            selectedFile = null;
-            return;
-          }
+  function showCelebration(
+    message
+  ) {
 
-          const allowedTypes = [
-            "image/jpeg",
-            "image/png",
-            "image/webp"
-          ];
-
-          if (
-            !allowedTypes.includes(
-              file.type
-            )
-          ) {
-            showStatus(
-              "Please select a JPG, PNG, or WebP image.",
-              "error"
-            );
-
-            event.target.value = "";
-            selectedFile = null;
-
-            return;
-          }
-
-          if (
-            file.size >
-            2 * 1024 * 1024
-          ) {
-            showStatus(
-              "Profile picture must be 2MB or less.",
-              "error"
-            );
-
-            event.target.value = "";
-            selectedFile = null;
-
-            return;
-          }
-
-          selectedFile = file;
-
-          const previewURL =
-            URL.createObjectURL(
-              file
-            );
-
-          showAvatar(
-            previewURL
-          );
-
-          showStatus(
-            "New profile picture selected. Save your profile to upload it."
-          );
-        }
+    const element =
+      document.getElementById(
+        "celebration"
       );
 
+    element.textContent =
+      message;
+
+    element.classList.add(
+      "show"
+    );
+
+    setTimeout(
+      function() {
+
+        element.classList.remove(
+          "show"
+        );
+
+      },
+      2600
+    );
+
+  }
+
+  function setPageMode() {
+
+    const title =
+      document.getElementById(
+        "pageTitle"
+      );
+
+    const subtitle =
+      document.getElementById(
+        "pageSubtitle"
+      );
+
+    const ownerControls =
+      document.getElementById(
+        "ownerControls"
+      );
+
+    const publicActions =
+      document.getElementById(
+        "publicActions"
+      );
+
+    const changePhoto =
+      document.getElementById(
+        "changePhotoButton"
+      );
+
+    if (isOwnProfile) {
+
+      title.textContent =
+        "My Profile";
+
+      subtitle.textContent =
+        "Manage your OOULink account";
+
+      ownerControls.classList.remove(
+        "hidden"
+      );
+
+      publicActions.classList.add(
+        "hidden"
+      );
+
+      changePhoto.classList.remove(
+        "hidden"
+      );
+
+    } else {
+
+      title.textContent =
+        "Profile";
+
+      subtitle.textContent =
+        "OOULink member profile";
+
+      ownerControls.classList.add(
+        "hidden"
+      );
+
+      publicActions.classList.remove(
+        "hidden"
+      );
+
+      changePhoto.classList.add(
+        "hidden"
+      );
+
+    }
+
+  }
+
+  async function loadTaskStats(
+    userId
+  ) {
+
+    let posted = 0;
+
+    let completed = 0;
+
+    const postedResult =
+      await supabaseClient
+        .from("tasks")
+        .select(
+          "id",
+          {
+            count: "exact",
+            head: true
+          }
+        )
+        .eq(
+          "user_id",
+          userId
+        );
+
+    if (
+      !postedResult.error
+    ) {
+      posted =
+        postedResult.count || 0;
+    }
+
+    const completedResult =
+      await supabaseClient
+        .from("tasks")
+        .select(
+          "id",
+          {
+            count: "exact",
+            head: true
+          }
+        )
+        .eq(
+          "runner_id",
+          userId
+        )
+        .eq(
+          "status",
+          "completed"
+        );
+
+    if (
+      !completedResult.error
+    ) {
+      completed =
+        completedResult.count || 0;
+    }
+
+    profileStats.posted =
+      posted;
+
+    profileStats.completed =
+      completed;
+
+    document.getElementById(
+      "postedCount"
+    ).textContent =
+      posted;
+
+    document.getElementById(
+      "completedCount"
+    ).textContent =
+      completed;
+
+  }
+
+  async function loadReviews(
+    userId
+  ) {
+
+    const result =
+      await supabaseClient
+        .from("reviews")
+        .select(
+          "id,task_id,reviewer_id,rating,note,created_at"
+        )
+        .eq(
+          "reviewee_id",
+          userId
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        )
+        .limit(10);
+
+    if (result.error) {
+
+      document.getElementById(
+        "reviewsList"
+      ).innerHTML =
+        '<div class="no-reviews">Reviews could not be loaded.</div>';
+
+      return;
+    }
+
+    const reviews =
+      result.data || [];
+
+    profileStats.reviews =
+      reviews.length;
+
+    document.getElementById(
+      "reviewCount"
+    ).textContent =
+      reviews.length;
+
+    if (reviews.length > 0) {
+
+      const total =
+        reviews.reduce(
+          function(sum, review) {
+
+            return (
+              sum +
+              (Number(
+                review.rating
+              ) || 0)
+            );
+
+          },
+          0
+        );
+
+      if (
+        !profileStats.reputation
+      ) {
+
+        profileStats.reputation =
+          total / reviews.length;
+
+      }
+
+      document.getElementById(
+        "trustReviewsIcon"
+      ).textContent =
+        "✓";
+
+      document.getElementById(
+        "trustReviewsText"
+      ).textContent =
+        `${reviews.length} review${reviews.length === 1 ? "" : "s"} received.`;
+
+      document.getElementById(
+        "reviewsList"
+      ).innerHTML =
+        reviews
+          .map(
+            function(review) {
+
+              return `
+                <div class="review-card">
+
+                  <div class="review-top">
+
+                    <span class="review-rating">
+                      ${getStars(review.rating)}
+                    </span>
+
+                    <span class="review-date">
+                      ${escapeHTML(formatDate(review.created_at))}
+                    </span>
+
+                  </div>
+
+                  ${
+                    review.note
+                      ? `
+                        <div class="review-note">
+                          ${escapeHTML(review.note)}
+                        </div>
+                      `
+                      : ""
+                  }
+
+                </div>
+              `;
+
+            }
+          )
+          .join("");
+
+    } else {
+
+      document.getElementById(
+        "reviewsList"
+      ).innerHTML =
+        '<div class="no-reviews">No reviews yet.</div>';
+
+    }
+
+    updateReputationUI();
+
+    updateAchievements();
+
+  }
     async function saveUsername() {
 
-      if (!isOwnProfile) {
-        return;
-      }
+    if (
+      !isOwnProfile ||
+      !currentUser
+    ) {
+      return;
+    }
 
-      const input =
-        document.getElementById(
-          "usernameInput"
-        );
-
-      if (!input) {
-        return;
-      }
-
-      const username =
-        input.value
-          .trim()
-          .toLowerCase();
-
-      if (
-        !/^[a-z0-9_]{3,20}$/.test(
-          username
-        )
-      ) {
-        showStatus(
-          "Username must be 3–20 characters using letters, numbers, or underscores.",
-          "error"
-        );
-
-        return;
-      }
-
-      showStatus(
-        "Saving username..."
+    const input =
+      document.getElementById(
+        "usernameInput"
       );
 
-      try {
+    const status =
+      document.getElementById(
+        "usernameStatus"
+      );
 
-        const {
-          error
-        } =
+    const button =
+      document.getElementById(
+        "usernameButton"
+      );
+
+    const username =
+      input.value
+        .trim()
+        .toLowerCase();
+
+    status.textContent =
+      "";
+
+    if (
+      !/^[a-z0-9_]{3,20}$/.test(
+        username
+      )
+    ) {
+
+      status.textContent =
+        "Use 3–20 lowercase letters, numbers, or underscores.";
+
+      status.className =
+        "status error";
+
+      return;
+    }
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "SAVING...";
+
+    const result =
+      await supabaseClient.rpc(
+        "set_my_username",
+        {
+          new_username:
+            username
+        }
+      );
+
+    button.disabled =
+      false;
+
+    button.textContent =
+      "SAVE USERNAME";
+
+    if (result.error) {
+
+      status.textContent =
+        result.error.message
+          .toLowerCase()
+          .includes("taken")
+          ? "That username is already taken."
+          : "Could not save username.";
+
+      status.className =
+        "status error";
+
+      return;
+    }
+
+    status.textContent =
+      "Username saved.";
+
+    status.className =
+      "status success";
+
+    document.getElementById(
+      "profileUsername"
+    ).textContent =
+      "@" + username;
+
+    document.getElementById(
+      "usernameSetup"
+    ).classList.add(
+      "hidden"
+    );
+
+    updateCompletionUI({
+      full_name:
+        document.getElementById(
+          "fullName"
+        ).value,
+
+      location:
+        document.getElementById(
+          "location"
+        ).value,
+
+      avatar_url:
+        currentUser.user_metadata
+          ?.avatar_url,
+
+      username:
+        username
+    });
+
+    updateAchievements();
+
+  }
+
+  async function saveProfile() {
+
+    if (
+      !isOwnProfile ||
+      !currentUser
+    ) {
+      return;
+    }
+
+    const fullName =
+      document.getElementById(
+        "fullName"
+      ).value.trim();
+
+    const location =
+      document.getElementById(
+        "location"
+      ).value.trim();
+
+    const button =
+      document.getElementById(
+        "saveButton"
+      );
+
+    if (
+      !fullName ||
+      !location
+    ) {
+
+      showStatus(
+        "Please enter your full name and location.",
+        "error"
+      );
+
+      return;
+    }
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "SAVING...";
+
+    try {
+
+      let avatarUrl =
+        null;
+
+      if (
+        selectedFile
+      ) {
+
+        const extension =
+          selectedFile.name
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+        const path =
+          `${currentUser.id}/avatar-${Date.now()}.${extension}`;
+
+        const upload =
           await supabaseClient
-            .rpc(
-              "set_my_username",
+            .storage
+            .from(
+              AVATAR_BUCKET
+            )
+            .upload(
+              path,
+              selectedFile,
               {
-                new_username:
-                  username
+                upsert: true,
+                contentType:
+                  selectedFile.type
               }
             );
 
-        if (error) {
-          throw error;
+        if (
+          upload.error
+        ) {
+          throw upload.error;
         }
 
-        showStatus(
-          "Username saved successfully.",
-          "success"
+        avatarUrl =
+          supabaseClient
+            .storage
+            .from(
+              AVATAR_BUCKET
+            )
+            .getPublicUrl(
+              path
+            )
+            .data
+            .publicUrl;
+
+      }
+
+      const metadata = {
+        ...(currentUser.user_metadata || {}),
+        full_name:
+          fullName,
+        location:
+          location
+      };
+
+      if (
+        avatarUrl
+      ) {
+        metadata.avatar_url =
+          avatarUrl;
+      }
+
+      const authUpdate =
+        await supabaseClient.auth.updateUser(
+          {
+            data:
+              metadata
+          }
         );
 
-        const usernameElement =
+      if (
+        authUpdate.error
+      ) {
+        throw authUpdate.error;
+      }
+
+      const databaseUpdate = {
+        full_name:
+          fullName,
+        location:
+          location
+      };
+
+      if (
+        avatarUrl
+      ) {
+        databaseUpdate.avatar_url =
+          avatarUrl;
+      }
+
+      const profileUpdate =
+        await supabaseClient
+          .from("profiles")
+          .update(
+            databaseUpdate
+          )
+          .eq(
+            "id",
+            currentUser.id
+          );
+
+      if (
+        profileUpdate.error
+      ) {
+        throw profileUpdate.error;
+      }
+
+      currentUser =
+        authUpdate.data.user ||
+        currentUser;
+
+      selectedFile =
+        null;
+
+      document.getElementById(
+        "profileName"
+      ).textContent =
+        fullName;
+
+      document.getElementById(
+        "profileLocation"
+      ).textContent =
+        location;
+
+      showAvatar(
+        avatarUrl ||
+        currentUser.user_metadata
+          ?.avatar_url
+      );
+
+      showStatus(
+        "Profile saved successfully.",
+        "success"
+      );
+
+      updateCompletionUI({
+        full_name:
+          fullName,
+
+        location:
+          location,
+
+        avatar_url:
+          avatarUrl ||
+          currentUser.user_metadata
+            ?.avatar_url,
+
+        username:
           document.getElementById(
             "profileUsername"
-          );
+          ).textContent
+            .replace(
+              "@",
+              ""
+            )
+      });
 
-        if (usernameElement) {
-          usernameElement.textContent =
-            `@${username}`;
-        }
+      updateAchievements();
 
-        const completion =
-          document.getElementById(
-            "completionUsername"
-          );
-
-        if (completion) {
-          completion.textContent =
-            "✓ Username";
-
-          completion.className =
-            "completion-item done";
-        }
-
-        showCelebration(
-          "🎉 Username saved!",
-          `Your username is now @${username}.`
-        );
-
-      } catch (error) {
-
-        console.error(
-          "Username error:",
-          error
-        );
-
-        const message =
-          String(
-            error?.message || ""
-          );
-
-        if (
-          message
-            .toLowerCase()
-            .includes("already taken")
-        ) {
-
-          showStatus(
-            "That username is already taken.",
-            "error"
-          );
-
-        } else {
-
-          showStatus(
-            message ||
-            "Unable to save username.",
-            "error"
-          );
-        }
-      }
-  }
-      async function saveProfile() {
-
-      if (!isOwnProfile) {
-        return;
-      }
-
-      const fullNameInput =
-        document.getElementById(
-          "fullNameInput"
-        );
-
-      const locationInput =
-        document.getElementById(
-          "locationInput"
-        );
-
-      if (
-        !fullNameInput ||
-        !locationInput
-      ) {
-        return;
-      }
-
-      const fullName =
-        fullNameInput.value.trim();
-
-      const location =
-        locationInput.value.trim();
-
-      if (!fullName) {
-        showStatus(
-          "Please enter your full name.",
-          "error"
-        );
-
-        fullNameInput.focus();
-        return;
-      }
-
-      if (!location) {
-        showStatus(
-          "Please enter your location.",
-          "error"
-        );
-
-        locationInput.focus();
-        return;
-      }
-
-      const saveButton =
-        document.querySelector(
-          "#ownerControls .save-button:not([onclick='saveUsername()'])"
-        );
-
-      if (saveButton) {
-        saveButton.disabled = true;
-        saveButton.style.opacity = ".65";
-      }
+    } catch (error) {
 
       showStatus(
-        "Saving profile..."
+        error.message ||
+          "Could not save profile.",
+        "error"
       );
 
-      try {
+    } finally {
 
-        let avatarURL =
-          currentUser.user_metadata
-            ?.avatar_url ||
-          "";
+      button.disabled =
+        false;
 
-        if (selectedFile) {
+      button.textContent =
+        "SAVE CHANGES";
 
-          const extension =
-            selectedFile.name
-              .split(".")
-              .pop()
-              .toLowerCase();
+    }
 
-          const filePath =
-            `${currentUser.id}/avatar-${Date.now()}.${extension}`;
+  }
 
-          const {
-            error: uploadError
-          } =
-            await supabaseClient
-              .storage
-              .from(AVATAR_BUCKET)
-              .upload(
-                filePath,
-                selectedFile,
-                {
-                  cacheControl: "3600",
-                  upsert: false,
-                  contentType:
-                    selectedFile.type
-                }
-              );
+  function showVerificationInfo() {
 
-          if (uploadError) {
-            throw uploadError;
-          }
+    alert(
+      "Profile verification is planned as an optional OOULink feature. It is not active yet."
+    );
 
-          const {
-            data: publicData
-          } =
-            supabaseClient
-              .storage
-              .from(AVATAR_BUCKET)
-              .getPublicUrl(
-                filePath
-              );
+  }
 
-          avatarURL =
-            publicData?.publicUrl ||
-            avatarURL;
+  function showTipInfo() {
 
-          selectedFile = null;
+    alert(
+      "Tipping is planned for a future OOULink update."
+    );
 
-          const avatarInput =
-            document.getElementById(
-              "avatarInput"
-            );
+  }
 
-          if (avatarInput) {
-            avatarInput.value = "";
-          }
-        }
+  async function logout() {
 
-        const {
-          error: authError
-        } =
-          await supabaseClient.auth
-            .updateUser({
-              data: {
-                full_name:
-                  fullName,
-                location:
-                  location,
-                avatar_url:
-                  avatarURL
-              }
-            });
+    const result =
+      await supabaseClient.auth.signOut();
 
-        if (authError) {
-          throw authError;
-        }
+    if (
+      result.error
+    ) {
 
-        const {
-          error: profileError
-        } =
-          await supabaseClient
-            .from("profiles")
-            .update({
-              full_name:
-                fullName,
-              location:
-                location,
-              avatar_url:
-                avatarURL
-            })
-            .eq(
-              "id",
-              currentUser.id
-            );
+      alert(
+        "Could not log out."
+      );
 
-        if (profileError) {
-          throw profileError;
-        }
+      return;
+    }
 
-        const {
-          data: refreshedUserData
-        } =
-          await supabaseClient.auth
-            .getUser();
+    window.location.href =
+      "index.html";
+
+  }
+
+  document
+    .getElementById(
+      "avatarInput"
+    )
+    .addEventListener(
+      "change",
+      function(event) {
 
         if (
-          refreshedUserData?.user
+          !isOwnProfile
         ) {
-          currentUser =
-            refreshedUserData.user;
+          return;
         }
 
-        const profileName =
-          document.getElementById(
-            "profileName"
+        const file =
+          event.target.files?.[0];
+
+        if (!file) {
+          return;
+        }
+
+        const allowedTypes = [
+          "image/jpeg",
+          "image/png",
+          "image/webp"
+        ];
+
+        if (
+          !allowedTypes.includes(
+            file.type
+          )
+        ) {
+
+          alert(
+            "Please choose a JPG, PNG, or WebP image."
           );
 
-        const profileLocation =
-          document.getElementById(
-            "profileLocation"
+          event.target.value =
+            "";
+
+          return;
+        }
+
+        if (
+          file.size >
+          2 * 1024 * 1024
+        ) {
+
+          alert(
+            "Profile pictures must be 2MB or smaller."
           );
 
-        if (profileName) {
-          profileName.textContent =
-            fullName;
+          event.target.value =
+            "";
+
+          return;
         }
 
-        if (profileLocation) {
-          profileLocation.textContent =
-            `📍 ${location}`;
-        }
+        selectedFile =
+          file;
 
         showAvatar(
-          avatarURL
+          URL.createObjectURL(
+            file
+          )
         );
 
-        updateCompletionUI({
-          full_name:
-            fullName,
-          username:
-            document.getElementById(
-              "usernameInput"
-            )?.value
-              ?.trim() || "",
-          location:
-            location,
-          avatar_url:
-            avatarURL
-        });
-
-        showStatus(
-          "Profile saved successfully.",
-          "success"
-        );
-
-        showCelebration(
-          "✅ Profile updated!",
-          "Your OOULink profile has been saved."
-        );
-
-      } catch (error) {
-
-        console.error(
-          "Save profile error:",
-          error
-        );
-
-        showStatus(
-          error?.message ||
-          "Unable to save profile.",
-          "error"
-        );
-
-      } finally {
-
-        if (saveButton) {
-          saveButton.disabled = false;
-          saveButton.style.opacity = "1";
-        }
-      }
-    }
-
-    function showVerificationInfo() {
-
-      alert(
-        "Profile verification is coming soon.\n\n" +
-        "This will be an optional trust feature for OOULink users."
-      );
-    }
-
-    function showTipInfo() {
-
-      alert(
-        "Tipping is coming soon.\n\n" +
-        "You'll be able to support helpful OOULink users in a future update."
-      );
-    }
-
-    async function logout() {
-
-      const confirmed =
-        window.confirm(
-          "Are you sure you want to log out?"
-        );
-
-      if (!confirmed) {
-        return;
-      }
-
-      try {
-
-        const {
-          error
-        } =
-          await supabaseClient.auth
-            .signOut();
-
-        if (error) {
-          throw error;
-        }
-
-        window.location.href =
-          "index.html";
-
-      } catch (error) {
-
-        console.error(
-          "Logout error:",
-          error
-        );
-
-        showStatus(
-          "Unable to log out right now.",
-          "error"
-        );
-      }
-    }
-
-    window.addEventListener(
-      "DOMContentLoaded",
-      () => {
-        loadProfile();
       }
     );
-    </script>
+    async function loadProfile() {
+
+    const sessionResult =
+      await supabaseClient
+        .auth
+        .getSession();
+
+    if (
+      sessionResult.error ||
+      !sessionResult.data.session
+    ) {
+
+      window.location.href =
+        "login.html?redirect=profile.html";
+
+      return;
+    }
+
+    currentUser =
+      sessionResult
+        .data
+        .session
+        .user;
+
+    const requestedId =
+      getProfileIdFromURL();
+
+    if (
+      requestedId
+    ) {
+
+      if (
+        !isValidUUID(
+          requestedId
+        )
+      ) {
+
+        throw new Error(
+          "Invalid profile link."
+        );
+
+      }
+
+      profileUserId =
+        requestedId;
+
+    } else {
+
+      profileUserId =
+        currentUser.id;
+
+    }
+
+    isOwnProfile =
+      profileUserId ===
+      currentUser.id;
+
+    const profileResult =
+      await supabaseClient
+        .from("profiles")
+        .select(
+          "id,username,full_name,location,avatar_url,xp,reputation"
+        )
+        .eq(
+          "id",
+          profileUserId
+        )
+        .maybeSingle();
+
+    if (
+      profileResult.error
+    ) {
+      throw profileResult.error;
+    }
+
+    const profile =
+      profileResult.data ||
+      {};
+
+    const fallbackName =
+      currentUser.user_metadata
+        ?.full_name ||
+      "OOULink User";
+
+    const fallbackLocation =
+      currentUser.user_metadata
+        ?.location ||
+      "";
+
+    const fallbackAvatar =
+      currentUser.user_metadata
+        ?.avatar_url ||
+      "";
+
+    const name =
+      profile.full_name ||
+      fallbackName;
+
+    const location =
+      profile.location ||
+      fallbackLocation;
+
+    const avatar =
+      profile.avatar_url ||
+      fallbackAvatar;
+
+    const username =
+      profile.username ||
+      "";
+
+    profileStats.xp =
+      Number(
+        profile.xp
+      ) || 0;
+
+    profileStats.reputation =
+      Number(
+        profile.reputation
+      ) || 0;
+
+    document.getElementById(
+      "profileName"
+    ).textContent =
+      name;
+
+    document.getElementById(
+      "profileUsername"
+    ).textContent =
+      username
+        ? "@" + username
+        : "Username not set";
+
+    document.getElementById(
+      "profileLocation"
+    ).textContent =
+      location ||
+      "Location not set";
+
+    showAvatar(
+      avatar
+    );
+
+    if (
+      isOwnProfile
+    ) {
+
+      document.getElementById(
+        "fullName"
+      ).value =
+        name === "OOULink User"
+          ? ""
+          : name;
+
+      document.getElementById(
+        "location"
+      ).value =
+        location;
+
+    }
+
+    document.getElementById(
+      "usernameSetup"
+    ).classList.toggle(
+      "hidden",
+      !isOwnProfile ||
+      Boolean(username)
+    );
+
+    setPageMode();
+
+    updateLevelUI(
+      profileStats.xp
+    );
+
+    await loadTaskStats(
+      profileUserId
+    );
+
+    await loadReviews(
+      profileUserId
+    );
+
+    updateCompletionUI({
+      full_name:
+        name,
+
+      location:
+        location,
+
+      avatar_url:
+        avatar,
+
+      username:
+        username
+    });
+
+    updateAchievements();
+
+    document.getElementById(
+      "loadingState"
+    ).classList.add(
+      "hidden"
+    );
+
+    document.getElementById(
+      "profileContent"
+    ).classList.remove(
+      "hidden"
+    );
+
+  }
+
+  window.addEventListener(
+    "error",
+    function(event) {
+
+      console.error(
+        "Profile error:",
+        event.error ||
+          event.message
+      );
+
+    }
+  );
+
+  loadProfile()
+    .catch(
+      function(error) {
+
+        console.error(
+          error
+        );
+
+        document.getElementById(
+          "loadingState"
+        ).classList.add(
+          "hidden"
+        );
+
+        const errorBox =
+          document.getElementById(
+            "errorState"
+          );
+
+        errorBox.textContent =
+          "Could not load this profile. Please refresh and try again.";
+
+        errorBox.classList.remove(
+          "hidden"
+        );
+
+      }
+    );
+  </script>
 
 </body>
 </html>
