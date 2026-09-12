@@ -175,6 +175,7 @@
     SUPABASE_URL,
     SUPABASE_KEY
   );
+  let moderationBlocked=false;function showModerationScreen(d){if(moderationBlocked)return;moderationBlocked=true;const t=d.ban_type==="temporary",e=t&&d.banned_until?new Date(d.banned_until).toLocaleString():null;document.body.innerHTML=`<div style="position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px;z-index:99999"><div style="width:100%;max-width:420px;background:#fff;border-radius:20px;padding:28px 22px;text-align:center"><div style="font-size:48px">🚫</div><h2>OOULink Account Restricted</h2><p>Your account is currently ${t?"temporarily":"permanently"} restricted and you cannot access My Tasks.</p>${t&&e?`<p><strong>Restriction ends:</strong><br>${e}</p>`:""}${d.ban_reason?`<p><strong>Reason:</strong><br>${String(d.ban_reason).replace(/[<>&"]/g,"")}</p>`:""}<p>Please follow OOULink's rules. If you believe this action was made in error, contact OOULink support.</p><button onclick="logoutModerated()" style="width:100%;border:0;border-radius:12px;padding:14px;background:#16834b;color:#fff;font-weight:700">LOG OUT</button></div></div>`}async function logoutModerated(){await supabaseClient.auth.signOut();location.href="login.html"}async function checkModeration(){const{data:{session}}=await supabaseClient.auth.getSession();if(!session){location.href="login.html";return false}const{data,error}=await supabaseClient.from("user_moderation").select("status,ban_type,banned_until,ban_reason").eq("user_id",session.user.id).maybeSingle();if(error)return true;if(data?.status==="banned"){const a=data.ban_type==="permanent"||(data.ban_type==="temporary"&&data.banned_until&&new Date(data.banned_until)>new Date());if(a){showModerationScreen(data);return false}}return true}
 
   const taskList = document.getElementById("taskList");
   const postedTab = document.getElementById("postedTab");
@@ -344,20 +345,7 @@
     loadTasks();
   });
 
-  async function initialize() {
-    const {
-      data: { session }
-    } = await supabaseClient.auth.getSession();
-
-    if (!session) {
-      window.location.href = "login.html";
-      return;
-    }
-
-    currentUser = session.user;
-
-    await loadTasks();
-  }
+  async function initialize(){const{data:{session}}=await supabaseClient.auth.getSession();if(!session){window.location.href="login.html";return}currentUser=session.user;if(!(await checkModeration()))return;await loadTasks()}
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
     if (!session) {
