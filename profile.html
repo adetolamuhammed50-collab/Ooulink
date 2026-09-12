@@ -1970,25 +1970,9 @@
               }
             );
 
-        if (
-          upload.error
-        ) {
-          throw upload.error;
-        }
+        if(upload.error)throw new Error("Avatar upload failed: "+upload.error.message);
 
-        avatarUrl =
-          supabaseClient
-            .storage
-            .from(
-              AVATAR_BUCKET
-            )
-            .getPublicUrl(
-              path
-            )
-            .data
-            .publicUrl;
-
-      }
+        avatarUrl=supabaseClient.storage.from(AVATAR_BUCKET).getPublicUrl(path).data.publicUrl+"?v="+Date.now();
 
       const metadata = {
         ...(currentUser.user_metadata || {}),
