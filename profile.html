@@ -2075,8 +2075,7 @@ function showVerificationForm(button,badge){let old=document.getElementById("ver
       profileResult.data ||
       {};
 
-    const name=profile.full_name||(isOwnProfile?currentUser.user_metadata?.full_name:"")||"OOULink User";const location=profile.location||(isOwnProfile?currentUser.user_metadata?.location:"")||"";const avatar=profile.avatar_url||(isOwnProfile?currentUser.user_metadata?.avatar_url:"")||"";
-
+    
     const name=profile.full_name||(isOwnProfile?currentUser.user_metadata?.full_name:"")||"OOULink User",location=profile.location||(isOwnProfile?currentUser.user_metadata?.location:"")||"",avatar=profile.avatar_url||(isOwnProfile?currentUser.user_metadata?.avatar_url:"")||"";
     const username =
       profile.username ||
