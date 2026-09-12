@@ -55,6 +55,7 @@ h1{margin:0;font-size:24px}.count{font-size:12px;background:#ffffff2b;padding:6p
 const SUPABASE_URL="https://dthvdxgxesomltlruogp.supabase.co";
 const SUPABASE_KEY="sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let moderationBlocked=false;function showModerationScreen(d){if(moderationBlocked)return;moderationBlocked=true;const t=d.ban_type==="temporary",e=t&&d.banned_until?new Date(d.banned_until).toLocaleString():null;document.body.innerHTML=`<div style="position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px;z-index:99999"><div style="width:100%;max-width:420px;background:#fff;border-radius:20px;padding:28px 22px;text-align:center"><div style="font-size:48px">🚫</div><h2>OOULink Account Restricted</h2><p>Your account is currently ${t?"temporarily":"permanently"} restricted and you cannot access alerts.</p>${t&&e?`<p><strong>Restriction ends:</strong><br>${e}</p>`:""}${d.ban_reason?`<p><strong>Reason:</strong><br>${String(d.ban_reason).replace(/[<>&"]/g,"")}</p>`:""}<p>Please follow OOULink's rules. If you believe this action was made in error, contact OOULink support.</p><button onclick="logoutModerated()" style="width:100%;border:0;border-radius:12px;padding:14px;background:#16834b;color:#fff;font-weight:700">LOG OUT</button></div></div>`}async function logoutModerated(){await supabaseClient.auth.signOut();location.href="login.html"}async function checkModeration(){const{data:{session}}=await supabaseClient.auth.getSession();if(!session){location.href="login.html";return false}const{data,error}=await supabaseClient.from("user_moderation").select("status,ban_type,banned_until,ban_reason").eq("user_id",session.user.id).maybeSingle();if(error)return true;if(data?.status==="banned"){const a=data.ban_type==="permanent"||(data.ban_type==="temporary"&&data.banned_until&&new Date(data.banned_until)>new Date());if(a){showModerationScreen(data);return false}}return true}
 const alerts=document.getElementById("alerts"),dot=document.getElementById("dot"),count=document.getElementById("count"),filters=document.getElementById("filters");
 let currentUser=null,allNotifications=[],taskMap={},activeFilter="all";
 function escapeHTML(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
@@ -141,7 +142,7 @@ filters.addEventListener("click",e=>{
  const b=e.target.closest(".filter");if(!b)return;activeFilter=b.dataset.filter;
  filters.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x===b));render();
 });
-document.addEventListener("DOMContentLoaded",loadAlerts);
+document.addEventListener("DOMContentLoaded",()=>{checkModeration().then(a=>{if(a)loadAlerts()})});
 </script>
 </body>
 </html>
