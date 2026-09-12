@@ -2219,19 +2219,7 @@ function renderActions(){
 
     renderActions();
 
-  }catch(error){
-    console.error("Apply for task error:",error);
-
-    if(button){
-      button.disabled = false;
-      button.textContent = "Apply for Task";
-    }
-
-    showToast(
-      error?.message ||
-      "Could not apply for this task."
-    );
-  }
+  }catch(error){console.error("Apply for task error:",error);if(button){button.disabled=false;button.textContent="Apply for Task";}if(error?.message?.includes("OOULINK_RATE_LIMITED"))showToast("⚡ Slow down — you can submit a maximum of 3 applications every 2 minutes. Please wait before applying again.");else showToast(error?.message||"Could not apply for this task.");}
 }
 
 async function selectRunner(applicationId){
