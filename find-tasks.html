@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Find Tasks - OOULink</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -36,6 +37,10 @@ nav a {
 user-select: none;
 }
 
+button {
+-webkit-tap-highlight-color: transparent;
+}
+
 .app {
 max-width: 480px;
 margin: auto;
@@ -51,6 +56,18 @@ background: #fff;
 position: sticky;
 top: 0;
 z-index: 20;
+animation: headerIn .35s ease both;
+}
+
+@keyframes headerIn {
+from {
+opacity: 0;
+transform: translateY(-8px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
 }
 
 .back {
@@ -59,7 +76,9 @@ text-decoration: none;
 color: #555;
 font-size: 14px;
 padding: 5px 0;
-transition: transform .15s ease, color .15s ease;
+transition:
+transform .15s ease,
+color .15s ease;
 }
 
 .back:active {
@@ -71,6 +90,7 @@ h1 {
 margin: 15px 0 5px;
 font-size: 26px;
 letter-spacing: -.4px;
+animation: textIn .4s ease .04s both;
 }
 
 .subtitle {
@@ -78,11 +98,24 @@ color: #777;
 font-size: 14px;
 line-height: 1.45;
 margin-bottom: 18px;
+animation: textIn .4s ease .08s both;
+}
+
+@keyframes textIn {
+from {
+opacity: 0;
+transform: translateY(5px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
 }
 
 .search-wrap {
 position: relative;
 margin-bottom: 12px;
+animation: textIn .4s ease .12s both;
 }
 
 .search-icon {
@@ -92,6 +125,11 @@ top: 50%;
 transform: translateY(-50%);
 font-size: 15px;
 pointer-events: none;
+transition: transform .2s ease;
+}
+
+.search-wrap:focus-within .search-icon {
+transform: translateY(-50%) scale(1.08);
 }
 
 .search-box {
@@ -102,12 +140,19 @@ border-radius: 13px;
 font-size: 15px;
 outline: none;
 background: #fff;
-transition: border-color .2s ease, box-shadow .2s ease;
+transition:
+border-color .2s ease,
+box-shadow .2s ease,
+transform .15s ease;
 }
 
 .search-box:focus {
 border-color: #16834b;
 box-shadow: 0 0 0 3px rgba(22,131,75,.08);
+}
+
+.search-box:active {
+transform: scale(.998);
 }
 
 .clear-search {
@@ -125,15 +170,25 @@ display: none;
 align-items: center;
 justify-content: center;
 cursor: pointer;
+transition:
+transform .15s ease,
+background .15s ease;
 }
 
 .clear-search.show {
 display: flex;
+animation: popIn .18s ease both;
+}
+
+.clear-search:active {
+transform: translateY(-50%) scale(.88);
+background: #e5e9e7;
 }
 
 .filter-row {
 display: flex;
 gap: 9px;
+animation: textIn .4s ease .16s both;
 }
 
 .filter-select {
@@ -146,12 +201,19 @@ background: white;
 font-size: 14px;
 outline: none;
 color: #172033;
-transition: border-color .2s ease, box-shadow .2s ease;
+transition:
+border-color .2s ease,
+box-shadow .2s ease,
+transform .15s ease;
 }
 
 .filter-select:focus {
 border-color: #16834b;
 box-shadow: 0 0 0 3px rgba(22,131,75,.07);
+}
+
+.filter-select:active {
+transform: scale(.995);
 }
 
 .results-bar {
@@ -161,11 +223,20 @@ justify-content: space-between;
 padding: 14px 20px 2px;
 font-size: 13px;
 color: #777;
+animation: textIn .4s ease .2s both;
 }
 
 .results-count {
 font-weight: 600;
 color: #555;
+transition:
+opacity .18s ease,
+transform .18s ease;
+}
+
+.results-count.updating {
+opacity: .45;
+transform: translateY(2px);
 }
 
 .clear-filters {
@@ -177,14 +248,41 @@ font-weight: 600;
 padding: 4px 0;
 cursor: pointer;
 display: none;
+transition:
+transform .15s ease,
+opacity .15s ease;
 }
 
 .clear-filters.show {
 display: block;
+animation: popIn .18s ease both;
+}
+
+.clear-filters:active {
+transform: scale(.94);
+}
+
+@keyframes popIn {
+from {
+opacity: 0;
+transform: scale(.9);
+}
+to {
+opacity: 1;
+transform: scale(1);
+}
 }
 
 #tasks {
 padding: 12px 20px 20px;
+transition:
+opacity .18s ease,
+transform .18s ease;
+}
+
+#tasks.refreshing {
+opacity: .55;
+transform: translateY(3px);
 }
 
 .task {
@@ -198,8 +296,10 @@ box-shadow: 0 2px 7px rgba(20,40,30,.035);
 transition:
 transform .18s ease,
 box-shadow .18s ease,
-border-color .18s ease;
-animation: cardIn .28s ease both;
+border-color .18s ease,
+opacity .18s ease;
+animation: cardIn .32s cubic-bezier(.22,.8,.25,1) both;
+will-change: transform, opacity;
 }
 
 .task:hover {
@@ -212,14 +312,29 @@ transform: scale(.985);
 box-shadow: 0 2px 7px rgba(20,40,30,.04);
 }
 
+.task.opening {
+animation: cardOpen .2s ease both;
+}
+
 @keyframes cardIn {
 from {
 opacity: 0;
-transform: translateY(7px);
+transform: translateY(9px);
 }
 to {
 opacity: 1;
 transform: translateY(0);
+}
+}
+
+@keyframes cardOpen {
+from {
+opacity: .7;
+transform: scale(.99);
+}
+to {
+opacity: 1;
+transform: scale(1);
 }
 }
 
@@ -286,6 +401,14 @@ min-width: 0;
 background: #f7f9f8;
 border-radius: 11px;
 padding: 9px 10px;
+transition:
+transform .15s ease,
+background .15s ease;
+}
+
+.meta-item:active {
+transform: scale(.985);
+background: #f2f6f4;
 }
 
 .meta-label {
@@ -308,6 +431,10 @@ overflow: hidden;
 text-overflow: ellipsis;
 }
 
+.deadline-soon {
+color: #c57918;
+}
+
 .budget-row {
 display: flex;
 align-items: center;
@@ -328,6 +455,11 @@ font-size: 20px;
 font-weight: 800;
 color: #16834b;
 letter-spacing: -.3px;
+transition: transform .18s ease;
+}
+
+.task:hover .budget {
+transform: translateX(-2px);
 }
 
 .view-btn {
@@ -346,6 +478,8 @@ transform .15s ease,
 background .15s ease,
 box-shadow .15s ease;
 box-shadow: 0 3px 8px rgba(22,131,75,.15);
+position: relative;
+overflow: hidden;
 }
 
 .view-btn:hover {
@@ -357,17 +491,54 @@ transform: scale(.98);
 box-shadow: none;
 }
 
+.view-btn::after {
+content: "";
+position: absolute;
+inset: 0;
+background: rgba(255,255,255,.12);
+opacity: 0;
+transition: opacity .15s ease;
+}
+
+.view-btn:active::after {
+opacity: 1;
+}
+
 .message {
 text-align: center;
 padding: 42px 18px;
 color: #777;
 font-size: 14px;
 line-height: 1.5;
+animation: emptyIn .3s ease both;
+}
+
+@keyframes emptyIn {
+from {
+opacity: 0;
+transform: translateY(8px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
 }
 
 .empty-icon {
 font-size: 34px;
 margin-bottom: 9px;
+animation: iconFloat .35s ease .08s both;
+}
+
+@keyframes iconFloat {
+from {
+opacity: 0;
+transform: scale(.8) translateY(5px);
+}
+to {
+opacity: 1;
+transform: scale(1) translateY(0);
+}
 }
 
 .empty-title {
@@ -392,6 +563,14 @@ border-radius: 10px;
 font-weight: 700;
 font-size: 13px;
 cursor: pointer;
+transition:
+transform .15s ease,
+background .15s ease;
+}
+
+.empty-action:active {
+transform: scale(.95);
+background: #126d3e;
 }
 
 .skeleton {
@@ -402,38 +581,64 @@ margin-bottom: 14px;
 overflow: hidden;
 position: relative;
 background: #fff;
+animation: skeletonIn .25s ease both;
+}
+
+.skeleton:nth-child(2) {
+animation-delay: .05s;
+}
+
+.skeleton:nth-child(3) {
+animation-delay: .1s;
+}
+
+@keyframes skeletonIn {
+from {
+opacity: 0;
+transform: translateY(6px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+.skeleton-line,
+.skeleton-pill,
+.skeleton-button {
+position: relative;
+overflow: hidden;
+background: #edf0ee;
+}
+
+.skeleton-line::after,
+.skeleton-pill::after,
+.skeleton-button::after {
+content: "";
+position: absolute;
+top: 0;
+left: -120%;
+width: 65%;
+height: 100%;
+background: linear-gradient(
+90deg,
+transparent,
+rgba(255,255,255,.75),
+transparent
+);
+animation: shimmer 1.25s ease-in-out infinite;
 }
 
 .skeleton-line {
 height: 11px;
 border-radius: 7px;
-background: #edf0ee;
 margin-bottom: 10px;
-position: relative;
-overflow: hidden;
-}
-
-.skeleton-line::after {
-content: "";
-position: absolute;
-top: 0;
-left: -100%;
-width: 60%;
-height: 100%;
-background: linear-gradient(
-90deg,
-transparent,
-rgba(255,255,255,.7),
-transparent
-);
-animation: shimmer 1.2s infinite;
 }
 
 .skeleton-pill {
 width: 82px;
 height: 23px;
 border-radius: 20px;
-background: #edf0ee;
 margin-bottom: 13px;
 }
 
@@ -452,10 +657,12 @@ width: 100%;
 height: 40px;
 border-radius: 11px;
 margin-top: 13px;
-background: #edf0ee;
 }
 
 @keyframes shimmer {
+0% {
+left: -120%;
+}
 100% {
 left: 150%;
 }
@@ -501,10 +708,6 @@ nav a:active {
 transform: scale(.92);
 }
 
-nav a br {
-display: block;
-}
-
 @media (max-width: 360px) {
 header {
 padding: 18px 16px;
@@ -528,14 +731,25 @@ padding: 14px;
 gap: 6px;
 }
 }
-</style>
-</head>
 
-<body>
+@media (prefers-reduced-motion: reduce) {
+*,
+*::before,
+*::after {
+animation-duration: .01ms !important;
+animation-iteration-count: 1 !important;
+transition-duration: .01ms !important;
+scroll-behavior: auto !important;
+}
+}
+</style>
+  </head>
+  <body>
 
 <div class="app">
 
 <header>
+
 <a href="index.html" class="back">← Back</a>
 
 <h1>Find Tasks</h1>
@@ -545,6 +759,7 @@ Find tasks you can complete and earn.
 </div>
 
 <div class="search-wrap">
+
 <span class="search-icon">🔎</span>
 
 <input
@@ -564,6 +779,7 @@ onclick="clearSearch()"
 >
 ×
 </button>
+
 </div>
 
 <div class="filter-row">
@@ -572,6 +788,7 @@ onclick="clearSearch()"
 id="categoryFilter"
 class="filter-select"
 >
+
 <option value="all">All Categories</option>
 <option value="Errands">Errands</option>
 <option value="Physical Help">Physical Help</option>
@@ -580,22 +797,31 @@ class="filter-select"
 <option value="Academic Support">Academic Support</option>
 <option value="Campus Services">Campus Services</option>
 <option value="Other">Other</option>
+
 </select>
 
 <select
 id="sortFilter"
 class="filter-select"
 >
+
 <option value="newest">Newest</option>
 <option value="highest">Highest Pay</option>
 <option value="lowest">Lowest Pay</option>
 <option value="deadline">Closest Deadline</option>
+
 </select>
+
+</div>
 
 </header>
 
 <div class="results-bar">
-<span id="resultsCount" class="results-count">
+
+<span
+id="resultsCount"
+class="results-count"
+>
 Loading...
 </span>
 
@@ -607,29 +833,59 @@ onclick="clearFilters()"
 >
 Clear filters
 </button>
+
 </div>
 
 <div id="tasks">
+
 <div class="skeleton">
+
 <div class="skeleton-pill"></div>
+
 <div class="skeleton-line skeleton-title"></div>
+
 <div class="skeleton-line"></div>
+
 <div class="skeleton-line skeleton-short"></div>
+
 <div class="skeleton-button"></div>
+
 </div>
 
 <div class="skeleton">
+
 <div class="skeleton-pill"></div>
+
 <div class="skeleton-line skeleton-title"></div>
+
 <div class="skeleton-line"></div>
+
 <div class="skeleton-line skeleton-short"></div>
+
 <div class="skeleton-button"></div>
+
 </div>
+
+<div class="skeleton">
+
+<div class="skeleton-pill"></div>
+
+<div class="skeleton-line skeleton-title"></div>
+
+<div class="skeleton-line"></div>
+
+<div class="skeleton-line skeleton-short"></div>
+
+<div class="skeleton-button"></div>
+
+</div>
+
 </div>
 
 </div>
 
 <nav>
+
 <a href="index.html">
 🏠<br>Home
 </a>
@@ -649,8 +905,8 @@ Clear filters
 <a href="profile.html">
 👤<br>Profile
 </a>
-</nav>
 
+</nav>
 <script>
 const SUPABASE_URL =
 "https://dthvdxgxesomltlruogp.supabase.co";
@@ -665,6 +921,9 @@ SUPABASE_KEY
 );
 
 let allTasks = [];
+
+const tasksContainer =
+document.getElementById("tasks");
 
 const searchInput =
 document.getElementById("searchInput");
@@ -684,6 +943,7 @@ document.getElementById("clearFilters");
 const resultsCount =
 document.getElementById("resultsCount");
 
+
 searchInput.addEventListener(
 "input",
 filterTasks
@@ -699,36 +959,65 @@ sortFilter.addEventListener(
 filterTasks
 );
 
+
 function showSkeletons() {
-const container =
-document.getElementById("tasks");
 
-container.innerHTML = `
+tasksContainer.classList.remove(
+"refreshing"
+);
+
+tasksContainer.innerHTML = `
 <div class="skeleton">
+
 <div class="skeleton-pill"></div>
+
 <div class="skeleton-line skeleton-title"></div>
+
 <div class="skeleton-line"></div>
+
 <div class="skeleton-line skeleton-short"></div>
+
 <div class="skeleton-button"></div>
+
 </div>
 
 <div class="skeleton">
+
 <div class="skeleton-pill"></div>
+
 <div class="skeleton-line skeleton-title"></div>
+
 <div class="skeleton-line"></div>
+
 <div class="skeleton-line skeleton-short"></div>
+
 <div class="skeleton-button"></div>
+
 </div>
 
 <div class="skeleton">
+
 <div class="skeleton-pill"></div>
+
 <div class="skeleton-line skeleton-title"></div>
+
 <div class="skeleton-line"></div>
+
 <div class="skeleton-line skeleton-short"></div>
+
 <div class="skeleton-button"></div>
+
 </div>
 `;
+
+resultsCount.textContent =
+"Loading...";
+
+resultsCount.classList.remove(
+"updating"
+);
 }
+
 
 async function loadTasks() {
 
@@ -736,17 +1025,22 @@ showSkeletons();
 
 const {
 data: { session }
-} = await supabaseClient.auth.getSession();
+} =
+await supabaseClient.auth.getSession();
 
 if (!session) {
-window.location.href = "login.html";
+
+window.location.href =
+"login.html";
+
 return;
 }
 
 const {
 data,
 error
-} = await supabaseClient
+} =
+await supabaseClient
 .from("tasks")
 .select("*")
 .eq("status", "open")
@@ -756,27 +1050,37 @@ ascending: false
 
 if (error) {
 
-document.getElementById("tasks").innerHTML = `
+tasksContainer.innerHTML = `
 <div class="message">
-<div class="empty-icon">⚠️</div>
+
+<div class="empty-icon">
+⚠️
+</div>
+
 <div class="empty-title">
 Unable to load tasks
 </div>
+
 <div class="empty-text">
 Please check your connection and try again.
 </div>
+
 <button
+type="button"
 class="empty-action"
 onclick="loadTasks()"
 >
 Try again
 </button>
+
 </div>
 `;
 
-resultsCount.textContent = "Unable to load";
+resultsCount.textContent =
+"Unable to load";
 
 console.error(error);
+
 return;
 }
 
@@ -784,6 +1088,7 @@ allTasks = data || [];
 
 filterTasks();
 }
+
 
 function filterTasks() {
 
@@ -828,20 +1133,27 @@ const matchesCategory =
 category === "all" ||
 task.category === category;
 
-return matchesSearch &&
-matchesCategory;
+return (
+matchesSearch &&
+matchesCategory
+);
 });
+
 
 filtered.sort((a, b) => {
 
 if (sort === "highest") {
+
 return Number(b.budget || 0) -
 Number(a.budget || 0);
+
 }
 
 if (sort === "lowest") {
+
 return Number(a.budget || 0) -
 Number(b.budget || 0);
+
 }
 
 if (sort === "deadline") {
@@ -857,6 +1169,7 @@ b.deadline
 : Number.MAX_SAFE_INTEGER;
 
 return dateA - dateB;
+
 }
 
 const dateA =
@@ -870,7 +1183,9 @@ b.created_at
 : 0;
 
 return dateB - dateA;
+
 });
+
 
 updateFilterControls(
 search,
@@ -880,6 +1195,7 @@ sort
 
 displayTasks(filtered);
 }
+
 
 function updateFilterControls(
 search,
@@ -903,21 +1219,46 @@ hasFilters
 );
 }
 
-function displayTasks(tasks) {
 
-const container =
-document.getElementById("tasks");
+function updateResultsCount(
+count
+) {
+
+resultsCount.classList.add(
+"updating"
+);
+
+setTimeout(() => {
 
 resultsCount.textContent =
-tasks.length === 1
+count === 1
 ? "1 task available"
-: `${tasks.length} tasks available`;
+: `${count} tasks available`;
+
+resultsCount.classList.remove(
+"updating"
+);
+
+}, 80);
+}
+
+
+function displayTasks(tasks) {
+
+tasksContainer.classList.add(
+"refreshing"
+);
+
+setTimeout(() => {
 
 if (!tasks.length) {
 
-container.innerHTML = `
+tasksContainer.innerHTML = `
 <div class="message">
-<div class="empty-icon">🔎</div>
+
+<div class="empty-icon">
+🔎
+</div>
 
 <div class="empty-title">
 No tasks found
@@ -928,18 +1269,27 @@ Try another search or remove your filters.
 </div>
 
 <button
+type="button"
 class="empty-action"
 onclick="clearFilters()"
 >
 Clear filters
 </button>
+
 </div>
 `;
+
+updateResultsCount(0);
+
+tasksContainer.classList.remove(
+"refreshing"
+);
 
 return;
 }
 
-container.innerHTML =
+
+tasksContainer.innerHTML =
 tasks.map((task, index) => {
 
 const category =
@@ -972,7 +1322,9 @@ const deadline =
 formatDeadline(task.deadline);
 
 const deadlineClass =
-getDeadlineClass(task.deadline);
+getDeadlineClass(
+task.deadline
+);
 
 return `
 <div
@@ -1009,6 +1361,7 @@ ${description}
 <div class="task-meta">
 
 <div class="meta-item">
+
 <span class="meta-label">
 Location
 </span>
@@ -1016,9 +1369,11 @@ Location
 <span class="meta-value">
 📍 ${location}
 </span>
+
 </div>
 
 <div class="meta-item">
+
 <span class="meta-label">
 Deadline
 </span>
@@ -1028,6 +1383,7 @@ class="meta-value ${deadlineClass}"
 >
 ⏰ ${deadline}
 </span>
+
 </div>
 
 </div>
@@ -1059,16 +1415,45 @@ VIEW TASK →
 `;
 
 }).join("");
+
+
+updateResultsCount(
+tasks.length
+);
+
+tasksContainer.classList.remove(
+"refreshing"
+);
+
+}, 120);
 }
+
 
 function openTask(taskId) {
 
 if (!taskId) return;
 
+const card =
+event &&
+event.currentTarget;
+
+if (card) {
+
+card.classList.add(
+"opening"
+);
+
+}
+
+setTimeout(() => {
+
 window.location.href =
 "task-details.html?id=" +
 encodeURIComponent(taskId);
+
+}, 100);
 }
+
 
 function clearSearch() {
 
@@ -1078,6 +1463,7 @@ filterTasks();
 
 searchInput.focus();
 }
+
 
 function clearFilters() {
 
@@ -1090,6 +1476,7 @@ sortFilter.value = "newest";
 filterTasks();
 }
 
+
 function formatDeadline(date) {
 
 if (!date) {
@@ -1099,9 +1486,11 @@ return "No deadline";
 const deadline =
 new Date(date);
 
-if (Number.isNaN(
+if (
+Number.isNaN(
 deadline.getTime()
-)) {
+)
+) {
 return "No deadline";
 }
 
@@ -1119,12 +1508,17 @@ if (diff < 0) {
 return "Deadline passed";
 }
 
-if (diff < 60 * 60 * 1000) {
+if (
+diff <
+60 * 60 * 1000
+) {
 
 const minutes =
 Math.max(
 1,
-Math.ceil(diff / 60000)
+Math.ceil(
+diff / 60000
+)
 );
 
 return `Due in ${minutes}m`;
@@ -1135,7 +1529,9 @@ if (diff < day) {
 const hours =
 Math.max(
 1,
-Math.ceil(diff / 3600000)
+Math.ceil(
+diff / 3600000
+)
 );
 
 return `Due in ${hours}h`;
@@ -1148,7 +1544,9 @@ return "Due tomorrow";
 if (diff < 7 * day) {
 
 const days =
-Math.ceil(diff / day);
+Math.ceil(
+diff / day
+);
 
 return `Due in ${days} days`;
 }
@@ -1163,6 +1561,7 @@ year: "numeric"
 );
 }
 
+
 function getDeadlineClass(date) {
 
 if (!date) {
@@ -1172,9 +1571,11 @@ return "";
 const deadline =
 new Date(date);
 
-if (Number.isNaN(
+if (
+Number.isNaN(
 deadline.getTime()
-)) {
+)
+) {
 return "";
 }
 
@@ -1186,12 +1587,16 @@ if (diff < 0) {
 return "";
 }
 
-if (diff < 24 * 60 * 60 * 1000) {
+if (
+diff <
+24 * 60 * 60 * 1000
+) {
 return "deadline-soon";
 }
 
 return "";
 }
+
 
 function escapeHtml(text) {
 
@@ -1203,6 +1608,7 @@ return String(text || "")
 .replace(/'/g, "&#039;");
 }
 
+
 function escapeJs(text) {
 
 return String(text || "")
@@ -1212,6 +1618,7 @@ return String(text || "")
 .replace(/\n/g, "\\n")
 .replace(/\r/g, "\\r");
 }
+
 
 loadTasks();
 </script>
