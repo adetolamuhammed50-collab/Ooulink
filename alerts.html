@@ -1,267 +1,552 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Alerts - OOULink</title>
+<title>Alerts - OOULink</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f7fb;
-      color: #111827;
-      padding-bottom: 82px;
-    }
-
-    .app {
-      max-width: 480px;
-      min-height: 100vh;
-      margin: auto;
-      background: #f5f7fb;
-    }
-
-    header {
-      background: #2563eb;
-      color: white;
-      padding: 20px;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 24px;
-    }
-
-    .container {
-      padding: 16px;
-      max-width: 700px;
-      margin: auto;
-    }
-
-    .loading,
-    .empty,
-    .error {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      text-align: center;
-      margin-top: 15px;
-    }
-
-    .error {
-      color: #b91c1c;
-    }
-
-    .task-group {
-      background: white;
-      border-radius: 14px;
-      margin-bottom: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-
-    .task-header {
-      padding: 16px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .task-title {
-      font-weight: bold;
-      font-size: 17px;
-    }
-
-    .task-meta {
-      margin-top: 6px;
-      font-size: 13px;
-      color: #6b7280;
-    }
-
-    .group-content {
-      display: none;
-      border-top: 1px solid #eee;
-      padding: 8px 16px 16px;
-    }
-
-    .group-content.open {
-      display: block;
-    }
-
-    .notification {
-      padding: 12px 0;
-      border-bottom: 1px solid #eee;
-    }
-
-    .notification:last-child {
-      border-bottom: none;
-    }
-
-    .notification-title {
-      font-weight: bold;
-    }
-
-    .notification-message {
-      font-size: 14px;
-      color: #4b5563;
-      margin-top: 4px;
-      line-height: 1.4;
-    }
-
-    .notification-time {
-      font-size: 12px;
-      color: #9ca3af;
-      margin-top: 5px;
-    }
-
-    .unread {
-      font-weight: bold;
-    }
-
-    /* =========================
-       PERMANENT CHAT BUTTON
-       ========================= */
-
-    .chat-button {
-      display: block;
-      width: 100%;
-      margin-top: 12px;
-      padding: 11px 14px;
-      border-radius: 9px;
-      background: #2563eb;
-      color: white;
-      text-align: center;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-    }
-
-    .chat-button:active {
-      transform: scale(0.98);
-    }
-
-    .chat-area {
-      background: #f0f7ff;
-      padding: 13px;
-      margin: 5px -6px;
-      border-radius: 10px;
-    }
-
-    /* =========================
-       BOTTOM NAV
-       ========================= */
-
-    .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
-  background: white;
-  border-top: 1px solid #e5e8e6;
-  display: flex;
-  justify-content: space-around;
-  padding: 12px 5px;
-  z-index: 1000;
+<style>
+*{
+  box-sizing:border-box;
 }
 
-.bottom-nav a {
-  text-align: center;
-  font-size: 11px;
-  color: #777;
-  text-decoration: none;
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5f7fb;
+  color:#111827;
+  padding-bottom:82px;
 }
 
-.bottom-nav a.active {
-  color: #16834b;
-  font-weight: 700;
+.app{
+  max-width:480px;
+  min-height:100vh;
+  margin:auto;
+  background:#f5f7fb;
 }
 
-    .bell-wrap {
-      position: relative;
-      display: inline-block;
-      height: 22px;
-    }
+header{
+  background:#2563eb;
+  color:white;
+  padding:20px 16px 16px;
+  position:sticky;
+  top:0;
+  z-index:50;
+}
 
-    .notification-dot {
-      position: absolute;
-      top: -2px;
-      right: -5px;
-      width: 8px;
-      height: 8px;
-      background: #ef4444;
-      border-radius: 50%;
-      border: 2px solid white;
-      display: none;
-    }
-  </style>
+header h1{
+  margin:0;
+  font-size:24px;
+}
+
+.header-sub{
+  margin-top:5px;
+  font-size:13px;
+  opacity:.88;
+}
+
+.container{
+  padding:14px 16px;
+  max-width:700px;
+  margin:auto;
+}
+
+.toolbar{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:2px 0 12px;
+  scrollbar-width:none;
+}
+
+.toolbar::-webkit-scrollbar{
+  display:none;
+}
+
+.filter-btn{
+  border:1px solid #dbe2ea;
+  background:white;
+  color:#4b5563;
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:12px;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:.18s ease;
+}
+
+.filter-btn.active{
+  background:#2563eb;
+  color:white;
+  border-color:#2563eb;
+}
+
+.filter-btn:active{
+  transform:scale(.96);
+}
+
+.summary{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:2px 0 12px;
+  font-size:13px;
+  color:#6b7280;
+}
+
+.mark-all{
+  border:none;
+  background:none;
+  color:#2563eb;
+  font-size:12px;
+  font-weight:bold;
+  cursor:pointer;
+  padding:5px 0;
+}
+
+.task-group{
+  background:white;
+  border-radius:14px;
+  margin-bottom:12px;
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  border:1px solid #edf0f4;
+  animation:groupIn .25s ease both;
+}
+
+@keyframes groupIn{
+  from{
+    opacity:0;
+    transform:translateY(7px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.task-header{
+  padding:15px;
+  cursor:pointer;
+  user-select:none;
+  transition:background .18s ease;
+}
+
+.task-header:active{
+  background:#f8fafc;
+}
+
+.task-title-row{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.task-icon{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  background:#eff6ff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+.task-title{
+  font-weight:bold;
+  font-size:16px;
+  flex:1;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.unread-badge{
+  min-width:19px;
+  height:19px;
+  border-radius:999px;
+  background:#ef4444;
+  color:white;
+  font-size:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 5px;
+}
+
+.task-meta{
+  margin-top:7px;
+  margin-left:43px;
+  font-size:12px;
+  color:#6b7280;
+}
+
+.arrow{
+  float:right;
+  font-size:12px;
+  color:#6b7280;
+  transition:transform .2s ease;
+}
+
+.group-content{
+  display:none;
+  border-top:1px solid #eef0f3;
+  padding:7px 14px 14px;
+}
+
+.group-content.open{
+  display:block;
+  animation:contentIn .2s ease;
+}
+
+@keyframes contentIn{
+  from{
+    opacity:0;
+  }
+  to{
+    opacity:1;
+  }
+}
+
+.notification{
+  position:relative;
+  padding:12px 4px 13px;
+  border-bottom:1px solid #eef0f3;
+  transition:.18s ease;
+}
+
+.notification:last-child{
+  border-bottom:none;
+}
+
+.notification.unread{
+  background:#f8fbff;
+  margin:0 -8px;
+  padding-left:12px;
+  padding-right:12px;
+  border-radius:9px;
+}
+
+.notification-top{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+}
+
+.notification-icon{
+  width:32px;
+  height:32px;
+  border-radius:9px;
+  background:#f3f4f6;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+.notification-info{
+  flex:1;
+  min-width:0;
+}
+
+.notification-title{
+  font-weight:bold;
+  font-size:14px;
+  color:#111827;
+}
+
+.notification-message{
+  font-size:13px;
+  color:#4b5563;
+  margin-top:4px;
+  line-height:1.45;
+}
+
+.notification-time{
+  font-size:11px;
+  color:#9ca3af;
+  margin-top:6px;
+}
+
+.notification-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:9px;
+}
+
+.action-btn{
+  border:none;
+  border-radius:8px;
+  padding:8px 10px;
+  font-size:11px;
+  font-weight:bold;
+  cursor:pointer;
+  background:#eff6ff;
+  color:#2563eb;
+  transition:.18s ease;
+}
+
+.action-btn.primary{
+  background:#2563eb;
+  color:white;
+}
+
+.action-btn:active{
+  transform:scale(.96);
+}
+
+.chat-area{
+  background:#f0f7ff;
+  padding:11px;
+  margin:7px 0 2px;
+  border-radius:10px;
+}
+
+.chat-button{
+  display:block;
+  width:100%;
+  padding:11px 14px;
+  border-radius:9px;
+  background:#2563eb;
+  color:white;
+  text-align:center;
+  text-decoration:none;
+  font-size:12px;
+  font-weight:bold;
+  border:none;
+  cursor:pointer;
+  transition:.18s ease;
+}
+
+.chat-button:active{
+  transform:scale(.98);
+}
+
+.loading,
+.empty,
+.error{
+  background:white;
+  padding:28px 20px;
+  border-radius:14px;
+  text-align:center;
+  margin-top:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.empty-icon{
+  font-size:40px;
+  margin-bottom:8px;
+}
+
+.empty-title{
+  font-weight:bold;
+  font-size:16px;
+}
+
+.empty-text{
+  color:#6b7280;
+  font-size:13px;
+  margin-top:5px;
+}
+
+.error{
+  color:#b91c1c;
+}
+
+.skeleton{
+  background:white;
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.skeleton-line{
+  height:12px;
+  border-radius:6px;
+  background:linear-gradient(
+    90deg,
+    #edf0f3 25%,
+    #f7f8fa 50%,
+    #edf0f3 75%
+  );
+  background-size:200% 100%;
+  animation:shimmer 1.2s infinite;
+}
+
+.skeleton-line.big{
+  width:65%;
+  height:15px;
+}
+
+.skeleton-line.small{
+  width:40%;
+  margin-top:9px;
+}
+
+.skeleton-line.mid{
+  width:80%;
+  margin-top:14px;
+}
+
+@keyframes shimmer{
+  0%{
+    background-position:200% 0;
+  }
+  100%{
+    background-position:-200% 0;
+  }
+}
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:480px;
+  background:white;
+  border-top:1px solid #e5e8e6;
+  display:flex;
+  justify-content:space-around;
+  padding:11px 5px;
+  z-index:1000;
+}
+
+.bottom-nav a{
+  text-align:center;
+  font-size:11px;
+  color:#777;
+  text-decoration:none;
+}
+
+.bottom-nav a.active{
+  color:#16834b;
+  font-weight:700;
+}
+
+.nav-icon{
+  display:block;
+  margin-bottom:2px;
+}
+
+.bell-wrap{
+  position:relative;
+  display:inline-block;
+  height:18px;
+}
+
+.notification-dot{
+  position:absolute;
+  top:-3px;
+  right:-5px;
+  width:8px;
+  height:8px;
+  background:#ef4444;
+  border-radius:50%;
+  border:2px solid white;
+  display:none;
+}
+
+@media(max-width:360px){
+  .container{
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+  .task-title{
+    font-size:15px;
+  }
+}
+</style>
 </head>
 
 <body>
 
 <div class="app">
 
-  <header>
-    <h1>🔔 Alerts</h1>
-  </header>
+<header>
+  <h1>🔔 Alerts</h1>
+  <div class="header-sub">Stay updated on your OOULink activity</div>
+</header>
 
-  <div class="container">
-    <div id="alertsContainer">
-      <div class="loading">
-        Loading your alerts...
-      </div>
+<div class="container">
+
+  <div class="toolbar">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="unread">Unread</button>
+    <button class="filter-btn" data-filter="message">Messages</button>
+    <button class="filter-btn" data-filter="task">Task Updates</button>
+    <button class="filter-btn" data-filter="general">General</button>
+  </div>
+
+  <div class="summary">
+    <span id="alertSummary">Loading...</span>
+    <button id="markAllBtn" class="mark-all" type="button">
+      Mark all read
+    </button>
+  </div>
+
+  <div id="alertsContainer">
+
+    <div class="skeleton">
+      <div class="skeleton-line big"></div>
+      <div class="skeleton-line small"></div>
+      <div class="skeleton-line mid"></div>
     </div>
+
+    <div class="skeleton">
+      <div class="skeleton-line big"></div>
+      <div class="skeleton-line small"></div>
+      <div class="skeleton-line mid"></div>
+    </div>
+
+    <div class="skeleton">
+      <div class="skeleton-line big"></div>
+      <div class="skeleton-line small"></div>
+      <div class="skeleton-line mid"></div>
+    </div>
+
   </div>
 
 </div>
-
+</div>
 
 <nav class="bottom-nav">
 
-  <a href="index.html">
-    <span class="nav-icon">🏠</span>
-    <span>Home</span>
-  </a>
-
-  <a href="my-tasks.html">
-
-  <span class="nav-icon">📋</span>
-
-  <span>My Tasks</span>
-
+<a href="index.html">
+  <span class="nav-icon">🏠</span>
+  <span>Home</span>
 </a>
 
-  <a href="post-task.html">
-    <span class="nav-icon">➕</span>
-    <span>Post</span>
-  </a>
+<a href="my-tasks.html">
+  <span class="nav-icon">📋</span>
+  <span>My Tasks</span>
+</a>
 
-  <a href="alerts.html" class="active">
-    <span class="bell-wrap">
-      <span class="nav-icon">🔔</span>
-      <span
-        id="notificationDot"
-        class="notification-dot"
-      ></span>
-    </span>
+<a href="post-task.html">
+  <span class="nav-icon">➕</span>
+  <span>Post</span>
+</a>
 
-    <span>Alerts</span>
-  </a>
+<a href="alerts.html" class="active">
+  <span class="bell-wrap">
+    <span class="nav-icon">🔔</span>
+    <span id="notificationDot" class="notification-dot"></span>
+  </span>
+  <span>Alerts</span>
+</a>
 
-  <a href="profile.html">
-    <span class="nav-icon">👤</span>
-    <span>Profile</span>
-  </a>
+<a href="profile.html">
+  <span class="nav-icon">👤</span>
+  <span>Profile</span>
+</a>
 
 </nav>
-
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -279,82 +564,159 @@ const supabaseClient =
     SUPABASE_KEY
   );
 
-
 const alertsContainer =
-  document.getElementById(
-    "alertsContainer"
-  );
+  document.getElementById("alertsContainer");
 
 const notificationDot =
-  document.getElementById(
-    "notificationDot"
-  );
+  document.getElementById("notificationDot");
+
+const alertSummary =
+  document.getElementById("alertSummary");
+
+const markAllBtn =
+  document.getElementById("markAllBtn");
 
 let currentUser = null;
+let allNotifications = [];
+let taskMap = {};
+let currentFilter = "all";
 
+function timeAgo(date){
 
-/* =========================
-   TIME AGO
-========================= */
+  const seconds = Math.floor(
+    (Date.now() - new Date(date).getTime()) / 1000
+  );
 
-function timeAgo(date) {
+  if(seconds < 60) return "Just now";
 
-  const seconds =
-    Math.floor(
-      (Date.now() -
-        new Date(date).getTime()) /
-      1000
-    );
+  const minutes = Math.floor(seconds / 60);
 
-  if (seconds < 60)
-    return "Just now";
-
-  const minutes =
-    Math.floor(seconds / 60);
-
-  if (minutes < 60)
+  if(minutes < 60)
     return minutes + " min ago";
 
-  const hours =
-    Math.floor(minutes / 60);
+  const hours = Math.floor(minutes / 60);
 
-  if (hours < 24)
+  if(hours < 24)
     return hours + " hr ago";
 
-  const days =
-    Math.floor(hours / 24);
+  const days = Math.floor(hours / 24);
+
+  if(days < 7)
+    return days + " day" + (days !== 1 ? "s" : "") + " ago";
+
+  const weeks = Math.floor(days / 7);
+
+  if(weeks < 5)
+    return weeks + " week" + (weeks !== 1 ? "s" : "") + " ago";
+
+  return new Date(date).toLocaleDateString();
+}
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function notificationCategory(notification){
+
+  const type =
+    String(notification.type || "").toLowerCase();
+
+  if(
+    type.includes("message") ||
+    type.includes("chat")
+  ){
+    return "message";
+  }
+
+  if(
+    notification.task_id ||
+    type.includes("task") ||
+    type.includes("accept") ||
+    type.includes("complete") ||
+    type.includes("runner")
+  ){
+    return "task";
+  }
+
+  return "general";
+}
+
+function notificationIcon(notification){
+
+  const category =
+    notificationCategory(notification);
+
+  if(category === "message")
+    return "💬";
+
+  if(category === "task")
+    return "📦";
+
+  return "🔔";
+}
+
+function getTaskTitle(taskId, notification){
+
+  const task = taskMap[taskId];
+
+  if(task && task.title)
+    return task.title;
+
+  const match =
+    String(notification.message || "")
+      .match(/"([^"]+)"/);
 
   return (
-    days +
-    " day" +
-    (days > 1 ? "s" : "") +
-    " ago"
+    match?.[1] ||
+    notification.title ||
+    "Task"
   );
 }
 
+function filteredNotifications(){
 
-/* =========================
-   ESCAPE HTML
-========================= */
+  if(currentFilter === "all")
+    return allNotifications;
 
-function escapeHTML(value) {
+  if(currentFilter === "unread")
+    return allNotifications.filter(
+      n => !n.is_read
+    );
 
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  return allNotifications.filter(
+    n => notificationCategory(n) === currentFilter
+  );
 }
 
+function updateSummary(){
 
-/* =========================
-   RED DOT
-========================= */
+  const total = allNotifications.length;
 
-async function updateNotificationDot() {
+  const unread =
+    allNotifications.filter(
+      n => !n.is_read
+    ).length;
 
-  if (!currentUser)
+  if(total === 0){
+    alertSummary.textContent = "No alerts";
+    return;
+  }
+
+  alertSummary.textContent =
+    unread > 0
+      ? `${unread} unread • ${total} total`
+      : `${total} notification${total !== 1 ? "s" : ""}`;
+}
+
+async function updateNotificationDot(){
+
+  if(!currentUser)
     return;
 
   const {
@@ -363,54 +725,94 @@ async function updateNotificationDot() {
   } =
     await supabaseClient
       .from("notifications")
-      .select("id", {
-        count: "exact",
-        head: true
+      .select("id",{
+        count:"exact",
+        head:true
       })
-      .eq(
-        "user_id",
-        currentUser.id
-      )
-      .eq(
-        "is_read",
-        false
-      );
+      .eq("user_id",currentUser.id)
+      .eq("is_read",false);
 
-  if (error) {
-
+  if(error){
     console.error(
       "Notification dot error:",
       error
     );
-
     return;
   }
 
   notificationDot.style.display =
-    count > 0
-      ? "block"
-      : "none";
+    count > 0 ? "block" : "none";
+}
+  function getActionHTML(notification, task){
+
+  const category =
+    notificationCategory(notification);
+
+  let html = "";
+
+  if(task){
+
+    html += `
+      <button
+        type="button"
+        class="action-btn"
+        data-action="task"
+        data-task-id="${escapeHTML(task.id)}"
+      >
+        📦 Open Task
+      </button>
+    `;
+  }
+
+  if(
+    task &&
+    task.runner_id &&
+    (
+      task.status === "accepted" ||
+      task.status === "completed"
+    ) &&
+    (
+      task.user_id === currentUser.id ||
+      task.runner_id === currentUser.id
+    )
+  ){
+
+    html += `
+      <button
+        type="button"
+        class="action-btn primary"
+        data-action="chat"
+        data-task-id="${escapeHTML(task.id)}"
+      >
+        💬 Open Chat
+      </button>
+    `;
+  }
+
+  if(category === "message" && !task){
+
+    html += `
+      <button
+        type="button"
+        class="action-btn primary"
+        data-action="refresh"
+      >
+        🔄 Refresh
+      </button>
+    `;
+  }
+
+  return html;
 }
 
-
-/* =========================
-   MARK GROUP READ
-========================= */
-
-async function markNotificationsRead(list) {
+async function markNotificationsRead(list){
 
   const unreadIds =
     list
-      .filter(
-        n => !n.is_read
-      )
-      .map(
-        n => n.id
-      );
+      .filter(n => !n.is_read)
+      .map(n => n.id);
 
-  if (
-    unreadIds.length === 0
-  )
+  if(unreadIds.length === 0)
     return;
 
   const {
@@ -419,44 +821,90 @@ async function markNotificationsRead(list) {
     await supabaseClient
       .from("notifications")
       .update({
-        is_read: true
+        is_read:true
       })
-      .in(
-        "id",
-        unreadIds
-      )
-      .eq(
-        "user_id",
-        currentUser.id
-      );
+      .in("id",unreadIds)
+      .eq("user_id",currentUser.id);
 
-  if (error) {
-
+  if(error){
     console.error(
       "Read notification error:",
+      error
+    );
+    return;
+  }
+
+  list.forEach(
+    n => n.is_read = true
+  );
+
+  updateSummary();
+  updateNotificationDot();
+}
+
+async function markAllRead(){
+
+  if(!currentUser)
+    return;
+
+  const unread =
+    allNotifications.filter(
+      n => !n.is_read
+    );
+
+  if(unread.length === 0)
+    return;
+
+  markAllBtn.disabled = true;
+  markAllBtn.textContent = "Marking...";
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("notifications")
+      .update({
+        is_read:true
+      })
+      .eq("user_id",currentUser.id)
+      .eq("is_read",false);
+
+  markAllBtn.disabled = false;
+  markAllBtn.textContent = "Mark all read";
+
+  if(error){
+
+    console.error(
+      "Mark all read error:",
       error
     );
 
     return;
   }
 
-  list.forEach(
-    n => {
-      n.is_read = true;
-    }
+  allNotifications.forEach(
+    n => n.is_read = true
   );
 
-  await updateNotificationDot();
+  updateSummary();
+  updateNotificationDot();
+
+  renderAlerts();
 }
 
+function openTask(taskId){
 
-/* =========================
-   OPEN CHAT
-========================= */
+  if(!taskId)
+    return;
 
-async function openChat(taskId) {
+  window.location.href =
+    "task-details.html?id=" +
+    encodeURIComponent(taskId);
+}
 
-  if (!taskId)
+function openChat(taskId){
+
+  if(!taskId)
     return;
 
   window.location.href =
@@ -464,33 +912,417 @@ async function openChat(taskId) {
     encodeURIComponent(taskId);
 }
 
+function renderEmpty(){
 
-/* =========================
-   LOAD ALERTS
-========================= */
+  const message =
+    currentFilter === "unread"
+      ? "You have no unread alerts."
+      : currentFilter === "message"
+        ? "No message notifications yet."
+        : currentFilter === "task"
+          ? "No task updates yet."
+          : currentFilter === "general"
+            ? "No general alerts yet."
+            : "Your notifications will appear here.";
 
-async function loadAlerts() {
+  alertsContainer.innerHTML = `
+    <div class="empty">
+      <div class="empty-icon">🔔</div>
+      <div class="empty-title">Nothing here yet</div>
+      <div class="empty-text">
+        ${escapeHTML(message)}
+      </div>
+    </div>
+  `;
+}
 
-  try {
+function renderAlerts(){
 
-    alertsContainer.innerHTML =
-      '<div class="loading">Loading your alerts...</div>';
+  const list =
+    filteredNotifications();
 
+  if(list.length === 0){
+
+    renderEmpty();
+    return;
+  }
+
+  const groups = {};
+
+  list.forEach(notification => {
+
+    const key =
+      notification.task_id ||
+      "general";
+
+    if(!groups[key])
+      groups[key] = [];
+
+    groups[key].push(notification);
+
+  });
+
+  alertsContainer.innerHTML = "";
+
+  Object.keys(groups).forEach(
+    (taskId,index) => {
+
+      const groupList =
+        groups[taskId];
+
+      const latest =
+        groupList[0];
+
+      const task =
+        taskMap[taskId];
+
+      const taskTitle =
+        taskId === "general"
+          ? "General Alerts"
+          : getTaskTitle(
+              taskId,
+              latest
+            );
+
+      const unreadCount =
+        groupList.filter(
+          n => !n.is_read
+        ).length;
+
+      const group =
+        document.createElement("div");
+
+      group.className = "task-group";
+
+      group.style.animationDelay =
+        (index * 35) + "ms";
+
+      const header =
+        document.createElement("div");
+
+      header.className =
+        "task-header";
+
+      header.innerHTML = `
+
+        <div class="task-title-row">
+
+          <div class="task-icon">
+            ${taskId === "general" ? "🔔" : "📦"}
+          </div>
+
+          <div class="task-title">
+            ${escapeHTML(taskTitle)}
+          </div>
+
+          ${
+            unreadCount > 0
+              ? `
+                <span class="unread-badge">
+                  ${unreadCount}
+                </span>
+              `
+              : ""
+          }
+
+        </div>
+
+        <div class="task-meta">
+
+          ${groupList.length}
+          notification${groupList.length !== 1 ? "s" : ""}
+
+          • Latest:
+          ${timeAgo(latest.created_at)}
+
+          <span class="arrow">▼</span>
+
+        </div>
+
+      `;
+
+      const content =
+        document.createElement("div");
+
+      content.className =
+        "group-content";
+
+      groupList.forEach(
+        notification => {
+
+          const item =
+            document.createElement("div");
+
+          item.className =
+            "notification " +
+            (
+              !notification.is_read
+                ? "unread"
+                : ""
+            );
+
+          const taskForNotification =
+            notification.task_id
+              ? taskMap[notification.task_id]
+              : null;
+
+          item.innerHTML = `
+
+            <div class="notification-top">
+
+              <div class="notification-icon">
+                ${notificationIcon(notification)}
+              </div>
+
+              <div class="notification-info">
+
+                <div class="notification-title">
+                  ${escapeHTML(
+                    notification.title ||
+                    "OOULink Alert"
+                  )}
+                </div>
+
+                <div class="notification-message">
+                  ${escapeHTML(
+                    notification.message
+                  )}
+                </div>
+
+                <div class="notification-time">
+                  ${timeAgo(
+                    notification.created_at
+                  )}
+                </div>
+
+                ${
+                  getActionHTML(
+                    notification,
+                    taskForNotification
+                  )
+                }
+
+              </div>
+
+            </div>
+
+          `;
+
+          content.appendChild(item);
+        }
+      );
+
+      const task =
+        taskMap[taskId];
+
+      const isAccepted =
+        task &&
+        task.runner_id &&
+        (
+          task.status === "accepted" ||
+          task.status === "completed"
+        );
+
+      const isParticipant =
+        task &&
+        (
+          task.user_id === currentUser.id ||
+          task.runner_id === currentUser.id
+        );
+
+      if(
+        task &&
+        isAccepted &&
+        isParticipant
+      ){
+
+        const chatArea =
+          document.createElement("div");
+
+        chatArea.className =
+          "chat-area";
+
+        const chatButton =
+          document.createElement("button");
+
+        chatButton.type = "button";
+        chatButton.className =
+          "chat-button";
+        chatButton.textContent =
+          "💬 OPEN TASK CHAT";
+
+        chatButton.addEventListener(
+          "click",
+          event => {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            openChat(task.id);
+
+          }
+        );
+
+        chatArea.appendChild(
+          chatButton
+        );
+
+        content.appendChild(
+          chatArea
+        );
+      }
+
+      header.addEventListener(
+        "click",
+        async () => {
+
+          const isOpen =
+            content.classList.contains("open");
+
+          content.classList.toggle(
+            "open"
+          );
+
+          const arrow =
+            header.querySelector(".arrow");
+
+          arrow.textContent =
+            isOpen ? "▼" : "▲";
+
+          if(!isOpen){
+
+            await markNotificationsRead(
+              groupList
+            );
+
+            header.querySelectorAll(
+              ".unread-badge"
+            ).forEach(
+              badge => badge.remove()
+            );
+
+            content
+              .querySelectorAll(".unread")
+              .forEach(
+                element =>
+                  element.classList.remove(
+                    "unread"
+                  )
+              );
+          }
+
+        }
+      );
+
+      group.appendChild(header);
+      group.appendChild(content);
+
+      alertsContainer.appendChild(group);
+    }
+  );
+}
+
+alertsContainer.addEventListener(
+  "click",
+  event => {
+
+    const button =
+      event.target.closest(
+        "[data-action]"
+      );
+
+    if(!button)
+      return;
+
+    event.stopPropagation();
+
+    const action =
+      button.dataset.action;
+
+    const taskId =
+      button.dataset.taskId;
+
+    if(action === "task"){
+      openTask(taskId);
+      return;
+    }
+
+    if(action === "chat"){
+      openChat(taskId);
+      return;
+    }
+
+    if(action === "refresh"){
+      loadAlerts();
+    }
+
+  }
+);
+
+document.querySelectorAll(
+  ".filter-btn"
+).forEach(button => {
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      document.querySelectorAll(
+        ".filter-btn"
+      ).forEach(
+        btn =>
+          btn.classList.remove("active")
+      );
+
+      button.classList.add("active");
+
+      currentFilter =
+        button.dataset.filter;
+
+      renderAlerts();
+
+    }
+  );
+
+});
+
+markAllBtn.addEventListener(
+  "click",
+  markAllRead
+);
+
+async function loadAlerts(){
+
+  try{
+
+    alertsContainer.innerHTML = `
+      <div class="skeleton">
+        <div class="skeleton-line big"></div>
+        <div class="skeleton-line small"></div>
+        <div class="skeleton-line mid"></div>
+      </div>
+      <div class="skeleton">
+        <div class="skeleton-line big"></div>
+        <div class="skeleton-line small"></div>
+        <div class="skeleton-line mid"></div>
+      </div>
+      <div class="skeleton">
+        <div class="skeleton-line big"></div>
+        <div class="skeleton-line small"></div>
+        <div class="skeleton-line mid"></div>
+      </div>
+    `;
 
     const {
-      data: sessionData,
-      error: sessionError
+      data:sessionData,
+      error:sessionError
     } =
-      await supabaseClient
-        .auth
-        .getSession();
+      await supabaseClient.auth.getSession();
 
-
-    if (sessionError)
+    if(sessionError)
       throw sessionError;
 
-
-    if (!sessionData.session) {
+    if(!sessionData.session){
 
       window.location.href =
         "login.html";
@@ -498,20 +1330,13 @@ async function loadAlerts() {
       return;
     }
 
-
     currentUser =
       sessionData.session.user;
 
-
     await updateNotificationDot();
 
-
-    /*
-      Get notifications.
-    */
-
     const {
-      data: notifications,
+      data:notifications,
       error
     } =
       await supabaseClient
@@ -523,74 +1348,31 @@ async function loadAlerts() {
         )
         .order(
           "created_at",
-          {
-            ascending: false
-          }
+          {ascending:false}
         );
 
-
-    if (error)
+    if(error)
       throw error;
 
+    allNotifications =
+      notifications || [];
 
-    if (
-      !notifications ||
-      notifications.length === 0
-    ) {
-
-      alertsContainer.innerHTML =
-        '<div class="empty">🔔 No alerts yet.</div>';
-
-      return;
-    }
-
-
-    /*
-      Group notifications by task.
-    */
-
-    const groups = {};
-
-
-    notifications.forEach(
-      notification => {
-
-        const key =
-          notification.task_id ||
-          "general";
-
-        if (!groups[key]) {
-          groups[key] = [];
-        }
-
-        groups[key].push(
-          notification
-        );
-
-      }
-    );
-
-
-    /*
-      Get task information so we can
-      know whether the task is accepted.
-    */
+    taskMap = {};
 
     const taskIds =
-      Object.keys(groups)
-        .filter(
-          id => id !== "general"
-        );
+      [
+        ...new Set(
+          allNotifications
+            .map(n => n.task_id)
+            .filter(Boolean)
+        )
+      ];
 
-
-    let tasks = [];
-
-
-    if (taskIds.length > 0) {
+    if(taskIds.length > 0){
 
       const {
-        data,
-        error: taskError
+        data:tasks,
+        error:taskError
       } =
         await supabaseClient
           .from("tasks")
@@ -606,375 +1388,38 @@ async function loadAlerts() {
             taskIds
           );
 
-
-      if (taskError) {
+      if(taskError){
 
         console.error(
           "Task lookup error:",
           taskError
         );
 
-      } else {
+      }else{
 
-        tasks = data || [];
+        (tasks || []).forEach(
+          task =>
+            taskMap[task.id] = task
+        );
+
       }
     }
 
+    updateSummary();
 
-    const taskMap = {};
+    renderAlerts();
 
-    tasks.forEach(
-      task => {
-
-        taskMap[task.id] =
-          task;
-
-      }
-    );
-
-
-    alertsContainer.innerHTML = "";
-
-
-    /*
-      BUILD GROUPS
-    */
-
-    Object.keys(groups).forEach(
-      taskId => {
-
-        const list =
-          groups[taskId];
-
-        const latest =
-          list[0];
-
-        const task =
-          taskMap[taskId];
-
-
-        /*
-          Use the actual task title
-          whenever possible.
-        */
-
-        const taskTitle =
-          task
-            ? task.title
-            : (
-                latest.task_id
-                  ? (
-                      latest.message.match(
-                        /"([^"]+)"/
-                      )?.[1] ||
-                      latest.title ||
-                      "Task"
-                    )
-                  : "General"
-              );
-
-
-        const group =
-          document.createElement(
-            "div"
-          );
-
-        group.className =
-          "task-group";
-
-
-        /*
-          HEADER
-        */
-
-        const header =
-          document.createElement(
-            "div"
-          );
-
-        header.className =
-          "task-header";
-
-
-        header.innerHTML = `
-
-          <div class="task-title">
-            📦 ${escapeHTML(taskTitle)}
-          </div>
-
-          <div class="task-meta">
-
-            ${list.length}
-            notification${list.length !== 1 ? "s" : ""}
-
-            • Latest:
-            ${timeAgo(
-              latest.created_at
-            )}
-
-            <span
-              class="arrow"
-              style="float:right"
-            >
-              ▼
-            </span>
-
-          </div>
-
-        `;
-
-
-        /*
-          CONTENT
-        */
-
-        const content =
-          document.createElement(
-            "div"
-          );
-
-        content.className =
-          "group-content";
-
-
-        list.forEach(
-          notification => {
-
-            const item =
-              document.createElement(
-                "div"
-              );
-
-
-            item.className =
-              "notification " +
-              (
-                !notification.is_read
-                  ? "unread"
-                  : ""
-              );
-
-
-            item.innerHTML = `
-
-              <div class="notification-title">
-
-                ${
-                  notification.type ===
-                  "new_message"
-                    ? "💬 "
-                    : ""
-                }
-
-                ${escapeHTML(
-                  notification.title
-                )}
-
-              </div>
-
-              <div class="notification-message">
-
-                ${escapeHTML(
-                  notification.message
-                )}
-
-              </div>
-
-              <div class="notification-time">
-
-                ${timeAgo(
-                  notification.created_at
-                )}
-
-              </div>
-
-            `;
-
-
-            content.appendChild(
-              item
-            );
-
-          }
-        );
-
-
-        /*
-          =================================================
-          PERMANENT CHAT BUTTON
-          =================================================
-
-          IMPORTANT:
-
-          This button is NOT connected
-          to notification.type.
-
-          It appears whenever:
-
-          1. There is a real task.
-          2. The task has been accepted.
-          3. The current user is the tasker
-             OR the runner.
-
-          Therefore it stays there even when
-          there are no new-message notifications.
-        */
-
-        const isAccepted =
-          task &&
-          task.runner_id &&
-          (
-            task.status === "accepted" ||
-            task.status === "completed"
-          );
-
-
-        const isParticipant =
-          task &&
-          (
-            task.user_id ===
-              currentUser.id ||
-
-            task.runner_id ===
-              currentUser.id
-          );
-
-
-        if (
-          task &&
-          isAccepted &&
-          isParticipant
-        ) {
-
-          const chatArea =
-            document.createElement(
-              "div"
-            );
-
-          chatArea.className =
-            "chat-area";
-
-
-          const chatButton =
-            document.createElement(
-              "button"
-            );
-
-          chatButton.type =
-            "button";
-
-          chatButton.className =
-            "chat-button";
-
-          chatButton.textContent =
-            "💬 OPEN TASK CHAT";
-
-
-          chatButton.addEventListener(
-            "click",
-            event => {
-
-              event.preventDefault();
-
-              event.stopPropagation();
-
-              openChat(
-                task.id
-              );
-
-            }
-          );
-
-
-          chatArea.appendChild(
-            chatButton
-          );
-
-          content.appendChild(
-            chatArea
-          );
-        }
-
-
-        /*
-          OPEN / CLOSE GROUP
-        */
-
-        header.addEventListener(
-          "click",
-          async () => {
-
-            const isOpen =
-              content.classList.contains(
-                "open"
-              );
-
-
-            content.classList.toggle(
-              "open"
-            );
-
-
-            header.querySelector(
-              ".arrow"
-            ).textContent =
-              isOpen
-                ? "▼"
-                : "▲";
-
-
-            if (!isOpen) {
-
-              await markNotificationsRead(
-                list
-              );
-
-
-              content
-                .querySelectorAll(
-                  ".unread"
-                )
-                .forEach(
-                  el => {
-
-                    el.classList.remove(
-                      "unread"
-                    );
-
-                  }
-                );
-
-            }
-
-          }
-        );
-
-
-        group.appendChild(
-          header
-        );
-
-        group.appendChild(
-          content
-        );
-
-        alertsContainer.appendChild(
-          group
-        );
-
-      }
-    );
-
-  } catch (error) {
+  }catch(error){
 
     console.error(
       "Alerts error:",
       error
     );
 
+    alertSummary.textContent =
+      "Unable to load";
 
     alertsContainer.innerHTML = `
-
       <div class="error">
 
         ❌ Unable to load alerts.
@@ -986,16 +1431,22 @@ async function loadAlerts() {
           "Please refresh the page."
         )}
 
+        <br><br>
+
+        <button
+          type="button"
+          class="action-btn primary"
+          onclick="loadAlerts()"
+        >
+          🔄 Try Again
+        </button>
+
       </div>
-
     `;
+
   }
+
 }
-
-
-/* =========================
-   START
-========================= */
 
 document.addEventListener(
   "DOMContentLoaded",
