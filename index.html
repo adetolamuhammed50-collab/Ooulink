@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>OOULink — Connect. Get things done. Earn.</title>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
-
+    html {
+      scroll-behavior: smooth;
+    }
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -21,7 +20,26 @@
       color: #222;
       padding-bottom: 80px;
     }
-
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+    a,
+    button,
+    .task-card,
+    .location,
+    .games-card {
+      transition:
+        transform 0.16s ease,
+        opacity 0.16s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease;
+    }
+    a:active,
+    button:active {
+      transform: scale(0.96);
+    }
     .app {
       width: 100%;
       max-width: 480px;
@@ -29,29 +47,23 @@
       margin: auto;
       background: #fff;
     }
-
-    /* HEADER */
-
     header {
       padding: 18px 16px 14px;
       border-bottom: 1px solid #e7ebe8;
       position: relative;
       background: white;
     }
-
     .top-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
     }
-
     .logo {
       font-size: 23px;
       font-weight: 800;
       color: #16834b;
     }
-
     .location {
       margin-top: 10px;
       display: inline-block;
@@ -62,14 +74,16 @@
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
+      user-select: none;
     }
-
+    .location:active {
+      transform: scale(0.97);
+    }
     .auth-buttons {
       display: flex;
       gap: 6px;
       align-items: center;
     }
-
     .auth-buttons a {
       text-decoration: none;
       font-size: 10px;
@@ -77,36 +91,15 @@
       padding: 8px 9px;
       border-radius: 8px;
     }
-
     .signup {
       color: #16834b;
       border: 1px solid #16834b;
       background: white;
     }
-
     .login {
       color: white;
       background: #16834b;
     }
-.view-task-button {
-  width: 100%;
-  margin-top: 14px;
-  padding: 12px 14px;
-  border: none;
-  border-radius: 12px;
-  background: #16834b;
-  color: white;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 3px 8px rgba(22,131,75,0.18);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.view-task-button:active {
-  transform: scale(0.96);
-  opacity: 0.9;
-}
     .profile-btn {
       text-decoration: none;
       color: #16834b;
@@ -117,7 +110,6 @@
       font-size: 10px;
       font-weight: 700;
     }
-
     .logout-btn {
       border: none;
       color: white;
@@ -128,9 +120,10 @@
       font-weight: 700;
       cursor: pointer;
     }
-
-    /* LOCATION MENU */
-
+    .logout-btn:disabled {
+      opacity: 0.65;
+      cursor: default;
+    }
     .location-menu {
       display: none;
       position: absolute;
@@ -143,15 +136,14 @@
       padding: 10px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.12);
       z-index: 2000;
+      animation: menuAppear 0.18s ease both;
     }
-
     .location-title {
       font-size: 13px;
       font-weight: 700;
       padding: 8px;
       color: #333;
     }
-
     .location-menu button {
       width: 100%;
       border: none;
@@ -162,39 +154,32 @@
       font-size: 13px;
       cursor: pointer;
     }
-
     .location-menu button:hover {
       background: #f0f6f2;
     }
-
-    /* HERO */
-
     .hero {
       padding: 28px 18px 22px;
       background: linear-gradient(135deg, #16834b, #0d6238);
       color: white;
+      animation: fadeUp 0.35s ease both;
     }
-
     .hero h1 {
       margin: 0 0 9px;
       font-size: 29px;
       line-height: 1.15;
     }
-
     .hero p {
       margin: 0;
       font-size: 14px;
       line-height: 1.5;
       opacity: 0.92;
     }
-
     .hero-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-top: 20px;
     }
-
     .post,
     .find {
       display: block;
@@ -205,80 +190,79 @@
       font-size: 13px;
       font-weight: 700;
     }
-
     .post {
       background: white;
       color: #16834b;
       border: 1px solid #16834b;
     }
-
     .find {
       background: #0a4d2c;
       color: white;
     }
-
-    /* CONTENT */
-
     .section {
       padding: 22px 16px 5px;
     }
-
     .section-heading {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 13px;
     }
-
     .section-heading h2 {
       margin: 0;
       font-size: 18px;
     }
-
     .section-heading a {
       color: #16834b;
       font-size: 12px;
       font-weight: 700;
       text-decoration: none;
     }
-
-    /* TASK CARDS */
-
     .task-card {
-  border: 1px solid #e3e8e5;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 14px;
-  background: white;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: 1px solid #e3e8e5;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      cursor: pointer;
+      animation: cardAppear 0.35s ease both;
     }
-
+    .task-card:hover {
+      box-shadow: 0 6px 16px rgba(0,0,0,0.07);
+      border-color: #d5dfd9;
+    }
+    .task-card:active {
+      transform: scale(0.985);
+      box-shadow: 0 5px 16px rgba(0,0,0,0.08);
+    }
+    .task-card:nth-child(2) {
+      animation-delay: 0.05s;
+    }
+    .task-card:nth-child(3) {
+      animation-delay: 0.1s;
+    }
     .task-top {
       display: flex;
       justify-content: space-between;
       gap: 10px;
     }
-
     .task-title {
       font-size: 15px;
       font-weight: 700;
       margin-bottom: 7px;
     }
-
     .task-price {
       color: #16834b;
       font-size: 15px;
       font-weight: 800;
       white-space: nowrap;
     }
-
     .task-info {
       color: #777;
       font-size: 12px;
       line-height: 1.7;
     }
-
     .tag {
       display: inline-block;
       margin-top: 8px;
@@ -289,73 +273,30 @@
       font-size: 10px;
       font-weight: 700;
     }
-
+    .view-task-button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: none;
+      border-radius: 12px;
+      background: #16834b;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(22,131,75,0.18);
+    }
+    .view-task-button:active {
+      transform: scale(0.97);
+      opacity: 0.9;
+    }
     .task-message {
       color: #777;
       font-size: 12px;
       padding: 10px 2px;
       line-height: 1.5;
+      animation: fadeUp 0.25s ease both;
     }
-    /* =========================
-       OOULINK MICRO ANIMATIONS
-    ========================= */
-
-    * {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    a,
-    button,
-    .task-card,
-    .location {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    a,
-    button {
-      transition:
-        transform 0.15s ease,
-        opacity 0.15s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
-    }
-
-    a:active,
-    button:active {
-      transform: scale(0.96);
-    }
-
-    .task-card {
-      cursor: pointer;
-      transition:
-        transform 0.18s ease,
-        box-shadow 0.18s ease,
-        border-color 0.18s ease;
-    }
-
-    .task-card:active {
-      transform: scale(0.985);
-      box-shadow: 0 5px 16px rgba(0,0,0,0.08);
-    }
-
-    .task-card {
-      animation: cardAppear 0.35s ease both;
-    }
-
-    @keyframes cardAppear {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* LOADING SKELETON */
-
     .skeleton-card {
       border: 1px solid #e8ece9;
       border-radius: 14px;
@@ -363,15 +304,20 @@
       margin-bottom: 12px;
       background: white;
       overflow: hidden;
+      animation: skeletonAppear 0.25s ease both;
     }
-
+    .skeleton-card:nth-child(2) {
+      animation-delay: 0.06s;
+    }
+    .skeleton-card:nth-child(3) {
+      animation-delay: 0.12s;
+    }
     .skeleton {
       position: relative;
       overflow: hidden;
       background: #edf1ee;
       border-radius: 7px;
     }
-
     .skeleton::after {
       content: "";
       position: absolute;
@@ -387,76 +333,52 @@
       );
       animation: skeletonShine 1.2s infinite;
     }
-
-    @keyframes skeletonShine {
-      100% {
-        left: 130%;
-      }
-    }
-
     .skeleton-title {
       width: 62%;
       height: 16px;
       margin-bottom: 12px;
     }
-
     .skeleton-line {
       width: 78%;
       height: 11px;
       margin-bottom: 8px;
     }
-
     .skeleton-line.short {
       width: 48%;
     }
-
     .skeleton-price {
       width: 65px;
       height: 17px;
       float: right;
     }
-
     .skeleton-tag {
       width: 65px;
       height: 22px;
       margin-top: 12px;
     }
-
-    /* FUN & GAMES */
-
     .games-card {
       margin: 20px 16px;
       padding: 18px;
       border-radius: 16px;
-      background: linear-gradient(
-        135deg,
-        #f0f8f3,
-        #e5f3eb
-      );
+      background: linear-gradient(135deg, #f0f8f3, #e5f3eb);
       border: 1px solid #d8eadf;
       cursor: pointer;
-      transition:
-        transform 0.18s ease,
-        box-shadow 0.18s ease;
+      animation: fadeUp 0.35s ease 0.15s both;
     }
-
     .games-card:active {
       transform: scale(0.98);
       box-shadow: 0 6px 18px rgba(0,0,0,0.08);
     }
-
     .games-card h2 {
       margin: 0 0 6px;
       font-size: 18px;
     }
-
     .games-card p {
       margin: 0;
       color: #666;
       font-size: 12px;
       line-height: 1.5;
     }
-
     .games-button {
       display: inline-block;
       margin-top: 13px;
@@ -467,47 +389,25 @@
       font-size: 12px;
       font-weight: 700;
     }
-
-    /* BOTTOM NAV MICRO ANIMATION */
-
-    nav a {
-      transition:
-        transform 0.15s ease,
-        color 0.2s ease;
-    }
-
-    nav a:active {
-      transform: scale(0.88);
-    }
-
-    nav a.active {
-      transform: translateY(-1px);
-    }
-
-    /* HOW IT WORKS */
-
     .how {
       margin: 20px 16px;
       padding: 18px;
       background: #f4f8f5;
       border-radius: 14px;
+      animation: fadeUp 0.35s ease 0.2s both;
     }
-
     .how h2 {
       margin: 0 0 15px;
       font-size: 17px;
     }
-
     .step {
       display: flex;
       gap: 11px;
       margin-bottom: 14px;
     }
-
     .step:last-child {
       margin-bottom: 0;
     }
-
     .step-number {
       min-width: 27px;
       height: 27px;
@@ -520,21 +420,16 @@
       font-size: 12px;
       font-weight: 700;
     }
-
     .step-text strong {
       display: block;
       font-size: 13px;
       margin-bottom: 3px;
     }
-
     .step-text span {
       color: #777;
       font-size: 11px;
       line-height: 1.4;
     }
-
-    /* FOOTER NAV */
-
     nav {
       position: fixed;
       bottom: 0;
@@ -549,581 +444,528 @@
       padding: 12px 5px;
       z-index: 1000;
     }
-
     nav a {
       text-align: center;
       font-size: 11px;
       color: #777;
       text-decoration: none;
     }
-
+    nav a:active {
+      transform: scale(0.88);
+    }
     nav a.active {
       color: #16834b;
       font-weight: 700;
+      transform: translateY(-1px);
     }
-
-    /* LOGIN STATUS */
-
     .welcome {
       display: none;
       padding: 10px 16px 0;
       color: #555;
       font-size: 12px;
+      animation: fadeUp 0.25s ease both;
     }
-
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(7px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes cardAppear {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes skeletonAppear {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes skeletonShine {
+      100% {
+        left: 130%;
+      }
+    }
+    @keyframes menuAppear {
+      from {
+        opacity: 0;
+        transform: translateY(-5px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
     @media (max-width: 360px) {
       .logo {
         font-size: 20px;
       }
-
       .auth-buttons a,
       .logout-btn,
       .profile-btn {
         font-size: 9px;
         padding: 7px;
       }
-
       .hero h1 {
         font-size: 26px;
       }
     }
   </style>
 </head>
-
 <body>
-
   <div class="app">
-
     <!-- HEADER -->
-
     <header>
-
       <div class="top-row">
-
         <div class="logo">
           OOULink
         </div>
-
         <!-- LOGGED OUT -->
-
         <div class="auth-buttons" id="loggedOutButtons">
-
           <a href="signup.html" class="signup">
             SIGN UP
           </a>
-
           <a href="login.html" class="login">
             LOG IN
           </a>
-
         </div>
-
         <!-- LOGGED IN -->
-
         <div
           class="auth-buttons"
           id="loggedInButtons"
           style="display:none;"
         >
-
           <a href="profile.html" class="profile-btn">
             👤 PROFILE
           </a>
-
           <button
             class="logout-btn"
             id="logoutButton"
+            type="button"
           >
             LOG OUT
           </button>
-
         </div>
-
       </div>
-
       <div
         class="location"
-        onclick="showLocations()"
+        id="locationButton"
+        role="button"
+        tabindex="0"
+        aria-haspopup="true"
+        aria-expanded="false"
       >
         📍
         <span id="selectedLocation">
           Choose your location
         </span>
       </div>
-
       <!-- LOCATION MENU -->
-
       <div
         id="locationMenu"
         class="location-menu"
       >
-
         <div class="location-title">
           Choose your location
         </div>
-
-        <button
-          onclick="selectLocation('OOU — Ago-Iwoye')"
-        >
+        <button type="button" data-location="OOU — Ago-Iwoye">
           📍 OOU — Ago-Iwoye
         </button>
-
-        <button
-          onclick="selectLocation('OOU — Ibogun Campus')"
-        >
+        <button type="button" data-location="OOU — Ibogun Campus">
           📍 OOU — Ibogun Campus
         </button>
-
-        <button
-          onclick="selectLocation('Sagamu')"
-        >
+        <button type="button" data-location="Sagamu">
           📍 Sagamu
         </button>
-
-        <button
-          onclick="selectLocation('Ayetoro')"
-        >
+        <button type="button" data-location="Ayetoro">
           📍 Ayetoro
         </button>
-
-        <button
-          onclick="selectLocation('Other')"
-        >
+        <button type="button" data-location="Other">
           📍 Other
         </button>
-
       </div>
-
     </header>
-
     <!-- WELCOME -->
-
     <div
       class="welcome"
       id="welcomeMessage"
+      aria-live="polite"
     ></div>
-
     <!-- HERO -->
-
     <section class="hero">
-
       <h1>
         What do you need done?
       </h1>
-
       <p>
         Get help from people around you.
         Complete tasks, earn money and get things done.
       </p>
-
       <div class="hero-buttons">
-
         <a
           href="post-task.html"
           class="post"
         >
           🙋 POST A TASK
         </a>
-
         <a
           href="find-tasks.html"
           class="find"
         >
           🏃 FIND TASKS
         </a>
-
       </div>
-
     </section>
-  
-
     <!-- NEARBY TASKS -->
-
     <section class="section">
-
       <div class="section-heading">
-
         <h2>
           Nearby Tasks
         </h2>
-
         <a href="find-tasks.html">
           See all
         </a>
-
       </div>
-
       <!-- REAL TASKS FROM SUPABASE -->
-
-      <div id="tasksContainer">
-
-        <div class="skeleton-card">
-  <div class="skeleton skeleton-title"></div>
-  <div class="skeleton skeleton-price"></div>
-  <div class="skeleton skeleton-line"></div>
-  <div class="skeleton skeleton-line short"></div>
-  <div class="skeleton skeleton-tag"></div>
-</div>
-
-<div class="skeleton-card">
-  <div class="skeleton skeleton-title"></div>
-  <div class="skeleton skeleton-price"></div>
-  <div class="skeleton skeleton-line"></div>
-  <div class="skeleton skeleton-line short"></div>
-  <div class="skeleton skeleton-tag"></div>
-</div>
-
+      <div id="tasksContainer" aria-live="polite">
+        <div class="skeleton-card" aria-hidden="true">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-price"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line short"></div>
+          <div class="skeleton skeleton-tag"></div>
+        </div>
+        <div class="skeleton-card" aria-hidden="true">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-price"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line short"></div>
+          <div class="skeleton skeleton-tag"></div>
+        </div>
+        <div class="skeleton-card" aria-hidden="true">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-price"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line short"></div>
+          <div class="skeleton skeleton-tag"></div>
+        </div>
       </div>
-
     </section>
-<div class="games-card">
-
-  <h2>🎮 Fun & Games</h2>
-
-  <p>
-    Take a quick break, challenge yourself,
-    and have some fun while you're here.
-  </p>
-
-  <span class="games-button">
-    🎯 Coming Soon
-  </span>
-
-  </div>
+    <!-- FUN & GAMES -->
+    <div class="games-card">
+      <h2>🎮 Fun & Games</h2>
+      <p>
+        Take a quick break, challenge yourself,
+        and have some fun while you're here.
+      </p>
+      <span class="games-button">
+        🎯 Coming Soon
+      </span>
+    </div>
     <!-- HOW IT WORKS -->
-
     <section class="how">
-
       <h2>
         How OOULink Works
       </h2>
-
       <div class="step">
-
         <div class="step-number">
           1
         </div>
-
         <div class="step-text">
-
           <strong>
             Post a task
           </strong>
-
           <span>
             Tell people what you need done,
             where and your budget.
           </span>
-
         </div>
-
       </div>
-
       <div class="step">
-
         <div class="step-number">
           2
         </div>
-
         <div class="step-text">
-
           <strong>
             Find someone
           </strong>
-
           <span>
             A nearby person accepts your task
             and gets to work.
           </span>
-
         </div>
-
       </div>
-
       <div class="step">
-
         <div class="step-number">
           3
         </div>
-
         <div class="step-text">
-
           <strong>
             Get it done
           </strong>
-
           <span>
             Confirm completion and leave a rating.
           </span>
-
         </div>
-
       </div>
-
       <div class="step">
-
         <div class="step-number">
           4
         </div>
-
         <div class="step-text">
-
           <strong>
             Earn
           </strong>
-
           <span>
             Complete tasks for others and earn money.
           </span>
-
         </div>
-
       </div>
-
     </section>
-
   </div>
-
   <!-- BOTTOM NAV -->
-
-  <nav>
-
+  <nav aria-label="Main navigation">
     <a
       href="index.html"
       class="active"
+      aria-current="page"
     >
       🏠<br>
       Home
     </a>
-
     <a href="my-tasks.html">
       📋<br>
       My Tasks
     </a>
-
     <a href="post-task.html">
       ➕<br>
       Post
     </a>
-
     <a href="alerts.html">
       🔔<br>
       Alerts
     </a>
-
     <a href="profile.html">
       👤<br>
       Profile
     </a>
-
   </nav>
-
   <!-- SUPABASE + OOULINK LOGIC -->
-
   <script>
-
     /* =========================
        SUPABASE CONFIG
     ========================= */
-
     const SUPABASE_URL =
       "https://dthvdxgxesomltlruogp.supabase.co";
-
     const SUPABASE_KEY =
       "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
-
     const supabaseClient =
       supabase.createClient(
         SUPABASE_URL,
         SUPABASE_KEY
       );
-
-
     /* =========================
        LOCATION
     ========================= */
-
+    const locationButton =
+      document.getElementById("locationButton");
+    const locationMenu =
+      document.getElementById("locationMenu");
     function showLocations() {
-
-      const menu =
-        document.getElementById(
-          "locationMenu"
-        );
-
-      if (menu.style.display === "block") {
-
-        menu.style.display = "none";
-
-      } else {
-
-        menu.style.display = "block";
-
-      }
-
+      const isOpen =
+        locationMenu.style.display === "block";
+      locationMenu.style.display =
+        isOpen ? "none" : "block";
+      locationButton.setAttribute(
+        "aria-expanded",
+        String(!isOpen)
+      );
     }
-
-
     function selectLocation(location) {
-
       document.getElementById(
         "selectedLocation"
       ).textContent = location;
-
       localStorage.setItem(
         "ooulink_location",
         location
       );
-
-      document.getElementById(
-        "locationMenu"
-      ).style.display = "none";
-
+      locationMenu.style.display = "none";
+      locationButton.setAttribute(
+        "aria-expanded",
+        "false"
+      );
     }
-
-
+    locationButton.addEventListener(
+      "click",
+      function(event) {
+        event.stopPropagation();
+        showLocations();
+      }
+    );
+    locationButton.addEventListener(
+      "keydown",
+      function(event) {
+        if (
+          event.key === "Enter" ||
+          event.key === " "
+        ) {
+          event.preventDefault();
+          showLocations();
+        }
+      }
+    );
+    locationMenu
+      .querySelectorAll("button[data-location]")
+      .forEach(function(button) {
+        button.addEventListener(
+          "click",
+          function() {
+            selectLocation(
+              button.dataset.location
+            );
+          }
+        );
+      });
     /* Load saved location */
-
     const savedLocation =
       localStorage.getItem(
         "ooulink_location"
       );
-
     if (savedLocation) {
-
       document.getElementById(
         "selectedLocation"
       ).textContent = savedLocation;
-
     }
-
-
     /* Close location menu when tapping outside */
-
     document.addEventListener(
       "click",
       function(event) {
-
-        const menu =
-          document.getElementById(
-            "locationMenu"
-          );
-
-        const locationButton =
-          document.querySelector(
-            ".location"
-          );
-
         if (
-          !menu.contains(event.target) &&
+          !locationMenu.contains(event.target) &&
           !locationButton.contains(event.target)
         ) {
-
-          menu.style.display = "none";
-
+          locationMenu.style.display = "none";
+          locationButton.setAttribute(
+            "aria-expanded",
+            "false"
+          );
         }
-
       }
     );
-
-
     /* =========================
-       LOAD REAL TASKS
+       TASK HELPERS
     ========================= */
-
     function escapeHTML(value) {
-
       return String(value ?? "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
-
     }
-
-
     function formatDeadline(deadline) {
-
       if (!deadline) {
         return "No deadline";
       }
-
       const date =
         new Date(deadline);
-
       if (Number.isNaN(date.getTime())) {
         return "No deadline";
       }
-
       const now =
         new Date();
-
       const difference =
         date.getTime() - now.getTime();
-
       if (difference <= 0) {
         return "Deadline passed";
       }
-
       const minutes =
         Math.floor(
           difference / 60000
         );
-
       if (minutes < 60) {
-
         return "Due in " +
           minutes +
           " minute" +
           (minutes === 1 ? "" : "s");
-
       }
-
       const hours =
         Math.floor(
           minutes / 60
         );
-
       if (hours < 24) {
-
         return "Due in " +
           hours +
           " hour" +
           (hours === 1 ? "" : "s");
-
       }
-
       const days =
         Math.floor(
           hours / 24
         );
-
       if (days === 1) {
         return "Due tomorrow";
       }
-
       if (days < 7) {
-
         return "Due in " +
           days +
           " days";
-
       }
-
       return "Due " +
         date.toLocaleDateString();
-
     }
-
-
-    async function loadTasks() {
-
+    function showTaskMessage(message) {
       const container =
         document.getElementById(
           "tasksContainer"
         );
-
-
+      container.innerHTML =
+        "";
+      const messageElement =
+        document.createElement(
+          "div"
+        );
+      messageElement.className =
+        "task-message";
+      messageElement.textContent =
+        message;
+      container.appendChild(
+        messageElement
+      );
+    }
+    /* =========================
+       LOAD REAL TASKS
+    ========================= */
+    async function loadTasks() {
+      const container =
+        document.getElementById(
+          "tasksContainer"
+        );
       const {
         data,
         error
@@ -1144,231 +986,168 @@
             }
           )
           .limit(3);
-
-
       if (error) {
-
         console.error(
           "Error loading tasks:",
           error
         );
-
-        container.innerHTML =
-          '<div class="task-message">Unable to load tasks right now.</div>';
-
+        showTaskMessage(
+          "Unable to load tasks right now."
+        );
         return;
-
       }
-
-
       if (!data || data.length === 0) {
-
-        container.innerHTML =
-          '<div class="task-message">No open tasks available right now.</div>';
-
+        showTaskMessage(
+          "No open tasks available right now."
+        );
         return;
-
       }
-
-
-      container.innerHTML = "";
-
-
-      data.forEach(function(task) {
-
+      container.innerHTML =
+        "";
+      data.forEach(function(task, index) {
         const title =
           escapeHTML(
             task.title
           );
-
         const location =
           escapeHTML(
             task.location
           );
-
         const category =
           escapeHTML(
             task.category
           );
-
         const budget =
           Number(task.budget || 0)
             .toLocaleString();
-
         const deadline =
           formatDeadline(
             task.deadline
           );
-
-
         const card =
           document.createElement(
             "div"
           );
-
         card.className =
           "task-card";
-
-
+        card.style.animationDelay =
+          Math.min(index * 0.06, 0.18) +
+          "s";
         card.innerHTML = `
-
-  <div class="task-top">
-
-    <div>
-
-      <div class="task-title">
-        ${title}
-      </div>
-
-      <div class="task-info">
-
-        📍 ${location || "Location not specified"}<br>
-        ⏰ ${deadline}
-
-      </div>
-
-    </div>
-
-    <div class="task-price">
-      ₦${budget}
-    </div>
-
-  </div>
-
-  <span class="tag">
-    ${category || "Other"}
-  </span>
-
-  <button
-  class="view-task-button"
-  type="button"
-  onclick="openTask('${task.id}')"
->
-  👀 View Task
-</button>
-
-`;
-card.querySelector(".view-task-button").addEventListener("click", function () {
-  window.location.href = `task-details.html?id=${task.id}`;
-});
-
-
+          <div class="task-top">
+            <div>
+              <div class="task-title">
+                ${title}
+              </div>
+              <div class="task-info">
+                📍 ${location || "Location not specified"}<br>
+                ⏰ ${deadline}
+              </div>
+            </div>
+            <div class="task-price">
+              ₦${budget}
+            </div>
+          </div>
+          <span class="tag">
+            ${category || "Other"}
+          </span>
+          <button
+            class="view-task-button"
+            type="button"
+          >
+            👀 View Task
+          </button>
+        `;
+        const viewButton =
+          card.querySelector(
+            ".view-task-button"
+          );
+        viewButton.addEventListener(
+          "click",
+          function(event) {
+            event.stopPropagation();
+            window.location.href =
+              "task-details.html?id=" +
+              encodeURIComponent(task.id);
+          }
+        );
+        card.addEventListener(
+          "click",
+          function() {
+            window.location.href =
+              "task-details.html?id=" +
+              encodeURIComponent(task.id);
+          }
+        );
         container.appendChild(
           card
         );
-
       });
-
     }
-
-
     /* Load tasks immediately */
-
     loadTasks();
-
-
     /* =========================
        AUTH STATE
     ========================= */
-
     async function updateAuthUI() {
-
       const {
         data: {
           session
         }
       } =
         await supabaseClient.auth.getSession();
-
-
       const loggedOutButtons =
         document.getElementById(
           "loggedOutButtons"
         );
-
       const loggedInButtons =
         document.getElementById(
           "loggedInButtons"
         );
-
       const welcomeMessage =
         document.getElementById(
           "welcomeMessage"
         );
-
-
       if (session) {
-
         loggedOutButtons.style.display =
           "none";
-
         loggedInButtons.style.display =
           "flex";
-
-
         const user =
           session.user;
-
-
         const fullName =
           user.user_metadata?.full_name;
-
-
         if (fullName) {
-
           welcomeMessage.textContent =
             "Welcome back, " +
             fullName +
             " 👋";
-
         } else {
-
           welcomeMessage.textContent =
             "Welcome back 👋";
-
         }
-
-
         welcomeMessage.style.display =
           "block";
-
-
       } else {
-
         loggedOutButtons.style.display =
           "flex";
-
         loggedInButtons.style.display =
           "none";
-
         welcomeMessage.style.display =
           "none";
-
       }
-
     }
-
-
     /* Check login immediately */
-
     updateAuthUI();
-
-
     /* Watch for login/logout */
-
     supabaseClient.auth.onAuthStateChange(
-      function(event, session) {
-
+      function() {
         updateAuthUI();
-
       }
     );
-
-
     /* =========================
        LOGOUT
     ========================= */
-
     document
       .getElementById(
         "logoutButton"
@@ -1376,32 +1155,33 @@ card.querySelector(".view-task-button").addEventListener("click", function () {
       .addEventListener(
         "click",
         async function() {
-
+          const logoutButton =
+            document.getElementById(
+              "logoutButton"
+            );
+          logoutButton.disabled =
+            true;
+          logoutButton.textContent =
+            "LOGGING OUT...";
           const {
             error
           } =
             await supabaseClient.auth.signOut();
-
-
           if (error) {
-
+            logoutButton.disabled =
+              false;
+            logoutButton.textContent =
+              "LOG OUT";
             alert(
               "Logout failed: " +
               error.message
             );
-
             return;
-
           }
-
-
           window.location.href =
             "index.html";
-
         }
       );
-
   </script>
-
 </body>
 </html>
