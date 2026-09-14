@@ -790,6 +790,26 @@ function showToast(message){
     toast.classList.remove("show");
   },2500);
 }
+async function notifyUser(userId,taskId,type,title,message){
+  if(!userId||!taskId)return false;
+  try{
+    const{error}=await supabaseClient.from("notifications").insert({
+      user_id:userId,
+      task_id:taskId,
+      type,
+      title,
+      message
+    });
+    if(error){
+      console.error("Notification insert error:",error);
+      return false;
+    }
+    return true;
+  }catch(error){
+    console.error("Notification exception:",error);
+    return false;
+  }
+}
 
 function profileAvatar(element,profile){
   if(!element) return;
@@ -1292,153 +1312,149 @@ function renderApplicantActions(){
 
 
 async function submitForVerification(){
-  if(!currentUser || !currentTask){
+  if(!currentUser||!currentTask){
     showToast("Please try again.");
     return;
   }
-
   if(!isRunner()){
     showToast("Only the assigned runner can submit this task.");
     return;
   }
-
-  if(normalizeStatus(currentTask.status) !== "in_progress"){
+  if(normalizeStatus(currentTask.status)!=="in_progress"){
     showToast("This task is not currently in progress.");
     return;
   }
 
-  const confirmed = window.confirm(
+  const confirmed=window.confirm(
     "Submit this task for the poster to verify?"
   );
 
-  if(!confirmed){
-    return;
-  }
+  if(!confirmed)return;
 
-  const button = $("submitVerificationBtn");
+  const button=$("submitVerificationBtn");
 
   if(button){
-    button.disabled = true;
-    button.textContent = "Submitting...";
+    button.disabled=true;
+    button.textContent="Submitting...";
   }
 
   try{
-    const {error} = await supabaseClient
+    const{error}=await supabaseClient
       .from("tasks")
-      .update({
-        status:"awaiting_verification"
-      })
+      .update({status:"awaiting_verification"})
       .eq("id",currentTask.id)
       .eq("runner_id",currentUser.id)
       .eq("status","in_progress");
 
-    if(error) throw error;
+    if(error)throw error;
+
+    await notifyUser(
+      currentTask.user_id,
+      currentTask.id,
+      "verification",
+      "Task Submitted for Verification",
+      "Your runner submitted the task for verification: "+currentTask.title
+    );
 
     showToast("Task submitted for verification.");
-
     await loadTask();
 
   }catch(error){
     console.error("Submit verification error:",error);
 
     if(button){
-      button.disabled = false;
-      button.textContent = "✓ Submit for Verification";
+      button.disabled=false;
+      button.textContent="✓ Submit for Verification";
     }
 
     showToast(
-      error?.message ||
-      "Could not submit the task."
+      error?.message||"Could not submit the task."
     );
   }
 }
 
 
 async function completeTask(){
-  if(!currentUser || !currentTask){
+  if(!currentUser||!currentTask){
     showToast("Please try again.");
     return;
   }
-
   if(!isOwner()){
     showToast("Only the task poster can complete this task.");
     return;
   }
-
-  if(normalizeStatus(currentTask.status) !== "awaiting_verification"){
+  if(normalizeStatus(currentTask.status)!=="awaiting_verification"){
     showToast("This task is not awaiting verification.");
     return;
   }
 
-  const confirmed = window.confirm(
+  const confirmed=window.confirm(
     "Approve this task and mark it as completed?"
   );
 
-  if(!confirmed){
-    return;
-  }
+  if(!confirmed)return;
 
-  const button = $("completeTaskBtn");
+  const button=$("completeTaskBtn");
+  const runnerId=currentTask.runner_id;
 
   if(button){
-    button.disabled = true;
-    button.textContent = "Completing...";
+    button.disabled=true;
+    button.textContent="Completing...";
   }
 
   try{
-    const {error} = await supabaseClient
+    const{error}=await supabaseClient
       .from("tasks")
-      .update({
-        status:"completed"
-      })
+      .update({status:"completed"})
       .eq("id",currentTask.id)
       .eq("user_id",currentUser.id)
-      .eq("runner_id",currentTask.runner_id)
+      .eq("runner_id",runnerId)
       .eq("status","awaiting_verification");
 
-    if(error) throw error;
+    if(error)throw error;
+
+    await notifyUser(
+      runnerId,
+      currentTask.id,
+      "task",
+      "Task Completed",
+      "Your task submission was approved and marked completed: "+currentTask.title
+    );
 
     showToast("Task completed successfully.");
 
-try {
-  const { error: xpError } =
-    await supabaseClient.rpc(
-      "award_task_xp",
-      {
-        target_task_id: currentTask.id,
-        target_reward_type: "task_completed"
+    try{
+      const{error:xpError}=await supabaseClient.rpc(
+        "award_task_xp",
+        {
+          target_task_id:currentTask.id,
+          target_reward_type:"task_completed"
+        }
+      );
+
+      if(xpError){
+        console.error("Task completion XP error:",xpError);
       }
-    );
+    }catch(xpError){
+      console.error("Task completion XP exception:",xpError);
+    }
 
-  if (xpError) {
-    console.error(
-      "Task completion XP error:",
-      xpError
-    );
-  }
-} catch (xpError) {
-  console.error(
-    "Task completion XP exception:",
-    xpError
-  );
-}
+    await loadTask();
 
-await loadTask();
   }catch(error){
     console.error("Complete task error:",error);
 
     if(button){
-      button.disabled = false;
-      button.textContent = "✓ Approve & Complete";
+      button.disabled=false;
+      button.textContent="✓ Approve & Complete";
     }
 
     showToast(
-      error?.message ||
-      "Could not complete the task."
+      error?.message||"Could not complete the task."
     );
   }
-  }
-  let selectedReviewRating = 0;
+}
+let selectedReviewRating = 0;
 
 function renderReviewStars(rating){
   const value = Math.max(0,Math.min(5,Number(rating) || 0));
@@ -2165,142 +2181,151 @@ function renderActions(){
     showToast("Please log in to apply for a task.");
     return;
   }
-
   if(!currentTask){
     showToast("Task information is not ready yet.");
     return;
   }
-
   if(isOwner()){
     showToast("You cannot apply for your own task.");
     return;
   }
-
-  if(normalizeStatus(currentTask.status) !== "open"){
+  if(normalizeStatus(currentTask.status)!=="open"){
     showToast("This task is no longer accepting applications.");
     return;
   }
-
-  if(myApplication &&
-     normalizeStatus(myApplication.status) === "pending"){
+  if(myApplication&&normalizeStatus(myApplication.status)==="pending"){
     showToast("You have already applied.");
     return;
   }
 
-  const button = $("applyBtn");
-
+  const button=$("applyBtn");
   if(button){
-    button.disabled = true;
-    button.textContent = "Applying...";
+    button.disabled=true;
+    button.textContent="Applying...";
   }
 
   try{
-    const {data,error} = await supabaseClient
+    const{error}=await supabaseClient
       .from("task_applications")
       .insert({
-        task_id: currentTask.id,
-        runner_id: currentUser.id,
-        status: "pending"
-      })
-      .select(`
-        id,
-        task_id,
-        runner_id,
-        status,
-        created_at
-      `)
-      .single();
+        task_id:currentTask.id,
+        runner_id:currentUser.id,
+        status:"pending"
+      });
 
-    if(error) throw error;
+    if(error)throw error;
 
-    myApplication = data || null;
+    myApplication={
+      task_id:currentTask.id,
+      runner_id:currentUser.id,
+      status:"pending"
+    };
+
+    await notifyUser(
+      currentTask.user_id,
+      currentTask.id,
+      "application",
+      "New Task Application",
+      "Someone applied for your task: "+currentTask.title
+    );
 
     showToast("Application sent successfully.");
-
     renderActions();
 
-  }catch(error){console.error("Apply for task error:",error);if(button){button.disabled=false;button.textContent="Apply for Task";}if(error?.message?.includes("OOULINK_RATE_LIMITED"))showToast("⚡ Slow down — you can submit a maximum of 3 applications every 2 minutes. Please wait before applying again.");else showToast(error?.message||"Could not apply for this task.");}
+  }catch(error){
+    console.error("Apply for task error:",error);
+
+    if(button){
+      button.disabled=false;
+      button.textContent="Apply for Task";
+    }
+
+    if(error?.message?.includes("OOULINK_RATE_LIMITED")){
+      showToast("⚡ Slow down — you can submit a maximum of 3 applications every 2 minutes. Please wait before applying again.");
+    }else{
+      showToast(error?.message||"Could not apply for this task.");
+    }
+  }
 }
 
 async function selectRunner(applicationId){
-  if(!currentUser || !currentTask){
+  if(!currentUser||!currentTask){
     showToast("Please try again.");
     return;
   }
-
   if(!isOwner()){
     showToast("Only the task poster can select a runner.");
     return;
   }
-
-  if(normalizeStatus(currentTask.status) !== "open"){
+  if(normalizeStatus(currentTask.status)!=="open"){
     showToast("This task is no longer open.");
     return;
   }
-
   if(!applicationId){
     showToast("No application was selected.");
     return;
   }
 
-  const application =
-    taskApplications.find(
-      item => item.id === applicationId
-    );
+  const application=taskApplications.find(
+    item=>item.id===applicationId
+  );
 
-  if(!application ||
-     normalizeStatus(application.status) !== "pending"){
+  if(!application||normalizeStatus(application.status)!=="pending"){
     showToast("This application is no longer available.");
     return;
   }
 
-  const confirmed = window.confirm(
+  const confirmed=window.confirm(
     "Select this student as the runner for this task?"
   );
 
-  if(!confirmed){
-    return;
-  }
+  if(!confirmed)return;
 
-  const buttons =
-    document.querySelectorAll(".select-runner-btn");
+  const buttons=document.querySelectorAll(".select-runner-btn");
 
   buttons.forEach(button=>{
-    button.disabled = true;
-    button.textContent = "Selecting...";
+    button.disabled=true;
+    button.textContent="Selecting...";
   });
 
   try{
-    const {data,error} = await supabaseClient
-      .rpc("select_task_runner",{
-        target_task_id: currentTask.id,
-        target_application_id: applicationId
-      });
+    const{data,error}=await supabaseClient.rpc(
+      "select_task_runner",
+      {
+        target_task_id:currentTask.id,
+        target_application_id:applicationId
+      }
+    );
 
-    if(error) throw error;
-
-    if(data !== true){
+    if(error)throw error;
+    if(data!==true){
       throw new Error("Runner selection could not be completed.");
     }
 
-    showToast("Runner selected successfully.");
+    await notifyUser(
+      application.runner_id,
+      currentTask.id,
+      "task",
+      "You Were Selected",
+      "You were selected as the runner for: "+currentTask.title
+    );
 
+    showToast("Runner selected successfully.");
     await loadTask();
 
   }catch(error){
     console.error("Select runner error:",error);
 
     showToast(
-      error?.message ||
-      "Could not select this runner."
+      error?.message||"Could not select this runner."
     );
 
     buttons.forEach(button=>{
-      button.disabled = false;
-      button.textContent = "Select Runner";
+      button.disabled=false;
+      button.textContent="Select Runner";
     });
   }
-      }
+}
   
 async function loadMyApplication(taskId){
   myApplication = null;
