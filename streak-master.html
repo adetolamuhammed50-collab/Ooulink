@@ -1,1 +1,237 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Streak Master • OOULink</title><style>*{box-sizing:border-box}body{margin:0;background:#f4fff7;color:#123;font-family:Arial,sans-serif;max-width:480px;margin:auto;padding-bottom:78px}.header{height:64px;background:#fff;border-bottom:1px solid #e3eee7;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:5}.logo{font-size:22px;font-weight:800;color:#159447}.back{border:0;background:#eef9f1;color:#159447;border-radius:12px;padding:9px 12px;font-weight:700}.wrap{padding:20px 18px}.intro{text-align:center}.intro h1{margin:5px 0;font-size:27px}.intro p{margin:0;color:#6d7972;font-size:14px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:18px 0}.stat{background:#fff;border:1px solid #e3eee7;border-radius:15px;text-align:center;padding:12px 5px}.stat b{display:block;color:#159447;font-size:20px}.stat span{font-size:10px;color:#718078}.game{background:#fff;border:1px solid #e3eee7;border-radius:22px;padding:22px 16px;text-align:center;box-shadow:0 6px 20px #1231}.timer{font-size:14px;color:#159447;font-weight:800;margin-bottom:16px}.question{font-size:21px;font-weight:800;min-height:52px;display:flex;align-items:center;justify-content:center;margin-bottom:15px}.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}.answer{border:2px solid #e3eee7;background:#f8fffa;border-radius:14px;padding:14px 8px;font-size:14px;font-weight:700;cursor:pointer;transition:.12s}.answer:active{transform:scale(.95)}.answer.correct{border-color:#159447;background:#eef9f1;color:#159447}.answer.wrong{border-color:#d95b48;background:#fff1ee;color:#d95b48}.message{height:30px;margin-top:14px;font-size:13px;font-weight:700;color:#159447}.start,.again{border:0;background:#159447;color:#fff;border-radius:13px;padding:13px 22px;font-weight:800}.start{margin-top:10px}.result{display:none;background:#fff;border:1px solid #e3eee7;border-radius:20px;padding:20px;text-align:center;margin-top:16px}.result h2{margin:0 0 8px}.big{font-size:40px;font-weight:900;color:#159447}.result p{color:#68756e;font-size:13px}.hint{text-align:center;color:#87938c;font-size:11px;margin:12px 0}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);height:64px;background:#fff;border-top:1px solid #e3eee7;display:flex;justify-content:space-around;align-items:center;z-index:10}.bottom a{text-decoration:none;color:#718078;font-size:10px;text-align:center}.bottom span{display:block;font-size:20px;margin-bottom:2px}.bottom .active{color:#159447;font-weight:800}@media(max-width:350px){.question{font-size:18px}.answer{padding:12px 6px}}</style></head><body><header class="header"><div class="logo">OOULink</div><button class="back" onclick="location.href='games.html'">← Games</button></header><main class="wrap"><section class="intro"><h1>🔥 Streak Master</h1><p>Answer correctly and keep your streak alive!</p></section><section class="stats"><div class="stat"><b id="score">0</b><span>SCORE</span></div><div class="stat"><b id="streak">0</b><span>STREAK</span></div><div class="stat"><b id="best">0</b><span>BEST</span></div></section><div class="game"><div class="timer">⏱️ <span id="time">30</span>s</div><div class="question" id="question">Ready?</div><div class="answers" id="answers"></div><div class="message" id="message">Get every answer right!</div><button class="start" id="start">START GAME</button></div><div class="result" id="result"><h2>🏆 Streak Complete!</h2><div class="big" id="finalScore">0</div><p id="resultText"></p><button class="again" id="again">PLAY AGAIN</button></div><div class="hint">30 seconds • Correct answers increase your streak • Wrong answers reset it</div></main><nav class="bottom"><a href="index.html"><span>🏠</span>Home</a><a href="my-tasks.html"><span>📋</span>My Tasks</a><a href="post-task.html"><span>➕</span>Post</a><a href="alerts.html"><span>🔔</span>Alerts</a><a href="profile.html"><span>👤</span>Profile</a></nav><script>const question=document.getElementById("question"),answers=document.getElementById("answers"),scoreEl=document.getElementById("score"),streakEl=document.getElementById("streak"),bestEl=document.getElementById("best"),timeEl=document.getElementById("time"),message=document.getElementById("message"),start=document.getElementById("start"),again=document.getElementById("again"),result=document.getElementById("result"),finalScore=document.getElementById("finalScore"),resultText=document.getElementById("resultText");const qs=[["What is 2 + 2?",["3","4","5","6"],"4"],["Which planet is known as the Red Planet?",["Earth","Mars","Venus","Jupiter"],"Mars"],["How many days are in a week?",["5","6","7","8"],"7"],["What color do you get by mixing blue and yellow?",["Green","Purple","Orange","Red"],"Green"],["Which is the largest ocean?",["Atlantic","Indian","Pacific","Arctic"],"Pacific"],["How many months are in a year?",["10","11","12","13"],"12"],["Which animal is known as man's best friend?",["Cat","Dog","Horse","Lion"],"Dog"],["What is 5 × 5?",["20","25","30","35"],"25"],["Which continent is Nigeria in?",["Asia","Africa","Europe","South America"],"Africa"],["How many hours are in a day?",["12","18","24","36"],"24"],["Which gas do humans need to breathe?",["Oxygen","Helium","Hydrogen","Neon"],"Oxygen"],["What is the opposite of hot?",["Warm","Cold","Dry","Bright"],"Cold"],["Which shape has three sides?",["Square","Circle","Triangle","Rectangle"],"Triangle"],["What is 10 - 3?",["5","6","7","8"],"7"],["Which is faster?",["Car","Snail","Cheetah","Turtle"],"Cheetah"]];let score=0,streak=0,time=30,timer=null,running=false,best=Number(localStorage.getItem("ooulink_streak_best")||0),current=null;bestEl.textContent=best;function nextQuestion(){if(!running)return;current=qs[Math.floor(Math.random()*qs.length)];question.textContent=current[0];answers.innerHTML="";let opts=[...current[1]];for(let i=opts.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1)),x=opts[i];opts[i]=opts[j];opts[j]=x}opts.forEach(v=>{const b=document.createElement("button");b.className="answer";b.textContent=v;b.onclick=()=>answer(b,v);answers.appendChild(b)})}function answer(btn,value){if(!running)return;const all=[...answers.children];all.forEach(b=>b.disabled=true);if(value===current[2]){btn.classList.add("correct");score++;streak++;message.textContent="🔥 Correct! Streak "+streak+"!";scoreEl.textContent=score;streakEl.textContent=streak;if(streak>best){best=streak;bestEl.textContent=best;localStorage.setItem("ooulink_streak_best",best)}}else{btn.classList.add("wrong");streak=0;streakEl.textContent=0;message.textContent="❌ Wrong! Streak reset.";all.forEach(b=>{if(b.textContent===current[2])b.classList.add("correct")})}setTimeout(nextQuestion,450)}function endGame(){running=false;clearInterval(timer);finalScore.textContent=score;resultText.textContent="You scored "+score+" point"+(score===1?"":"s")+" with a best streak of "+best+".";result.style.display="block";answers.innerHTML="";question.textContent="Time's up!";message.textContent="Great run!";start.style.display="none"}function startGame(){clearInterval(timer);score=0;streak=0;time=30;running=true;scoreEl.textContent=0;streakEl.textContent=0;timeEl.textContent=30;result.style.display="none";start.style.display="none";message.textContent="Get every answer right!";nextQuestion();timer=setInterval(()=>{time--;timeEl.textContent=time;if(time<=0)endGame()},1000)}start.onclick=startGame;again.onclick=()=>{start.style.display="inline-block";startGame()};</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Streak Master • StudTask</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f4fff7; color: #123; font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding-bottom: 88px; }
+    .header { height: 64px; background: #fff; border-bottom: 1px solid #e3eee7; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; position: sticky; top: 0; z-index: 5; }
+    .logo { font-size: 22px; font-weight: 800; color: #159447; }
+    .back, .start, .again { border: 0; cursor: pointer; font-weight: 800; transition: transform .16s ease, opacity .16s ease, box-shadow .16s ease; touch-action: manipulation; }
+    .back { background: #eef9f1; color: #159447; border-radius: 12px; padding: 10px 13px; }
+    .back:hover, .start:hover, .again:hover { box-shadow: 0 6px 16px rgba(21,148,71,.2); }
+    .back:active, .start:active, .again:active { transform: scale(.94); opacity: .85; }
+    .back:focus-visible, .start:focus-visible, .again:focus-visible, .answer:focus-visible, .bottom-nav a:focus-visible { outline: 3px solid rgba(21,148,71,.22); outline-offset: 2px; }
+    .wrap { padding: 20px 18px; }
+    .intro { text-align: center; }
+    .intro h1 { margin: 5px 0; font-size: 27px; }
+    .intro p { margin: 0; color: #6d7972; font-size: 14px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin: 18px 0; }
+    .stat { background: #fff; border: 1px solid #e3eee7; border-radius: 15px; text-align: center; padding: 12px 5px; }
+    .stat b { display: block; color: #159447; font-size: 20px; }
+    .stat span { font-size: 10px; color: #718078; }
+    .game { background: #fff; border: 1px solid #e3eee7; border-radius: 22px; padding: 22px 16px; text-align: center; box-shadow: 0 6px 20px rgba(18,51,34,.08); }
+    .timer { font-size: 14px; color: #159447; font-weight: 800; margin-bottom: 16px; }
+    .question { font-size: 21px; font-weight: 800; min-height: 52px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+    .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .answer { border: 2px solid #e3eee7; background: #f8fffa; color: #123; border-radius: 14px; padding: 14px 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform .12s ease, border-color .12s ease, background .12s ease; touch-action: manipulation; }
+    .answer:active { transform: scale(.95); }
+    .answer.correct { border-color: #159447; background: #eef9f1; color: #159447; }
+    .answer.wrong { border-color: #d95b48; background: #fff1ee; color: #d95b48; }
+    .message { height: 30px; margin-top: 14px; font-size: 13px; font-weight: 700; color: #159447; }
+    .start, .again { background: #159447; color: #fff; border-radius: 13px; padding: 13px 22px; }
+    .start { margin-top: 10px; }
+    .result { display: none; background: #fff; border: 1px solid #e3eee7; border-radius: 20px; padding: 20px; text-align: center; margin-top: 16px; }
+    .result h2 { margin: 0 0 8px; }
+    .big { font-size: 40px; font-weight: 900; color: #159447; }
+    .result p { color: #68756e; font-size: 13px; }
+    .hint { text-align: center; color: #87938c; font-size: 11px; margin: 12px 0; }
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: rgba(255,255,255,.94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid #e5e8ec; display: grid; grid-template-columns: repeat(5, 1fr); padding: 7px 5px 9px; z-index: 10; box-shadow: 0 -6px 22px rgba(0,0,0,.06); }
+    .bottom-nav a { position: relative; min-height: 54px; padding: 5px 2px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: #687386; font-size: 9px; font-weight: 600; border-radius: 12px; transition: transform .16s ease, color .16s ease, background .16s ease, box-shadow .16s ease; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .bottom-nav a span { font-size: 18px; line-height: 20px; margin-bottom: 2px; transition: transform .16s ease; }
+    .bottom-nav a:hover { color: #16834b; background: rgba(22,131,75,.05); }
+    .bottom-nav a:active { transform: scale(.91); }
+    .bottom-nav a:active span { transform: scale(.86); }
+    .bottom-nav a.active { color: #16834b; font-weight: 800; background: rgba(22,131,75,.09); box-shadow: inset 0 0 0 1px rgba(22,131,75,.07); }
+    .bottom-nav a.active::after { content: ""; position: absolute; left: 50%; bottom: 3px; width: 20px; height: 3px; border-radius: 10px; background: #16834b; transform: translateX(-50%); }
+    @media (max-width: 350px) { .question { font-size: 18px; } .answer { padding: 12px 6px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">StudTask</div>
+    <button class="back" type="button" onclick="location.href='games.html'">← Games</button>
+  </header>
+
+  <main class="wrap">
+    <section class="intro">
+      <h1>🔥 Streak Master</h1>
+      <p>Answer correctly and keep your streak alive!</p>
+    </section>
+
+    <section class="stats">
+      <div class="stat"><b id="score">0</b><span>SCORE</span></div>
+      <div class="stat"><b id="streak">0</b><span>STREAK</span></div>
+      <div class="stat"><b id="best">0</b><span>BEST</span></div>
+    </section>
+
+    <div class="game">
+      <div class="timer">⏱️ <span id="time">30</span>s</div>
+      <div class="question" id="question">Ready?</div>
+      <div class="answers" id="answers"></div>
+      <div class="message" id="message">Get every answer right!</div>
+      <button class="start" id="start" type="button">START GAME</button>
+    </div>
+
+    <div class="result" id="result">
+      <h2>🏆 Streak Complete!</h2>
+      <div class="big" id="finalScore">0</div>
+      <p id="resultText"></p>
+      <button class="again" id="again" type="button">PLAY AGAIN</button>
+    </div>
+
+    <div class="hint">30 seconds • Correct answers increase your streak • Wrong answers reset it</div>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <a href="index.html"><span>⌂</span>Home</a>
+    <a href="my-tasks.html"><span>✓</span>My Tasks</a>
+    <a href="post-task.html"><span>＋</span>Post</a>
+    <a href="alerts.html"><span>🔔</span>Alerts</a>
+    <a href="profile.html"><span>♙</span>Profile</a>
+  </nav>
+
+  <script>
+    const question = document.getElementById("question");
+    const answers = document.getElementById("answers");
+    const scoreEl = document.getElementById("score");
+    const streakEl = document.getElementById("streak");
+    const bestEl = document.getElementById("best");
+    const timeEl = document.getElementById("time");
+    const message = document.getElementById("message");
+    const start = document.getElementById("start");
+    const again = document.getElementById("again");
+    const result = document.getElementById("result");
+    const finalScore = document.getElementById("finalScore");
+    const resultText = document.getElementById("resultText");
+
+    const questions = [
+      ["What is 2 + 2?", ["3", "4", "5", "6"], "4"],
+      ["Which planet is known as the Red Planet?", ["Earth", "Mars", "Venus", "Jupiter"], "Mars"],
+      ["How many days are in a week?", ["5", "6", "7", "8"], "7"],
+      ["What color do you get by mixing blue and yellow?", ["Green", "Purple", "Orange", "Red"], "Green"],
+      ["Which is the largest ocean?", ["Atlantic", "Indian", "Pacific", "Arctic"], "Pacific"],
+      ["How many months are in a year?", ["10", "11", "12", "13"], "12"],
+      ["Which animal is known as man's best friend?", ["Cat", "Dog", "Horse", "Lion"], "Dog"],
+      ["What is 5 × 5?", ["20", "25", "30", "35"], "25"],
+      ["Which continent is Nigeria in?", ["Asia", "Africa", "Europe", "South America"], "Africa"],
+      ["How many hours are in a day?", ["12", "18", "24", "36"], "24"],
+      ["Which gas do humans need to breathe?", ["Oxygen", "Helium", "Hydrogen", "Neon"], "Oxygen"],
+      ["What is the opposite of hot?", ["Warm", "Cold", "Dry", "Bright"], "Cold"],
+      ["Which shape has three sides?", ["Square", "Circle", "Triangle", "Rectangle"], "Triangle"],
+      ["What is 10 - 3?", ["5", "6", "7", "8"], "7"],
+      ["Which is faster?", ["Car", "Snail", "Cheetah", "Turtle"], "Cheetah"]
+    ];
+
+    let score = 0;
+    let streak = 0;
+    let time = 30;
+    let timer = null;
+    let running = false;
+    let best = Number(localStorage.getItem("studtask_streak_best") || 0);
+    let current = null;
+
+    bestEl.textContent = best;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function nextQuestion() {
+      if (!running) return;
+
+      current = questions[Math.floor(Math.random() * questions.length)];
+      question.textContent = current[0];
+      answers.innerHTML = "";
+      const options = shuffle([...current[1]]);
+
+      options.forEach(value => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "answer";
+        button.textContent = value;
+        button.addEventListener("click", () => answer(button, value));
+        answers.appendChild(button);
+      });
+    }
+
+    function answer(button, value) {
+      if (!running) return;
+
+      const all = [...answers.children];
+      all.forEach(item => { item.disabled = true; });
+
+      if (value === current[2]) {
+        button.classList.add("correct");
+        score += 1;
+        streak += 1;
+        scoreEl.textContent = score;
+        streakEl.textContent = streak;
+        message.textContent = "🔥 Correct! Streak " + streak + "!";
+
+        if (streak > best) {
+          best = streak;
+          bestEl.textContent = best;
+          localStorage.setItem("studtask_streak_best", best);
+        }
+      } else {
+        button.classList.add("wrong");
+        streak = 0;
+        streakEl.textContent = "0";
+        message.textContent = "❌ Wrong! Streak reset.";
+        all.forEach(item => {
+          if (item.textContent === current[2]) item.classList.add("correct");
+        });
+      }
+
+      setTimeout(nextQuestion, 450);
+    }
+
+    function endGame() {
+      running = false;
+      clearInterval(timer);
+      finalScore.textContent = score;
+      resultText.textContent = "You scored " + score + " point" + (score === 1 ? "" : "s") + " with a best streak of " + best + ".";
+      result.style.display = "block";
+      answers.innerHTML = "";
+      question.textContent = "Time's up!";
+      message.textContent = "Great run!";
+      start.style.display = "none";
+    }
+
+    function startGame() {
+      clearInterval(timer);
+      score = 0;
+      streak = 0;
+      time = 30;
+      running = true;
+      scoreEl.textContent = "0";
+      streakEl.textContent = "0";
+      timeEl.textContent = "30";
+      result.style.display = "none";
+      start.style.display = "none";
+      message.textContent = "Get every answer right!";
+      nextQuestion();
+
+      timer = setInterval(() => {
+        time -= 1;
+        timeEl.textContent = time;
+        if (time <= 0) endGame();
+      }, 1000);
+    }
+
+    start.addEventListener("click", startGame);
+    again.addEventListener("click", () => {
+      start.style.display = "inline-block";
+      startGame();
+    });
+  </script>
+</body>
+</html>
