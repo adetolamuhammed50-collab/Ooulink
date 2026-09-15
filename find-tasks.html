@@ -1,1 +1,714 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Find Tasks - OOULink</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7f6;color:#17221c}header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #e5eae7;padding:14px 16px}.wrap{max-width:480px;margin:auto}.head{display:flex;align-items:center;gap:12px}.back{color:#16834b;text-decoration:none;font-weight:700;font-size:14px}.logo{font-size:21px;font-weight:800;color:#16834b}.sub{font-size:12px;color:#777;margin-top:2px}.search{margin-top:14px;position:relative}.search input{width:100%;padding:13px 42px 13px 14px;border:1px solid #dce3df;border-radius:13px;font-size:15px;outline:0;background:#fafcfa}.search input:focus{border-color:#16834b}.clear{position:absolute;right:10px;top:9px;border:0;background:0 0;font-size:19px;color:#888;display:none}.filters{margin-top:10px;display:flex;gap:8px;overflow-x:auto;padding-bottom:3px}.filters::-webkit-scrollbar{display:none}.filters select,.filterBtn{border:1px solid #dce3df;background:#fff;border-radius:11px;padding:10px 11px;font-size:12px;white-space:nowrap}.filterBtn{font-weight:700;color:#16834b}.advanced{display:none;background:#fff;border:1px solid #e0e6e2;border-radius:15px;padding:12px;margin-top:9px}.advanced.show{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field label{display:block;font-size:11px;color:#777;margin-bottom:5px}.field select,.field input{width:100%;padding:10px;border:1px solid #dce3df;border-radius:10px;background:#fafcfa;font-size:12px}.chips{display:flex;gap:7px;overflow-x:auto;margin-top:9px}.chips::-webkit-scrollbar{display:none}.chip{background:#e7f5ed;color:#16834b;border-radius:20px;padding:7px 10px;font-size:11px;font-weight:700;white-space:nowrap}.chip button{border:0;background:0 0;color:inherit;margin-left:4px;font-weight:800}.topbar{display:flex;align-items:center;justify-content:space-between;margin:15px 0 10px}.count{font-size:13px;color:#66716b;font-weight:600}.actions{display:flex;gap:7px}.smallBtn{border:1px solid #dce3df;background:#fff;border-radius:9px;padding:8px 10px;font-size:11px;font-weight:700}.task{background:#fff;border:1px solid #e4e9e6;border-radius:16px;padding:15px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.035);transition:.15s}.task:active{transform:scale(.985)}.tasktop{display:flex;justify-content:space-between;gap:8px}.badge{font-size:10px;background:#e8f6ee;color:#16834b;border-radius:20px;padding:5px 8px;font-weight:700}.budget{font-weight:800;color:#16834b;font-size:15px}.task h3{font-size:16px;margin:10px 0 6px}.desc{font-size:12px;color:#68736d;line-height:1.45;margin:0 0 11px}.meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.meta span{font-size:10px;color:#68736d;background:#f3f6f4;border-radius:8px;padding:6px 7px}.deadline{color:#d47700!important;background:#fff4df!important}.expired{opacity:.65}.view{width:100%;border:0;background:#16834b;color:#fff;padding:11px;border-radius:10px;font-weight:700}.load{width:100%;border:1px solid #16834b;background:#fff;color:#16834b;padding:12px;border-radius:11px;font-weight:700;margin:3px 0 14px}.newbar{display:none;background:#16834b;color:#fff;border-radius:11px;padding:10px;text-align:center;font-size:12px;font-weight:700;margin-bottom:10px}.empty{text-align:center;background:#fff;border-radius:16px;padding:35px 20px;color:#68736d;border:1px solid #e4e9e6}.empty b{display:block;color:#26332b;font-size:16px;margin-bottom:6px}.skeleton{height:150px;background:linear-gradient(90deg,#eef2ef,#f8faf8,#eef2ef);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:16px;margin-bottom:10px}@keyframes sk{to{background-position:-200% 0}}nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e3e8e5;height:62px;display:flex;justify-content:center;z-index:30}.navin{width:100%;max-width:480px;display:flex;justify-content:space-around;align-items:center}.navin a{text-decoration:none;color:#69736d;font-size:10px;text-align:center}.navin a span{display:block;font-size:19px;margin-bottom:2px}.navin .active{color:#16834b;font-weight:700}main{padding:0 14px 80px;max-width:480px;margin:auto}@media(min-width:481px){body{background:#eef2ef}}</style></head><body><div id="app"><header><div class="wrap"><div class="head"><a class="back" href="index.html">← Back</a><div><div class="logo">OOULink</div><div class="sub">Find tasks near you</div></div></div><div class="search"><input id="searchInput" placeholder="Search tasks, skills, locations..." autocomplete="off"><button class="clear" id="clearSearch">×</button></div><div class="filters"><select id="category"><option value="all">All categories</option><option>Errands</option><option>Physical Help</option><option>Digital Work</option><option>Creative Skills</option><option>Academic Support</option><option>Campus Services</option><option>Other</option></select><select id="sort"><option value="newest">Newest</option><option value="highest">Highest budget</option><option value="lowest">Lowest budget</option><option value="deadline">Nearest deadline</option></select><button class="filterBtn" id="filterBtn">⚙ Filters</button></div><div class="advanced" id="advanced"><div class="grid"><div class="field"><label>Location</label><select id="location"><option value="all">All locations</option><option>OOU — Ibogun Campus</option><option>OOU — Ago-Iwoye</option><option>Sagamu</option><option>Ayetoro</option><option>Other</option></select></div><div class="field"><label>Deadline</label><select id="deadlineFilter"><option value="all">Any deadline</option><option value="today">Today</option><option value="3">Next 3 days</option><option value="7">Next 7 days</option></select></div><div class="field"><label>Minimum budget</label><input id="minBudget" type="number" min="0" placeholder="₦0"></div><div class="field"><label>Maximum budget</label><input id="maxBudget" type="number" min="0" placeholder="No limit"></div></div></div><div class="chips" id="chips"></div></div></header><main><div class="newbar" id="newBar">✨ New tasks available — tap to refresh</div><div class="topbar"><div class="count" id="count">Loading tasks...</div><div class="actions"><button class="smallBtn" id="refreshBtn">↻ Refresh</button><button class="smallBtn" id="clearBtn">Clear</button></div></div><div id="tasks"><div class="skeleton"></div><div class="skeleton"></div></div><button class="load" id="loadMore" style="display:none">Load more tasks</button></main></div><nav><div class="navin"><a href="index.html"><span>⌂</span>Home</a><a href="my-tasks.html"><span>✓</span>My Tasks</a><a href="post-task.html"><span>＋</span>Post</a><a href="alerts.html"><span>🔔</span>Alerts</a><a href="profile.html"><span>♙</span>Profile</a></div></nav><script>const SUPABASE_URL="https://dthvdxgxesomltlruogp.supabase.co",SUPABASE_KEY="sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr",supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);let moderationBlocked=false;async function logoutModerated(){await supabaseClient.auth.signOut();location.href="login.html"}function showModerationScreen(d){if(moderationBlocked)return;moderationBlocked=true;const t=d.ban_type==="temporary",e=t&&d.banned_until?new Date(d.banned_until).toLocaleString():null;document.body.innerHTML=`<div style="position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px;z-index:99999"><div style="width:100%;max-width:420px;background:#fff;border-radius:20px;padding:28px 22px;text-align:center"><div style="font-size:48px">🚫</div><h2>OOULink Account Restricted</h2><p>Your account is currently ${t?"temporarily":"permanently"} restricted and you cannot access Find Tasks.</p>${t&&e?`<p><strong>Restriction ends:</strong><br>${e}</p>`:""}${d.ban_reason?`<p><strong>Reason:</strong><br>${String(d.ban_reason).replace(/[<>&"]/g,"")}</p>`:""}<p>Please follow OOULink's rules. If you believe this action was made in error, contact OOULink support.</p><button onclick="logoutModerated()" style="width:100%;border:0;border-radius:12px;padding:14px;background:#16834b;color:#fff;font-weight:700">LOG OUT</button></div></div>`}async function checkModeration(){const{data:{session}}=await supabaseClient.auth.getSession();if(!session){location.href="login.html";return false}const{data,error}=await supabaseClient.from("user_moderation").select("status,ban_type,banned_until,ban_reason").eq("user_id",session.user.id).maybeSingle();if(error)return true;if(data?.status==="banned"){const a=data.ban_type==="permanent"||(data.ban_type==="temporary"&&data.banned_until&&new Date(data.banned_until)>new Date());if(a){showModerationScreen(data);return false}}return true}const searchInput=document.getElementById("searchInput"),clearSearch=document.getElementById("clearSearch"),category=document.getElementById("category"),sort=document.getElementById("sort"),filterBtn=document.getElementById("filterBtn"),advanced=document.getElementById("advanced"),locationFilter=document.getElementById("location"),deadlineFilter=document.getElementById("deadlineFilter"),minBudget=document.getElementById("minBudget"),maxBudget=document.getElementById("maxBudget"),chips=document.getElementById("chips"),tasksBox=document.getElementById("tasks"),count=document.getElementById("count"),loadMore=document.getElementById("loadMore"),refreshBtn=document.getElementById("refreshBtn"),clearBtn=document.getElementById("clearBtn"),newBar=document.getElementById("newBar");let allTasks=[],page=0,loading=false,hasMore=true,newTaskCount=0,realtimeChannel=null;const PAGE_SIZE=12;function esc(v){return String(v??"").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]))}function saveFilters(){localStorage.setItem("ooulink_find_filters",JSON.stringify({q:searchInput.value,c:category.value,s:sort.value,l:locationFilter.value,d:deadlineFilter.value,min:minBudget.value,max:maxBudget.value}))}function restoreFilters(){try{const x=JSON.parse(localStorage.getItem("ooulink_find_filters")||"{}");if(x.q!=null)searchInput.value=x.q;if(x.c)category.value=x.c;if(x.s)sort.value=x.s;if(x.l)locationFilter.value=x.l;if(x.d)deadlineFilter.value=x.d;if(x.min!=null)minBudget.value=x.min;if(x.max!=null)maxBudget.value=x.max}catch(e){}}function formatDate(v){if(!v)return"Not specified";const d=new Date(v);if(isNaN(d))return esc(v);return d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})}function expired(v){return v&&new Date(v)<new Date()}function deadlineClass(v){return expired(v)?"":"deadline"}function deadlineText(v){if(!v)return"Deadline not set";const d=new Date(v),diff=d-Date.now(),days=Math.ceil(diff/86400000);if(diff<=0)return"Expired";if(days===1)return"Due tomorrow";if(days<7)return`Due in ${days} days`;return`Due ${formatDate(v)}`}function budgetValue(t){const n=Number(t.budget);return isNaN(n)?0:n}function matches(t){if(t.status!=="open"||t.moderation_status!=="approved"||expired(t.deadline))return false;const q=searchInput.value.trim().toLowerCase();if(q){const hay=[t.title,t.description,t.location,t.category].join(" ").toLowerCase();if(!hay.includes(q))return false}if(category.value!=="all"&&String(t.category||"")!==category.value)return false;if(locationFilter.value!=="all"&&String(t.location||"")!==locationFilter.value)return false;const b=budgetValue(t),mn=Number(minBudget.value),mx=Number(maxBudget.value);if(minBudget.value&&b<mn)return false;if(maxBudget.value&&b>mx)return false;if(deadlineFilter.value!=="all"&&t.deadline){const days=Number(deadlineFilter.value),end=Date.now()+days*86400000;if(new Date(t.deadline).getTime()>end)return false}return true}function sortTasks(a){const s=sort.value;return a.sort((x,y)=>{if(s==="highest")return budgetValue(y)-budgetValue(x);if(s==="lowest")return budgetValue(x)-budgetValue(y);if(s==="deadline")return(new Date(x.deadline||"9999-12-31"))-(new Date(y.deadline||"9999-12-31"));return new Date(y.created_at)-new Date(x.created_at)})}function renderChips(){const a=[];if(searchInput.value.trim())a.push(["Search",()=>{searchInput.value="";applyFilters()}]);if(category.value!=="all")a.push([category.value,()=>{category.value="all";applyFilters()}]);if(locationFilter.value!=="all")a.push([locationFilter.value,()=>{locationFilter.value="all";applyFilters()}]);if(deadlineFilter.value!=="all")a.push([deadlineFilter.options[deadlineFilter.selectedIndex].text,()=>{deadlineFilter.value="all";applyFilters()}]);if(minBudget.value)a.push([`Min ₦${Number(minBudget.value).toLocaleString()}`,()=>{minBudget.value="";applyFilters()}]);if(maxBudget.value)a.push([`Max ₦${Number(maxBudget.value).toLocaleString()}`,()=>{maxBudget.value="";applyFilters()}]);chips.innerHTML=a.map((x,i)=>`<span class="chip">${esc(x[0])}<button onclick="removeChip(${i})">×</button></span>`).join("");window._chipActions=a.map(x=>x[1])}function removeChip(i){if(window._chipActions?.[i])window._chipActions[i]()}function render(){const filtered=sortTasks(allTasks.filter(matches));count.textContent=`${filtered.length} task${filtered.length===1?"":"s"} found`;if(!filtered.length){tasksBox.innerHTML=`<div class="empty"><b>🔎 No tasks found</b>Try changing your search or filters.</div>`;loadMore.style.display=hasMore?"block":"none";return}tasksBox.innerHTML=filtered.map(t=>{const ex=expired(t.deadline);return`<article class="task ${ex?"expired":""}"><div class="tasktop"><span class="badge">${esc(t.category||"Other")}</span><span class="budget">₦${budgetValue(t).toLocaleString()}</span></div><h3>${esc(t.title||"Untitled task")}</h3><p class="desc">${esc((t.description||"").slice(0,180))}${(t.description||"").length>180?"…":""}</p><div class="meta"><span>📍 ${esc(t.location||"Location not set")}</span><span class="${deadlineClass(t.deadline)}">⏰ ${esc(deadlineText(t.deadline))}</span></div><button class="view" onclick="openTask('${esc(t.id)}',event)">View Task</button></article>`}).join("");loadMore.style.display=hasMore?"block":"none"}async function loadTasks(reset=false){if(loading)return;if(reset){page=0;hasMore=true;allTasks=[];tasksBox.innerHTML='<div class="skeleton"></div><div class="skeleton"></div>'}if(!hasMore)return;loading=true;loadMore.disabled=true;loadMore.textContent="Loading...";const from=page*PAGE_SIZE,to=from+PAGE_SIZE-1;let q=supabaseClient.from("tasks").select("id,title,description,location,category,budget,deadline,created_at,status,moderation_status").eq("status","open").eq("moderation_status","approved").order("created_at",{ascending:false}).range(from,to);const{data,error}=await q;if(error){tasksBox.innerHTML=`<div class="empty"><b>Couldn't load tasks</b><span>${esc(error.message)}</span></div>`;loading=false;loadMore.disabled=false;loadMore.textContent="Load more tasks";return}const fresh=(data||[]).filter(t=>t.status==="open"&&t.moderation_status==="approved"&&!expired(t.deadline));allTasks=allTasks.concat(fresh);hasMore=(data||[]).length===PAGE_SIZE;page++;render();loading=false;loadMore.disabled=false;loadMore.textContent=hasMore?"Load more tasks":"All tasks loaded"}function applyFilters(){saveFilters();renderChips();render()}function clearFilters(){searchInput.value="";category.value="all";sort.value="newest";locationFilter.value="all";deadlineFilter.value="all";minBudget.value="";maxBudget.value="";localStorage.removeItem("ooulink_find_filters");applyFilters()}function openTask(id,e){if(e)e.stopPropagation();if(!id)return;const b=e?.currentTarget;b?.animate([{transform:"scale(.96)"},{transform:"scale(1)"}],{duration:140});setTimeout(()=>location.href=`task-details.html?id=${encodeURIComponent(id)}`,100)}function setupRealtime(){realtimeChannel=supabaseClient.channel("find-tasks-live").on("postgres_changes",{event:"INSERT",schema:"public",table:"tasks"},p=>{const t=p.new;if(t.status==="open"&&t.moderation_status==="approved"&&!expired(t.deadline)){newTaskCount++;newBar.textContent=`✨ ${newTaskCount} new task${newTaskCount===1?"":"s"} available — tap to refresh`;newBar.style.display="block"}}).subscribe()}newBar.onclick=async()=>{newBar.style.display="none";newTaskCount=0;await loadTasks(true)};searchInput.addEventListener("input",()=>{clearSearch.style.display=searchInput.value?"block":"none";applyFilters()});clearSearch.onclick=()=>{searchInput.value="";clearSearch.style.display="none";applyFilters()};[category,sort,locationFilter,deadlineFilter,minBudget,maxBudget].forEach(x=>x.addEventListener("change",applyFilters));filterBtn.onclick=()=>advanced.classList.toggle("show");clearBtn.onclick=clearFilters;refreshBtn.onclick=async()=>{refreshBtn.disabled=true;refreshBtn.textContent="↻...";await loadTasks(true);refreshBtn.disabled=false;refreshBtn.textContent="↻ Refresh"};loadMore.onclick=()=>loadTasks(false);restoreFilters();clearSearch.style.display=searchInput.value?"block":"none";checkModeration().then(ok=>{if(ok){renderChips();loadTasks(true);setupRealtime()}});window.addEventListener("beforeunload",()=>{if(realtimeChannel)supabaseClient.removeChannel(realtimeChannel)})</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Find Tasks - StudTask</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f7f6;color:#17221c;padding-bottom:78px}
+button,a,select,input{font:inherit}
+button,a{transition:transform .16s ease,box-shadow .16s ease,background-color .16s ease,opacity .16s ease}
+button:active,a:active{transform:scale(.96)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid rgba(22,131,75,.2);outline-offset:2px}
+.wrap,main{width:100%;max-width:480px;margin:auto}
+header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #e5eae7;padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.025)}
+.head{display:flex;align-items:center;gap:12px}
+.back{color:#16834b;text-decoration:none;font-weight:800;font-size:14px;padding:7px 4px;border-radius:9px}
+.logo{font-size:21px;font-weight:800;color:#16834b}
+.sub{font-size:12px;color:#777;margin-top:2px}
+.search{margin-top:14px;position:relative}
+.search input{width:100%;padding:13px 42px 13px 14px;border:1px solid #dce3df;border-radius:13px;font-size:15px;outline:0;background:#fafcfa;transition:border-color .16s,box-shadow .16s}
+.search input:focus{border-color:#16834b;box-shadow:0 0 0 3px rgba(22,131,75,.08)}
+.clear{position:absolute;right:8px;top:7px;width:32px;height:32px;border:0;background:transparent;font-size:20px;color:#888;border-radius:50%;display:none}
+.clear:active{background:#eef5f1}
+.filters{margin-top:10px;display:flex;gap:8px;overflow-x:auto;padding:2px 1px 4px;scrollbar-width:none}
+.filters::-webkit-scrollbar,.chips::-webkit-scrollbar{display:none}
+.filters select,.filterBtn{border:1px solid #dce3df;background:#fff;border-radius:11px;padding:10px 11px;font-size:12px;white-space:nowrap;min-height:39px}
+.filters select:focus,.field select:focus,.field input:focus{border-color:#16834b;outline:0;box-shadow:0 0 0 3px rgba(22,131,75,.07)}
+.filterBtn{font-weight:800;color:#16834b;cursor:pointer}
+.filterBtn.active{background:#e8f6ee;box-shadow:0 2px 8px rgba(22,131,75,.12)}
+.advanced{display:none;background:#fff;border:1px solid #e0e6e2;border-radius:15px;padding:12px;margin-top:9px;box-shadow:0 5px 18px rgba(0,0,0,.04)}
+.advanced.show{display:block;animation:drop .18s ease-out}
+@keyframes drop{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.field label{display:block;font-size:11px;color:#777;margin-bottom:5px;font-weight:700}
+.field select,.field input{width:100%;padding:10px;border:1px solid #dce3df;border-radius:10px;background:#fafcfa;font-size:12px;min-height:39px}
+.chips{display:flex;gap:7px;overflow-x:auto;margin-top:9px;padding-bottom:2px;scrollbar-width:none}
+.chip{background:#e7f5ed;color:#16834b;border-radius:20px;padding:7px 10px;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 1px 4px rgba(22,131,75,.08)}
+.chip button{border:0;background:transparent;color:inherit;margin-left:4px;font-weight:900;padding:0 2px;cursor:pointer}
+main{padding:0 14px 22px}
+.newbar{display:none;background:#16834b;color:#fff;border-radius:11px;padding:11px;text-align:center;font-size:12px;font-weight:800;margin:12px 0 10px;box-shadow:0 5px 14px rgba(22,131,75,.2);cursor:pointer}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:15px 0 10px}
+.count{font-size:13px;color:#66716b;font-weight:700}
+.actions{display:flex;gap:7px}
+.smallBtn{border:1px solid #dce3df;background:#fff;border-radius:10px;padding:8px 10px;font-size:11px;font-weight:800;min-height:35px;box-shadow:0 1px 4px rgba(0,0,0,.025);cursor:pointer}
+.smallBtn:disabled{opacity:.55;transform:none}
+.task{background:#fff;border:1px solid #e4e9e6;border-radius:16px;padding:15px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.035);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.task:hover{box-shadow:0 5px 16px rgba(0,0,0,.06);border-color:#d6dfda}
+.task:active{transform:scale(.985);box-shadow:0 2px 7px rgba(0,0,0,.035)}
+.tasktop{display:flex;justify-content:space-between;gap:8px}
+.badge{font-size:10px;background:#e8f6ee;color:#16834b;border-radius:20px;padding:5px 8px;font-weight:800}
+.scope-badge{font-size:10px;background:#f0f4f2;color:#59655f;border-radius:20px;padding:5px 8px;font-weight:700;margin-left:auto}
+.budget{font-weight:800;color:#16834b;font-size:15px}
+.task h3{font-size:16px;margin:10px 0 6px}
+.desc{font-size:12px;color:#68736d;line-height:1.45;margin:0 0 11px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.meta span{font-size:10px;color:#68736d;background:#f3f6f4;border-radius:8px;padding:6px 7px}
+.deadline{color:#d47700!important;background:#fff4df!important}
+.expired{opacity:.65}
+.view{width:100%;border:0;background:#16834b;color:#fff;padding:11px;border-radius:10px;font-weight:800;cursor:pointer;box-shadow:0 3px 8px rgba(22,131,75,.16)}
+.view:hover{background:#137544;box-shadow:0 5px 12px rgba(22,131,75,.2)}
+.load{width:100%;border:1px solid #16834b;background:#fff;color:#16834b;padding:12px;border-radius:11px;font-weight:800;margin:3px 0 14px;cursor:pointer}
+.load:disabled{opacity:.55;cursor:default}
+.empty{text-align:center;background:#fff;border-radius:16px;padding:35px 20px;color:#68736d;border:1px solid #e4e9e6}
+.empty b{display:block;color:#26332b;font-size:16px;margin-bottom:6px}
+.skeleton{height:150px;background:linear-gradient(90deg,#eef2ef,#f8faf8,#eef2ef);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:16px;margin-bottom:10px}
+@keyframes sk{to{background-position:-200% 0}}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid #e1e7e3;height:70px;display:flex;justify-content:center;z-index:30;box-shadow:0 -4px 18px rgba(0,0,0,.05)}
+.navin{width:100%;max-width:480px;display:flex;justify-content:space-around;align-items:center;padding:5px 6px}
+.navin a{position:relative;flex:1;max-width:92px;text-decoration:none;color:#69736d;font-size:10px;text-align:center;padding:6px 4px;border-radius:13px;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700}
+.navin a span{width:34px;height:28px;display:grid;place-items:center;font-size:19px;line-height:1;border-radius:10px;transition:transform .16s ease,background-color .16s ease}
+.navin a:active span{transform:scale(.86)}
+.navin a.active{color:#16834b;background:#f0f7f3}
+.navin a.active span{background:#e1f3e9}
+.navin a.active::after{content:"";position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:#16834b}
+@media(min-width:481px){body{background:#eef2ef}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+<div class="wrap">
+<div class="head">
+<a class="back" href="index.html">← Back</a>
+<div>
+<div class="logo">StudTask</div>
+<div class="sub">Find tasks from students and campuses</div>
+</div>
+</div>
+<div class="search">
+<input id="searchInput" placeholder="Search tasks, skills, locations..." autocomplete="off">
+<button class="clear" id="clearSearch" aria-label="Clear search">×</button>
+</div>
+<div class="filters">
+<select id="scope" aria-label="Task scope">
+<option value="all">All Universities</option>
+<option value="university">My University</option>
+<option value="campus">My Campus</option>
+<option value="location">My Location</option>
+</select>
+<select id="category" aria-label="Category">
+<option value="all">All categories</option>
+<option>Errands</option>
+<option>Physical Help</option>
+<option>Digital Work</option>
+<option>Creative Skills</option>
+<option>Academic Support</option>
+<option>Campus Services</option>
+<option>Other</option>
+</select>
+<select id="sort" aria-label="Sort tasks">
+<option value="newest">Newest</option>
+<option value="highest">Highest budget</option>
+<option value="lowest">Lowest budget</option>
+<option value="deadline">Nearest deadline</option>
+</select>
+<button class="filterBtn" id="filterBtn" type="button">⚙ Filters</button>
+</div>
+<div class="advanced" id="advanced">
+<div class="grid">
+<div class="field">
+<label for="universityFilter">University</label>
+<select id="universityFilter"><option value="all">All universities</option></select>
+</div>
+<div class="field">
+<label for="campusFilter">Campus</label>
+<select id="campusFilter"><option value="all">All campuses</option></select>
+</div>
+<div class="field">
+<label for="locationFilter">Location</label>
+<input id="locationFilter" type="text" placeholder="Any location">
+</div>
+<div class="field">
+<label for="deadlineFilter">Deadline</label>
+<select id="deadlineFilter">
+<option value="all">Any deadline</option>
+<option value="today">Today</option>
+<option value="3">Next 3 days</option>
+<option value="7">Next 7 days</option>
+</select>
+</div>
+<div class="field">
+<label for="minBudget">Minimum budget</label>
+<input id="minBudget" type="number" min="0" placeholder="₦0">
+</div>
+<div class="field">
+<label for="maxBudget">Maximum budget</label>
+<input id="maxBudget" type="number" min="0" placeholder="No limit">
+</div>
+</div>
+</div>
+<div class="chips" id="chips"></div>
+</div>
+</header>
+<main>
+<div class="newbar" id="newBar">✨ New tasks available — tap to refresh</div>
+<div class="topbar">
+<div class="count" id="count">Loading tasks...</div>
+<div class="actions">
+<button class="smallBtn" id="refreshBtn" type="button">↻ Refresh</button>
+<button class="smallBtn" id="clearBtn" type="button">Clear</button>
+</div>
+</div>
+<div id="tasks">
+<div class="skeleton"></div>
+<div class="skeleton"></div>
+</div>
+<button class="load" id="loadMore" type="button" style="display:none">Load more tasks</button>
+</main>
+</div>
+<nav aria-label="Main navigation">
+<div class="navin">
+<a href="index.html"><span>⌂</span>Home</a>
+<a href="my-tasks.html"><span>✓</span>My Tasks</a>
+<a href="post-task.html"><span>＋</span>Post</a>
+<a href="alerts.html"><span>🔔</span>Alerts</a>
+<a href="profile.html"><span>♙</span>Profile</a>
+</div>
+</nav>
+<script>
+const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let moderationBlocked = false;
+let currentUser = null;
+let profileData = null;
+let allTasks = [];
+let page = 0;
+let loading = false;
+let hasMore = true;
+let newTaskCount = 0;
+let realtimeChannel = null;
+const PAGE_SIZE = 12;
+
+const searchInput = document.getElementById("searchInput");
+const clearSearch = document.getElementById("clearSearch");
+const scope = document.getElementById("scope");
+const category = document.getElementById("category");
+const sort = document.getElementById("sort");
+const filterBtn = document.getElementById("filterBtn");
+const advanced = document.getElementById("advanced");
+const universityFilter = document.getElementById("universityFilter");
+const campusFilter = document.getElementById("campusFilter");
+const locationFilter = document.getElementById("locationFilter");
+const deadlineFilter = document.getElementById("deadlineFilter");
+const minBudget = document.getElementById("minBudget");
+const maxBudget = document.getElementById("maxBudget");
+const chips = document.getElementById("chips");
+const tasksBox = document.getElementById("tasks");
+const count = document.getElementById("count");
+const loadMore = document.getElementById("loadMore");
+const refreshBtn = document.getElementById("refreshBtn");
+const clearBtn = document.getElementById("clearBtn");
+const newBar = document.getElementById("newBar");
+
+function esc(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    }[character]));
+}
+
+function saveFilters() {
+    localStorage.setItem("studtask_find_filters", JSON.stringify({
+        q: searchInput.value,
+        scope: scope.value,
+        category: category.value,
+        sort: sort.value,
+        university: universityFilter.value,
+        campus: campusFilter.value,
+        location: locationFilter.value,
+        deadline: deadlineFilter.value,
+        min: minBudget.value,
+        max: maxBudget.value
+    }));
+}
+
+function restoreFilters() {
+    try {
+        const saved = JSON.parse(localStorage.getItem("studtask_find_filters") || "{}");
+        if (saved.q != null) searchInput.value = saved.q;
+        if (saved.scope) scope.value = saved.scope;
+        if (saved.category) category.value = saved.category;
+        if (saved.sort) sort.value = saved.sort;
+        if (saved.university) universityFilter.value = saved.university;
+        if (saved.campus) campusFilter.value = saved.campus;
+        if (saved.location != null) locationFilter.value = saved.location;
+        if (saved.deadline) deadlineFilter.value = saved.deadline;
+        if (saved.min != null) minBudget.value = saved.min;
+        if (saved.max != null) maxBudget.value = saved.max;
+    } catch (error) {}
+}
+
+function formatDate(value) {
+    if (!value) return "Not specified";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return esc(value);
+    return date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+}
+
+function expired(value) {
+    return value && new Date(value) < new Date();
+}
+
+function deadlineClass(value) {
+    return expired(value) ? "" : "deadline";
+}
+
+function deadlineText(value) {
+    if (!value) return "Deadline not set";
+    const date = new Date(value);
+    const difference = date - Date.now();
+    const days = Math.ceil(difference / 86400000);
+    if (difference <= 0) return "Expired";
+    if (days === 1) return "Due tomorrow";
+    if (days < 7) return `Due in ${days} days`;
+    return `Due ${formatDate(value)}`;
+}
+
+function budgetValue(task) {
+    const number = Number(task.budget);
+    return Number.isNaN(number) ? 0 : number;
+}
+
+function universityLabel(task) {
+    if (task.university?.short_name) return task.university.short_name;
+    if (task.university?.name) return task.university.name;
+    return task.university_other || "University not specified";
+}
+
+function campusLabel(task) {
+    if (task.campus?.name) return task.campus.name;
+    return task.campus_other || "Campus not specified";
+}
+
+function matches(task) {
+    if (task.status !== "open" || task.moderation_status !== "approved" || expired(task.deadline)) return false;
+
+    const query = searchInput.value.trim().toLowerCase();
+    if (query) {
+        const searchable = [
+            task.title,
+            task.description,
+            task.location,
+            task.category,
+            task.university?.name,
+            task.university?.short_name,
+            task.university_other,
+            task.campus?.name,
+            task.campus_other
+        ].join(" ").toLowerCase();
+        if (!searchable.includes(query)) return false;
+    }
+
+    if (scope.value === "university" && profileData?.university_id) {
+        if (task.university_id !== profileData.university_id) return false;
+    }
+
+    if (scope.value === "campus" && profileData?.campus_id) {
+        if (task.campus_id !== profileData.campus_id) return false;
+    }
+
+    if (scope.value === "location" && profileData?.location) {
+        if (String(task.location || "").toLowerCase() !== String(profileData.location).toLowerCase()) return false;
+    }
+
+    if (category.value !== "all" && String(task.category || "") !== category.value) return false;
+    if (universityFilter.value !== "all" && String(task.university_id || "") !== universityFilter.value) return false;
+    if (campusFilter.value !== "all" && String(task.campus_id || "") !== campusFilter.value) return false;
+
+    const locationQuery = locationFilter.value.trim().toLowerCase();
+    if (locationQuery && !String(task.location || "").toLowerCase().includes(locationQuery)) return false;
+
+    const budget = budgetValue(task);
+    if (minBudget.value && budget < Number(minBudget.value)) return false;
+    if (maxBudget.value && budget > Number(maxBudget.value)) return false;
+
+    if (deadlineFilter.value !== "all" && task.deadline) {
+        const deadline = new Date(task.deadline).getTime();
+        const now = Date.now();
+        if (deadlineFilter.value === "today") {
+            const today = new Date();
+            const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+            const end = start + 86400000;
+            if (deadline < start || deadline >= end) return false;
+        } else {
+            const days = Number(deadlineFilter.value);
+            if (deadline > now + days * 86400000) return false;
+        }
+    }
+
+    return true;
+}
+
+function sortTasks(tasks) {
+    const selectedSort = sort.value;
+    return tasks.sort((a, b) => {
+        if (selectedSort === "highest") return budgetValue(b) - budgetValue(a);
+        if (selectedSort === "lowest") return budgetValue(a) - budgetValue(b);
+        if (selectedSort === "deadline") return new Date(a.deadline || "9999-12-31") - new Date(b.deadline || "9999-12-31");
+        return new Date(b.created_at) - new Date(a.created_at);
+    });
+}
+
+function renderChips() {
+    const active = [];
+
+    if (searchInput.value.trim()) active.push(["Search", () => { searchInput.value = ""; applyFilters(); }]);
+    if (scope.value !== "all") active.push([scope.options[scope.selectedIndex].text, () => { scope.value = "all"; applyFilters(); }]);
+    if (category.value !== "all") active.push([category.value, () => { category.value = "all"; applyFilters(); }]);
+    if (universityFilter.value !== "all") active.push([universityFilter.options[universityFilter.selectedIndex].text, () => { universityFilter.value = "all"; applyFilters(); }]);
+    if (campusFilter.value !== "all") active.push([campusFilter.options[campusFilter.selectedIndex].text, () => { campusFilter.value = "all"; applyFilters(); }]);
+    if (locationFilter.value.trim()) active.push([`Location: ${locationFilter.value.trim()}`, () => { locationFilter.value = ""; applyFilters(); }]);
+    if (deadlineFilter.value !== "all") active.push([deadlineFilter.options[deadlineFilter.selectedIndex].text, () => { deadlineFilter.value = "all"; applyFilters(); }]);
+    if (minBudget.value) active.push([`Min ₦${Number(minBudget.value).toLocaleString()}`, () => { minBudget.value = ""; applyFilters(); }]);
+    if (maxBudget.value) active.push([`Max ₦${Number(maxBudget.value).toLocaleString()}`, () => { maxBudget.value = ""; applyFilters(); }]);
+
+    chips.innerHTML = active.map((item, index) => `<span class="chip">${esc(item[0])}<button type="button" onclick="removeChip(${index})">×</button></span>`).join("");
+    window._chipActions = active.map(item => item[1]);
+}
+
+function removeChip(index) {
+    if (window._chipActions?.[index]) window._chipActions[index]();
+}
+
+function render() {
+    const filtered = sortTasks(allTasks.filter(matches));
+    count.textContent = `${filtered.length} task${filtered.length === 1 ? "" : "s"} found`;
+
+    if (!filtered.length) {
+        tasksBox.innerHTML = `<div class="empty"><b>🔎 No tasks found</b>Try changing your search, university, campus or filters.</div>`;
+        loadMore.style.display = hasMore ? "block" : "none";
+        return;
+    }
+
+    tasksBox.innerHTML = filtered.map(task => {
+        const isExpired = expired(task.deadline);
+        return `
+        <article class="task ${isExpired ? "expired" : ""}">
+            <div class="tasktop">
+                <span class="badge">${esc(task.category || "Other")}</span>
+                <span class="scope-badge">${esc(universityLabel(task))}</span>
+                <span class="budget">₦${budgetValue(task).toLocaleString()}</span>
+            </div>
+            <h3>${esc(task.title || "Untitled task")}</h3>
+            <p class="desc">${esc((task.description || "").slice(0, 180))}${(task.description || "").length > 180 ? "…" : ""}</p>
+            <div class="meta">
+                <span>🎓 ${esc(campusLabel(task))}</span>
+                <span>📍 ${esc(task.location || "Location not set")}</span>
+                <span class="${deadlineClass(task.deadline)}">⏰ ${esc(deadlineText(task.deadline))}</span>
+            </div>
+            <button class="view" type="button" data-task-id="${esc(task.id)}">View Task</button>
+        </article>`;
+    }).join("");
+
+    tasksBox.querySelectorAll("[data-task-id]").forEach(button => {
+        button.addEventListener("click", event => {
+            const id = event.currentTarget.dataset.taskId;
+            event.currentTarget.animate([
+                { transform: "scale(.96)" },
+                { transform: "scale(1)" }
+            ], { duration: 140 });
+            setTimeout(() => {
+                if (id) location.href = `task-details.html?id=${encodeURIComponent(id)}`;
+            }, 100);
+        });
+    });
+
+    loadMore.style.display = hasMore ? "block" : "none";
+}
+
+async function loadProfile() {
+    const { data, error } = await supabaseClient
+        .from("profiles")
+        .select("id,university_id,university_other,campus_id,campus_other,location")
+        .eq("id", currentUser.id)
+        .maybeSingle();
+
+    if (!error) profileData = data || null;
+}
+
+async function loadUniversityFilters() {
+    const { data } = await supabaseClient
+        .from("universities")
+        .select("id,name,short_name")
+        .eq("is_active", true)
+        .order("name");
+
+    if (!data) return;
+
+    universityFilter.innerHTML = `<option value="all">All universities</option>` + data.map(university =>
+        `<option value="${esc(university.id)}">${esc(university.short_name ? `${university.short_name} — ${university.name}` : university.name)}</option>`
+    ).join("");
+
+    if (profileData?.university_id) universityFilter.value = profileData.university_id;
+}
+
+async function loadCampusFilters(universityId = "all") {
+    campusFilter.innerHTML = `<option value="all">All campuses</option>`;
+    if (universityId === "all") return;
+
+    const { data } = await supabaseClient
+        .from("campuses")
+        .select("id,name")
+        .eq("university_id", universityId)
+        .eq("is_active", true)
+        .order("name");
+
+    if (!data) return;
+
+    campusFilter.innerHTML += data.map(campus =>
+        `<option value="${esc(campus.id)}">${esc(campus.name)}</option>`
+    ).join("");
+
+    if (profileData?.campus_id && universityId === profileData.university_id) campusFilter.value = profileData.campus_id;
+}
+
+async function loadTasks(reset = false) {
+    if (loading) return;
+
+    if (reset) {
+        page = 0;
+        hasMore = true;
+        allTasks = [];
+        tasksBox.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
+    }
+
+    if (!hasMore) return;
+
+    loading = true;
+    loadMore.disabled = true;
+    loadMore.textContent = "Loading...";
+
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    const { data, error } = await supabaseClient
+        .from("tasks")
+        .select(`
+            id,
+            title,
+            description,
+            location,
+            category,
+            budget,
+            deadline,
+            created_at,
+            status,
+            moderation_status,
+            university_id,
+            university_other,
+            campus_id,
+            campus_other,
+            university:universities(id,name,short_name),
+            campus:campuses(id,name)
+        `)
+        .eq("status", "open")
+        .eq("moderation_status", "approved")
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+    if (error) {
+        tasksBox.innerHTML = `<div class="empty"><b>Couldn't load tasks</b><span>${esc(error.message)}</span></div>`;
+        loading = false;
+        loadMore.disabled = false;
+        loadMore.textContent = "Load more tasks";
+        return;
+    }
+
+    const fresh = (data || []).filter(task =>
+        task.status === "open" &&
+        task.moderation_status === "approved" &&
+        !expired(task.deadline)
+    );
+
+    allTasks = allTasks.concat(fresh);
+    hasMore = (data || []).length === PAGE_SIZE;
+    page += 1;
+
+    render();
+    loading = false;
+    loadMore.disabled = false;
+    loadMore.textContent = hasMore ? "Load more tasks" : "All tasks loaded";
+}
+
+function applyFilters() {
+    saveFilters();
+    renderChips();
+    render();
+}
+
+function clearFilters() {
+    searchInput.value = "";
+    scope.value = "all";
+    category.value = "all";
+    sort.value = "newest";
+    universityFilter.value = "all";
+    campusFilter.innerHTML = `<option value="all">All campuses</option>`;
+    locationFilter.value = "";
+    deadlineFilter.value = "all";
+    minBudget.value = "";
+    maxBudget.value = "";
+    localStorage.removeItem("studtask_find_filters");
+    clearSearch.style.display = "none";
+    applyFilters();
+}
+
+async function checkModeration() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    if (!session) {
+        location.href = "login.html";
+        return false;
+    }
+
+    currentUser = session.user;
+
+    const { data, error } = await supabaseClient
+        .from("user_moderation")
+        .select("status,ban_type,banned_until,ban_reason")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+    if (error) return true;
+
+    if (data?.status === "banned") {
+        const activeBan = data.ban_type === "permanent" ||
+            (data.ban_type === "temporary" && data.banned_until && new Date(data.banned_until) > new Date());
+
+        if (activeBan) {
+            showModerationScreen(data);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+async function logoutModerated() {
+    await supabaseClient.auth.signOut();
+    location.href = "login.html";
+}
+
+function showModerationScreen(data) {
+    if (moderationBlocked) return;
+    moderationBlocked = true;
+
+    const temporary = data.ban_type === "temporary";
+    const end = temporary && data.banned_until ? new Date(data.banned_until).toLocaleString() : null;
+    const reason = data.ban_reason ? esc(data.ban_reason) : "No reason provided.";
+
+    document.body.innerHTML = `
+        <div style="position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px;z-index:99999">
+            <div style="width:100%;max-width:420px;background:#fff;border-radius:20px;padding:28px 22px;text-align:center">
+                <div style="font-size:48px">🚫</div>
+                <h2>StudTask Account Restricted</h2>
+                <p>Your account is currently ${temporary ? "temporarily" : "permanently"} restricted and you cannot access Find Tasks.</p>
+                ${end ? `<p><strong>Restriction ends:</strong><br>${esc(end)}</p>` : ""}
+                <p><strong>Reason:</strong><br>${reason}</p>
+                <p>Please follow StudTask's rules. If you believe this action was made in error, contact StudTask support.</p>
+                <button onclick="logoutModerated()" style="width:100%;border:0;border-radius:12px;padding:14px;background:#16834b;color:#fff;font-weight:700">LOG OUT</button>
+            </div>
+        </div>`;
+}
+
+function setupRealtime() {
+    realtimeChannel = supabaseClient
+        .channel("find-tasks-live")
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "tasks" }, payload => {
+            const task = payload.new;
+            if (task.status === "open" && task.moderation_status === "approved" && !expired(task.deadline)) {
+                newTaskCount += 1;
+                newBar.textContent = `✨ ${newTaskCount} new task${newTaskCount === 1 ? "" : "s"} available — tap to refresh`;
+                newBar.style.display = "block";
+            }
+        })
+        .subscribe();
+}
+
+newBar.onclick = async () => {
+    newBar.style.display = "none";
+    newTaskCount = 0;
+    await loadTasks(true);
+};
+
+searchInput.addEventListener("input", () => {
+    clearSearch.style.display = searchInput.value ? "block" : "none";
+    applyFilters();
+});
+
+clearSearch.onclick = () => {
+    searchInput.value = "";
+    clearSearch.style.display = "none";
+    applyFilters();
+};
+
+scope.addEventListener("change", applyFilters);
+category.addEventListener("change", applyFilters);
+sort.addEventListener("change", applyFilters);
+universityFilter.addEventListener("change", async () => {
+    await loadCampusFilters(universityFilter.value);
+    applyFilters();
+});
+campusFilter.addEventListener("change", applyFilters);
+locationFilter.addEventListener("input", applyFilters);
+deadlineFilter.addEventListener("change", applyFilters);
+minBudget.addEventListener("input", applyFilters);
+maxBudget.addEventListener("input", applyFilters);
+
+filterBtn.onclick = () => {
+    advanced.classList.toggle("show");
+    filterBtn.classList.toggle("active", advanced.classList.contains("show"));
+};
+
+clearBtn.onclick = clearFilters;
+
+refreshBtn.onclick = async () => {
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = "↻...";
+    await loadTasks(true);
+    refreshBtn.disabled = false;
+    refreshBtn.textContent = "↻ Refresh";
+};
+
+loadMore.onclick = () => loadTasks(false);
+
+restoreFilters();
+clearSearch.style.display = searchInput.value ? "block" : "none";
+
+(async () => {
+    const allowed = await checkModeration();
+    if (!allowed) return;
+
+    await loadProfile();
+    await loadUniversityFilters();
+    await loadCampusFilters(universityFilter.value);
+
+    renderChips();
+    await loadTasks(true);
+    setupRealtime();
+})();
+
+window.addEventListener("beforeunload", () => {
+    if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
+});
+</script>
+</body>
+</html>
