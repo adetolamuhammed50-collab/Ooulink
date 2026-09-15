@@ -1,1 +1,225 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Endless Runner • OOULink</title><style>*{box-sizing:border-box}body{margin:0;background:#f4fff7;color:#123;font-family:Arial,sans-serif;max-width:480px;margin:auto;padding-bottom:78px}.header{height:64px;background:#fff;border-bottom:1px solid #e3eee7;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:5}.logo{font-size:22px;font-weight:800;color:#159447}.back{border:0;background:#eef9f1;color:#159447;border-radius:12px;padding:9px 12px;font-weight:700}.wrap{padding:20px 18px}.intro{text-align:center}.intro h1{margin:5px 0;font-size:27px}.intro p{margin:0;color:#6d7972;font-size:14px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:18px 0}.stat{background:#fff;border:1px solid #e3eee7;border-radius:15px;text-align:center;padding:12px 5px}.stat b{display:block;color:#159447;font-size:20px}.stat span{font-size:10px;color:#718078}.arena{height:390px;background:linear-gradient(#dff6e6 0 72%,#bde4c8 72%);border:2px solid #dcebe1;border-radius:22px;position:relative;overflow:hidden;touch-action:manipulation;box-shadow:0 6px 20px #1231}.ground{position:absolute;bottom:0;left:0;width:100%;height:28%;background:repeating-linear-gradient(90deg,#9bd0aa 0 35px,#a8d8b5 35px 70px)}.player{position:absolute;left:45px;bottom:28%;width:42px;height:52px;background:#159447;border-radius:14px 14px 8px 8px;font-size:27px;display:flex;align-items:center;justify-content:center;z-index:2}.player.jump{animation:jump .55s ease-out}@keyframes jump{0%{bottom:28%}45%{bottom:62%}100%{bottom:28%}}.obstacle{position:absolute;bottom:28%;right:-45px;width:38px;height:52px;background:#e26a43;border-radius:9px 9px 4px 4px;z-index:2}.message{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:25px;color:#65736b;font-size:15px;background:#ffffffbb;z-index:4}.start{border:0;background:#159447;color:#fff;border-radius:14px;padding:13px 22px;font-weight:800;margin-top:10px}.result{display:none;text-align:center;background:#fff;border:1px solid #e3eee7;border-radius:20px;padding:20px;margin-top:16px}.result h2{margin:0 0 8px}.big{font-size:38px;font-weight:900;color:#159447}.result p{color:#68756e;font-size:13px}.again{border:0;background:#159447;color:#fff;border-radius:13px;padding:12px 20px;font-weight:800}.hint{text-align:center;color:#87938c;font-size:11px;margin:12px 0}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);height:64px;background:#fff;border-top:1px solid #e3eee7;display:flex;justify-content:space-around;align-items:center;z-index:10}.bottom a{text-decoration:none;color:#718078;font-size:10px;text-align:center}.bottom span{display:block;font-size:20px;margin-bottom:2px}.bottom .active{color:#159447;font-weight:800}@media(max-height:650px){.arena{height:330px}}</style></head><body><header class="header"><div class="logo">OOULink</div><button class="back" onclick="location.href='games.html'">← Games</button></header><main class="wrap"><section class="intro"><h1>🏃 Endless Runner</h1><p>Jump over obstacles and survive as long as possible!</p></section><section class="stats"><div class="stat"><b id="score">0</b><span>SCORE</span></div><div class="stat"><b id="speed">1</b><span>SPEED</span></div><div class="stat"><b id="best">0</b><span>BEST</span></div></section><div class="arena" id="arena"><div class="message" id="message"><div><div style="font-size:48px">🏃</div><div>Ready to run?</div><button class="start" id="start">START GAME</button></div></div><div class="player" id="player">🏃</div><div class="ground"></div></div><div class="result" id="result"><h2>💥 Game Over!</h2><div class="big" id="finalScore">0</div><p id="resultText"></p><button class="again" id="again">PLAY AGAIN</button></div><div class="hint">Tap the game area to jump • Avoid the obstacles</div></main><nav class="bottom"><a href="index.html"><span>🏠</span>Home</a><a href="my-tasks.html"><span>📋</span>My Tasks</a><a href="post-task.html"><span>➕</span>Post</a><a href="alerts.html"><span>🔔</span>Alerts</a><a href="profile.html"><span>👤</span>Profile</a></nav><script>const arena=document.getElementById("arena"),player=document.getElementById("player"),message=document.getElementById("message"),start=document.getElementById("start"),again=document.getElementById("again"),scoreEl=document.getElementById("score"),speedEl=document.getElementById("speed"),bestEl=document.getElementById("best"),result=document.getElementById("result"),finalScore=document.getElementById("finalScore"),resultText=document.getElementById("resultText");let running=false,score=0,speed=4,best=Number(localStorage.getItem("ooulink_runner_best")||0),obstacles=[],loop=null,spawn=null,jumping=false;bestEl.textContent=best;function jump(){if(!running||jumping)return;jumping=true;player.classList.remove("jump");void player.offsetWidth;player.classList.add("jump");setTimeout(()=>{jumping=false},550)}function collision(o){const a=player.getBoundingClientRect(),b=o.getBoundingClientRect();return a.left<b.right-7&&a.right>b.left+7&&a.top<b.bottom-7&&a.bottom>b.top+7}function endGame(){running=false;clearInterval(loop);clearInterval(spawn);obstacles.forEach(o=>o.remove());obstacles=[];finalScore.textContent=score;if(score>best){best=score;localStorage.setItem("ooulink_runner_best",best);bestEl.textContent=best;resultText.textContent="🔥 New personal best!";}else resultText.textContent="You survived with a score of "+score+".";result.style.display="block";message.style.display="none"}function createObstacle(){if(!running)return;const o=document.createElement("div");o.className="obstacle";o.style.right="-45px";arena.appendChild(o);obstacles.push(o)}function startGame(){running=true;score=0;speed=4;scoreEl.textContent=0;speedEl.textContent=1;result.style.display="none";message.style.display="none";obstacles.forEach(o=>o.remove());obstacles=[];clearInterval(loop);clearInterval(spawn);spawn=setInterval(createObstacle,1300);loop=setInterval(()=>{obstacles.forEach((o,i)=>{let r=parseFloat(o.style.right)||-45;r+=speed;o.style.right=r+"px";if(r>arena.clientWidth+50){o.remove();obstacles.splice(i,1);score++;scoreEl.textContent=score;if(score%10===0){speed=Math.min(10,speed+.5);speedEl.textContent=Math.round(speed-3)}}else if(collision(o))endGame()})},30)}arena.addEventListener("pointerdown",e=>{if(e.target===start)return;jump()});start.onclick=startGame;again.onclick=startGame;</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Endless Runner • StudTask</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f4fff7; color: #123; font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding-bottom: 88px; }
+    .header { height: 64px; background: #fff; border-bottom: 1px solid #e3eee7; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; position: sticky; top: 0; z-index: 5; }
+    .logo { font-size: 22px; font-weight: 800; color: #159447; }
+    .back, .start, .again { border: 0; cursor: pointer; font-weight: 800; transition: transform .16s ease, opacity .16s ease, box-shadow .16s ease; touch-action: manipulation; }
+    .back { background: #eef9f1; color: #159447; border-radius: 12px; padding: 10px 13px; }
+    .back:hover, .start:hover, .again:hover { box-shadow: 0 6px 16px rgba(21,148,71,.2); }
+    .back:active, .start:active, .again:active { transform: scale(.94); opacity: .85; }
+    .back:focus-visible, .start:focus-visible, .again:focus-visible, .arena:focus-visible, .bottom-nav a:focus-visible { outline: 3px solid rgba(21,148,71,.22); outline-offset: 2px; }
+    .wrap { padding: 20px 18px; }
+    .intro { text-align: center; }
+    .intro h1 { margin: 5px 0; font-size: 27px; }
+    .intro p { margin: 0; color: #6d7972; font-size: 14px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin: 18px 0; }
+    .stat { background: #fff; border: 1px solid #e3eee7; border-radius: 15px; text-align: center; padding: 12px 5px; }
+    .stat b { display: block; color: #159447; font-size: 20px; }
+    .stat span { font-size: 10px; color: #718078; }
+    .arena { height: 390px; background: linear-gradient(#dff6e6 0 72%, #bde4c8 72%); border: 2px solid #dcebe1; border-radius: 22px; position: relative; overflow: hidden; touch-action: manipulation; box-shadow: 0 6px 20px rgba(18,51,34,.08); }
+    .ground { position: absolute; bottom: 0; left: 0; width: 100%; height: 28%; background: repeating-linear-gradient(90deg, #9bd0aa 0 35px, #a8d8b5 35px 70px); }
+    .player { position: absolute; left: 45px; bottom: 28%; width: 42px; height: 52px; background: #159447; border-radius: 14px 14px 8px 8px; font-size: 27px; display: flex; align-items: center; justify-content: center; z-index: 2; }
+    .player.jump { animation: jump .55s ease-out; }
+    @keyframes jump { 0% { bottom: 28%; } 45% { bottom: 62%; } 100% { bottom: 28%; } }
+    .obstacle { position: absolute; bottom: 28%; right: -45px; width: 38px; height: 52px; background: #e26a43; border-radius: 9px 9px 4px 4px; z-index: 2; }
+    .message { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 25px; color: #65736b; font-size: 15px; background: rgba(255,255,255,.73); z-index: 4; }
+    .start, .again { background: #159447; color: #fff; border-radius: 14px; padding: 13px 22px; margin-top: 10px; }
+    .result { display: none; text-align: center; background: #fff; border: 1px solid #e3eee7; border-radius: 20px; padding: 20px; margin-top: 16px; }
+    .result h2 { margin: 0 0 8px; }
+    .big { font-size: 38px; font-weight: 900; color: #159447; }
+    .result p { color: #68756e; font-size: 13px; }
+    .hint { text-align: center; color: #87938c; font-size: 11px; margin: 12px 0; }
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: rgba(255,255,255,.94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid #e5e8ec; display: grid; grid-template-columns: repeat(5, 1fr); padding: 7px 5px 9px; z-index: 10; box-shadow: 0 -6px 22px rgba(0,0,0,.06); }
+    .bottom-nav a { position: relative; min-height: 54px; padding: 5px 2px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: #687386; font-size: 9px; font-weight: 600; border-radius: 12px; transition: transform .16s ease, color .16s ease, background .16s ease, box-shadow .16s ease; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .bottom-nav a span { font-size: 18px; line-height: 20px; margin-bottom: 2px; transition: transform .16s ease; }
+    .bottom-nav a:hover { color: #16834b; background: rgba(22,131,75,.05); }
+    .bottom-nav a:active { transform: scale(.91); }
+    .bottom-nav a:active span { transform: scale(.86); }
+    .bottom-nav a.active { color: #16834b; font-weight: 800; background: rgba(22,131,75,.09); box-shadow: inset 0 0 0 1px rgba(22,131,75,.07); }
+    .bottom-nav a.active::after { content: ""; position: absolute; left: 50%; bottom: 3px; width: 20px; height: 3px; border-radius: 10px; background: #16834b; transform: translateX(-50%); }
+    @media (max-height: 650px) { .arena { height: 330px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">StudTask</div>
+    <button class="back" type="button" onclick="location.href='games.html'">← Games</button>
+  </header>
+
+  <main class="wrap">
+    <section class="intro">
+      <h1>🏃 Endless Runner</h1>
+      <p>Jump over obstacles and survive as long as possible!</p>
+    </section>
+
+    <section class="stats">
+      <div class="stat"><b id="score">0</b><span>SCORE</span></div>
+      <div class="stat"><b id="speed">1</b><span>SPEED</span></div>
+      <div class="stat"><b id="best">0</b><span>BEST</span></div>
+    </section>
+
+    <div class="arena" id="arena" tabindex="0" aria-label="Endless Runner game area">
+      <div class="message" id="message">
+        <div>
+          <div style="font-size:48px">🏃</div>
+          <div>Ready to run?</div>
+          <button class="start" id="start" type="button">START GAME</button>
+        </div>
+      </div>
+      <div class="player" id="player">🏃</div>
+      <div class="ground"></div>
+    </div>
+
+    <div class="result" id="result">
+      <h2>💥 Game Over!</h2>
+      <div class="big" id="finalScore">0</div>
+      <p id="resultText"></p>
+      <button class="again" id="again" type="button">PLAY AGAIN</button>
+    </div>
+
+    <div class="hint">Tap the game area to jump • Avoid the obstacles</div>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <a href="index.html"><span>⌂</span>Home</a>
+    <a href="my-tasks.html"><span>✓</span>My Tasks</a>
+    <a href="post-task.html"><span>＋</span>Post</a>
+    <a href="alerts.html"><span>🔔</span>Alerts</a>
+    <a href="profile.html"><span>♙</span>Profile</a>
+  </nav>
+
+  <script>
+    const arena = document.getElementById("arena");
+    const player = document.getElementById("player");
+    const message = document.getElementById("message");
+    const start = document.getElementById("start");
+    const again = document.getElementById("again");
+    const scoreEl = document.getElementById("score");
+    const speedEl = document.getElementById("speed");
+    const bestEl = document.getElementById("best");
+    const result = document.getElementById("result");
+    const finalScore = document.getElementById("finalScore");
+    const resultText = document.getElementById("resultText");
+
+    let running = false;
+    let score = 0;
+    let speed = 4;
+    let best = Number(localStorage.getItem("studtask_runner_best") || 0);
+    let obstacles = [];
+    let loop = null;
+    let spawn = null;
+    let jumping = false;
+
+    bestEl.textContent = best;
+
+    function jump() {
+      if (!running || jumping) return;
+      jumping = true;
+      player.classList.remove("jump");
+      void player.offsetWidth;
+      player.classList.add("jump");
+      setTimeout(() => { jumping = false; }, 550);
+    }
+
+    function collision(obstacle) {
+      const playerRect = player.getBoundingClientRect();
+      const obstacleRect = obstacle.getBoundingClientRect();
+      return playerRect.left < obstacleRect.right - 7 &&
+        playerRect.right > obstacleRect.left + 7 &&
+        playerRect.top < obstacleRect.bottom - 7 &&
+        playerRect.bottom > obstacleRect.top + 7;
+    }
+
+    function endGame() {
+      if (!running) return;
+      running = false;
+      clearInterval(loop);
+      clearInterval(spawn);
+      obstacles.forEach(obstacle => obstacle.remove());
+      obstacles = [];
+      finalScore.textContent = score;
+
+      if (score > best) {
+        best = score;
+        localStorage.setItem("studtask_runner_best", best);
+        bestEl.textContent = best;
+        resultText.textContent = "New personal best!";
+      } else {
+        resultText.textContent = "You survived with a score of " + score + ".";
+      }
+
+      result.style.display = "block";
+      message.style.display = "none";
+    }
+
+    function createObstacle() {
+      if (!running) return;
+      const obstacle = document.createElement("div");
+      obstacle.className = "obstacle";
+      obstacle.style.right = "-45px";
+      arena.appendChild(obstacle);
+      obstacles.push(obstacle);
+    }
+
+    function startGame() {
+      running = true;
+      score = 0;
+      speed = 4;
+      jumping = false;
+      scoreEl.textContent = "0";
+      speedEl.textContent = "1";
+      result.style.display = "none";
+      message.style.display = "none";
+      obstacles.forEach(obstacle => obstacle.remove());
+      obstacles = [];
+      clearInterval(loop);
+      clearInterval(spawn);
+      spawn = setInterval(createObstacle, 1300);
+
+      loop = setInterval(() => {
+        obstacles.forEach((obstacle, index) => {
+          let right = parseFloat(obstacle.style.right) || -45;
+          right += speed;
+          obstacle.style.right = right + "px";
+
+          if (right > arena.clientWidth + 50) {
+            obstacle.remove();
+            obstacles.splice(index, 1);
+            score += 1;
+            scoreEl.textContent = score;
+
+            if (score % 10 === 0) {
+              speed = Math.min(10, speed + 0.5);
+              speedEl.textContent = Math.round(speed - 3);
+            }
+          } else if (collision(obstacle)) {
+            endGame();
+          }
+        });
+      }, 30);
+    }
+
+    arena.addEventListener("pointerdown", event => {
+      if (event.target === start) return;
+      jump();
+    });
+
+    arena.addEventListener("keydown", event => {
+      if (event.key === " " || event.key === "ArrowUp") {
+        event.preventDefault();
+        jump();
+      }
+    });
+
+    start.addEventListener("click", startGame);
+    again.addEventListener("click", startGame);
+  </script>
+</body>
+</html>
