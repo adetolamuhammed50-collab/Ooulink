@@ -3,654 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Task Details — OOULink</title>
+<title>Task Details — StudTask</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --green:#16a34a;
-  --green-dark:#15803d;
-  --green-light:#ecfdf3;
-  --text:#17201a;
-  --muted:#6b7280;
-  --border:#e5e7eb;
-  --bg:#f6f8f7;
-  --white:#fff;
-  --red:#dc2626;
-  --orange:#ea580c;
-  --blue:#2563eb;
-  --shadow:0 4px 18px rgba(0,0,0,.06);
-}
-html,body{
-  min-height:100%;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,Helvetica,sans-serif;
-}
-body{
-  display:flex;
-  justify-content:center;
-}
-button,a{font:inherit}
-button{cursor:pointer}
-.app{
-  width:100%;
-  max-width:480px;
-  min-height:100vh;
-  background:var(--bg);
-  position:relative;
-}
-.header{
-  height:60px;
-  background:var(--white);
-  border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  padding:0 14px;
-  position:sticky;
-  top:0;
-  z-index:20;
-}
-.back-btn{
-  width:40px;
-  height:40px;
-  border:0;
-  background:transparent;
-  border-radius:12px;
-  font-size:24px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--text);
-  transition:.15s;
-}
-.back-btn:active{transform:scale(.92);background:#f1f5f3}
-.header-title{
-  flex:1;
-  min-width:0;
-  text-align:center;
-  font-size:16px;
-  font-weight:700;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  padding:0 8px;
-}
-.header-brand{
-  width:40px;
-  text-align:right;
-  color:var(--green-dark);
-  font-weight:800;
-  font-size:12px;
-}
-main{padding:14px 14px 90px}
-.hidden{display:none!important}
-
-.loading-card,
-.error-card,
-.not-found-card{
-  background:var(--white);
-  border-radius:18px;
-  padding:18px;
-  box-shadow:var(--shadow);
-}
-.skeleton{
-  background:linear-gradient(90deg,#edf0ee 25%,#f7f8f7 50%,#edf0ee 75%);
-  background-size:200% 100%;
-  animation:shine 1.4s infinite;
-  border-radius:10px;
-}
-@keyframes shine{
-  from{background-position:200% 0}
-  to{background-position:-200% 0}
-}
-.sk-title{height:28px;width:78%;margin-bottom:14px}
-.sk-line{height:14px;width:100%;margin-bottom:9px}
-.sk-line.short{width:62%}
-.sk-box{height:80px;width:100%;margin-top:16px}
-
-.error-card{text-align:center;padding:35px 20px}
-.error-icon,.not-found-icon{font-size:42px;margin-bottom:12px}
-.error-card h2,.not-found-card h2{font-size:20px;margin-bottom:8px}
-.error-card p,.not-found-card p{
-  color:var(--muted);
-  line-height:1.5;
-  font-size:14px;
-}
-.primary-btn{
-  margin-top:18px;
-  border:0;
-  background:var(--green);
-  color:#fff;
-  padding:12px 18px;
-  border-radius:12px;
-  font-weight:700;
-  transition:.15s;
-}
-.primary-btn:active{transform:scale(.97)}
-
-.hero{
-  background:var(--white);
-  border-radius:20px;
-  padding:18px;
-  box-shadow:var(--shadow);
-  margin-bottom:12px;
-}
-.hero-top{
-  display:flex;
-  align-items:flex-start;
-  gap:10px;
-  margin-bottom:12px;
-}
-.category{
-  color:var(--green-dark);
-  background:var(--green-light);
-  padding:6px 9px;
-  border-radius:8px;
-  font-size:11px;
-  font-weight:700;
-}
-.status{
-  margin-left:auto;
-  padding:6px 9px;
-  border-radius:8px;
-  font-size:11px;
-  font-weight:700;
-  white-space:nowrap;
-}
-.status-open{background:#dcfce7;color:#166534}
-.status-progress{background:#dbeafe;color:#1d4ed8}
-.status-completed{background:#e0e7ff;color:#3730a3}
-.status-cancelled{background:#fee2e2;color:#991b1b}
-.status-default{background:#f3f4f6;color:#4b5563}
-
-.hero h1{
-  font-size:22px;
-  line-height:1.25;
-  margin-bottom:10px;
-}
-.description{
-  color:#4b5563;
-  line-height:1.6;
-  font-size:14px;
-  white-space:pre-wrap;
-  word-break:break-word;
-}
-
-.info-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-bottom:12px;
-}
-.info-box{
-  background:var(--white);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:13px;
-}
-.info-label{
-  color:var(--muted);
-  font-size:11px;
-  margin-bottom:6px;
-}
-.info-value{
-  font-size:14px;
-  font-weight:700;
-  word-break:break-word;
-}
-.money{color:var(--green-dark);font-size:17px}
-
-.section{
-  background:var(--white);
-  border-radius:18px;
-  padding:16px;
-  box-shadow:var(--shadow);
-  margin-bottom:12px;
-}
-.section-title{
-  font-size:15px;
-  font-weight:800;
-  margin-bottom:13px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-  .poster-card{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:4px 0;
-}
-.avatar{
-  width:48px;
-  height:48px;
-  border-radius:50%;
-  background:var(--green-light);
-  color:var(--green-dark);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:800;
-  font-size:15px;
-  overflow:hidden;
-  flex:none;
-}
-.avatar img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-.person-info{min-width:0;flex:1}
-.person-name{
-  font-size:14px;
-  font-weight:800;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-.person-meta{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:4px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-.person-stats{
-  display:flex;
-  gap:8px;
-  margin-top:5px;
-  flex-wrap:wrap;
-}
-.stat{
-  font-size:10px;
-  color:#4b5563;
-  background:#f3f4f6;
-  padding:4px 7px;
-  border-radius:6px;
-}
-.runner-empty{
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.5;
-  background:#f8faf9;
-  border-radius:12px;
-  padding:12px;
-}
-
-.timeline{
-  position:relative;
-  padding-left:26px;
-}
-.timeline:before{
-  content:"";
-  position:absolute;
-  left:7px;
-  top:5px;
-  bottom:5px;
-  width:2px;
-  background:#dfe7e2;
-}
-.timeline-item{
-  position:relative;
-  margin-bottom:18px;
-}
-.timeline-item:last-child{margin-bottom:0}
-.timeline-dot{
-  position:absolute;
-  left:-24px;
-  top:2px;
-  width:16px;
-  height:16px;
-  border-radius:50%;
-  background:var(--green);
-  border:3px solid #dcfce7;
-}
-.timeline-item h4{
-  font-size:13px;
-  margin-bottom:4px;
-}
-.timeline-item p{
-  font-size:11px;
-  color:var(--muted);
-  line-height:1.45;
-}
-
-.attachment-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-.attachment{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:10px;
-}
-.file-icon{
-  width:36px;
-  height:36px;
-  border-radius:9px;
-  background:#f0fdf4;
-  color:var(--green-dark);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:17px;
-}
-.file-info{flex:1;min-width:0}
-.file-name{
-  font-size:12px;
-  font-weight:700;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-.file-size{font-size:10px;color:var(--muted);margin-top:3px}
-.file-link{
-  border:0;
-  background:#f0fdf4;
-  color:var(--green-dark);
-  border-radius:8px;
-  padding:7px 9px;
-  font-size:11px;
-  font-weight:700;
-}
-.no-files{
-  color:var(--muted);
-  font-size:13px;
-  text-align:center;
-  padding:8px;
-}
-
-.action-section{padding-bottom:14px}
-.action-btn{
-  width:100%;
-  min-height:46px;
-  border:0;
-  border-radius:13px;
-  font-weight:800;
-  transition:transform .15s,opacity .15s;
-}
-.action-btn:active{transform:scale(.97)}
-.chat-btn{
-  background:var(--green);
-  color:#fff;
-}
-.disabled-btn{
-  background:#eef1ef;
-  color:#7a827d;
-  cursor:not-allowed;
-}
-.secondary-btn{
-  margin-top:9px;
-  background:#fff;
-  color:#374151;
-  border:1px solid var(--border);
-}
-  .danger-btn{
-  margin-top:9px;
-  background:#fff;
-  color:#dc2626;
-  border:1px solid #fecaca;
-}
-
-.danger-btn:active{
-  transform:scale(.97);
-}
-
-.safety-note{
-  margin-top:9px;
-  color:#6b7280;
-  font-size:11px;
-  line-height:1.45;
-  text-align:center;
-}
-  .review-card{
-  margin-top:12px;
-  padding:14px;
-  background:#f8faf9;
-  border:1px solid var(--border);
-  border-radius:14px;
-}
-
-.review-title{
-  font-size:14px;
-  font-weight:800;
-  margin-bottom:5px;
-}
-
-.review-subtitle{
-  color:var(--muted);
-  font-size:11px;
-  line-height:1.45;
-  margin-bottom:12px;
-}
-
-.rating-row{
-  display:flex;
-  gap:7px;
-  margin-bottom:12px;
-}
-
-.rating-btn{
-  flex:1;
-  min-height:42px;
-  border:1px solid var(--border);
-  background:#fff;
-  border-radius:10px;
-  font-size:18px;
-  transition:.15s;
-}
-
-.rating-btn:active{
-  transform:scale(.94);
-}
-
-.rating-btn.selected{
-  background:#fef3c7;
-  border-color:#f59e0b;
-}
-
-.review-note{
-  width:100%;
-  min-height:90px;
-  resize:vertical;
-  border:1px solid var(--border);
-  border-radius:11px;
-  padding:10px;
-  font:inherit;
-  font-size:12px;
-  outline:none;
-  background:#fff;
-}
-
-.review-note:focus{
-  border-color:var(--green);
-}
-
-.review-stars{
-  color:#f59e0b;
-  letter-spacing:2px;
-  font-size:16px;
-  margin-top:5px;
-}
-
-.review-existing{
-  margin-top:10px;
-  color:#4b5563;
-  font-size:12px;
-  line-height:1.5;
-}
-.helper-text{
-  text-align:center;
-  color:var(--muted);
-  font-size:11px;
-  line-height:1.45;
-  margin-top:9px;
-}
-
-.bottom-space{height:8px}
-
-.toast{
-  position:fixed;
-  left:50%;
-  bottom:24px;
-  transform:translate(-50%,20px);
-  width:calc(100% - 32px);
-  max-width:448px;
-  background:#17201a;
-  color:#fff;
-  padding:12px 14px;
-  border-radius:12px;
-  font-size:13px;
-  text-align:center;
-  opacity:0;
-  pointer-events:none;
-  transition:.2s;
-  z-index:100;
-}
-.toast.show{
-  opacity:1;
-  transform:translate(-50%,0);
-}
-
-@media(max-width:360px){
-  .hero h1{font-size:20px}
-  .info-grid{grid-template-columns:1fr}
-}
-
-@media(prefers-reduced-motion:reduce){
-  *,*:before,*:after{
-    animation-duration:.01ms!important;
-    transition-duration:.01ms!important;
-  }
-}
+:root{--green:#16a34a;--green-dark:#15803d;--green-light:#ecfdf3;--text:#17201a;--muted:#6b7280;--border:#e5e7eb;--bg:#f6f8f7;--white:#fff;--red:#dc2626;--shadow:0 4px 18px rgba(0,0,0,.06)}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{display:flex;justify-content:center}
+button,a{font:inherit}button{cursor:pointer}
+.app{width:100%;max-width:480px;min-height:100vh;background:var(--bg);position:relative}
+.header{height:60px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;position:sticky;top:0;z-index:20}
+.back-btn{width:40px;height:40px;border:0;background:transparent;border-radius:12px;font-size:24px;display:flex;align-items:center;justify-content:center;color:var(--text);transition:transform .16s ease,background .16s ease,box-shadow .16s ease}
+.back-btn:hover{background:#f1f5f3;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.back-btn:active{transform:scale(.91);background:#e8efeb}
+.back-btn:focus-visible{outline:3px solid rgba(22,163,74,.2);outline-offset:2px}
+.header-title{flex:1;min-width:0;text-align:center;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px}
+.header-brand{width:40px;text-align:right;color:var(--green-dark);font-weight:800;font-size:12px}
+main{padding:14px 14px 104px}.hidden{display:none!important}
+.loading-card,.error-card,.not-found-card{background:var(--white);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.skeleton{background:linear-gradient(90deg,#edf0ee 25%,#f7f8f7 50%,#edf0ee 75%);background-size:200% 100%;animation:shine 1.4s infinite;border-radius:10px}
+@keyframes shine{from{background-position:200% 0}to{background-position:-200% 0}}
+.sk-title{height:28px;width:78%;margin-bottom:14px}.sk-line{height:14px;width:100%;margin-bottom:9px}.sk-line.short{width:62%}.sk-box{height:80px;width:100%;margin-top:16px}
+.error-card{text-align:center;padding:35px 20px}.error-icon,.not-found-icon{font-size:42px;margin-bottom:12px}.error-card h2,.not-found-card h2{font-size:20px;margin-bottom:8px}.error-card p,.not-found-card p{color:var(--muted);line-height:1.5;font-size:14px}
+.primary-btn{margin-top:18px;border:0;background:var(--green);color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;transition:transform .16s ease,box-shadow .16s ease,opacity .16s ease}.primary-btn:hover{box-shadow:0 7px 16px rgba(22,163,74,.18)}.primary-btn:active{transform:scale(.97)}.primary-btn:focus-visible{outline:3px solid rgba(22,163,74,.2);outline-offset:2px}
+.hero{background:var(--white);border-radius:20px;padding:18px;box-shadow:var(--shadow);margin-bottom:12px}.hero-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}.category{color:var(--green-dark);background:var(--green-light);padding:6px 9px;border-radius:8px;font-size:11px;font-weight:700}.status{margin-left:auto;padding:6px 9px;border-radius:8px;font-size:11px;font-weight:700;white-space:nowrap}.status-open{background:#dcfce7;color:#166534}.status-progress{background:#dbeafe;color:#1d4ed8}.status-completed{background:#e0e7ff;color:#3730a3}.status-cancelled{background:#fee2e2;color:#991b1b}.status-default{background:#f3f4f6;color:#4b5563}.hero h1{font-size:22px;line-height:1.25;margin-bottom:10px}.description{color:#4b5563;line-height:1.6;font-size:14px;white-space:pre-wrap;word-break:break-word}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.info-box{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:13px}.info-label{color:var(--muted);font-size:11px;margin-bottom:6px}.info-value{font-size:14px;font-weight:700;word-break:break-word}.money{color:var(--green-dark);font-size:17px}
+.section{background:var(--white);border-radius:18px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px}.section-title{font-size:15px;font-weight:800;margin-bottom:13px;display:flex;align-items:center;gap:8px}.poster-card{display:flex;align-items:center;gap:12px;padding:4px 0}.avatar{width:48px;height:48px;border-radius:50%;background:var(--green-light);color:var(--green-dark);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;overflow:hidden;flex:none}.avatar img{width:100%;height:100%;object-fit:cover}.person-info{min-width:0;flex:1}.person-name{font-size:14px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.person-meta{color:var(--muted);font-size:12px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.person-stats{display:flex;gap:8px;margin-top:5px;flex-wrap:wrap}.stat{font-size:10px;color:#4b5563;background:#f3f4f6;padding:4px 7px;border-radius:6px}.runner-empty{color:var(--muted);font-size:13px;line-height:1.5;background:#f8faf9;border-radius:12px;padding:12px}
+.timeline{position:relative;padding-left:26px}.timeline:before{content:"";position:absolute;left:7px;top:5px;bottom:5px;width:2px;background:#dfe7e2}.timeline-item{position:relative;margin-bottom:18px}.timeline-item:last-child{margin-bottom:0}.timeline-dot{position:absolute;left:-24px;top:2px;width:16px;height:16px;border-radius:50%;background:var(--green);border:3px solid #dcfce7}.timeline-item h4{font-size:13px;margin-bottom:4px}.timeline-item p{font-size:11px;color:var(--muted);line-height:1.45}
+.attachment-list{display:flex;flex-direction:column;gap:8px}.attachment{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:12px;padding:10px}.file-icon{width:36px;height:36px;border-radius:9px;background:#f0fdf4;color:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:17px}.file-info{flex:1;min-width:0}.file-name{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.file-size{font-size:10px;color:var(--muted);margin-top:3px}.file-link{border:0;background:#f0fdf4;color:var(--green-dark);border-radius:8px;padding:7px 9px;font-size:11px;font-weight:700;transition:transform .16s ease,background .16s ease}.file-link:hover{background:#dcfce7}.file-link:active{transform:scale(.94)}.no-files{color:var(--muted);font-size:13px;text-align:center;padding:8px}
+.action-section{padding-bottom:14px}.action-btn{width:100%;min-height:46px;border:0;border-radius:13px;font-weight:800;transition:transform .16s ease,box-shadow .16s ease,background .16s ease,opacity .16s ease}.action-btn:hover{box-shadow:0 7px 16px rgba(0,0,0,.07)}.action-btn:active{transform:scale(.97)}.action-btn:focus-visible{outline:3px solid rgba(22,163,74,.2);outline-offset:2px}.chat-btn{background:var(--green);color:#fff}.chat-btn:hover{background:var(--green-dark)}.disabled-btn{background:#eef1ef;color:#7a827d;cursor:not-allowed}.secondary-btn{margin-top:9px;background:#fff;color:#374151;border:1px solid var(--border)}.secondary-btn:hover{background:#f8faf9}.danger-btn{margin-top:9px;background:#fff;color:#dc2626;border:1px solid #fecaca}.danger-btn:hover{background:#fff7f7}.safety-note{margin-top:9px;color:#6b7280;font-size:11px;line-height:1.45;text-align:center}.review-card{margin-top:12px;padding:14px;background:#f8faf9;border:1px solid var(--border);border-radius:14px}.review-title{font-size:14px;font-weight:800;margin-bottom:5px}.review-subtitle{color:var(--muted);font-size:11px;line-height:1.45;margin-bottom:12px}.rating-row{display:flex;gap:7px;margin-bottom:12px}.rating-btn{flex:1;min-height:42px;border:1px solid var(--border);background:#fff;border-radius:10px;font-size:18px;transition:transform .16s ease,background .16s ease,border-color .16s ease}.rating-btn:active{transform:scale(.94)}.rating-btn.selected{background:#fef3c7;border-color:#f59e0b}.review-note{width:100%;min-height:90px;resize:vertical;border:1px solid var(--border);border-radius:11px;padding:10px;font:inherit;font-size:12px;outline:none;background:#fff}.review-note:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.08)}.review-stars{color:#f59e0b;letter-spacing:2px;font-size:16px;margin-top:5px}.review-existing{margin-top:10px;color:#4b5563;font-size:12px;line-height:1.5}.helper-text{text-align:center;color:var(--muted);font-size:11px;line-height:1.45;margin-top:9px}.bottom-space{height:8px}
+.applicant-list{display:flex;flex-direction:column;gap:10px}.applicant-card{display:flex;align-items:flex-start;gap:12px;border:1px solid var(--border);border-radius:14px;padding:12px;background:#fff}.applicant-card .action-btn{margin-top:10px}
+.toast{position:fixed;left:50%;bottom:82px;transform:translate(-50%,20px);width:calc(100% - 32px);max-width:448px;background:#17201a;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;text-align:center;opacity:0;pointer-events:none;transition:.2s;z-index:100}.toast.show{opacity:1;transform:translate(-50%,0)}
+.bottom-nav{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);width:calc(100% - 20px);max-width:460px;height:66px;padding:7px;display:grid;grid-template-columns:repeat(5,1fr);gap:5px;background:rgba(255,255,255,.9);border:1px solid rgba(229,231,235,.9);border-radius:20px;box-shadow:0 12px 34px rgba(0,0,0,.12);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:90}.nav-item{position:relative;min-width:0;min-height:50px;border:0;border-radius:15px;background:transparent;color:#66706a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;transition:transform .16s ease,background .16s ease,color .16s ease,box-shadow .16s ease}.nav-item:hover{background:#f3f7f4;color:var(--green-dark);transform:translateY(-1px)}.nav-item:active{transform:scale(.93);background:#eaf5ee}.nav-item:focus-visible{outline:3px solid rgba(22,163,74,.2);outline-offset:2px}.nav-item.active{background:var(--green-light);color:var(--green-dark);box-shadow:inset 0 0 0 1px rgba(22,163,74,.08)}.nav-item.active::after{content:"";position:absolute;bottom:4px;width:18px;height:3px;border-radius:99px;background:var(--green)}.nav-icon{font-size:19px;line-height:20px;transition:transform .16s ease}.nav-item:active .nav-icon{transform:scale(.86)}.nav-label{font-size:10px;font-weight:700;line-height:12px}.nav-item.active .nav-icon{transform:translateY(-1px)}
+@media(max-width:360px){.hero h1{font-size:20px}.info-grid{grid-template-columns:1fr}.nav-label{font-size:9px}.bottom-nav{height:63px}.nav-item{min-height:47px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
-
 <body>
 <div class="app">
-
 <header class="header">
   <button class="back-btn" id="backBtn" aria-label="Go back">‹</button>
   <div class="header-title" id="headerTitle">Task Details</div>
-  <div class="header-brand">OOULink</div>
+  <div class="header-brand">StudTask</div>
 </header>
-
 <main>
-  <section id="loadingState" class="loading-card">
-    <div class="skeleton sk-title"></div>
-    <div class="skeleton sk-line"></div>
-    <div class="skeleton sk-line short"></div>
-    <div class="skeleton sk-box"></div>
-    <div class="skeleton sk-box"></div>
-  </section>
-
-  <section id="errorState" class="error-card hidden">
-    <div class="error-icon">⚠️</div>
-    <h2>Something went wrong</h2>
-    <p id="errorMessage">We couldn't load this task.</p>
-    <button class="primary-btn" id="retryBtn">Try Again</button>
-  </section>
-
-  <section id="notFoundState" class="not-found-card hidden">
-    <div class="not-found-icon">🔎</div>
-    <h2>Task not found</h2>
-    <p>This task may have been removed or the link is no longer valid.</p>
-    <button class="primary-btn" id="backHomeBtn">Go Home</button>
-  </section>
-
-  <div id="contentState" class="hidden">
-
-    <section class="hero">
-      <div class="hero-top">
-        <span class="category" id="taskCategory">Task</span>
-        <span class="status status-default" id="taskStatus">Loading</span>
-      </div>
-      <h1 id="taskTitle">Task title</h1>
-      <div class="description" id="taskDescription"></div>
-    </section>
-
-    <section class="info-grid">
-      <div class="info-box">
-        <div class="info-label">Budget</div>
-        <div class="info-value money" id="taskBudget">₦0</div>
-      </div>
-      <div class="info-box">
-        <div class="info-label">Location</div>
-        <div class="info-value" id="taskLocation">—</div>
-      </div>
-      <div class="info-box">
-        <div class="info-label">Deadline</div>
-        <div class="info-value" id="taskDeadline">—</div>
-      </div>
-      <div class="info-box">
-        <div class="info-label">Posted</div>
-        <div class="info-value" id="taskCreated">—</div>
-      </div>
-    </section>
-        <section class="section">
-      <div class="section-title">👤 Poster</div>
-      <div class="poster-card">
-        <div class="avatar" id="posterAvatar">?</div>
-        <div class="person-info">
-          <div class="person-name" id="posterName">Loading...</div>
-          <div class="person-meta" id="posterLocation">Location unavailable</div>
-          <div class="person-stats">
-            <span class="stat" id="posterXp">XP 0</span>
-            <span class="stat" id="posterRep">Reputation 0</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-title">🏃 Runner</div>
-      <div id="runnerContent"></div>
-    </section>
-
-    <section class="section">
-      <div class="section-title">📎 Attachments</div>
-      <div id="attachmentContent"></div>
-    </section>
-
-    <section class="section">
-      <div class="section-title">🕒 Task Timeline</div>
-      <div class="timeline" id="timeline"></div>
-    </section>
-
-    <section class="section action-section" id="actionSection">
-  <div class="section-title">⚡ Actions</div>
-  <div id="actionContent"></div>
-</section>
-
-<section class="section action-section" id="reviewSection">
-  <div class="section-title">⭐ Reviews</div>
-  <div id="reviewContent"></div>
-</section>
-     <section class="section action-section" id="managementSection">
-  <div class="section-title">🛡️ Task Management & Safety</div>
-  <div id="managementContent"></div>
-     </section>
-    <div class="bottom-space"></div>
-  </div>
+<section id="loadingState" class="loading-card"><div class="skeleton sk-title"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-box"></div><div class="skeleton sk-box"></div></section>
+<section id="errorState" class="error-card hidden"><div class="error-icon">⚠️</div><h2>Something went wrong</h2><p id="errorMessage">We couldn't load this task.</p><button class="primary-btn" id="retryBtn">Try Again</button></section>
+<section id="notFoundState" class="not-found-card hidden"><div class="not-found-icon">🔎</div><h2>Task not found</h2><p>This task may have been removed or the link is no longer valid.</p><button class="primary-btn" id="backHomeBtn">Go Home</button></section>
+<div id="contentState" class="hidden">
+<section class="hero"><div class="hero-top"><span class="category" id="taskCategory">Task</span><span class="status status-default" id="taskStatus">Loading</span></div><h1 id="taskTitle">Task title</h1><div class="description" id="taskDescription"></div></section>
+<section class="info-grid"><div class="info-box"><div class="info-label">Budget</div><div class="info-value money" id="taskBudget">₦0</div></div><div class="info-box"><div class="info-label">Location</div><div class="info-value" id="taskLocation">—</div></div><div class="info-box"><div class="info-label">Deadline</div><div class="info-value" id="taskDeadline">—</div></div><div class="info-box"><div class="info-label">Posted</div><div class="info-value" id="taskCreated">—</div></div></section>
+<section class="section"><div class="section-title">👤 Poster</div><div class="poster-card"><div class="avatar" id="posterAvatar">?</div><div class="person-info"><div class="person-name" id="posterName">Loading...</div><div class="person-meta" id="posterLocation">Location unavailable</div><div class="person-stats"><span class="stat" id="posterXp">XP 0</span><span class="stat" id="posterRep">Reputation 0</span></div></div></div></section>
+<section class="section"><div class="section-title">🏃 Runner</div><div id="runnerContent"></div></section>
+<section class="section"><div class="section-title">📎 Attachments</div><div id="attachmentContent"></div></section>
+<section class="section"><div class="section-title">🕒 Task Timeline</div><div class="timeline" id="timeline"></div></section>
+<section class="section action-section" id="actionSection"><div class="section-title">⚡ Actions</div><div id="actionContent"></div></section>
+<section class="section action-section" id="reviewSection"><div class="section-title">⭐ Reviews</div><div id="reviewContent"></div></section>
+<section class="section action-section" id="managementSection"><div class="section-title">🛡️ Task Management & Safety</div><div id="managementContent"></div></section>
+<div class="bottom-space"></div>
+</div>
 </main>
-
+<nav class="bottom-nav" aria-label="Primary navigation">
+  <a class="nav-item" href="index.html"><span class="nav-icon">⌂</span><span class="nav-label">Home</span></a>
+  <a class="nav-item" href="my-tasks.html"><span class="nav-icon">✓</span><span class="nav-label">My Tasks</span></a>
+  <a class="nav-item" href="post-task.html"><span class="nav-icon">＋</span><span class="nav-label">Post</span></a>
+  <a class="nav-item" href="alerts.html"><span class="nav-icon">🔔</span><span class="nav-label">Alerts</span></a>
+  <a class="nav-item" href="profile.html"><span class="nav-icon">♙</span><span class="nav-label">Profile</span></a>
+</nav>
 <div class="toast" id="toast"></div>
-
 <script>
 const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-let moderationBlocked=false;function showModerationScreen(d){if(moderationBlocked)return;moderationBlocked=true;const t=d.ban_type==="temporary",e=t&&d.banned_until?new Date(d.banned_until).toLocaleString():null;document.body.innerHTML=`<div style="position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px;z-index:99999"><div style="width:100%;max-width:420px;background:#fff;border-radius:20px;padding:28px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)"><div style="font-size:48px;margin-bottom:12px">🚫</div><h2 style="font-size:23px;margin:0 0 10px">OOULink Account Restricted</h2><p style="font-size:14px;line-height:1.6;color:#5f6963">Your account is currently ${t?"temporarily":"permanently"} restricted and you cannot view or interact with tasks.</p>${t&&e?`<p style="font-size:14px;line-height:1.6;color:#5f6963"><strong>Restriction ends:</strong><br>${e}</p>`:""}${d.ban_reason?`<p style="background:#fff4f4;border-radius:12px;padding:12px;color:#8b2020;text-align:left;font-size:14px;line-height:1.5"><strong>Reason:</strong><br>${String(d.ban_reason).replace(/[<>&"]/g,"")}</p>`:""}<p style="font-size:14px;line-height:1.6;color:#5f6963">Please follow OOULink's rules. If you believe this action was made in error, contact OOULink support.</p><button onclick="logoutModerated()" style="width:100%;border:0;border-radius:12px;padding:14px;background:#16834b;color:#fff;font-weight:700;font-size:15px">LOG OUT</button>${t?'<p style="font-size:12px;color:#7b847f;margin-top:12px">Your access will automatically return after the temporary restriction expires.</p>':""}</div></div>`}async function logoutModerated(){await supabaseClient.auth.signOut();location.href="login.html"}async function checkModeration(){const{data:{session}}=await supabaseClient.auth.getSession();if(!session){location.href="login.html";return false}const{data,error}=await supabaseClient.from("user_moderation").select("status,ban_type,banned_until,ban_reason").eq("user_id",session.user.id).maybeSingle();if(error)return true;if(data?.status==="banned"){const a=data.ban_type==="permanent"||(data.ban_type==="temporary"&&data.banned_until&&new Date(data.banned_until)>new Date());if(a){showModerationScreen(data);return false}}return true}
+const supabaseClient = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let moderationBlocked = false;
+
+function showModerationScreen(details){
+  if(moderationBlocked) return;
+  moderationBlocked = true;
+  const temporary = details.ban_type === "temporary";
+  const endDate = temporary && details.banned_until ? new Date(details.banned_until).toLocaleString() : null;
+  document.body.innerHTML = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px;z-index:99999">
+      <div style="width:100%;max-width:420px;background:#fff;border-radius:20px;padding:28px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+        <div style="font-size:48px;margin-bottom:12px">🚫</div>
+        <h2 style="font-size:23px;margin:0 0 10px">StudTask Account Restricted</h2>
+        <p style="font-size:14px;line-height:1.6;color:#5f6963">Your account is currently ${temporary ? "temporarily" : "permanently"} restricted and you cannot view or interact with tasks.</p>
+        ${temporary && endDate ? `<p style="font-size:14px;line-height:1.6;color:#5f6963"><strong>Restriction ends:</strong><br>${endDate}</p>` : ""}
+        ${details.ban_reason ? `<p style="background:#fff4f4;border-radius:12px;padding:12px;color:#8b2020;text-align:left;font-size:14px;line-height:1.5"><strong>Reason:</strong><br>${String(details.ban_reason).replace(/[<>&"]/g,"")}</p>` : ""}
+        <p style="font-size:14px;line-height:1.6;color:#5f6963">Please follow StudTask's rules. If you believe this action was made in error, contact StudTask support.</p>
+        <button onclick="logoutModerated()" style="width:100%;border:0;border-radius:12px;padding:14px;background:#16834b;color:#fff;font-weight:700;font-size:15px">LOG OUT</button>
+        ${temporary ? '<p style="font-size:12px;color:#7b847f;margin-top:12px">Your access will automatically return after the temporary restriction expires.</p>' : ""}
+      </div>
+    </div>`;
+}
+
+async function logoutModerated(){
+  await supabaseClient.auth.signOut();
+  location.href = "login.html";
+}
+
+async function checkModeration(){
+  const {data:{session}} = await supabaseClient.auth.getSession();
+  if(!session){
+    location.href = "login.html";
+    return false;
+  }
+  const {data,error} = await supabaseClient.from("user_moderation").select("status,ban_type,banned_until,ban_reason").eq("user_id",session.user.id).maybeSingle();
+  if(error) return true;
+  if(data?.status === "banned"){
+    const active = data.ban_type === "permanent" || (data.ban_type === "temporary" && data.banned_until && new Date(data.banned_until) > new Date());
+    if(active){
+      showModerationScreen(data);
+      return false;
+    }
+  }
+  return true;
+}
 
 let currentUser = null;
 let currentTask = null;
@@ -661,1968 +129,272 @@ let taskApplications = [];
 let myApplication = null;
 let applicantProfiles = {};
 let isLoading = false;
-
+let selectedReviewRating = 0;
 const $ = id => document.getElementById(id);
 
-function getTaskId(){
-  return new URLSearchParams(window.location.search).get("id");
-}
-
-function escapeHtml(value){
-  return String(value ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-}
-
-function formatMoney(value){
-  const number = Number(value);
-  if(!Number.isFinite(number)) return "₦0";
-  return "₦" + number.toLocaleString("en-NG");
-}
-
-function formatDate(value){
-  if(!value) return "—";
-  const date = new Date(value);
-  if(Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString("en-NG",{
-    day:"numeric",
-    month:"short",
-    year:"numeric"
-  });
-}
-
-function formatDateTime(value){
-  if(!value) return "—";
-  const date = new Date(value);
-  if(Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString("en-NG",{
-    day:"numeric",
-    month:"short",
-    year:"numeric",
-    hour:"numeric",
-    minute:"2-digit"
-  });
-}
-
-function displayName(profile){
-  if(!profile) return "OOULink User";
-  return profile.full_name || profile.username || "OOULink User";
-}
-
-function getInitials(name){
-  const clean = String(name || "?").trim();
-  if(!clean) return "?";
-  const parts = clean.split(/\s+/).filter(Boolean);
-  if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
-  return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
-}
-
-function normalizeStatus(status){
-  return String(status || "unknown").toLowerCase().trim();
-}
-
-function statusLabel(status){
-  const value = normalizeStatus(status);
-
-  const labels = {
-    open:"Open",
-    assigned:"Assigned",
-    accepted:"Accepted",
-    in_progress:"In Progress",
-    awaiting_verification:"Awaiting Verification",
-    completed:"Completed",
-    cancelled:"Cancelled",
-    canceled:"Cancelled"
-  };
-
-  return labels[value] || value.replace(/_/g," ") || "Unknown";
-    }
-
-function statusClass(status){
-  const value = normalizeStatus(status);
-  if(value === "open") return "status-open";
-  if(value === "in_progress" || value === "assigned") return "status-progress";
-  if(value === "completed") return "status-completed";
-  if(value === "cancelled" || value === "canceled") return "status-cancelled";
-  return "status-default";
-}
-  function showLoading(show){
-  $("loadingState").classList.toggle("hidden",!show);
-  if(show){
-    $("errorState").classList.add("hidden");
-    $("notFoundState").classList.add("hidden");
-    $("contentState").classList.add("hidden");
-  }
-}
-
-function showError(message){
-  $("loadingState").classList.add("hidden");
-  $("notFoundState").classList.add("hidden");
-  $("contentState").classList.add("hidden");
-  $("errorState").classList.remove("hidden");
-  $("errorMessage").textContent =
-    message || "We couldn't load this task.";
-}
-
-function showNotFound(){
-  $("loadingState").classList.add("hidden");
-  $("errorState").classList.add("hidden");
-  $("contentState").classList.add("hidden");
-  $("notFoundState").classList.remove("hidden");
-}
-
-function showContent(){
-  $("loadingState").classList.add("hidden");
-  $("errorState").classList.add("hidden");
-  $("notFoundState").classList.add("hidden");
-  $("contentState").classList.remove("hidden");
-}
-
-function showToast(message){
-  const toast = $("toast");
-  toast.textContent = message;
-  toast.classList.add("show");
-  clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(()=>{
-    toast.classList.remove("show");
-  },2500);
-}
-async function notifyUser(userId,taskId,type,title,message){
-  if(!userId||!taskId)return false;
-  try{
-    const{error}=await supabaseClient.from("notifications").insert({
-      user_id:userId,
-      task_id:taskId,
-      type,
-      title,
-      message
-    });
-    if(error){
-      console.error("Notification insert error:",error);
-      return false;
-    }
-    return true;
-  }catch(error){
-    console.error("Notification exception:",error);
-    return false;
-  }
-}
-
-function profileAvatar(element,profile){
-  if(!element) return;
-  const name = displayName(profile);
-  if(profile && profile.avatar_url){
-    element.innerHTML =
-      `<img src="${escapeHtml(profile.avatar_url)}" alt="">`;
-  }else{
-    element.textContent = getInitials(name);
-  }
-}
-
-function isOwner(){
-  return !!(
-    currentUser &&
-    currentTask &&
-    currentTask.user_id === currentUser.id
-  );
-}
-
-function isRunner(){
-  return !!(
-    currentUser &&
-    currentTask &&
-    currentTask.runner_id === currentUser.id
-  );
-}
-
-function isParticipant(){
-  return isOwner() || isRunner();
-}
-
-function canUseChat(){
-  return !!(
-    currentUser &&
-    currentTask &&
-    currentTask.runner_id &&
-    isParticipant()
-  );
-}
+function getTaskId(){return new URLSearchParams(window.location.search).get("id")}
+function escapeHtml(value){return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+function formatMoney(value){const number=Number(value);if(!Number.isFinite(number))return "₦0";return "₦"+number.toLocaleString("en-NG")}
+function formatDate(value){if(!value)return "—";const date=new Date(value);if(Number.isNaN(date.getTime()))return "—";return date.toLocaleDateString("en-NG",{day:"numeric",month:"short",year:"numeric"})}
+function formatDateTime(value){if(!value)return "—";const date=new Date(value);if(Number.isNaN(date.getTime()))return "—";return date.toLocaleString("en-NG",{day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"})}
+function displayName(profile){if(!profile)return "StudTask User";return profile.full_name||profile.username||"StudTask User"}
+function getInitials(name){const clean=String(name||"?").trim();if(!clean)return "?";const parts=clean.split(/\s+/).filter(Boolean);if(parts.length===1)return parts[0].slice(0,2).toUpperCase();return (parts[0][0]+parts[parts.length-1][0]).toUpperCase()}
+function normalizeStatus(status){return String(status||"unknown").toLowerCase().trim()}
+function statusLabel(status){const value=normalizeStatus(status);const labels={open:"Open",assigned:"Assigned",accepted:"Accepted",in_progress:"In Progress",awaiting_verification:"Awaiting Verification",completed:"Completed",cancelled:"Cancelled",canceled:"Cancelled"};return labels[value]||value.replace(/_/g," ")||"Unknown"}
+function statusClass(status){const value=normalizeStatus(status);if(value==="open")return "status-open";if(value==="in_progress"||value==="assigned")return "status-progress";if(value==="completed")return "status-completed";if(value==="cancelled"||value==="canceled")return "status-cancelled";return "status-default"}
+function showLoading(show){$("loadingState").classList.toggle("hidden",!show);if(show){$("errorState").classList.add("hidden");$("notFoundState").classList.add("hidden");$("contentState").classList.add("hidden")}}
+function showError(message){$("loadingState").classList.add("hidden");$("notFoundState").classList.add("hidden");$("contentState").classList.add("hidden");$("errorState").classList.remove("hidden");$("errorMessage").textContent=message||"We couldn't load this task."}
+function showNotFound(){$("loadingState").classList.add("hidden");$("errorState").classList.add("hidden");$("contentState").classList.add("hidden");$("notFoundState").classList.remove("hidden")}
+function showContent(){$("loadingState").classList.add("hidden");$("errorState").classList.add("hidden");$("notFoundState").classList.add("hidden");$("contentState").classList.remove("hidden")}
+function showToast(message){const toast=$("toast");toast.textContent=message;toast.classList.add("show");clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>toast.classList.remove("show"),2500)}
+async function notifyUser(userId,taskId,type,title,message){if(!userId||!taskId)return false;try{const{error}=await supabaseClient.from("notifications").insert({user_id:userId,task_id:taskId,type,title,message});if(error){console.error("Notification insert error:",error);return false}return true}catch(error){console.error("Notification exception:",error);return false}}
+function profileAvatar(element,profile){if(!element)return;const name=displayName(profile);if(profile&&profile.avatar_url)element.innerHTML=`<img src="${escapeHtml(profile.avatar_url)}" alt="">`;else element.textContent=getInitials(name)}
+function isOwner(){return !!(currentUser&&currentTask&&currentTask.user_id===currentUser.id)}
+function isRunner(){return !!(currentUser&&currentTask&&currentTask.runner_id===currentUser.id)}
+function isParticipant(){return isOwner()||isRunner()}
+function canUseChat(){return !!(currentUser&&currentTask&&currentTask.runner_id&&isParticipant())}
 
 function renderTask(){
-  $("headerTitle").textContent =
-    currentTask.title || "Task Details";
-
-  $("taskCategory").textContent =
-    currentTask.category || "Task";
-
-  const status = normalizeStatus(currentTask.status);
-  $("taskStatus").textContent = statusLabel(status);
-  $("taskStatus").className =
-    "status " + statusClass(status);
-
-  $("taskTitle").textContent =
-    currentTask.title || "Untitled task";
-
-  $("taskDescription").textContent =
-    currentTask.description || "No description provided.";
-
-  $("taskBudget").textContent =
-    formatMoney(currentTask.budget);
-
-  $("taskLocation").textContent =
-    currentTask.location || "Not specified";
-
-  $("taskDeadline").textContent =
-    formatDateTime(currentTask.deadline);
-
-  $("taskCreated").textContent =
-    formatDateTime(currentTask.created_at);
+  $("headerTitle").textContent=currentTask.title||"Task Details";
+  $("taskCategory").textContent=currentTask.category||"Task";
+  const status=normalizeStatus(currentTask.status);
+  $("taskStatus").textContent=statusLabel(status);
+  $("taskStatus").className="status "+statusClass(status);
+  $("taskTitle").textContent=currentTask.title||"Untitled task";
+  $("taskDescription").textContent=currentTask.description||"No description provided.";
+  $("taskBudget").textContent=formatMoney(currentTask.budget);
+  $("taskLocation").textContent=currentTask.location||"Not specified";
+  $("taskDeadline").textContent=formatDateTime(currentTask.deadline);
+  $("taskCreated").textContent=formatDateTime(currentTask.created_at);
 }
 
 function renderPoster(){
-  const name = displayName(ownerProfile);
-
-  $("posterName").textContent = name;
-  $("posterLocation").textContent =
-    ownerProfile?.location || "Location not provided";
-
-  $("posterXp").textContent =
-    "XP " + Number(ownerProfile?.xp || 0);
-
-  $("posterRep").textContent =
-    "Reputation " + Number(ownerProfile?.reputation || 0);
-
+  const name=displayName(ownerProfile);
+  $("posterName").textContent=name;
+  $("posterLocation").textContent=ownerProfile?.location||"Location not provided";
+  $("posterXp").textContent="XP "+Number(ownerProfile?.xp||0);
+  $("posterRep").textContent="Reputation "+Number(ownerProfile?.reputation||0);
   profileAvatar($("posterAvatar"),ownerProfile);
 }
 
 function renderRunner(){
-  if(!currentTask.runner_id){
-    $("runnerContent").innerHTML = `
-      <div class="runner-empty">
-        No runner has been assigned to this task yet.
-      </div>`;
-    return;
-  }
-
-  if(!runnerProfile){
-    $("runnerContent").innerHTML = `
-      <div class="runner-empty">
-        A runner has been assigned, but their profile could not be loaded.
-      </div>`;
-    return;
-  }
-
-  const name = displayName(runnerProfile);
-  const avatar = runnerProfile.avatar_url
-    ? `<img src="${escapeHtml(runnerProfile.avatar_url)}" alt="">`
-    : escapeHtml(getInitials(name));
-
-  $("runnerContent").innerHTML = `
-    <div class="poster-card">
-      <div class="avatar">${avatar}</div>
-      <div class="person-info">
-        <div class="person-name">${escapeHtml(name)}</div>
-        <div class="person-meta">
-          ${escapeHtml(runnerProfile.location || "Location not provided")}
-        </div>
-        <div class="person-stats">
-          <span class="stat">XP ${Number(runnerProfile.xp || 0)}</span>
-          <span class="stat">
-            Reputation ${Number(runnerProfile.reputation || 0)}
-          </span>
-        </div>
-      </div>
-    </div>`;
-  }
-  function formatFileSize(bytes){
-  const value = Number(bytes);
-  if(!Number.isFinite(value) || value <= 0) return "";
-  if(value < 1024) return value + " B";
-  if(value < 1024 * 1024)
-    return (value / 1024).toFixed(1) + " KB";
-  return (value / (1024 * 1024)).toFixed(1) + " MB";
+  if(!currentTask.runner_id){$("runnerContent").innerHTML=`<div class="runner-empty">No runner has been assigned to this task yet.</div>`;return}
+  if(!runnerProfile){$("runnerContent").innerHTML=`<div class="runner-empty">A runner has been assigned, but their profile could not be loaded.</div>`;return}
+  const name=displayName(runnerProfile);
+  const avatar=runnerProfile.avatar_url?`<img src="${escapeHtml(runnerProfile.avatar_url)}" alt="">`:escapeHtml(getInitials(name));
+  $("runnerContent").innerHTML=`<div class="poster-card"><div class="avatar">${avatar}</div><div class="person-info"><div class="person-name">${escapeHtml(name)}</div><div class="person-meta">${escapeHtml(runnerProfile.location||"Location not provided")}</div><div class="person-stats"><span class="stat">XP ${Number(runnerProfile.xp||0)}</span><span class="stat">Reputation ${Number(runnerProfile.reputation||0)}</span></div></div></div>`;
 }
+
+function formatFileSize(bytes){const value=Number(bytes);if(!Number.isFinite(value)||value<=0)return "";if(value<1024)return value+" B";if(value<1024*1024)return (value/1024).toFixed(1)+" KB";return (value/(1024*1024)).toFixed(1)+" MB"}
 
 async function renderAttachments(){
-  const box = $("attachmentContent");
-
-  if(!taskAttachments.length){
-    box.innerHTML =
-      `<div class="no-files">No attachments for this task.</div>`;
-    return;
-  }
-
-  const items = await Promise.all(
-    taskAttachments.map(async file=>{
-      let url = "";
-
-      try{
-        const result = await supabaseClient
-          .storage
-          .from("TaskFiles")
-          .createSignedUrl(file.file_path,600);
-
-        if(!result.error && result.data){
-          url = result.data.signedUrl || "";
-        }
-      }catch(error){
-        console.warn("Attachment URL error:",error);
-      }
-
-      const safeName =
-        escapeHtml(file.file_name || "Attachment");
-
-      const size =
-        formatFileSize(file.file_size);
-
-      return `
-        <div class="attachment">
-          <div class="file-icon">📄</div>
-
-          <div class="file-info">
-            <div class="file-name">${safeName}</div>
-            <div class="file-size">${escapeHtml(size)}</div>
-          </div>
-
-          ${
-            url
-            ? `<button class="file-link"
-                  type="button"
-                  data-url="${escapeHtml(url)}">
-                  Open
-               </button>`
-            : `<span class="file-size">Unavailable</span>`
-          }
-        </div>
-      `;
-    })
-  );
-
-  box.innerHTML =
-    `<div class="attachment-list">${items.join("")}</div>`;
-
-  box.querySelectorAll(".file-link").forEach(button=>{
-    button.addEventListener("click",()=>{
-      const url = button.getAttribute("data-url");
-      if(url){
-        window.open(url,"_blank","noopener");
-      }
-    });
-  });
+  const box=$("attachmentContent");
+  if(!taskAttachments.length){box.innerHTML=`<div class="no-files">No attachments for this task.</div>`;return}
+  const items=await Promise.all(taskAttachments.map(async file=>{
+    let url="";
+    try{const result=await supabaseClient.storage.from("TaskFiles").createSignedUrl(file.file_path,600);if(!result.error&&result.data)url=result.data.signedUrl||""}catch(error){console.warn("Attachment URL error:",error)}
+    const safeName=escapeHtml(file.file_name||"Attachment");
+    const size=formatFileSize(file.file_size);
+    return `<div class="attachment"><div class="file-icon">📄</div><div class="file-info"><div class="file-name">${safeName}</div><div class="file-size">${escapeHtml(size)}</div></div>${url?`<button class="file-link" type="button" data-url="${escapeHtml(url)}">Open</button>`:`<span class="file-size">Unavailable</span>`}</div>`;
+  }));
+  box.innerHTML=`<div class="attachment-list">${items.join("")}</div>`;
+  box.querySelectorAll(".file-link").forEach(button=>button.addEventListener("click",()=>{const url=button.getAttribute("data-url");if(url)window.open(url,"_blank","noopener")}));
 }
-  
+
 function renderTimeline(){
-  const status = normalizeStatus(currentTask.status);
-
-  const items = [
-    {
-      title:"Task posted",
-      text:`Posted ${formatDateTime(currentTask.created_at)}`
-    }
-  ];
-
-  if(currentTask.runner_id){
-    items.push({
-      title:"Runner assigned",
-      text:"A runner has been selected for this task."
-    });
-  }
-
-  if(
-    status === "accepted" ||
-    status === "in_progress" ||
-    status === "awaiting_verification" ||
-    status === "completed"
-  ){
-    items.push({
-      title:"Task accepted",
-      text:"A runner has been selected and the task is ready to begin."
-    });
-  }
-
-  if(
-    status === "in_progress" ||
-    status === "awaiting_verification" ||
-    status === "completed"
-  ){
-    items.push({
-      title:"Task in progress",
-      text:"The runner is working on this task."
-    });
-  }
-
-  if(
-    status === "awaiting_verification" ||
-    status === "completed"
-  ){
-    items.push({
-      title:"Awaiting verification",
-      text:"The runner submitted the task for the poster to verify."
-    });
-  }
-
-  if(status === "completed"){
-    items.push({
-      title:"Task completed",
-      text:"The poster approved the submitted task."
-    });
-  }
-
-  if(status === "cancelled" || status === "canceled"){
-    items.push({
-      title:"Task cancelled",
-      text:"This task is no longer active."
-    });
-  }
-
-  $("timeline").innerHTML = items.map(item=>`
-    <div class="timeline-item">
-      <span class="timeline-dot"></span>
-      <h4>${escapeHtml(item.title)}</h4>
-      <p>${escapeHtml(item.text)}</p>
-    </div>
-  `).join("");
-    }
-function renderApplicantActions(){
-  const box = $("actionContent");
-  const status = normalizeStatus(currentTask.status);
-
-  if(status !== "open"){
-    box.innerHTML = `
-      <div class="helper-text">
-        This task is no longer accepting applicants.
-      </div>
-    `;
-    return;
-  }
-
-  if(isOwner()){
-    const pendingApplications =
-      taskApplications.filter(
-        application => application.status === "pending"
-      );
-
-    if(!pendingApplications.length){
-      box.innerHTML = `
-        <div class="helper-text">
-          No students have applied for this task yet.
-        </div>
-      `;
-      return;
-    }
-
-    box.innerHTML = `
-      <div class="helper-text" style="margin-bottom:10px">
-        ${pendingApplications.length}
-        applicant${pendingApplications.length === 1 ? "" : "s"}
-        ${pendingApplications.length === 1 ? "is" : "are"} waiting.
-      </div>
-
-      <div class="applicant-list">
-        ${pendingApplications.map(application=>{
-          const profile =
-            applicantProfiles[application.runner_id];
-
-          const name = displayName(profile);
-          const avatar = profile?.avatar_url
-            ? `<img src="${escapeHtml(profile.avatar_url)}" alt="">`
-            : escapeHtml(getInitials(name));
-
-          return `
-            <div class="applicant-card">
-              <div class="avatar">${avatar}</div>
-
-              <div class="person-info">
-                <div class="person-name">
-                  ${escapeHtml(name)}
-                </div>
-
-                <div class="person-meta">
-                  ${escapeHtml(
-                    profile?.location || "Location not provided"
-                  )}
-                </div>
-
-                <div class="person-stats">
-                  <span class="stat">
-                    XP ${Number(profile?.xp || 0)}
-                  </span>
-
-                  <span class="stat">
-                    Reputation ${Number(profile?.reputation || 0)}
-                  </span>
-                </div>
-
-                <button
-                  class="action-btn chat-btn select-runner-btn"
-                  type="button"
-                  data-application-id="${escapeHtml(application.id)}"
-                >
-                  Select Runner
-                </button>
-              </div>
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `;
-
-    box.querySelectorAll(".select-runner-btn").forEach(button=>{
-      button.addEventListener("click",()=>{
-        selectRunner(button.dataset.applicationId);
-      });
-    });
-
-    return;
-  }
-
-  if(myApplication){
-    const applicationStatus =
-      normalizeStatus(myApplication.status);
-
-    if(applicationStatus === "pending"){
-      box.innerHTML = `
-        <button
-          class="action-btn disabled-btn"
-          type="button"
-          disabled
-        >
-          ✓ Application Sent
-        </button>
-
-        <div class="helper-text">
-          Your application is waiting for the poster to choose a runner.
-        </div>
-      `;
-      return;
-    }
-
-    if(applicationStatus === "selected"){
-      box.innerHTML = `
-        <button
-          class="action-btn chat-btn"
-          type="button"
-          id="selectedRunnerBtn"
-        >
-          ✓ You Were Selected
-        </button>
-
-        <div class="helper-text">
-          You have been selected for this task.
-        </div>
-      `;
-
-      $("selectedRunnerBtn").addEventListener("click",()=>{
-        if(canUseChat()){
-          window.location.href =
-            "chat.html?id=" +
-            encodeURIComponent(currentTask.id);
-        }
-      });
-
-      return;
-    }
-
-    if(applicationStatus === "rejected"){
-      box.innerHTML = `
-        <div class="helper-text">
-          Your application was not selected for this task.
-        </div>
-      `;
-      return;
-    }
-
-    if(applicationStatus === "withdrawn"){
-      myApplication = null;
-    }
-  }
-
-  box.innerHTML = `
-    <button
-      class="action-btn chat-btn"
-      type="button"
-      id="applyBtn"
-    >
-      Apply for Task
-    </button>
-
-    <div class="helper-text">
-      Apply if you are available and can complete this task.
-    </div>
-  `;
-
-  $("applyBtn").addEventListener("click",applyForTask);
-  }
-  async function startTask(){
-  if(!currentUser || !currentTask){
-    showToast("Please try again.");
-    return;
-  }
-
-  if(!isRunner()){
-    showToast("Only the assigned runner can start this task.");
-    return;
-  }
-
-  if(normalizeStatus(currentTask.status) !== "accepted"){
-    showToast("This task cannot be started right now.");
-    return;
-  }
-
-  const button = $("startTaskBtn");
-
-  if(button){
-    button.disabled = true;
-    button.textContent = "Starting...";
-  }
-
-  try{
-    const {error} = await supabaseClient
-      .from("tasks")
-      .update({
-        status:"in_progress"
-      })
-      .eq("id",currentTask.id)
-      .eq("runner_id",currentUser.id)
-      .eq("status","accepted");
-
-    if(error) throw error;
-
-    showToast("Task started.");
-
-    await loadTask();
-
-  }catch(error){
-    console.error("Start task error:",error);
-
-    if(button){
-      button.disabled = false;
-      button.textContent = "▶ Start Task";
-    }
-
-    showToast(
-      error?.message ||
-      "Could not start the task."
-    );
-  }
+  const status=normalizeStatus(currentTask.status);
+  const items=[{title:"Task posted",text:`Posted ${formatDateTime(currentTask.created_at)}`}];
+  if(currentTask.runner_id)items.push({title:"Runner assigned",text:"A runner has been selected for this task."});
+  if(["accepted","in_progress","awaiting_verification","completed"].includes(status))items.push({title:"Task accepted",text:"A runner has been selected and the task is ready to begin."});
+  if(["in_progress","awaiting_verification","completed"].includes(status))items.push({title:"Task in progress",text:"The runner is working on this task."});
+  if(["awaiting_verification","completed"].includes(status))items.push({title:"Awaiting verification",text:"The runner submitted the task for the poster to verify."});
+  if(status==="completed")items.push({title:"Task completed",text:"The poster approved the submitted task."});
+  if(status==="cancelled"||status==="canceled")items.push({title:"Task cancelled",text:"This task is no longer active."});
+  $("timeline").innerHTML=items.map(item=>`<div class="timeline-item"><span class="timeline-dot"></span><h4>${escapeHtml(item.title)}</h4><p>${escapeHtml(item.text)}</p></div>`).join("");
 }
 
+function renderApplicantActions(){
+  const box=$("actionContent");
+  const status=normalizeStatus(currentTask.status);
+  if(status!=="open"){box.innerHTML=`<div class="helper-text">This task is no longer accepting applicants.</div>`;return}
+  if(isOwner()){
+    const pendingApplications=taskApplications.filter(application=>application.status==="pending");
+    if(!pendingApplications.length){box.innerHTML=`<div class="helper-text">No students have applied for this task yet.</div>`;return}
+    box.innerHTML=`<div class="helper-text" style="margin-bottom:10px">${pendingApplications.length} applicant${pendingApplications.length===1?"":"s"} ${pendingApplications.length===1?"is":"are"} waiting.</div><div class="applicant-list">${pendingApplications.map(application=>{const profile=applicantProfiles[application.runner_id];const name=displayName(profile);const avatar=profile?.avatar_url?`<img src="${escapeHtml(profile.avatar_url)}" alt="">`:escapeHtml(getInitials(name));return `<div class="applicant-card"><div class="avatar">${avatar}</div><div class="person-info"><div class="person-name">${escapeHtml(name)}</div><div class="person-meta">${escapeHtml(profile?.location||"Location not provided")}</div><div class="person-stats"><span class="stat">XP ${Number(profile?.xp||0)}</span><span class="stat">Reputation ${Number(profile?.reputation||0)}</span></div><button class="action-btn chat-btn select-runner-btn" type="button" data-application-id="${escapeHtml(application.id)}">Select Runner</button></div></div>`}).join("")}</div>`;
+    box.querySelectorAll(".select-runner-btn").forEach(button=>button.addEventListener("click",()=>selectRunner(button.dataset.applicationId)));
+    return;
+  }
+  if(myApplication){
+    const applicationStatus=normalizeStatus(myApplication.status);
+    if(applicationStatus==="pending"){box.innerHTML=`<button class="action-btn disabled-btn" type="button" disabled>✓ Application Sent</button><div class="helper-text">Your application is waiting for the poster to choose a runner.</div>`;return}
+    if(applicationStatus==="selected"){box.innerHTML=`<button class="action-btn chat-btn" type="button" id="selectedRunnerBtn">✓ You Were Selected</button><div class="helper-text">You have been selected for this task.</div>`;$("selectedRunnerBtn").addEventListener("click",()=>{if(canUseChat())window.location.href="chat.html?id="+encodeURIComponent(currentTask.id)});return}
+    if(applicationStatus==="rejected"){box.innerHTML=`<div class="helper-text">Your application was not selected for this task.</div>`;return}
+    if(applicationStatus==="withdrawn")myApplication=null;
+  }
+  box.innerHTML=`<button class="action-btn chat-btn" type="button" id="applyBtn">Apply for Task</button><div class="helper-text">Apply if you are available and can complete this task.</div>`;
+  $("applyBtn").addEventListener("click",applyForTask);
+}
+
+async function startTask(){
+  if(!currentUser||!currentTask){showToast("Please try again.");return}
+  if(!isRunner()){showToast("Only the assigned runner can start this task.");return}
+  if(normalizeStatus(currentTask.status)!=="accepted"){showToast("This task cannot be started right now.");return}
+  const button=$("startTaskBtn");if(button){button.disabled=true;button.textContent="Starting..."}
+  try{const{error}=await supabaseClient.from("tasks").update({status:"in_progress"}).eq("id",currentTask.id).eq("runner_id",currentUser.id).eq("status","accepted");if(error)throw error;showToast("Task started.");await loadTask()}catch(error){console.error("Start task error:",error);if(button){button.disabled=false;button.textContent="▶ Start Task"}showToast(error?.message||"Could not start the task.")}
+}
 
 async function submitForVerification(){
-  if(!currentUser||!currentTask){
-    showToast("Please try again.");
-    return;
-  }
-  if(!isRunner()){
-    showToast("Only the assigned runner can submit this task.");
-    return;
-  }
-  if(normalizeStatus(currentTask.status)!=="in_progress"){
-    showToast("This task is not currently in progress.");
-    return;
-  }
-
-  const confirmed=window.confirm(
-    "Submit this task for the poster to verify?"
-  );
-
-  if(!confirmed)return;
-
-  const button=$("submitVerificationBtn");
-
-  if(button){
-    button.disabled=true;
-    button.textContent="Submitting...";
-  }
-
-  try{
-    const{error}=await supabaseClient
-      .from("tasks")
-      .update({status:"awaiting_verification"})
-      .eq("id",currentTask.id)
-      .eq("runner_id",currentUser.id)
-      .eq("status","in_progress");
-
-    if(error)throw error;
-
-    await notifyUser(
-      currentTask.user_id,
-      currentTask.id,
-      "verification",
-      "Task Submitted for Verification",
-      "Your runner submitted the task for verification: "+currentTask.title
-    );
-
-    showToast("Task submitted for verification.");
-    await loadTask();
-
-  }catch(error){
-    console.error("Submit verification error:",error);
-
-    if(button){
-      button.disabled=false;
-      button.textContent="✓ Submit for Verification";
-    }
-
-    showToast(
-      error?.message||"Could not submit the task."
-    );
-  }
+  if(!currentUser||!currentTask){showToast("Please try again.");return}
+  if(!isRunner()){showToast("Only the assigned runner can submit this task.");return}
+  if(normalizeStatus(currentTask.status)!=="in_progress"){showToast("This task is not currently in progress.");return}
+  if(!window.confirm("Submit this task for the poster to verify?"))return;
+  const button=$("submitVerificationBtn");if(button){button.disabled=true;button.textContent="Submitting..."}
+  try{const{error}=await supabaseClient.from("tasks").update({status:"awaiting_verification"}).eq("id",currentTask.id).eq("runner_id",currentUser.id).eq("status","in_progress");if(error)throw error;await notifyUser(currentTask.user_id,currentTask.id,"verification","Task Submitted for Verification","Your runner submitted the task for verification: "+currentTask.title);showToast("Task submitted for verification.");await loadTask()}catch(error){console.error("Submit verification error:",error);if(button){button.disabled=false;button.textContent="✓ Submit for Verification"}showToast(error?.message||"Could not submit the task.")}
 }
-
 
 async function completeTask(){
-  if(!currentUser||!currentTask){
-    showToast("Please try again.");
-    return;
-  }
-  if(!isOwner()){
-    showToast("Only the task poster can complete this task.");
-    return;
-  }
-  if(normalizeStatus(currentTask.status)!=="awaiting_verification"){
-    showToast("This task is not awaiting verification.");
-    return;
-  }
-
-  const confirmed=window.confirm(
-    "Approve this task and mark it as completed?"
-  );
-
-  if(!confirmed)return;
-
-  const button=$("completeTaskBtn");
-  const runnerId=currentTask.runner_id;
-
-  if(button){
-    button.disabled=true;
-    button.textContent="Completing...";
-  }
-
-  try{
-    const{error}=await supabaseClient
-      .from("tasks")
-      .update({status:"completed"})
-      .eq("id",currentTask.id)
-      .eq("user_id",currentUser.id)
-      .eq("runner_id",runnerId)
-      .eq("status","awaiting_verification");
-
-    if(error)throw error;
-
-    await notifyUser(
-      runnerId,
-      currentTask.id,
-      "task",
-      "Task Completed",
-      "Your task submission was approved and marked completed: "+currentTask.title
-    );
-
-    showToast("Task completed successfully.");
-
-    try{
-      const{error:xpError}=await supabaseClient.rpc(
-        "award_task_xp",
-        {
-          target_task_id:currentTask.id,
-          target_reward_type:"task_completed"
-        }
-      );
-
-      if(xpError){
-        console.error("Task completion XP error:",xpError);
-      }
-    }catch(xpError){
-      console.error("Task completion XP exception:",xpError);
-    }
-
-    await loadTask();
-
-  }catch(error){
-    console.error("Complete task error:",error);
-
-    if(button){
-      button.disabled=false;
-      button.textContent="✓ Approve & Complete";
-    }
-
-    showToast(
-      error?.message||"Could not complete the task."
-    );
-  }
-}
-let selectedReviewRating = 0;
-
-function renderReviewStars(rating){
-  const value = Math.max(0,Math.min(5,Number(rating) || 0));
-
-  return "★".repeat(value) + "☆".repeat(5 - value);
+  if(!currentUser||!currentTask){showToast("Please try again.");return}
+  if(!isOwner()){showToast("Only the task poster can complete this task.");return}
+  if(normalizeStatus(currentTask.status)!=="awaiting_verification"){showToast("This task is not awaiting verification.");return}
+  if(!window.confirm("Approve this task and mark it as completed?"))return;
+  const button=$("completeTaskBtn");const runnerId=currentTask.runner_id;if(button){button.disabled=true;button.textContent="Completing..."}
+  try{const{error}=await supabaseClient.from("tasks").update({status:"completed"}).eq("id",currentTask.id).eq("user_id",currentUser.id).eq("runner_id",runnerId).eq("status","awaiting_verification");if(error)throw error;await notifyUser(runnerId,currentTask.id,"task","Task Completed","Your task submission was approved and marked completed: "+currentTask.title);showToast("Task completed successfully.");try{const{error:xpError}=await supabaseClient.rpc("award_task_xp",{target_task_id:currentTask.id,target_reward_type:"task_completed"});if(xpError)console.error("Task completion XP error:",xpError)}catch(xpError){console.error("Task completion XP exception:",xpError)}await loadTask()}catch(error){console.error("Complete task error:",error);if(button){button.disabled=false;button.textContent="✓ Approve & Complete"}showToast(error?.message||"Could not complete the task.")}
 }
 
-async function loadMyReview(){
-  if(
-    !currentUser ||
-    !currentTask ||
-    normalizeStatus(currentTask.status) !== "completed" ||
-    !isParticipant()
-  ){
-    return null;
-  }
-
-  const {data,error} = await supabaseClient
-    .from("reviews")
-    .select("id,rating,note,created_at")
-    .eq("task_id",currentTask.id)
-    .eq("reviewer_id",currentUser.id)
-    .maybeSingle();
-
-  if(error){
-    console.error("Load review error:",error);
-    return null;
-  }
-
-  return data || null;
-}
-
-function revieweeName(){
-  if(isOwner()){
-    return displayName(runnerProfile);
-  }
-
-  if(isRunner()){
-    return displayName(ownerProfile);
-  }
-
-  return "the other participant";
-}
-
+function renderReviewStars(rating){const value=Math.max(0,Math.min(5,Number(rating)||0));return "★".repeat(value)+"☆".repeat(5-value)}
+async function loadMyReview(){if(!currentUser||!currentTask||normalizeStatus(currentTask.status)!=="completed"||!isParticipant())return null;const{data,error}=await supabaseClient.from("reviews").select("id,rating,note,created_at").eq("task_id",currentTask.id).eq("reviewer_id",currentUser.id).maybeSingle();if(error){console.error("Load review error:",error);return null}return data||null}
+function revieweeName(){if(isOwner())return displayName(runnerProfile);if(isRunner())return displayName(ownerProfile);return "the other participant"}
 async function submitReview(){
-  if(
-    !currentUser ||
-    !currentTask ||
-    normalizeStatus(currentTask.status) !== "completed"
-  ){
-    showToast("Reviews are available after task completion.");
-    return;
-  }
-
-  if(!isParticipant()){
-    showToast("Only task participants can leave a review.");
-    return;
-  }
-
-  const revieweeId =
-    isOwner()
-      ? currentTask.runner_id
-      : currentTask.user_id;
-
-  if(!revieweeId || revieweeId === currentUser.id){
-    showToast("This review cannot be submitted.");
-    return;
-  }
-
-  if(!selectedReviewRating){
-    showToast("Please choose a rating.");
-    return;
-  }
-
-  const noteElement = $("reviewNote");
-  const note = noteElement
-    ? noteElement.value.trim()
-    : "";
-
-  const button = $("submitReviewBtn");
-
-  if(button){
-    button.disabled = true;
-    button.textContent = "Submitting...";
-  }
-
-  try{
-    const {data,error} = await supabaseClient
-      .from("reviews")
-      .insert({
-        task_id:currentTask.id,
-        reviewer_id:currentUser.id,
-        reviewee_id:revieweeId,
-        rating:selectedReviewRating,
-        note:note || null
-      })
-      .select("id,rating,note,created_at")
-      .single();
-
-    if(error){
-      if(error.code === "23505"){
-        showToast("You have already reviewed this person.");
-        await renderReviewSection();
-        return;
-      }
-
-      throw error;
-    }
-
-    showToast("Review submitted. ⭐");
-
-    selectedReviewRating = 0;
-
-    renderSubmittedReview(data);
-
-  }catch(error){
-    console.error("Submit review error:",error);
-
-    if(button){
-      button.disabled = false;
-      button.textContent = "Submit Review";
-    }
-
-    showToast(
-      error?.message ||
-      "Could not submit your review."
-    );
-  }
+  if(!currentUser||!currentTask||normalizeStatus(currentTask.status)!=="completed"){showToast("Reviews are available after task completion.");return}
+  if(!isParticipant()){showToast("Only task participants can leave a review.");return}
+  const revieweeId=isOwner()?currentTask.runner_id:currentTask.user_id;if(!revieweeId||revieweeId===currentUser.id){showToast("This review cannot be submitted.");return}
+  if(!selectedReviewRating){showToast("Please choose a rating.");return}
+  const noteElement=$("reviewNote");const note=noteElement?noteElement.value.trim():"";const button=$("submitReviewBtn");if(button){button.disabled=true;button.textContent="Submitting..."}
+  try{const{data,error}=await supabaseClient.from("reviews").insert({task_id:currentTask.id,reviewer_id:currentUser.id,reviewee_id:revieweeId,rating:selectedReviewRating,note:note||null}).select("id,rating,note,created_at").single();if(error){if(error.code==="23505"){showToast("You have already reviewed this person.");await renderReviewSection();return}throw error}showToast("Review submitted. ⭐");selectedReviewRating=0;renderSubmittedReview(data)}catch(error){console.error("Submit review error:",error);if(button){button.disabled=false;button.textContent="Submit Review"}showToast(error?.message||"Could not submit your review.")}
 }
-
-function renderSubmittedReview(review){
-  const box = $("reviewContent");
-
-  if(!box || !review){
-    return;
-  }
-
-  box.innerHTML = `
-    <div class="review-card">
-      <div class="review-title">⭐ Your Review</div>
-
-      <div class="review-stars">
-        ${renderReviewStars(review.rating)}
-      </div>
-
-      ${
-        review.note
-          ? `
-            <div class="review-existing">
-              ${escapeHtml(review.note)}
-            </div>
-          `
-          : `
-            <div class="review-existing">
-              You left a ${Number(review.rating)}/5 rating.
-            </div>
-          `
-      }
-    </div>
-  `;
-}
-
-function selectReviewRating(rating){
-  selectedReviewRating = Number(rating);
-
-  document
-    .querySelectorAll(".rating-btn")
-    .forEach(button=>{
-      button.classList.toggle(
-        "selected",
-        Number(button.dataset.rating) === selectedReviewRating
-      );
-    });
-}
-
+function renderSubmittedReview(review){const box=$("reviewContent");if(!box||!review)return;box.innerHTML=`<div class="review-card"><div class="review-title">⭐ Your Review</div><div class="review-stars">${renderReviewStars(review.rating)}</div>${review.note?`<div class="review-existing">${escapeHtml(review.note)}</div>`:`<div class="review-existing">You left a ${Number(review.rating)}/5 rating.</div>`}</div>`}
+function selectReviewRating(rating){selectedReviewRating=Number(rating);document.querySelectorAll(".rating-btn").forEach(button=>button.classList.toggle("selected",Number(button.dataset.rating)===selectedReviewRating))}
 async function renderReviewSection(){
-  const box = $("reviewContent");
-
-  if(!box){
-    return;
-  }
-
-  if(
-    !currentUser ||
-    !currentTask ||
-    normalizeStatus(currentTask.status) !== "completed" ||
-    !isParticipant()
-  ){
-    box.innerHTML = "";
-    return;
-  }
-
-  const existingReview = await loadMyReview();
-
-  if(existingReview){
-    renderSubmittedReview(existingReview);
-    return;
-  }
-
-  selectedReviewRating = 0;
-
-  box.innerHTML = `
-    <div class="review-card">
-
-      <div class="review-title">
-        ⭐ Review ${escapeHtml(revieweeName())}
-      </div>
-
-      <div class="review-subtitle">
-        How was your experience with this task?
-      </div>
-
-      <div class="rating-row">
-        ${[1,2,3,4,5].map(rating=>`
-          <button
-            class="rating-btn"
-            type="button"
-            data-rating="${rating}"
-          >
-            ★
-          </button>
-        `).join("")}
-      </div>
-
-      <textarea
-        id="reviewNote"
-        class="review-note"
-        maxlength="500"
-        placeholder="Write a short review (optional)..."
-      ></textarea>
-
-      <button
-        class="action-btn chat-btn"
-        type="button"
-        id="submitReviewBtn"
-        style="margin-top:10px"
-      >
-        Submit Review
-      </button>
-
-      <div class="helper-text">
-        Your rating helps build trust on OOULink.
-      </div>
-
-    </div>
-  `;
-
-  box
-    .querySelectorAll(".rating-btn")
-    .forEach(button=>{
-      button.addEventListener("click",()=>{
-        selectReviewRating(button.dataset.rating);
-      });
-    });
-
-  $("submitReviewBtn")
-    .addEventListener("click",submitReview);
-    }
-  async function deleteTask(){
-  if(!currentUser || !currentTask){
-    showToast("Please try again.");
-    return;
-  }
-
-  if(!isOwner()){
-    showToast("Only the task poster can delete this task.");
-    return;
-  }
-
-  if(
-    normalizeStatus(currentTask.status) !== "open" ||
-    currentTask.runner_id
-  ){
-    showToast(
-      "Only an open task with no assigned runner can be deleted."
-    );
-    return;
-  }
-
-  const confirmed = window.confirm(
-    "Delete this task permanently? This cannot be undone."
-  );
-
-  if(!confirmed){
-    return;
-  }
-
-  const button = $("deleteTaskBtn");
-
-  if(button){
-    button.disabled = true;
-    button.textContent = "Deleting...";
-  }
-
-  try{
-    const {error} = await supabaseClient
-      .from("tasks")
-      .delete()
-      .eq("id",currentTask.id)
-      .eq("user_id",currentUser.id)
-      .eq("status","open")
-      .is("runner_id",null);
-
-    if(error) throw error;
-
-    showToast("Task deleted.");
-
-    setTimeout(()=>{
-      window.location.href = "my-tasks.html";
-    },700);
-
-  }catch(error){
-    console.error("Delete task error:",error);
-
-    if(button){
-      button.disabled = false;
-      button.textContent = "🗑 Delete Task";
-    }
-
-    showToast(
-      error?.message ||
-      "Could not delete this task."
-    );
-  }
+  const box=$("reviewContent");if(!box)return;
+  if(!currentUser||!currentTask||normalizeStatus(currentTask.status)!=="completed"||!isParticipant()){box.innerHTML="";return}
+  const existingReview=await loadMyReview();if(existingReview){renderSubmittedReview(existingReview);return}
+  selectedReviewRating=0;
+  box.innerHTML=`<div class="review-card"><div class="review-title">⭐ Review ${escapeHtml(revieweeName())}</div><div class="review-subtitle">How was your experience with this task?</div><div class="rating-row">${[1,2,3,4,5].map(rating=>`<button class="rating-btn" type="button" data-rating="${rating}">★</button>`).join("")}</div><textarea id="reviewNote" class="review-note" maxlength="500" placeholder="Write a short review (optional)..."></textarea><button class="action-btn chat-btn" type="button" id="submitReviewBtn" style="margin-top:10px">Submit Review</button><div class="helper-text">Your rating helps build trust on StudTask.</div></div>`;
+  box.querySelectorAll(".rating-btn").forEach(button=>button.addEventListener("click",()=>selectReviewRating(button.dataset.rating)));
+  $("submitReviewBtn").addEventListener("click",submitReview);
 }
 
+async function deleteTask(){
+  if(!currentUser||!currentTask){showToast("Please try again.");return}
+  if(!isOwner()){showToast("Only the task poster can delete this task.");return}
+  if(normalizeStatus(currentTask.status)!=="open"||currentTask.runner_id){showToast("Only an open task with no assigned runner can be deleted.");return}
+  if(!window.confirm("Delete this task permanently? This cannot be undone."))return;
+  const button=$("deleteTaskBtn");if(button){button.disabled=true;button.textContent="Deleting..."}
+  try{const{error}=await supabaseClient.from("tasks").delete().eq("id",currentTask.id).eq("user_id",currentUser.id).eq("status","open").is("runner_id",null);if(error)throw error;showToast("Task deleted.");setTimeout(()=>{window.location.href="my-tasks.html"},700)}catch(error){console.error("Delete task error:",error);if(button){button.disabled=false;button.textContent="🗑 Delete Task"}showToast(error?.message||"Could not delete this task.")}
+}
 
 async function reportTask(){
-  if(!currentUser || !currentTask){
-    showToast("Please try again.");
-    return;
-  }
+  if(!currentUser||!currentTask){showToast("Please try again.");return}
+  if(!isParticipant()){showToast("Only the task poster or assigned runner can report this task.");return}
+  if(!currentTask.runner_id){showToast("A user report is available once a runner has been assigned.");return}
+  const reportedUserId=isOwner()?currentTask.runner_id:currentTask.user_id;if(!reportedUserId||reportedUserId===currentUser.id){showToast("This report cannot be submitted.");return}
+  const reason=window.prompt("Why are you reporting this task or user?");if(!reason||!reason.trim())return;
+  const details=window.prompt("Add more details if needed. You can leave this blank.")||"";
+  try{const{error}=await supabaseClient.from("reports").insert({task_id:currentTask.id,reporter_id:currentUser.id,reported_user_id:reportedUserId,reason:reason.trim(),details:details.trim()});if(error)throw error;showToast("Report submitted. Thank you.")}catch(error){console.error("Report error:",error);showToast(error?.message||"Could not submit the report.")}
+}
 
-  if(!isParticipant()){
-    showToast(
-      "Only the task poster or assigned runner can report this task."
-    );
-    return;
-  }
-
-  if(!currentTask.runner_id){
-    showToast(
-      "A user report is available once a runner has been assigned."
-    );
-    return;
-  }
-
-  const reportedUserId =
-    isOwner()
-      ? currentTask.runner_id
-      : currentTask.user_id;
-
-  if(!reportedUserId || reportedUserId === currentUser.id){
-    showToast("This report cannot be submitted.");
-    return;
-  }
-
-  const reason = window.prompt(
-    "Why are you reporting this task or user?"
-  );
-
-  if(!reason || !reason.trim()){
-    return;
-  }
-
-  const details = window.prompt(
-    "Add more details if needed. You can leave this blank."
-  ) || "";
-
-  try{
-    const {error} = await supabaseClient
-      .from("reports")
-      .insert({
-        task_id: currentTask.id,
-        reporter_id: currentUser.id,
-        reported_user_id: reportedUserId,
-        reason: reason.trim(),
-        details: details.trim()
-      });
-
-    if(error) throw error;
-
-    showToast("Report submitted. Thank you.");
-
-  }catch(error){
-    console.error("Report error:",error);
-
-    showToast(
-      error?.message ||
-      "Could not submit the report."
-    );
-  }
-  }
 function renderActions(){
-  const box = $("actionContent");
-  const status = normalizeStatus(currentTask.status);
-  const managementBox = $("managementContent");
-
-  if(managementBox){
-    let managementHtml = "";
-
-    if(
-      isOwner() &&
-      status === "open" &&
-      !currentTask.runner_id
-    ){
-      managementHtml += `
-        <button
-          class="action-btn danger-btn"
-          type="button"
-          id="deleteTaskBtn"
-        >
-          🗑 Delete Task
-        </button>
-
-        <div class="safety-note">
-          You can delete this task while it is still open and has no runner.
-        </div>
-      `;
-    }
-
-    if(
-      isParticipant() &&
-      currentTask.runner_id
-    ){
-      managementHtml += `
-        <button
-          class="action-btn danger-btn"
-          type="button"
-          id="reportTaskBtn"
-        >
-          ⚑ Report Task / User
-        </button>
-
-        <div class="safety-note">
-          Use this if there is a serious problem with the task or the other participant.
-        </div>
-      `;
-    }
-
-    managementBox.innerHTML = managementHtml;
-
-    if($("deleteTaskBtn")){
-      $("deleteTaskBtn").addEventListener(
-        "click",
-        deleteTask
-      );
-    }
-
-    if($("reportTaskBtn")){
-      $("reportTaskBtn").addEventListener(
-        "click",
-        reportTask
-      );
-    }
+  const box=$("actionContent");const status=normalizeStatus(currentTask.status);const managementBox=$("managementContent");
+  if(managementBox){let managementHtml="";if(isOwner()&&status==="open"&&!currentTask.runner_id){managementHtml+=`<button class="action-btn danger-btn" type="button" id="deleteTaskBtn">🗑 Delete Task</button><div class="safety-note">You can delete this task while it is still open and has no runner.</div>`}if(isParticipant()&&currentTask.runner_id){managementHtml+=`<button class="action-btn danger-btn" type="button" id="reportTaskBtn">⚑ Report Task / User</button><div class="safety-note">Use this if there is a serious problem with the task or the other participant.</div>`}managementBox.innerHTML=managementHtml;if($("deleteTaskBtn"))$("deleteTaskBtn").addEventListener("click",deleteTask);if($("reportTaskBtn"))$("reportTaskBtn").addEventListener("click",reportTask)}
+  if(status==="open"){renderApplicantActions();return}
+  if(status==="accepted"){
+    let html="";
+    if(isRunner())html+=`<button class="action-btn chat-btn" type="button" id="startTaskBtn">▶ Start Task</button><div class="helper-text">Start the task when you are ready to begin working.</div>`;else if(isOwner())html+=`<div class="helper-text">Your runner has been selected. They can now start the task.</div>`;
+    if(canUseChat())html+=`<button class="action-btn secondary-btn" type="button" id="chatBtn">💬 Open Task Chat</button>`;
+    if(!html)html=`<div class="helper-text">This task has already been assigned to a runner.</div>`;
+    box.innerHTML=html;if($("startTaskBtn"))$("startTaskBtn").addEventListener("click",startTask);if($("chatBtn"))$("chatBtn").addEventListener("click",()=>window.location.href="chat.html?id="+encodeURIComponent(currentTask.id));return;
   }
-  /*
-   * OPEN
-   * Poster manages applicants.
-   * Other students can apply.
-   */
-  if(status === "open"){
-    if(isOwner()){
-      renderApplicantActions();
-      return;
-    }
-
-    renderApplicantActions();
-    return;
+  if(status==="in_progress"){
+    let html="";
+    if(isRunner())html+=`<button class="action-btn chat-btn" type="button" id="submitVerificationBtn">✓ Submit for Verification</button><div class="helper-text">Submit when you have finished the task.</div>`;else if(isOwner())html+=`<div class="helper-text">Your runner is currently working on this task. You can review their submission when they finish.</div>`;
+    if(canUseChat())html+=`<button class="action-btn secondary-btn" type="button" id="chatBtn">💬 Open Task Chat</button>`;
+    if(!html)html=`<div class="helper-text">This task is currently in progress.</div>`;
+    box.innerHTML=html;if($("submitVerificationBtn"))$("submitVerificationBtn").addEventListener("click",submitForVerification);if($("chatBtn"))$("chatBtn").addEventListener("click",()=>window.location.href="chat.html?id="+encodeURIComponent(currentTask.id));return;
   }
-
-  /*
-   * ACCEPTED
-   * Assigned runner can start.
-   * Poster can view the task/chat.
-   */
-  if(status === "accepted"){
-    let html = "";
-
-    if(isRunner()){
-      html += `
-        <button
-          class="action-btn chat-btn"
-          type="button"
-          id="startTaskBtn"
-        >
-          ▶ Start Task
-        </button>
-
-        <div class="helper-text">
-          Start the task when you are ready to begin working.
-        </div>
-      `;
-    }else if(isOwner()){
-      html += `
-        <div class="helper-text">
-          Your runner has been selected. They can now start the task.
-        </div>
-      `;
-    }
-
-    if(canUseChat()){
-      html += `
-        <button
-          class="action-btn secondary-btn"
-          type="button"
-          id="chatBtn"
-        >
-          💬 Open Task Chat
-        </button>
-      `;
-    }
-
-    if(!html){
-      html = `
-        <div class="helper-text">
-          This task has already been assigned to a runner.
-        </div>
-      `;
-    }
-
-    box.innerHTML = html;
-
-    if($("startTaskBtn")){
-      $("startTaskBtn").addEventListener("click",startTask);
-    }
-
-    if($("chatBtn")){
-      $("chatBtn").addEventListener("click",()=>{
-        window.location.href =
-          "chat.html?id=" +
-          encodeURIComponent(currentTask.id);
-      });
-    }
-
-    return;
+  if(status==="awaiting_verification"){
+    let html="";
+    if(isOwner())html+=`<button class="action-btn chat-btn" type="button" id="completeTaskBtn">✓ Approve & Complete</button><div class="helper-text">Review the task before approving it as completed.</div>`;else if(isRunner())html+=`<div class="helper-text">Your submission is waiting for the poster to verify.</div>`;
+    if(canUseChat())html+=`<button class="action-btn secondary-btn" type="button" id="chatBtn">💬 Open Task Chat</button>`;
+    if(!html)html=`<div class="helper-text">This task is awaiting verification.</div>`;
+    box.innerHTML=html;if($("completeTaskBtn"))$("completeTaskBtn").addEventListener("click",completeTask);if($("chatBtn"))$("chatBtn").addEventListener("click",()=>window.location.href="chat.html?id="+encodeURIComponent(currentTask.id));return;
   }
-
-  /*
-   * IN PROGRESS
-   * Runner submits for verification.
-   * Poster waits.
-   */
-  if(status === "in_progress"){
-    let html = "";
-
-    if(isRunner()){
-      html += `
-        <button
-          class="action-btn chat-btn"
-          type="button"
-          id="submitVerificationBtn"
-        >
-          ✓ Submit for Verification
-        </button>
-
-        <div class="helper-text">
-          Submit when you have finished the task.
-        </div>
-      `;
-    }else if(isOwner()){
-      html += `
-        <div class="helper-text">
-          Your runner is currently working on this task.
-          You can review their submission when they finish.
-        </div>
-      `;
-    }
-
-    if(canUseChat()){
-      html += `
-        <button
-          class="action-btn secondary-btn"
-          type="button"
-          id="chatBtn"
-        >
-          💬 Open Task Chat
-        </button>
-      `;
-    }
-
-    if(!html){
-      html = `
-        <div class="helper-text">
-          This task is currently in progress.
-        </div>
-      `;
-    }
-
-    box.innerHTML = html;
-
-    if($("submitVerificationBtn")){
-      $("submitVerificationBtn")
-        .addEventListener("click",submitForVerification);
-    }
-
-    if($("chatBtn")){
-      $("chatBtn").addEventListener("click",()=>{
-        window.location.href =
-          "chat.html?id=" +
-          encodeURIComponent(currentTask.id);
-      });
-    }
-
-    return;
+  if(status==="completed"){
+    let html=`<div class="helper-text">🎉 This task has been completed successfully.</div>`;if(canUseChat())html+=`<button class="action-btn secondary-btn" type="button" id="chatBtn">💬 Open Task Chat</button>`;box.innerHTML=html;renderReviewSection();if($("chatBtn"))$("chatBtn").addEventListener("click",()=>window.location.href="chat.html?id="+encodeURIComponent(currentTask.id));return;
   }
+  box.innerHTML=`<div class="helper-text">There are no actions available for this task right now.</div>`;
+}
 
-  /*
-   * AWAITING VERIFICATION
-   * Poster approves.
-   * Runner waits.
-   */
-  if(status === "awaiting_verification"){
-    let html = "";
-
-    if(isOwner()){
-      html += `
-        <button
-          class="action-btn chat-btn"
-          type="button"
-          id="completeTaskBtn"
-        >
-          ✓ Approve & Complete
-        </button>
-
-        <div class="helper-text">
-          Review the task before approving it as completed.
-        </div>
-      `;
-    }else if(isRunner()){
-      html += `
-        <div class="helper-text">
-          Your submission is waiting for the poster to verify.
-        </div>
-      `;
-    }
-
-    if(canUseChat()){
-      html += `
-        <button
-          class="action-btn secondary-btn"
-          type="button"
-          id="chatBtn"
-        >
-          💬 Open Task Chat
-        </button>
-      `;
-    }
-
-    if(!html){
-      html = `
-        <div class="helper-text">
-          This task is awaiting verification.
-        </div>
-      `;
-    }
-
-    box.innerHTML = html;
-
-    if($("completeTaskBtn")){
-      $("completeTaskBtn")
-        .addEventListener("click",completeTask);
-    }
-
-    if($("chatBtn")){
-      $("chatBtn").addEventListener("click",()=>{
-        window.location.href =
-          "chat.html?id=" +
-          encodeURIComponent(currentTask.id);
-      });
-    }
-
-    return;
-  }
-
-  /*
-   * COMPLETED
-   */
-  if(status === "completed"){
-    let html = `
-      <div class="helper-text">
-        🎉 This task has been completed successfully.
-      </div>
-    `;
-
-    if(canUseChat()){
-      html += `
-        <button
-          class="action-btn secondary-btn"
-          type="button"
-          id="chatBtn"
-        >
-          💬 Open Task Chat
-        </button>
-      `;
-    }
-
-    box.innerHTML = html;
-    renderReviewSection();
-    if($("chatBtn")){
-      $("chatBtn").addEventListener("click",()=>{
-        window.location.href =
-          "chat.html?id=" +
-          encodeURIComponent(currentTask.id);
-      });
-    }
-
-    return;
-  }
-
-  /*
-   * CANCELLED / OTHER
-   */
-  box.innerHTML = `
-    <div class="helper-text">
-      There are no actions available for this task right now.
-    </div>
-  `;
-  }
-
-
-  async function applyForTask(){
-  if(!currentUser){
-    showToast("Please log in to apply for a task.");
-    return;
-  }
-  if(!currentTask){
-    showToast("Task information is not ready yet.");
-    return;
-  }
-  if(isOwner()){
-    showToast("You cannot apply for your own task.");
-    return;
-  }
-  if(normalizeStatus(currentTask.status)!=="open"){
-    showToast("This task is no longer accepting applications.");
-    return;
-  }
-  if(myApplication&&normalizeStatus(myApplication.status)==="pending"){
-    showToast("You have already applied.");
-    return;
-  }
-
-  const button=$("applyBtn");
-  if(button){
-    button.disabled=true;
-    button.textContent="Applying...";
-  }
-
-  try{
-    const{error}=await supabaseClient
-      .from("task_applications")
-      .insert({
-        task_id:currentTask.id,
-        runner_id:currentUser.id,
-        status:"pending"
-      });
-
-    if(error)throw error;
-
-    myApplication={
-      task_id:currentTask.id,
-      runner_id:currentUser.id,
-      status:"pending"
-    };
-
-    await notifyUser(
-      currentTask.user_id,
-      currentTask.id,
-      "application",
-      "New Task Application",
-      "Someone applied for your task: "+currentTask.title
-    );
-
-    showToast("Application sent successfully.");
-    renderActions();
-
-  }catch(error){
-    console.error("Apply for task error:",error);
-
-    if(button){
-      button.disabled=false;
-      button.textContent="Apply for Task";
-    }
-
-    if(error?.message?.includes("OOULINK_RATE_LIMITED")){
-      showToast("⚡ Slow down — you can submit a maximum of 3 applications every 2 minutes. Please wait before applying again.");
-    }else{
-      showToast(error?.message||"Could not apply for this task.");
-    }
-  }
+async function applyForTask(){
+  if(!currentUser){showToast("Please log in to apply for a task.");return}
+  if(!currentTask){showToast("Task information is not ready yet.");return}
+  if(isOwner()){showToast("You cannot apply for your own task.");return}
+  if(normalizeStatus(currentTask.status)!=="open"){showToast("This task is no longer accepting applications.");return}
+  if(myApplication&&normalizeStatus(myApplication.status)==="pending"){showToast("You have already applied.");return}
+  const button=$("applyBtn");if(button){button.disabled=true;button.textContent="Applying..."}
+  try{const{error}=await supabaseClient.from("task_applications").insert({task_id:currentTask.id,runner_id:currentUser.id,status:"pending"});if(error)throw error;myApplication={task_id:currentTask.id,runner_id:currentUser.id,status:"pending"};await notifyUser(currentTask.user_id,currentTask.id,"application","New Task Application","Someone applied for your task: "+currentTask.title);showToast("Application sent successfully.");renderActions()}catch(error){console.error("Apply for task error:",error);if(button){button.disabled=false;button.textContent="Apply for Task"}if(error?.message?.includes("OOULINK_RATE_LIMITED"))showToast("⚡ Slow down — you can submit a maximum of 3 applications every 2 minutes. Please wait before applying again.");else showToast(error?.message||"Could not apply for this task.")}
 }
 
 async function selectRunner(applicationId){
-  if(!currentUser||!currentTask){
-    showToast("Please try again.");
-    return;
-  }
-  if(!isOwner()){
-    showToast("Only the task poster can select a runner.");
-    return;
-  }
-  if(normalizeStatus(currentTask.status)!=="open"){
-    showToast("This task is no longer open.");
-    return;
-  }
-  if(!applicationId){
-    showToast("No application was selected.");
-    return;
-  }
-
-  const application=taskApplications.find(
-    item=>item.id===applicationId
-  );
-
-  if(!application||normalizeStatus(application.status)!=="pending"){
-    showToast("This application is no longer available.");
-    return;
-  }
-
-  const confirmed=window.confirm(
-    "Select this student as the runner for this task?"
-  );
-
-  if(!confirmed)return;
-
-  const buttons=document.querySelectorAll(".select-runner-btn");
-
-  buttons.forEach(button=>{
-    button.disabled=true;
-    button.textContent="Selecting...";
-  });
-
-  try{
-    const{data,error}=await supabaseClient.rpc(
-      "select_task_runner",
-      {
-        target_task_id:currentTask.id,
-        target_application_id:applicationId
-      }
-    );
-
-    if(error)throw error;
-    if(data!==true){
-      throw new Error("Runner selection could not be completed.");
-    }
-
-    await notifyUser(
-      application.runner_id,
-      currentTask.id,
-      "task",
-      "You Were Selected",
-      "You were selected as the runner for: "+currentTask.title
-    );
-
-    showToast("Runner selected successfully.");
-    await loadTask();
-
-  }catch(error){
-    console.error("Select runner error:",error);
-
-    showToast(
-      error?.message||"Could not select this runner."
-    );
-
-    buttons.forEach(button=>{
-      button.disabled=false;
-      button.textContent="Select Runner";
-    });
-  }
+  if(!currentUser||!currentTask){showToast("Please try again.");return}
+  if(!isOwner()){showToast("Only the task poster can select a runner.");return}
+  if(normalizeStatus(currentTask.status)!=="open"){showToast("This task is no longer open.");return}
+  if(!applicationId){showToast("No application was selected.");return}
+  const application=taskApplications.find(item=>item.id===applicationId);if(!application||normalizeStatus(application.status)!=="pending"){showToast("This application is no longer available.");return}
+  if(!window.confirm("Select this student as the runner for this task?"))return;
+  const buttons=document.querySelectorAll(".select-runner-btn");buttons.forEach(button=>{button.disabled=true;button.textContent="Selecting..."});
+  try{const{data,error}=await supabaseClient.rpc("select_task_runner",{target_task_id:currentTask.id,target_application_id:applicationId});if(error)throw error;if(data!==true)throw new Error("Runner selection could not be completed.");await notifyUser(application.runner_id,currentTask.id,"task","You Were Selected","You were selected as the runner for: "+currentTask.title);showToast("Runner selected successfully.");await loadTask()}catch(error){console.error("Select runner error:",error);showToast(error?.message||"Could not select this runner.");buttons.forEach(button=>{button.disabled=false;button.textContent="Select Runner"})}
 }
-  
+
 async function loadMyApplication(taskId){
-  myApplication = null;
-
-  if(!currentUser){
-    return;
-  }
-
-  const {data,error} = await supabaseClient
-    .from("task_applications")
-    .select(`
-      id,
-      task_id,
-      runner_id,
-      status,
-      created_at
-    `)
-    .eq("task_id",taskId)
-    .eq("runner_id",currentUser.id)
-    .order("created_at",{ascending:false})
-    .limit(1)
-    .maybeSingle();
-
-  if(error){
-    console.warn("My application load error:",error);
-    return;
-  }
-
-  myApplication = data || null;
+  myApplication=null;if(!currentUser)return;
+  const{data,error}=await supabaseClient.from("task_applications").select(`id,task_id,runner_id,status,created_at`).eq("task_id",taskId).eq("runner_id",currentUser.id).order("created_at",{ascending:false}).limit(1).maybeSingle();
+  if(error){console.warn("My application load error:",error);return}myApplication=data||null;
 }
 
 async function loadTaskApplications(taskId){
-  taskApplications = [];
-  applicantProfiles = {};
-
-  if(!isOwner()){
-    return;
-  }
-
-  const {data,error} = await supabaseClient
-    .from("task_applications")
-    .select(`
-      id,
-      task_id,
-      runner_id,
-      status,
-      created_at
-    `)
-    .eq("task_id",taskId)
-    .order("created_at",{ascending:true});
-
-  if(error){
-    console.warn("Task applications load error:",error);
-    return;
-  }
-
-  taskApplications = data || [];
-
-  const runnerIds = [
-    ...new Set(
-      taskApplications
-        .map(application => application.runner_id)
-        .filter(Boolean)
-    )
-  ];
-
-  if(!runnerIds.length){
-    return;
-  }
-
-  const {data:profiles,error:profileError} =
-    await supabaseClient
-      .from("profiles")
-      .select(`
-        id,
-        username,
-        full_name,
-        location,
-        avatar_url,
-        xp,
-        reputation
-      `)
-      .in("id",runnerIds);
-
-  if(profileError){
-    console.warn("Applicant profile load error:",profileError);
-    return;
-  }
-
-  (profiles || []).forEach(profile=>{
-    applicantProfiles[profile.id] = profile;
-  });
-      }
-async function loadTask(){
-  const taskId = getTaskId();
-
-  if(!taskId){
-    showNotFound();
-    return;
-  }
-
-  showLoading(true);
-  isLoading = true;
-
-  try{
-    const {data:userData,error:userError} =
-      await supabaseClient.auth.getUser();
-
-    if(userError){
-      console.warn("Auth check:",userError);
-    }
-
-    currentUser = userData?.user || null;
-
-    const {data:task,error:taskError} =
-      await supabaseClient
-        .from("tasks")
-        .select(`
-          id,
-          user_id,
-          title,
-          description,
-          category,
-          location,
-          budget,
-          deadline,
-          status,
-          runner_id,
-          created_at
-        `)
-        .eq("id",taskId)
-        .maybeSingle();
-
-    if(taskError) throw taskError;
-
-    if(!task){
-      showNotFound();
-      return;
-    }
-
-    currentTask = task;
-
-    /*
-     * Render the main task immediately.
-     * The task itself is the most important data.
-     */
-    ownerProfile = null;
-    runnerProfile = null;
-    taskAttachments = [];
-    taskApplications = [];
-    applicantProfiles = {};
-    myApplication = null;
-
-    renderTask();
-    renderRunner();
-    renderTimeline();
-    renderActions();
-    showContent();
-
-    /*
-     * Load secondary data in parallel.
-     * None of these should block the initial task display.
-     */
-    const myApplicationPromise =
-      loadMyApplication(task.id);
-
-    const applicationsPromise =
-      loadTaskApplications(task.id);
-
-    const profilesPromise = (async()=>{
-      const profileIds = [
-        task.user_id,
-        task.runner_id
-      ].filter(Boolean);
-
-      if(!profileIds.length) return;
-
-      const {data:profiles,error:profileError} =
-        await supabaseClient
-          .from("profiles")
-          .select(`
-            id,
-            username,
-            full_name,
-            location,
-            avatar_url,
-            xp,
-            reputation
-          `)
-          .in("id",profileIds);
-
-      if(profileError){
-        console.warn("Profile load error:",profileError);
-        return;
-      }
-
-      ownerProfile =
-        profiles?.find(
-          profile => profile.id === task.user_id
-        ) || null;
-
-      runnerProfile =
-        profiles?.find(
-          profile => profile.id === task.runner_id
-        ) || null;
-    })();
-
-    const attachmentsPromise = (async()=>{
-      const {data:attachments,error:attachmentError} =
-        await supabaseClient
-          .from("task_attachments")
-          .select(`
-            id,
-            task_id,
-            user_id,
-            file_name,
-            file_path,
-            file_size,
-            mime_type,
-            created_at
-          `)
-          .eq("task_id",task.id)
-          .order("created_at",{ascending:true});
-
-      if(attachmentError){
-        console.warn(
-          "Attachment load error:",
-          attachmentError
-        );
-        return;
-      }
-
-      taskAttachments = attachments || [];
-    })();
-
-    /*
-     * Wait for the secondary data together.
-     * The page is already visible while this happens.
-     */
-    await Promise.all([
-      myApplicationPromise,
-      applicationsPromise,
-      profilesPromise,
-      attachmentsPromise
-    ]);
-
-    /*
-     * Refresh the parts that depend on the secondary data.
-     */
-    renderPoster();
-    renderRunner();
-    renderActions();
-
-    renderAttachments().catch(error=>{
-      console.warn(
-        "Attachment rendering error:",
-        error
-      );
-    });
-
-  }catch(error){
-    console.error("Task details error:",error);
-
-    showError(
-      error?.message ||
-      "We couldn't load this task. Please try again."
-    );
-
-  }finally{
-    isLoading = false;
-  }
-  }
-
-
-async function initializePage(){
-  await loadTask();
+  taskApplications=[];applicantProfiles={};if(!isOwner())return;
+  const{data,error}=await supabaseClient.from("task_applications").select(`id,task_id,runner_id,status,created_at`).eq("task_id",taskId).order("created_at",{ascending:true});
+  if(error){console.warn("Task applications load error:",error);return}
+  taskApplications=data||[];
+  const runnerIds=[...new Set(taskApplications.map(application=>application.runner_id).filter(Boolean))];if(!runnerIds.length)return;
+  const{data:profiles,error:profileError}=await supabaseClient.from("profiles").select(`id,username,full_name,location,avatar_url,xp,reputation`).in("id",runnerIds);if(profileError){console.warn("Applicant profile load error:",profileError);return}(profiles||[]).forEach(profile=>{applicantProfiles[profile.id]=profile});
 }
 
-$("backBtn").addEventListener("click",()=>{
-  if(history.length > 1){
-    history.back();
-  }else{
-    window.location.href = "index.html";
-  }
-});
+async function loadTask(){
+  const taskId=getTaskId();if(!taskId){showNotFound();return}
+  showLoading(true);isLoading=true;
+  try{
+    const{data:userData,error:userError}=await supabaseClient.auth.getUser();if(userError)console.warn("Auth check:",userError);currentUser=userData?.user||null;
+    const{data:task,error:taskError}=await supabaseClient.from("tasks").select(`id,user_id,title,description,category,location,budget,deadline,status,runner_id,created_at`).eq("id",taskId).maybeSingle();if(taskError)throw taskError;if(!task){showNotFound();return}
+    currentTask=task;ownerProfile=null;runnerProfile=null;taskAttachments=[];taskApplications=[];applicantProfiles={};myApplication=null;
+    renderTask();renderRunner();renderTimeline();renderActions();showContent();
+    const myApplicationPromise=loadMyApplication(task.id);
+    const applicationsPromise=loadTaskApplications(task.id);
+    const profilesPromise=(async()=>{const profileIds=[task.user_id,task.runner_id].filter(Boolean);if(!profileIds.length)return;const{data:profiles,error:profileError}=await supabaseClient.from("profiles").select(`id,username,full_name,location,avatar_url,xp,reputation`).in("id",profileIds);if(profileError){console.warn("Profile load error:",profileError);return}ownerProfile=profiles?.find(profile=>profile.id===task.user_id)||null;runnerProfile=profiles?.find(profile=>profile.id===task.runner_id)||null})();
+    const attachmentsPromise=(async()=>{const{data:attachments,error:attachmentError}=await supabaseClient.from("task_attachments").select(`id,task_id,user_id,file_name,file_path,file_size,mime_type,created_at`).eq("task_id",task.id).order("created_at",{ascending:true});if(attachmentError){console.warn("Attachment load error:",attachmentError);return}taskAttachments=attachments||[]})();
+    await Promise.all([myApplicationPromise,applicationsPromise,profilesPromise,attachmentsPromise]);
+    renderPoster();renderRunner();renderActions();renderAttachments().catch(error=>console.warn("Attachment rendering error:",error));
+  }catch(error){console.error("Task details error:",error);showError(error?.message||"We couldn't load this task. Please try again.")}finally{isLoading=false}
+}
 
-$("retryBtn").addEventListener("click",()=>{
-  initializePage();
-});
+async function initializePage(){await loadTask()}
 
-$("backHomeBtn").addEventListener("click",()=>{
-  window.location.href = "index.html";
-});
+$("backBtn").addEventListener("click",()=>{if(history.length>1)history.back();else window.location.href="index.html"});
+$("retryBtn").addEventListener("click",()=>initializePage());
+$("backHomeBtn").addEventListener("click",()=>window.location.href="index.html");
 
-document.addEventListener("DOMContentLoaded",()=>{checkModeration().then(a=>{if(a)initializePage()})});
+document.addEventListener("DOMContentLoaded",()=>{checkModeration().then(allowed=>{if(allowed)initializePage()})});
 </script>
-
 </div>
 </body>
 </html>
