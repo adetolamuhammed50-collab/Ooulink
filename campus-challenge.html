@@ -1,1 +1,699 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OOU Campus Challenge • OOULink</title><style>*{box-sizing:border-box}body{margin:0;background:#f4fff7;color:#123;font-family:Arial,sans-serif;max-width:480px;margin:auto;padding-bottom:78px}.header{height:64px;background:#fff;border-bottom:1px solid #e3eee7;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:5}.logo{font-size:22px;font-weight:800;color:#159447}.back{border:0;background:#eef9f1;color:#159447;border-radius:12px;padding:9px 12px;font-weight:700}.wrap{padding:20px 18px}.intro{text-align:center}.intro h1{margin:5px 0;font-size:27px}.intro p{margin:0;color:#6d7972;font-size:14px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:18px 0}.stat{background:#fff;border:1px solid #e3eee7;border-radius:15px;text-align:center;padding:12px 5px}.stat b{display:block;color:#159447;font-size:20px}.stat span{font-size:10px;color:#718078}.game{background:#fff;border:1px solid #e3eee7;border-radius:22px;padding:22px 16px;text-align:center;box-shadow:0 6px 20px #1231}.timer{font-size:14px;color:#159447;font-weight:800;margin-bottom:15px}.question{font-size:19px;font-weight:800;line-height:1.4;min-height:85px;display:flex;align-items:center;justify-content:center;margin-bottom:15px}.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}.answer{border:2px solid #e3eee7;background:#f8fffa;border-radius:14px;padding:14px 7px;font-size:13px;font-weight:700;cursor:pointer;transition:.12s}.answer:active{transform:scale(.95)}.answer.correct{border-color:#159447;background:#eef9f1;color:#159447}.answer.wrong{border-color:#d95b48;background:#fff1ee;color:#d95b48}.message{height:30px;margin-top:14px;font-size:13px;font-weight:700;color:#159447}.start,.again{border:0;background:#159447;color:#fff;border-radius:13px;padding:13px 22px;font-weight:800}.start{margin-top:10px}.result{display:none;background:#fff;border:1px solid #e3eee7;border-radius:20px;padding:20px;text-align:center;margin-top:16px}.result h2{margin:0 0 8px}.big{font-size:40px;font-weight:900;color:#159447}.result p{color:#68756e;font-size:13px}.hint{text-align:center;color:#87938c;font-size:11px;margin:12px 0}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);height:64px;background:#fff;border-top:1px solid #e3eee7;display:flex;justify-content:space-around;align-items:center;z-index:10}.bottom a{text-decoration:none;color:#718078;font-size:10px;text-align:center}.bottom span{display:block;font-size:20px;margin-bottom:2px}.bottom .active{color:#159447;font-weight:800}@media(max-width:350px){.question{font-size:17px}.answer{font-size:12px}}</style></head><body><header class="header"><div class="logo">OOULink</div><button class="back" onclick="location.href='games.html'">← Games</button></header><main class="wrap"><section class="intro"><h1>🗺️ OOU Campus Challenge</h1><p>Test your knowledge of OOU and student life!</p></section><section class="stats"><div class="stat"><b id="score">0</b><span>SCORE</span></div><div class="stat"><b id="round">0</b><span>ROUND</span></div><div class="stat"><b id="best">0</b><span>BEST</span></div></section><div class="game"><div class="timer">⏱️ <span id="time">30</span>s</div><div class="question" id="question">Ready for the challenge?</div><div class="answers" id="answers"></div><div class="message" id="message">How well do you know OOU?</div><button class="start" id="start">START CHALLENGE</button></div><div class="result" id="result"><h2>🎓 Challenge Complete!</h2><div class="big" id="finalScore">0</div><p id="resultText"></p><button class="again" id="again">PLAY AGAIN</button></div><div class="hint">30 seconds • Correct answer = 1 point • Keep learning!</div></main><nav class="bottom"><a href="index.html"><span>🏠</span>Home</a><a href="my-tasks.html"><span>📋</span>My Tasks</a><a href="post-task.html"><span>➕</span>Post</a><a href="alerts.html"><span>🔔</span>Alerts</a><a href="profile.html"><span>👤</span>Profile</a></nav><script>const question=document.getElementById("question"),answers=document.getElementById("answers"),scoreEl=document.getElementById("score"),roundEl=document.getElementById("round"),bestEl=document.getElementById("best"),timeEl=document.getElementById("time"),message=document.getElementById("message"),start=document.getElementById("start"),again=document.getElementById("again"),result=document.getElementById("result"),finalScore=document.getElementById("finalScore"),resultText=document.getElementById("resultText");const qs=[["What does OOU stand for?",["Olabisi Onabanjo University","Ogun State University","Oyo University","Ogun Open University"],"Olabisi Onabanjo University"],["What state is OOU located in?",["Ogun State","Oyo State","Lagos State","Osun State"],"Ogun State"],["What is the main town associated with OOU's Ago-Iwoye campus?",["Ago-Iwoye","Ibogun","Sagamu","Ayetoro"],"Ago-Iwoye"],["Which of these is an OOU campus location?",["Ibogun","Kano","Enugu","Calabar"],"Ibogun"],["What type of institution is OOU?",["University","Polytechnic","Primary school","College of Nursing"],"University"],["Which group best describes OOULink?",["Student task marketplace","Banking app","Music player","Weather app"],"Student task marketplace"],["Which activity fits a student gig marketplace?",["Running an errand","Flying a plane","Building a highway","Operating a train"],"Running an errand"],["Which location is included in OOULink's campus options?",["Ayetoro","Abuja","Ibadan","Benin City"],"Ayetoro"],["Which city is commonly associated with OOU's main campus?",["Ago-Iwoye","Lagos","Akure","Ilorin"],"Ago-Iwoye"],["What can students use OOULink to find?",["Tasks and gigs","Flight tickets only","Movie channels","Bank loans"],"Tasks and gigs"],["Which of these is a useful student service?",["Helping with an errand","Launching a satellite","Building an airport","Mining gold"],"Helping with an errand"],["OOU is located in which country?",["Nigeria","Ghana","Kenya","Benin"],"Nigeria"]];let score=0,round=0,time=30,timer=null,running=false,locked=false,best=Number(localStorage.getItem("ooulink_campus_best")||0);bestEl.textContent=best;function nextQuestion(){if(!running)return;locked=false;answers.innerHTML="";const q=qs[Math.floor(Math.random()*qs.length)];question.textContent=q[0];round++;roundEl.textContent=round;let opts=[...q[1]];for(let i=opts.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1)),x=opts[i];opts[i]=opts[j];opts[j]=x}opts.forEach(v=>{const b=document.createElement("button");b.className="answer";b.textContent=v;b.onclick=()=>answer(b,v,q[2]);answers.appendChild(b)});message.textContent="Choose the best answer!"}function answer(btn,value,correct){if(!running||locked)return;locked=true;[...answers.children].forEach(b=>b.disabled=true);if(value===correct){score++;scoreEl.textContent=score;btn.classList.add("correct");message.textContent="🎓 Correct! Nice one."}else{btn.classList.add("wrong");message.textContent="❌ Not quite!";[...answers.children].forEach(b=>{if(b.textContent===correct)b.classList.add("correct")})}if(score>best){best=score;bestEl.textContent=best;localStorage.setItem("ooulink_campus_best",best)}setTimeout(nextQuestion,500)}function endGame(){running=false;locked=true;clearInterval(timer);answers.innerHTML="";finalScore.textContent=score;if(score>best){best=score;localStorage.setItem("ooulink_campus_best",best);bestEl.textContent=best;resultText.textContent="🔥 New personal best! You scored "+score+" point"+(score===1?"":"s")+"."}else resultText.textContent="You scored "+score+" point"+(score===1?"":"s")+" in the OOU Campus Challenge.";result.style.display="block";question.textContent="Challenge complete!";message.textContent="Well played!";start.style.display="none"}function startGame(){clearInterval(timer);score=0;round=0;time=30;running=true;locked=false;scoreEl.textContent=0;roundEl.textContent=0;timeEl.textContent=30;result.style.display="none";start.style.display="none";nextQuestion();timer=setInterval(()=>{time--;timeEl.textContent=time;if(time<=0)endGame()},1000)}start.onclick=startGame;again.onclick=()=>{start.style.display="inline-block";startGame()};</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#16834b">
+  <title>Campus Challenge - StudTask</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #f4fff7;
+      color: #123;
+      font-family: Arial, sans-serif;
+      max-width: 480px;
+      margin: auto;
+      padding-bottom: 92px;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .header {
+      height: 64px;
+      background: #fff;
+      border-bottom: 1px solid #e3eee7;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 800;
+      color: #16834b;
+    }
+
+    .back {
+      border: 0;
+      background: #eef9f1;
+      color: #16834b;
+      border-radius: 12px;
+      padding: 10px 13px;
+      font-weight: 700;
+      transition: transform 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .back:active {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+
+    .back:focus-visible,
+    .answer:focus-visible,
+    .start:focus-visible,
+    .again:focus-visible,
+    .bottom a:focus-visible {
+      outline: 3px solid rgba(22, 131, 75, 0.22);
+      outline-offset: 2px;
+    }
+
+    .wrap {
+      padding: 20px 18px;
+    }
+
+    .intro {
+      text-align: center;
+    }
+
+    .intro h1 {
+      margin: 5px 0;
+      font-size: 27px;
+    }
+
+    .intro p {
+      margin: 0;
+      color: #6d7972;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin: 18px 0;
+    }
+
+    .stat {
+      background: #fff;
+      border: 1px solid #e3eee7;
+      border-radius: 15px;
+      text-align: center;
+      padding: 12px 5px;
+    }
+
+    .stat b {
+      display: block;
+      color: #16834b;
+      font-size: 20px;
+    }
+
+    .stat span {
+      font-size: 10px;
+      color: #718078;
+    }
+
+    .game {
+      background: #fff;
+      border: 1px solid #e3eee7;
+      border-radius: 22px;
+      padding: 22px 16px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(18, 48, 35, 0.08);
+    }
+
+    .timer {
+      font-size: 14px;
+      color: #16834b;
+      font-weight: 800;
+      margin-bottom: 15px;
+    }
+
+    .question {
+      font-size: 19px;
+      font-weight: 800;
+      line-height: 1.4;
+      min-height: 85px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .answer {
+      border: 2px solid #e3eee7;
+      background: #f8fffa;
+      color: #123;
+      border-radius: 14px;
+      padding: 14px 7px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+
+    .answer:active {
+      transform: scale(0.95);
+    }
+
+    .answer.correct {
+      border-color: #16834b;
+      background: #eef9f1;
+      color: #16834b;
+    }
+
+    .answer.wrong {
+      border-color: #d95b48;
+      background: #fff1ee;
+      color: #d95b48;
+    }
+
+    .message {
+      min-height: 30px;
+      margin-top: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #16834b;
+    }
+
+    .start,
+    .again {
+      border: 0;
+      background: #16834b;
+      color: #fff;
+      border-radius: 13px;
+      padding: 13px 22px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .start {
+      margin-top: 10px;
+    }
+
+    .start:active,
+    .again:active {
+      transform: scale(0.95);
+      opacity: 0.88;
+    }
+
+    .result {
+      display: none;
+      background: #fff;
+      border: 1px solid #e3eee7;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .result h2 {
+      margin: 0 0 8px;
+    }
+
+    .big {
+      font-size: 40px;
+      font-weight: 900;
+      color: #16834b;
+    }
+
+    .result p {
+      color: #68756e;
+      font-size: 13px;
+    }
+
+    .hint {
+      text-align: center;
+      color: #87938c;
+      font-size: 11px;
+      margin: 12px 0;
+    }
+
+    .bottom {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(480px, 100%);
+      min-height: 70px;
+      background: rgba(255, 255, 255, 0.94);
+      border-top: 1px solid #e3eee7;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 7px 5px;
+      z-index: 10;
+    }
+
+    .bottom a {
+      position: relative;
+      min-width: 48px;
+      min-height: 52px;
+      padding: 6px 5px;
+      text-decoration: none;
+      color: #718078;
+      font-size: 10px;
+      text-align: center;
+      border-radius: 13px;
+      transition: transform 0.16s ease, color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .bottom span {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 2px;
+      transition: transform 0.16s ease;
+    }
+
+    .bottom a:active {
+      transform: scale(0.91);
+      background: #eef9f1;
+    }
+
+    .bottom a:active span {
+      transform: scale(0.9);
+    }
+
+    .bottom a.active {
+      color: #16834b;
+      background: #eef9f1;
+      font-weight: 800;
+      box-shadow: 0 3px 10px rgba(22, 131, 75, 0.08);
+    }
+
+    .bottom a.active::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 3px;
+      width: 22px;
+      height: 3px;
+      border-radius: 99px;
+      background: #16834b;
+      transform: translateX(-50%);
+    }
+
+    @media (max-width: 350px) {
+      .question {
+        font-size: 17px;
+      }
+
+      .answer {
+        font-size: 12px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">StudTask</div>
+    <button class="back" type="button" onclick="location.href='games.html'">← Games</button>
+  </header>
+
+  <main class="wrap">
+    <section class="intro">
+      <h1>🗺️ Campus Challenge</h1>
+      <p>Test your knowledge of university life and student communities.</p>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <b id="score">0</b>
+        <span>SCORE</span>
+      </div>
+      <div class="stat">
+        <b id="round">0</b>
+        <span>ROUND</span>
+      </div>
+      <div class="stat">
+        <b id="best">0</b>
+        <span>BEST</span>
+      </div>
+    </section>
+
+    <section class="game">
+      <div class="timer">
+        ⏱️ <span id="time">30</span>s
+      </div>
+
+      <div class="question" id="question">
+        Ready for the challenge?
+      </div>
+
+      <div class="answers" id="answers"></div>
+
+      <div class="message" id="message">
+        How well do you know student life?
+      </div>
+
+      <button class="start" id="start" type="button">
+        START CHALLENGE
+      </button>
+    </section>
+
+    <section class="result" id="result">
+      <h2>🎓 Challenge Complete!</h2>
+      <div class="big" id="finalScore">0</div>
+      <p id="resultText"></p>
+      <button class="again" id="again" type="button">
+        PLAY AGAIN
+      </button>
+    </section>
+
+    <div class="hint">
+      30 seconds • Correct answer = 1 point • Keep learning!
+    </div>
+  </main>
+
+  <nav class="bottom">
+    <a href="index.html">
+      <span>🏠</span>
+      Home
+    </a>
+    <a href="my-tasks.html">
+      <span>📋</span>
+      My Tasks
+    </a>
+    <a href="post-task.html">
+      <span>➕</span>
+      Post
+    </a>
+    <a href="alerts.html">
+      <span>🔔</span>
+      Alerts
+    </a>
+    <a href="profile.html">
+      <span>👤</span>
+      Profile
+    </a>
+  </nav>
+
+  <script>
+    const question = document.getElementById("question");
+    const answers = document.getElementById("answers");
+    const scoreEl = document.getElementById("score");
+    const roundEl = document.getElementById("round");
+    const bestEl = document.getElementById("best");
+    const timeEl = document.getElementById("time");
+    const message = document.getElementById("message");
+    const start = document.getElementById("start");
+    const again = document.getElementById("again");
+    const result = document.getElementById("result");
+    const finalScore = document.getElementById("finalScore");
+    const resultText = document.getElementById("resultText");
+
+    const questions = [
+      [
+        "What is a campus?",
+        [
+          "A university location or site",
+          "A bank account",
+          "A transport ticket",
+          "A phone setting"
+        ],
+        "A university location or site"
+      ],
+      [
+        "Which activity fits a student task marketplace?",
+        [
+          "Running an errand",
+          "Flying a plane",
+          "Building a highway",
+          "Operating a train"
+        ],
+        "Running an errand"
+      ],
+      [
+        "Which is useful when identifying your university?",
+        [
+          "University name",
+          "Phone wallpaper",
+          "Battery level",
+          "Screen brightness"
+        ],
+        "University name"
+      ],
+      [
+        "Which information can identify a campus?",
+        [
+          "Campus name",
+          "Favorite song",
+          "Phone model",
+          "Browser theme"
+        ],
+        "Campus name"
+      ],
+      [
+        "What can students use StudTask to find?",
+        [
+          "Tasks and gigs",
+          "Flight tickets only",
+          "Movie channels",
+          "Bank loans"
+        ],
+        "Tasks and gigs"
+      ],
+      [
+        "Which is a useful student service?",
+        [
+          "Helping with an errand",
+          "Launching a satellite",
+          "Building an airport",
+          "Mining gold"
+        ],
+        "Helping with an errand"
+      ],
+      [
+        "What should you check before accepting a task?",
+        [
+          "The task details",
+          "The phone wallpaper",
+          "The weather icon only",
+          "The battery percentage"
+        ],
+        "The task details"
+      ],
+      [
+        "What is a good reason to use a student marketplace?",
+        [
+          "To connect students who need and offer help",
+          "To replace a university",
+          "To operate public transport",
+          "To issue passports"
+        ],
+        "To connect students who need and offer help"
+      ],
+      [
+        "Which country is StudTask designed for first?",
+        [
+          "Nigeria",
+          "Canada",
+          "Japan",
+          "Brazil"
+        ],
+        "Nigeria"
+      ],
+      [
+        "What can a student earn by completing an eligible task?",
+        [
+          "Task payment",
+          "A passport",
+          "A driving licence",
+          "A university degree"
+        ],
+        "Task payment"
+      ],
+      [
+        "Which detail can help you find relevant nearby tasks?",
+        [
+          "Location",
+          "Screen size",
+          "Phone ringtone",
+          "Battery health"
+        ],
+        "Location"
+      ],
+      [
+        "What is the goal of StudTask?",
+        [
+          "Connect students and help get things done",
+          "Replace university classes",
+          "Sell mobile phones",
+          "Run a transport company"
+        ],
+        "Connect students and help get things done"
+      ]
+    ];
+
+    let score = 0;
+    let round = 0;
+    let time = 30;
+    let timer = null;
+    let running = false;
+    let locked = false;
+    let best = Number(localStorage.getItem("studtask_campus_best") || 0);
+
+    bestEl.textContent = best;
+
+    function nextQuestion() {
+      if (!running) {
+        return;
+      }
+
+      locked = false;
+      answers.innerHTML = "";
+
+      const current = questions[Math.floor(Math.random() * questions.length)];
+
+      question.textContent = current[0];
+      round += 1;
+      roundEl.textContent = round;
+
+      const options = [...current[1]];
+
+      for (let i = options.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = options[i];
+        options[i] = options[j];
+        options[j] = temp;
+      }
+
+      options.forEach((value) => {
+        const button = document.createElement("button");
+        button.className = "answer";
+        button.type = "button";
+        button.textContent = value;
+        button.addEventListener("click", () => {
+          answer(button, value, current[2]);
+        });
+        answers.appendChild(button);
+      });
+
+      message.textContent = "Choose the best answer!";
+    }
+
+    function answer(button, value, correct) {
+      if (!running || locked) {
+        return;
+      }
+
+      locked = true;
+
+      [...answers.children].forEach((item) => {
+        item.disabled = true;
+      });
+
+      if (value === correct) {
+        score += 1;
+        scoreEl.textContent = score;
+        button.classList.add("correct");
+        message.textContent = "🎓 Correct! Nice one.";
+      } else {
+        button.classList.add("wrong");
+        message.textContent = "❌ Not quite!";
+
+        [...answers.children].forEach((item) => {
+          if (item.textContent === correct) {
+            item.classList.add("correct");
+          }
+        });
+      }
+
+      if (score > best) {
+        best = score;
+        bestEl.textContent = best;
+        localStorage.setItem("studtask_campus_best", String(best));
+      }
+
+      setTimeout(nextQuestion, 500);
+    }
+
+    function endGame() {
+      running = false;
+      locked = true;
+      clearInterval(timer);
+      timer = null;
+      answers.innerHTML = "";
+      finalScore.textContent = score;
+
+      if (score > best) {
+        best = score;
+        localStorage.setItem("studtask_campus_best", String(best));
+        bestEl.textContent = best;
+        resultText.textContent =
+          "🔥 New personal best! You scored " +
+          score +
+          " point" +
+          (score === 1 ? "" : "s") +
+          ".";
+      } else {
+        resultText.textContent =
+          "You scored " +
+          score +
+          " point" +
+          (score === 1 ? "" : "s") +
+          " in the Campus Challenge.";
+      }
+
+      result.style.display = "block";
+      question.textContent = "Challenge complete!";
+      message.textContent = "Well played!";
+      start.style.display = "none";
+    }
+
+    function startGame() {
+      clearInterval(timer);
+      score = 0;
+      round = 0;
+      time = 30;
+      running = true;
+      locked = false;
+
+      scoreEl.textContent = "0";
+      roundEl.textContent = "0";
+      timeEl.textContent = "30";
+      result.style.display = "none";
+      start.style.display = "none";
+
+      nextQuestion();
+
+      timer = setInterval(() => {
+        time -= 1;
+        timeEl.textContent = time;
+
+        if (time <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    start.addEventListener("click", startGame);
+
+    again.addEventListener("click", () => {
+      start.style.display = "inline-block";
+      startGame();
+    });
+  </script>
+</body>
+</html>
