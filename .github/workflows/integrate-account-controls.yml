@@ -1,0 +1,49 @@
+name: Integrate Account Controls
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Add account controls link
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("profile.html")
+          text = path.read_text(encoding="utf-8")
+
+          marker = '<a href="account-controls.html"'
+          if marker not in text:
+              button = '<a href="account-controls.html" class="btn blue" style="display:block;text-align:center;margin-top:9px">⚙️ ACCOUNT CONTROLS</a>'
+              anchor = '<a href="users.html" class="btn blue"'
+              if anchor in text:
+                  text = text.replace(anchor, button + anchor, 1)
+              else:
+                  raise SystemExit("Could not find a safe insertion point in profile.html")
+              path.write_text(text, encoding="utf-8")
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add profile.html
+          git diff --cached --quiet || git commit -m "Add account controls to profile"
+          git push
+
+      - name: Remove temporary workflow
+        if: success()
+        run: |
+          rm -f .github/workflows/integrate-account-controls.yml
+          git add .github/workflows/integrate-account-controls.yml
+          git diff --cached --quiet || git commit -m "Remove temporary account controls workflow"
+          git push
