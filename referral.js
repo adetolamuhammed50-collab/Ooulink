@@ -68,4 +68,16 @@
       window.setTimeout(() => claimReferral(session.user), 0);
     }
   });
+
+  if (window.location.pathname.endsWith("/signup.html") || window.location.pathname.endsWith("/signup")) {
+    const fixSignupMessage = () => {
+      const message = document.getElementById("message");
+      if (!message) return;
+      if (message.textContent.includes("Account created, but your profile could not be completed.")) {
+        message.textContent = "Account created successfully! Check your email to confirm your account.";
+        message.className = "message success";
+      }
+    };
+    new MutationObserver(fixSignupMessage).observe(document.body, { subtree: true, childList: true, characterData: true });
+  }
 })();
