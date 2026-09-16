@@ -1,4 +1,5 @@
-const CACHE_NAME = "studtask-v2";
+const CACHE_NAME = "studtask-v3";
+const THIRD_PARTY_CACHE = "studtask-third-party-v1";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -19,7 +20,7 @@ self.addEventListener("activate", event => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key !== CACHE_NAME)
+          .filter(key => key !== CACHE_NAME && key !== THIRD_PARTY_CACHE)
           .map(key => caches.delete(key))
       )
     )
@@ -40,10 +41,38 @@ async function updateCache(request) {
   }
 }
 
+async function loadThirdPartyScript(request) {
+  const cache = await caches.open(THIRD_PARTY_CACHE);
+  const cached = await cache.match(request);
+
+  if (cached) {
+    fetch(request)
+      .then(response => {
+        if (response.ok) cache.put(request, response.clone());
+      })
+      .catch(() => {});
+    return cached;
+  }
+
+  try {
+    const response = await fetch(request);
+    if (response.ok) await cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    return cached || Response.error();
+  }
+}
+
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
   const url = new URL(event.request.url);
+
+  if (url.hostname === "cdn.jsdelivr.net") {
+    event.respondWith(loadThirdPartyScript(event.request));
+    return;
+  }
+
   if (url.origin !== self.location.origin) return;
 
   if (event.request.mode === "navigate") {
