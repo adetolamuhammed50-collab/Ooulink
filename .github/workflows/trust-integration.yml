@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - .trust-integration-trigger
 
 permissions:
   contents: write
@@ -23,8 +25,8 @@ jobs:
           profile = Path("profile.html")
           text = profile.read_text(encoding="utf-8")
 
-          profile_marker = 'data-trust-link="profile-trust-link"'
-          if profile_marker not in text:
+          marker = 'data-trust-link="profile-trust-link"'
+          if marker not in text:
               target = '</div><div class="section"><div class="title">🏆 Achievements'
               replacement = '</div><a class="btn verify" data-trust-link="profile-trust-link" href="trust.html">🛡️ VIEW TRUST & REPUTATION</a><div class="section"><div class="title">🏆 Achievements'
               if target not in text:
@@ -84,13 +86,13 @@ jobs:
 
           task.write_text(text, encoding="utf-8")
 
-      - name: Commit changes and remove temporary workflow
+      - name: Commit changes and remove temporary files
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .trust-integration-trigger .github/workflows/trust-integration.yml
           git add profile.html task-details.html
-          git rm .github/workflows/trust-integration.yml
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
