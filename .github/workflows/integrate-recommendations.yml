@@ -1,0 +1,33 @@
+name: Integrate For You recommendations
+on:
+  push:
+    paths:
+      - '.github/workflows/integrate-recommendations.yml'
+permissions:
+  contents: write
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add For You entry
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('find-tasks.html')
+          s=p.read_text()
+          old='<button class="smallBtn" id="refreshBtn" type="button">↻ Refresh</button>'
+          new='<a class="smallBtn" href="recommendations.html" style="display:inline-flex;align-items:center;text-decoration:none;color:#16834b">✨ For You</a><button class="smallBtn" id="refreshBtn" type="button">↻ Refresh</button>'
+          if 'href="recommendations.html"' not in s:
+              if old not in s:
+                  raise SystemExit('Target refresh button not found')
+              s=s.replace(old,new,1)
+              p.write_text(s)
+          PY
+      - name: Commit integration
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add find-tasks.html
+          git diff --cached --quiet || git commit -m 'Add For You recommendations link'
+          git push
