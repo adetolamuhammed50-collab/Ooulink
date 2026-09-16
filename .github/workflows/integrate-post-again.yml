@@ -1,0 +1,27 @@
+name: Integrate Post Again
+on:
+  push:
+    paths:
+      - 'post-again.js'
+      - '.github/workflows/integrate-post-again.yml'
+permissions:
+  contents: write
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Integrate script
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          for name in ['my-tasks.html','post-task.html']:
+              p=Path(name); s=p.read_text(); tag='<script src="post-again.js"></script>'
+              if tag not in s: p.write_text(s.replace('</body>',tag+'</body>'))
+          Path('.github/workflows/integrate-post-again.yml').unlink()
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add my-tasks.html post-task.html .github/workflows/integrate-post-again.yml
+          git commit -m 'Integrate Post Again task templates' || exit 0
+          git push
