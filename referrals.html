@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Referrals — StudTask</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f5f7fb; color: #172033; }
+    button, a { touch-action: manipulation; }
+    .wrap { width: 100%; max-width: 480px; margin: auto; padding: 18px 15px 90px; }
+    .back { color: #16834b; text-decoration: none; font-size: 14px; }
+    h1 { font-size: 27px; margin: 18px 0 5px; }
+    .sub { color: #687386; font-size: 13px; margin: 0 0 18px; }
+    .card { background: #fff; border-radius: 18px; padding: 18px; margin-top: 12px; box-shadow: 0 5px 18px rgba(0,0,0,.05); }
+    .label { color: #8993a3; font-size: 10px; font-weight: 800; letter-spacing: .8px; }
+    .code { margin-top: 7px; font-size: 25px; font-weight: 900; letter-spacing: 1px; color: #16834b; word-break: break-word; }
+    .linkbox { margin-top: 10px; padding: 11px; border-radius: 11px; background: #f7f9fb; color: #687386; font-size: 11px; line-height: 1.5; word-break: break-all; }
+    .btn { width: 100%; border: 0; border-radius: 11px; padding: 13px; margin-top: 10px; font-size: 12px; font-weight: 800; cursor: pointer; }
+    .green { background: #16834b; color: #fff; }
+    .light { background: #eef7f1; color: #16834b; }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+    .stat { background: #f7f9fb; border-radius: 13px; padding: 14px; text-align: center; }
+    .stat b { display: block; font-size: 22px; }
+    .stat span { display: block; margin-top: 4px; color: #758094; font-size: 10px; }
+    .person { padding: 12px 0; border-top: 1px solid #edf0f2; }
+    .person:first-child { border-top: 0; }
+    .person strong { font-size: 13px; }
+    .person span { display: block; color: #758094; font-size: 10px; margin-top: 4px; }
+    .empty, .message { color: #758094; font-size: 12px; line-height: 1.5; }
+    .success { color: #16834b; }
+    .error { color: #c62828; }
+    .note { background: #f8fbf9; border: 1px solid #e0eee5; border-radius: 13px; padding: 12px; color: #687386; font-size: 11px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <a class="back" href="profile.html">← Back to Profile</a>
+    <h1>Refer Friends</h1>
+    <p class="sub">Invite other students to join StudTask with your personal referral link.</p>
+
+    <section class="card">
+      <div class="label">YOUR REFERRAL CODE</div>
+      <div class="code" id="referralCode">Loading...</div>
+      <div class="linkbox" id="referralLink">Loading referral link...</div>
+      <button class="btn green" id="copyButton">COPY REFERRAL LINK</button>
+      <div class="message" id="copyMessage"></div>
+    </section>
+
+    <section class="card">
+      <div class="stats">
+        <div class="stat"><b id="registeredCount">0</b><span>REGISTERED</span></div>
+        <div class="stat"><b id="qualifiedCount">0</b><span>QUALIFIED</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="label">PEOPLE YOU REFERRED</div>
+      <div id="referralsList" style="margin-top:8px"><div class="empty">Loading referrals...</div></div>
+    </section>
+
+    <section class="card">
+      <div class="note">
+        Referral tracking is active now. Monetary or withdrawal-based referral rewards are intentionally not enabled yet. The referral relationship is recorded so a future reward system can be added without changing who referred whom.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const referralCodeElement = document.getElementById("referralCode");
+    const referralLinkElement = document.getElementById("referralLink");
+    const copyButton = document.getElementById("copyButton");
+    const copyMessage = document.getElementById("copyMessage");
+    const registeredCount = document.getElementById("registeredCount");
+    const qualifiedCount = document.getElementById("qualifiedCount");
+    const referralsList = document.getElementById("referralsList");
+
+    let referralLink = "";
+
+    function showMessage(text, type) {
+      copyMessage.textContent = text;
+      copyMessage.className = `message ${type || ""}`;
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+      return new Date(value).toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      });
+    }
+
+    async function loadReferralData() {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabaseClient
+        .from("profiles")
+        .select("referral_code")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile?.referral_code) {
+        referralCodeElement.textContent = "Unavailable";
+        referralLinkElement.textContent = "Your referral code could not be loaded.";
+        return;
+      }
+
+      referralLink = `${window.location.origin}/signup.html?ref=${encodeURIComponent(profile.referral_code)}`;
+      referralCodeElement.textContent = profile.referral_code;
+      referralLinkElement.textContent = referralLink;
+
+      const { data: referrals, error: referralsError } = await supabaseClient
+        .from("referrals")
+        .select("referred_user_id, status, created_at")
+        .eq("referrer_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (referralsError) {
+        referralsList.innerHTML = `<div class="empty">Could not load your referrals.</div>`;
+        return;
+      }
+
+      const rows = referrals || [];
+      registeredCount.textContent = rows.filter(row => row.status === "registered" || row.status === "qualified").length;
+      qualifiedCount.textContent = rows.filter(row => row.status === "qualified").length;
+
+      if (!rows.length) {
+        referralsList.innerHTML = `<div class="empty">No referrals yet. Share your link to invite someone.</div>`;
+        return;
+      }
+
+      const ids = rows.map(row => row.referred_user_id);
+      const { data: profiles } = await supabaseClient
+        .from("profiles")
+        .select("id, full_name, username")
+        .in("id", ids);
+
+      const profileMap = new Map((profiles || []).map(profileRow => [profileRow.id, profileRow]));
+
+      referralsList.innerHTML = rows.map(row => {
+        const person = profileMap.get(row.referred_user_id);
+        const name = person?.full_name || (person?.username ? `@${person.username}` : "StudTask user");
+        const status = row.status === "qualified" ? "Qualified" : row.status === "rejected" ? "Rejected" : "Registered";
+        return `<div class="person"><strong>${escapeHtml(name)}</strong><span>${status} • ${formatDate(row.created_at)}</span></div>`;
+      }).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>\"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;"
+      })[character]);
+    }
+
+    copyButton.addEventListener("click", async () => {
+      if (!referralLink) return;
+
+      try {
+        await navigator.clipboard.writeText(referralLink);
+        showMessage("Referral link copied.", "success");
+      } catch {
+        showMessage("Copy failed. Press and hold the link to copy it.", "error");
+      }
+    });
+
+    loadReferralData();
+  </script>
+  <script src="referral.js"></script>
+</body>
+</html>
