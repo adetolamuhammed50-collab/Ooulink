@@ -1,0 +1,134 @@
+name: Integrate task cancellation UI
+
+on:
+  push:
+    paths:
+      - ".github/workflows/integrate-cancellation.yml"
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Integrate cancellation controls
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path("task-details.html")
+          text = path.read_text(encoding="utf-8")
+
+          if "function renderCancellationAction()" in text:
+              raise SystemExit("Cancellation UI is already integrated.")
+
+          marker = "function renderDisputeAction()"
+          marker_index = text.find(marker)
+          if marker_index == -1:
+              raise SystemExit("Could not find the existing dispute action integration point.")
+
+          cancellation_function = r'''function renderCancellationAction() {
+  const box = document.getElementById("actionContent");
+
+  if (!box || !currentTask || !currentUser) {
+    return;
+  }
+
+  const status = normalizeStatus(currentTask.status);
+  const isPoster = currentTask.user_id === currentUser.id;
+  const isRunner = currentTask.runner_id === currentUser.id;
+
+  let allowed = false;
+  let label = "";
+  let note = "";
+
+  if (status === "open" && isPoster) {
+    allowed = true;
+    label = "Cancel Task";
+    note = "Cancelling will return the reserved task funds to your available wallet balance.";
+  } else if ((status === "accepted" || status === "in_progress") && isRunner) {
+    allowed = true;
+    label = "Cancel Task";
+    note = "Cancelling will end the task and return the reserved task funds to the poster.";
+  }
+
+  if (!allowed || document.getElementById("cancelTaskBtn")) {
+    return;
+  }
+
+  const button = document.createElement("button");
+  button.id = "cancelTaskBtn";
+  button.type = "button";
+  button.className = "action-btn danger-btn";
+  button.textContent = "✕ " + label;
+
+  button.addEventListener("click", async () => {
+    const confirmed = window.confirm(
+      "Cancel this task? This action cannot be undone."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const reason = window.prompt(
+      "Optional cancellation reason:",
+      ""
+    );
+
+    button.disabled = true;
+    button.textContent = "Cancelling...";
+
+    try {
+      const { error } = await supabaseClient.rpc("cancel_task", {
+        p_task_id: currentTask.id,
+        p_reason: reason ? reason.trim() || null : null
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      showToast("Task cancelled successfully.");
+      await loadTask();
+    } catch (error) {
+      console.error("Cancel task error:", error);
+      showToast(error?.message || "Could not cancel this task.");
+      button.disabled = false;
+      button.textContent = "✕ " + label;
+    }
+  });
+
+  box.appendChild(button);
+
+  const noteElement = document.createElement("div");
+  noteElement.className = "safety-note";
+  noteElement.textContent = note;
+  box.appendChild(noteElement);
+}
+
+'''
+
+          text = text[:marker_index] + cancellation_function + text[marker_index:]
+
+          old = "renderActions();renderDisputeAction();"
+          new = "renderActions();renderDisputeAction();renderCancellationAction();"
+          if old not in text:
+              raise SystemExit("Could not find the existing task render integration call.")
+          text = text.replace(old, new)
+
+          path.write_text(text, encoding="utf-8")
+
+      - name: Commit integration and remove temporary workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/integrate-cancellation.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add task-details.html .github/workflows/integrate-cancellation.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "Add task cancellation controls"
+          git push
