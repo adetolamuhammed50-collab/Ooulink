@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Verification Status - OOULink</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f5f7fb; color: #172033; font-family: Arial, sans-serif; }
+    .app { width: 100%; max-width: 480px; margin: 0 auto; padding: 18px 15px 35px; }
+    .back { color: #16834b; text-decoration: none; font-size: 14px; font-weight: 700; }
+    h1 { margin: 17px 0 5px; font-size: 26px; }
+    .subtitle { margin: 0 0 17px; color: #687386; font-size: 13px; line-height: 1.5; }
+    .card { background: #fff; border-radius: 18px; padding: 17px; margin-bottom: 14px; box-shadow: 0 4px 16px rgba(0,0,0,.05); }
+    .status-card { text-align: center; }
+    .icon { width: 62px; height: 62px; margin: 0 auto 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; background: #f1f3f6; }
+    .icon.verified { background: #eaf7ef; color: #16834b; }
+    .icon.pending { background: #fff7df; color: #9a6700; }
+    .icon.rejected { background: #fff0f0; color: #c62828; }
+    .status-title { font-size: 20px; font-weight: 900; }
+    .status-text { margin-top: 6px; color: #687386; font-size: 12px; line-height: 1.5; }
+    .pill { display: inline-block; margin-top: 10px; padding: 6px 10px; border-radius: 99px; font-size: 10px; font-weight: 900; background: #f1f3f6; color: #697386; }
+    .pill.verified { background: #eaf7ef; color: #16834b; }
+    .pill.pending { background: #fff7df; color: #9a6700; }
+    .pill.rejected { background: #fff0f0; color: #c62828; }
+    h2 { margin: 0 0 9px; font-size: 16px; }
+    .row { padding: 10px 0; border-top: 1px solid #e8edf2; display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+    .row:first-of-type { border-top: 0; }
+    .label { color: #788497; }
+    .value { font-weight: 800; text-align: right; word-break: break-word; }
+    .note { background: #f7f9fb; border-radius: 11px; padding: 11px; color: #596578; font-size: 11px; line-height: 1.5; }
+    .trust-item { display: flex; gap: 10px; padding: 9px 0; border-top: 1px solid #e8edf2; }
+    .trust-item:first-of-type { border-top: 0; }
+    .check { color: #16834b; font-weight: 900; }
+    .trust-item b { font-size: 12px; }
+    .trust-item p { margin: 3px 0 0; color: #718093; font-size: 10px; line-height: 1.4; }
+    .button { display: block; width: 100%; border: 0; border-radius: 10px; padding: 12px; text-align: center; text-decoration: none; font-size: 12px; font-weight: 800; margin-top: 9px; }
+    .green { background: #16834b; color: #fff; }
+    .blue { background: #eef4ff; color: #2563eb; }
+    .loading, .empty { text-align: center; padding: 35px 10px; color: #687386; font-size: 12px; }
+    .error { background: #fff0f0; color: #c62828; border-radius: 11px; padding: 12px; font-size: 12px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <a class="back" href="profile.html">← Back to Profile</a>
+    <h1>Verification & Trust</h1>
+    <p class="subtitle">See your current verification status and what it means for your profile.</p>
+
+    <div id="content" class="loading">Loading verification status...</div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const content = document.getElementById("content");
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>\"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;"
+      }[character]));
+    }
+
+    function formatDate(value) {
+      if (!value) return "Not available";
+      return new Date(value).toLocaleString();
+    }
+
+    function renderStatus(record) {
+      if (!record) {
+        return {
+          icon: "🛡️",
+          className: "",
+          title: "Not verified",
+          text: "You have not submitted a verification request yet.",
+          pill: "NOT VERIFIED"
+        };
+      }
+
+      if (record.status === "verified") {
+        return {
+          icon: "✓",
+          className: "verified",
+          title: "Profile verified",
+          text: "Your student identity verification has been approved by an administrator.",
+          pill: "VERIFIED"
+        };
+      }
+
+      if (record.status === "pending") {
+        return {
+          icon: "⏳",
+          className: "pending",
+          title: "Verification under review",
+          text: "Your verification request has been submitted and is waiting for administrator review.",
+          pill: "PENDING REVIEW"
+        };
+      }
+
+      return {
+        icon: "!",
+        className: "rejected",
+        title: "Verification needs attention",
+        text: "Your previous verification request was rejected. Review the administrator note and submit again if needed.",
+        pill: "REJECTED"
+      };
+    }
+
+    async function load() {
+      const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+
+      if (userError || !userData.user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const { data: record, error } = await supabaseClient
+        .from("profile_verifications")
+        .select("status, submitted_at, reviewed_at, matric_number, course, reviewer_note")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
+
+      if (error) {
+        content.className = "error";
+        content.textContent = error.message || "Could not load verification status.";
+        return;
+      }
+
+      const status = renderStatus(record);
+      const profile = await supabaseClient
+        .from("profiles")
+        .select("full_name, username")
+        .eq("id", userData.user.id)
+        .maybeSingle();
+
+      const name = profile.data?.full_name || profile.data?.username || "Your profile";
+      const note = record?.reviewer_note || "No administrator note has been added.";
+
+      content.className = "";
+      content.innerHTML = `
+        <section class="card status-card">
+          <div class="icon ${status.className}">${status.icon}</div>
+          <div class="status-title">${status.title}</div>
+          <div class="status-text">${status.text}</div>
+          <div class="pill ${status.className}">${status.pill}</div>
+        </section>
+
+        <section class="card">
+          <h2>Verification Details</h2>
+          <div class="row"><span class="label">Profile</span><span class="value">${escapeHtml(name)}</span></div>
+          <div class="row"><span class="label">Matric number</span><span class="value">${escapeHtml(record?.matric_number || "Not submitted")}</span></div>
+          <div class="row"><span class="label">Course</span><span class="value">${escapeHtml(record?.course || "Not submitted")}</span></div>
+          <div class="row"><span class="label">Submitted</span><span class="value">${formatDate(record?.submitted_at)}</span></div>
+          <div class="row"><span class="label">Reviewed</span><span class="value">${formatDate(record?.reviewed_at)}</span></div>
+        </section>
+
+        <section class="card">
+          <h2>Administrator Note</h2>
+          <div class="note">${escapeHtml(note)}</div>
+        </section>
+
+        <section class="card">
+          <h2>Trust Signals</h2>
+          <div class="trust-item"><span class="check">✓</span><div><b>Student identity review</b><p>ID card and selfie information can be reviewed by administrators.</p></div></div>
+          <div class="trust-item"><span class="check">✓</span><div><b>Verification status is visible</b><p>Your profile can clearly show whether verification is pending, approved, rejected, or not submitted.</p></div></div>
+          <div class="trust-item"><span class="check">✓</span><div><b>Reviews and reputation</b><p>Completed tasks and reviews provide additional trust information alongside verification.</p></div></div>
+        </section>
+
+        <a class="button green" href="profile.html">← RETURN TO PROFILE</a>
+        ${record?.status === "rejected" || !record ? '<a class="button blue" href="profile.html">🛡️ SUBMIT / UPDATE VERIFICATION</a>' : ''}
+      `;
+    }
+
+    load();
+  </script>
+</body>
+</html>
