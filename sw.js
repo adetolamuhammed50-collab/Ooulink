@@ -1,4 +1,4 @@
-const CACHE_NAME="studtask-v8",THIRD_PARTY_CACHE="studtask-third-party-v2",APP_SHELL=["./","./index.html","./offline.html","./manifest.json","./logo.svg","./icon.svg","./brand.js","./sw.js"];
+const CACHE_NAME="studtask-v9",THIRD_PARTY_CACHE="studtask-third-party-v2",APP_SHELL=["./","./index.html","./offline.html","./manifest.json","./logo.svg","./icon.svg","./brand.js","./sw.js"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(APP_SHELL)));self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME&&k!==THIRD_PARTY_CACHE).map(k=>caches.delete(k)))));self.clients.claim()});
 async function updateCache(r){try{const x=await fetch(r);if(x.ok&&new URL(r.url).origin===self.location.origin){const c=await caches.open(CACHE_NAME);await c.put(r,x.clone())}return x}catch{return null}}
