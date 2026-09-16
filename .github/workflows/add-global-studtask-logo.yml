@@ -1,0 +1,45 @@
+name: Add global StudTask logo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inject-logo:
+    if: contains(github.event.head_commit.message, 'Add shared StudTask logo header')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add shared logo script to every HTML page
+        shell: python
+        run: |
+          from pathlib import Path
+
+          for path in Path('.').glob('*.html'):
+              text = path.read_text(encoding='utf-8')
+              if 'src="brand.js"' in text:
+                  continue
+              marker = '</body>'
+              if marker not in text:
+                  continue
+              text = text.replace(marker, '  <script src="brand.js"></script>\n' + marker, 1)
+              path.write_text(text, encoding='utf-8')
+
+      - name: Commit logo integration
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add '*.html'
+          if git diff --cached --quiet; then
+            echo "No HTML files needed updating."
+            exit 0
+          fi
+          git commit -m "Add StudTask logo to every page"
+          git push
