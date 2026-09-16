@@ -1,0 +1,29 @@
+name: Integrate Onboarding
+on:
+  push:
+    branches: [main]
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Integrate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          tag='<script src="onboarding.js"></script>'
+          if tag not in s:
+              s=s.replace('</body>',tag+'</body>')
+              p.write_text(s)
+          PY
+      - name: Commit integration and remove workflow
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add index.html
+          git commit -m "Integrate improved onboarding" || true
+          git rm .github/workflows/integrate-onboarding.yml || true
+          git commit -m "Remove temporary onboarding workflow" || true
+          git push
