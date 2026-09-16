@@ -51,6 +51,7 @@ main{padding:14px 14px 104px}.hidden{display:none!important}
 <section id="errorState" class="error-card hidden"><div class="error-icon">⚠️</div><h2>Something went wrong</h2><p id="errorMessage">We couldn't load this task.</p><button class="primary-btn" id="retryBtn">Try Again</button></section>
 <section id="notFoundState" class="not-found-card hidden"><div class="not-found-icon">🔎</div><h2>Task not found</h2><p>This task may have been removed or the link is no longer valid.</p><button class="primary-btn" id="backHomeBtn">Go Home</button></section>
 <div id="contentState" class="hidden">
+<section class="section" data-saved-task-section style="margin-bottom:12px"><button class="action-btn secondary-btn" type="button" id="saveTaskBtn" data-saved-task-button>🔖 Save Task</button><div class="safety-note">Save this task to find it quickly later.</div></section>
 <section class="hero"><div class="hero-top"><span class="category" id="taskCategory">Task</span><span class="status status-default" id="taskStatus">Loading</span></div><h1 id="taskTitle">Task title</h1><div class="description" id="taskDescription"></div></section>
 <section class="info-grid"><div class="info-box"><div class="info-label">Budget</div><div class="info-value money" id="taskBudget">₦0</div></div><div class="info-box"><div class="info-label">Location</div><div class="info-value" id="taskLocation">—</div></div><div class="info-box"><div class="info-label">Deadline</div><div class="info-value" id="taskDeadline">—</div></div><div class="info-box"><div class="info-label">Posted</div><div class="info-value" id="taskCreated">—</div></div></section>
 <section class="section"><div class="section-title">👤 Poster</div><div class="poster-card"><div class="avatar" id="posterAvatar">?</div><div class="person-info"><div class="person-name" id="posterName">Loading...</div><div class="person-meta" id="posterLocation">Location unavailable</div><div class="person-stats"><span class="stat" id="posterXp">XP 0</span><span class="stat" id="posterRep">Reputation 0</span></div></div></div></section>
@@ -502,14 +503,47 @@ function renderTrustAction() {
     box.appendChild(wrap);
 }
 
-async function loadTask(){
+async function setupSavedTaskButton(){
+    const button = document.getElementById("saveTaskBtn");
+    if (!button || !currentUser || !currentTask) return;
+    const { data, error } = await supabaseClient.rpc("is_task_saved", { p_task_id: currentTask.id });
+    if (error) {
+      console.error("Saved task check error:", error);
+      return;
+    }
+    let saved = data === true;
+    const update = () => {
+      button.textContent = saved ? "🔖 Saved Task" : "🔖 Save Task";
+      button.classList.toggle("saved", saved);
+    };
+    update();
+    button.onclick = async () => {
+      button.disabled = true;
+      try {
+        const { error: actionError } = saved
+          ? await supabaseClient.rpc("unsave_task", { p_task_id: currentTask.id })
+          : await supabaseClient.rpc("save_task", { p_task_id: currentTask.id });
+        if (actionError) throw actionError;
+        saved = !saved;
+        update();
+        showToast(saved ? "Task saved." : "Task removed from Saved.");
+      } catch (error) {
+        console.error("Saved task action error:", error);
+        showToast(error?.message || "Could not update saved task.");
+      } finally {
+        button.disabled = false;
+      }
+    };
+  }
+
+  async function loadTask(){
   const taskId=getTaskId();if(!taskId){showNotFound();return}
   showLoading(true);isLoading=true;
   try{
     const{data:userData,error:userError}=await supabaseClient.auth.getUser();if(userError)console.warn("Auth check:",userError);currentUser=userData?.user||null;
     const{data:task,error:taskError}=await supabaseClient.from("tasks").select(`id,user_id,title,description,category,location,budget,deadline,status,runner_id,created_at`).eq("id",taskId).maybeSingle();if(taskError)throw taskError;if(!task){showNotFound();return}
     currentTask=task;ownerProfile=null;runnerProfile=null;taskAttachments=[];taskApplications=[];applicantProfiles={};myApplication=null;
-    renderTask();renderRunner();renderTimeline();renderActions();renderDisputeAction();renderCancellationAction();renderTrustAction();showContent();
+    renderTask();renderRunner();renderTimeline();renderActions();setupSavedTaskButton();renderDisputeAction();renderCancellationAction();renderTrustAction();showContent();
     const myApplicationPromise=loadMyApplication(task.id);
     const applicationsPromise=loadTaskApplications(task.id);
     const profilesPromise=(async()=>{const profileIds=[task.user_id,task.runner_id].filter(Boolean);if(!profileIds.length)return;const{data:profiles,error:profileError}=await supabaseClient.from("profiles").select(`id,username,full_name,location,avatar_url,xp,reputation`).in("id",profileIds);if(profileError){console.warn("Profile load error:",profileError);return}ownerProfile=profiles?.find(profile=>profile.id===task.user_id)||null;runnerProfile=profiles?.find(profile=>profile.id===task.runner_id)||null})();
