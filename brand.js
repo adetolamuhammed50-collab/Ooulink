@@ -1,6 +1,7 @@
 (() => {
   const injectStudTaskBrand = () => {
     if (document.querySelector(".studtask-global-brand")) return;
+    if (document.querySelector('img[src="logo.svg"]')) return;
 
     const brand = document.createElement("a");
     brand.className = "studtask-global-brand";
@@ -13,7 +14,7 @@
       .studtask-global-brand {
         position: fixed;
         top: max(10px, env(safe-area-inset-top));
-        left: 10px;
+        right: 10px;
         z-index: 99999;
         display: inline-flex;
         align-items: center;
@@ -36,7 +37,7 @@
       }
       @media (min-width: 600px) {
         .studtask-global-brand {
-          left: 18px;
+          right: 18px;
           top: max(14px, env(safe-area-inset-top));
           width: 150px;
         }
