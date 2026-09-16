@@ -1,4 +1,20 @@
 (() => {
+  const warmSupabaseConnection = () => {
+    if (!document.head.querySelector('link[data-studtask-preconnect="supabase"]')) {
+      const link = document.createElement("link");
+      link.rel = "preconnect";
+      link.href = "https://dthvdxgxesomltlruogp.supabase.co";
+      link.setAttribute("data-studtask-preconnect", "supabase");
+      document.head.appendChild(link);
+    }
+  };
+
+  const registerServiceWorker = () => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(() => {});
+    }
+  };
+
   const injectStudTaskBrand = () => {
     if (document.querySelector(".studtask-global-brand")) return;
     if (document.querySelector('img[src="logo.svg"]')) return;
@@ -47,6 +63,9 @@
     document.head.appendChild(style);
     document.body.appendChild(brand);
   };
+
+  warmSupabaseConnection();
+  registerServiceWorker();
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", injectStudTaskBrand, { once: true });
