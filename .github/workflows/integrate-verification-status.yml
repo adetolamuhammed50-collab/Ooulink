@@ -1,0 +1,50 @@
+name: Integrate Verification Status
+
+on:
+  push:
+    paths:
+      - ".github/verification-status-trigger"
+      - ".github/workflows/integrate-verification-status.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Add verification status link
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("profile.html")
+          text = path.read_text(encoding="utf-8")
+          link = '<a href="verification-status.html" class="btn verify" style="display:block;text-align:center;margin-top:9px">🛡️ VERIFICATION & TRUST</a>'
+
+          if 'href="verification-status.html"' not in text:
+              marker = '<button class="btn verify" style="margin-top:9px" onclick="showVerification()">'
+              if marker not in text:
+                  raise SystemExit("Could not find the existing verification button in profile.html")
+              text = text.replace(marker, link + marker, 1)
+              path.write_text(text, encoding="utf-8")
+          PY
+
+      - name: Commit profile integration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add profile.html
+          git diff --cached --quiet || git commit -m "Integrate verification status into profile"
+          git push
+
+      - name: Remove temporary workflow and trigger file
+        run: |
+          rm -f .github/verification-status-trigger .github/workflows/integrate-verification-status.yml
+          git add -A
+          git diff --cached --quiet || git commit -m "Remove temporary verification integration workflow"
+          git push
