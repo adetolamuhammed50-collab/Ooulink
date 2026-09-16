@@ -536,7 +536,24 @@ async function setupSavedTaskButton(){
     };
   }
 
-  async function loadTask(){
+  
+/* recently-viewed-integration */
+function recordRecentlyViewedTask(taskId) {
+    if (!taskId) return;
+    const key = "studtask_recent_tasks";
+    const maxItems = 20;
+    try {
+        const saved = JSON.parse(localStorage.getItem(key) || "[]");
+        const ids = Array.isArray(saved) ? saved.filter(item => typeof item === "string") : [];
+        const updated = [taskId, ...ids.filter(id => id !== taskId)].slice(0, maxItems);
+        localStorage.setItem(key, JSON.stringify(updated));
+    } catch (error) {
+        console.warn("Could not save recently viewed task.", error);
+    }
+}
+
+async function loadTask(){
+  recordRecentlyViewedTask(taskId);
   const taskId=getTaskId();if(!taskId){showNotFound();return}
   showLoading(true);isLoading=true;
   try{
