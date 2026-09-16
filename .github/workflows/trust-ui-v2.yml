@@ -2,8 +2,8 @@ name: Integrate Trust UI v2
 
 on:
   push:
-    branches: [main]
-    paths: [.trust-ui-v2-trigger]
+    paths:
+      - .trust-ui-v2-trigger
 
 permissions:
   contents: write
@@ -16,75 +16,66 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Integrate trust UI
-        shell: python
+        shell: bash
         run: |
+          python3 <<'PY'
           from pathlib import Path
 
           profile = Path("profile.html")
           text = profile.read_text(encoding="utf-8")
           if 'data-trust-link="profile-trust-link"' not in text:
               anchor = '<div class="section"><div class="title">🏆 Achievements</div>'
-              replacement = '<a class="btn verify" data-trust-link="profile-trust-link" href="trust.html">🛡️ VIEW TRUST & REPUTATION</a>' + anchor
               if anchor not in text:
                   raise SystemExit("Profile trust anchor not found")
-              text = text.replace(anchor, replacement, 1)
-              profile.write_text(text, encoding="utf-8")
+              replacement = '<a class="btn verify" data-trust-link="profile-trust-link" href="trust.html">🛡️ VIEW TRUST & REPUTATION</a>' + anchor
+              profile.write_text(text.replace(anchor, replacement, 1), encoding="utf-8")
 
           task = Path("task-details.html")
           text = task.read_text(encoding="utf-8")
           if 'function renderTrustAction()' not in text:
               anchor = 'async function loadTask(){'
-              function = '''function renderTrustAction() {
-  const box = document.getElementById("actionContent");
-  if (!box || !currentTask || !currentUser) return;
-
-  const posterId = currentTask.user_id;
-  const runnerId = currentTask.runner_id;
-  if (!posterId && !runnerId) return;
-
-  const wrap = document.createElement("div");
-  wrap.className = "trust-action";
-  wrap.style.cssText = "margin-top:10px;padding:12px;border:1px solid #e0eee5;border-radius:13px;background:#f8fbf9";
-
-  const title = document.createElement("div");
-  title.textContent = "🛡️ Trust & Reputation";
-  title.style.cssText = "font-size:12px;font-weight:800;color:#172033;margin-bottom:8px";
-  wrap.appendChild(title);
-
-  const addLink = (label, userId) => {
-    if (!userId) return;
-    const link = document.createElement("a");
-    link.href = "trust.html?user=" + encodeURIComponent(userId);
-    link.textContent = label;
-    link.className = "action-btn secondary-btn";
-    link.style.cssText = "display:block;text-align:center;text-decoration:none";
-    wrap.appendChild(link);
-  };
-
-  addLink("View Poster Trust Profile", posterId);
-  if (runnerId) addLink("View Runner Trust Profile", runnerId);
-  box.appendChild(wrap);
-}
-
-'''
               if anchor not in text:
                   raise SystemExit("Task load anchor not found")
-              text = text.replace(anchor, function + anchor, 1)
+              function = '''function renderTrustAction() {
+              const box = document.getElementById("actionContent");
+              if (!box || !currentTask || !currentUser) return;
+              const posterId = currentTask.user_id;
+              const runnerId = currentTask.runner_id;
+              if (!posterId && !runnerId) return;
+              const wrap = document.createElement("div");
+              wrap.className = "trust-action";
+              wrap.style.cssText = "margin-top:10px;padding:12px;border:1px solid #e0eee5;border-radius:13px;background:#f8fbf9";
+              const title = document.createElement("div");
+              title.textContent = "🛡️ Trust & Reputation";
+              title.style.cssText = "font-size:12px;font-weight:800;color:#172033;margin-bottom:8px";
+              wrap.appendChild(title);
+              const addLink = (label, userId) => {
+                if (!userId) return;
+                const link = document.createElement("a");
+                link.href = "trust.html?user=" + encodeURIComponent(userId);
+                link.textContent = label;
+                link.className = "action-btn secondary-btn";
+                link.style.cssText = "display:block;text-align:center;text-decoration:none";
+                wrap.appendChild(link);
+              };
+              addLink("View Poster Trust Profile", posterId);
+              if (runnerId) addLink("View Runner Trust Profile", runnerId);
+              box.appendChild(wrap);
+          }
 
+          '''
+              text = text.replace(anchor, function + anchor, 1)
           text = text.replace('renderActions();renderDisputeAction();renderCancellationAction();', 'renderActions();renderDisputeAction();renderCancellationAction();renderTrustAction();')
           text = text.replace('renderActions();renderDisputeAction();renderAttachments()', 'renderActions();renderDisputeAction();renderTrustAction();renderAttachments()')
           task.write_text(text, encoding="utf-8")
+          PY
 
-      - name: Commit integration and clean up
+      - name: Commit changes
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .trust-ui-v2-trigger .github/workflows/trust-ui-v2.yml
           git add profile.html task-details.html
-          if git diff --cached --quiet; then
-            echo "No integration changes needed"
-            exit 0
-          fi
+          git diff --cached --quiet && exit 0
           git commit -m "Integrate Trust & Reputation into profile and task details"
           git push
