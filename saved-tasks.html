@@ -23,8 +23,8 @@ main{padding:14px 14px 100px}.intro{margin-bottom:12px;color:var(--muted);font-s
 </div>
 <script>
 const SUPABASE_URL="https://dthvdxgxesomltlruogp.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_YOUR_EXISTING_KEY";
-const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const SUPABASE_KEY="sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const list=document.getElementById("list");
 document.getElementById("back").onclick=()=>history.length>1?history.back():location.href="index.html";
 function esc(value){return String(value??"").replace(/[&<>'"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[char]))}
