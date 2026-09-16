@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>For You - StudTask</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f7f6;color:#17221c;padding-bottom:78px}
+a,button{touch-action:manipulation}a,button{transition:transform .16s ease,opacity .16s ease}a:active,button:active{transform:scale(.96)}
+.wrap{width:100%;max-width:480px;margin:auto;padding:16px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:15px}.back{color:#16834b;text-decoration:none;font-size:14px;font-weight:800}.title{font-size:25px;font-weight:800}.sub{font-size:12px;color:#718078;margin-top:4px}
+.card{background:#fff;border:1px solid #e3e9e5;border-radius:17px;padding:15px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.035)}
+.info{background:#eaf7ef;border-color:#d8ecdf;color:#24633f;font-size:11px;line-height:1.5}.info b{display:block;font-size:13px;margin-bottom:4px}
+.tasktop{display:flex;justify-content:space-between;gap:8px}.badge{font-size:10px;background:#e8f6ee;color:#16834b;border-radius:20px;padding:5px 8px;font-weight:800}.budget{font-size:15px;color:#16834b;font-weight:800}.task h3{font-size:16px;margin:10px 0 6px}.desc{font-size:12px;color:#68736d;line-height:1.45;margin:0 0 10px}.meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px}.meta span{font-size:10px;color:#68736d;background:#f3f6f4;border-radius:8px;padding:6px 7px}.reason{font-size:10px;color:#5e6b64;background:#f7f9f8;border-radius:9px;padding:8px;margin-bottom:10px}.view{display:block;text-align:center;text-decoration:none;width:100%;border:0;background:#16834b;color:#fff;padding:11px;border-radius:10px;font-size:12px;font-weight:800}.empty{text-align:center;background:#fff;border:1px solid #e3e9e5;border-radius:17px;padding:32px 18px;color:#68736d;font-size:12px}.empty b{display:block;color:#26332b;font-size:16px;margin-bottom:7px}.empty a{display:block;margin-top:14px;background:#16834b;color:#fff;padding:11px;border-radius:10px;text-decoration:none;font-weight:800}.loading{text-align:center;padding:45px;color:#718078;font-size:12px}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid #e1e7e3;height:70px;display:flex;justify-content:center;z-index:20}.navin{width:100%;max-width:480px;display:flex;justify-content:space-around;align-items:center;padding:5px 6px}.navin a{flex:1;max-width:92px;text-decoration:none;color:#69736d;font-size:10px;text-align:center;padding:6px 4px;border-radius:13px;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700}.navin a span{width:34px;height:28px;display:grid;place-items:center;font-size:19px;border-radius:10px}.navin a.active{color:#16834b;background:#f0f7f3}.navin a.active span{background:#e1f3e9}
+</style>
+</head>
+<body>
+<main class="wrap">
+<div class="top"><a class="back" href="find-tasks.html">← Find Tasks</a><div><div class="title">For You</div><div class="sub">Tasks matched to your StudTask profile</div></div></div>
+<div class="card info"><b>How recommendations work</b>We prioritize tasks that match your university, campus, location and categories you have saved before. Only current, approved, open tasks are shown.</div>
+<div id="content"><div class="loading">Finding tasks for you...</div></div>
+</main>
+<nav aria-label="Main navigation"><div class="navin"><a href="index.html"><span>⌂</span>Home</a><a href="my-tasks.html"><span>✓</span>My Tasks</a><a href="post-task.html"><span>＋</span>Post</a><a href="alerts.html"><span>🔔</span>Alerts</a><a href="profile.html"><span>♙</span>Profile</a></div></nav>
+<script>
+const SUPABASE_URL="https://dthvdxgxesomltlruogp.supabase.co";
+const SUPABASE_KEY="sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const content=document.getElementById("content");
+function esc(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function money(value){return "₦"+Number(value||0).toLocaleString();}
+function deadline(value){const d=new Date(value);return d.toLocaleDateString(undefined,{day:"numeric",month:"short"})+" • "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});}
+function reason(parts){return parts.filter(Boolean).join(" • ");}
+async function load(){
+ try{
+  const {data:userData,error:userError}=await supabaseClient.auth.getUser();
+  if(userError||!userData?.user){content.innerHTML='<div class="empty"><b>Log in to get recommendations</b>Your profile helps StudTask find relevant tasks for you.<a href="login.html">Log In</a></div>';return;}
+  const userId=userData.user.id;
+  const [{data:profile,error:profileError},{data:saved,error:savedError}]=await Promise.all([
+   supabaseClient.from("profiles").select("university_id,campus_id,location").eq("id",userId).maybeSingle(),
+   supabaseClient.from("saved_tasks").select("task_id,tasks(category)").eq("user_id",userId)
+  ]);
+  if(profileError)throw profileError;
+  if(savedError)throw savedError;
+  const categoryScores={};
+  (saved||[]).forEach(row=>{const category=row.tasks?.category;if(category)categoryScores[category]=(categoryScores[category]||0)+1;});
+  const {data:tasks,error:taskError}=await supabaseClient.from("tasks").select("id,title,description,category,location,budget,deadline,university_id,campus_id").eq("status","open").eq("moderation_status","approved").gte("deadline",new Date().toISOString()).order("created_at",{ascending:false}).limit(60);
+  if(taskError)throw taskError;
+  const scored=(tasks||[]).map(task=>{
+   let score=0;const reasons=[];
+   if(profile?.university_id&&task.university_id===profile.university_id){score+=40;reasons.push("Your university");}
+   if(profile?.campus_id&&task.campus_id===profile.campus_id){score+=30;reasons.push("Your campus");}
+   if(profile?.location&&task.location&&task.location.trim().toLowerCase()===profile.location.trim().toLowerCase()){score+=15;reasons.push("Your location");}
+   const categoryScore=categoryScores[task.category]||0;
+   if(categoryScore){score+=Math.min(15,categoryScore*5);reasons.push("Similar to saved tasks");}
+   return {...task,score,reasons};
+  }).filter(task=>task.score>0).sort((a,b)=>b.score-a.score||new Date(a.deadline)-new Date(b.deadline)).slice(0,12);
+  if(!scored.length){content.innerHTML='<div class="empty"><b>No strong matches yet</b>Complete your university, campus and location details, or save a few tasks so recommendations can learn what interests you.<a href="find-tasks.html">Browse All Tasks</a></div>';return;}
+  content.innerHTML=scored.map(task=>`<article class="card"><div class="tasktop"><span class="badge">${esc(task.category||"Other")}</span><span class="budget">${money(task.budget)}</span></div><h3>${esc(task.title)}</h3><p class="desc">${esc(task.description||"")}</p><div class="meta"><span>📍 ${esc(task.location||"Location not set")}</span><span>⏰ ${esc(deadline(task.deadline))}</span></div><div class="reason">Recommended because: ${esc(reason(task.reasons))}</div><a class="view" href="task-details.html?id=${encodeURIComponent(task.id)}">View Task</a></article>`).join("");
+ }catch(error){console.error(error);content.innerHTML=`<div class="empty"><b>Could not load recommendations</b><span>${esc(error.message||"Please try again.")}</span><a href="find-tasks.html">Browse All Tasks</a></div>`;}
+}
+load();
+</script>
+</body>
+</html>
