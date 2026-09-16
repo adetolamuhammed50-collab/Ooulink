@@ -370,6 +370,36 @@ async function loadTaskApplications(taskId){
   const{data:profiles,error:profileError}=await supabaseClient.from("profiles").select(`id,username,full_name,location,avatar_url,xp,reputation`).in("id",runnerIds);if(profileError){console.warn("Applicant profile load error:",profileError);return}(profiles||[]).forEach(profile=>{applicantProfiles[profile.id]=profile});
 }
 
+
+
+function renderDisputeAction() {
+  const box = document.getElementById("actionContent");
+  if (!box || !currentTask || !currentUser) return;
+
+  const status = normalizeStatus(currentTask.status);
+  const isParticipant = currentTask.user_id === currentUser.id || currentTask.runner_id === currentUser.id;
+  const canDispute = isParticipant && ["accepted", "in_progress", "awaiting_verification"].includes(status);
+
+  if (!canDispute) return;
+  if (document.getElementById("openDisputeBtn")) return;
+
+  const button = document.createElement("button");
+  button.id = "openDisputeBtn";
+  button.className = "action-btn danger-btn";
+  button.type = "button";
+  button.textContent = "⚠️ Open Dispute";
+  button.addEventListener("click", () => {
+    window.location.href = `disputes.html?task=${encodeURIComponent(currentTask.id)}`;
+  });
+
+  const note = document.createElement("div");
+  note.className = "safety-note";
+  note.textContent = "Use a dispute when there is a serious task or payment disagreement that cannot be resolved normally.";
+
+  box.appendChild(button);
+  box.appendChild(note);
+}
+
 async function loadTask(){
   const taskId=getTaskId();if(!taskId){showNotFound();return}
   showLoading(true);isLoading=true;
@@ -377,13 +407,13 @@ async function loadTask(){
     const{data:userData,error:userError}=await supabaseClient.auth.getUser();if(userError)console.warn("Auth check:",userError);currentUser=userData?.user||null;
     const{data:task,error:taskError}=await supabaseClient.from("tasks").select(`id,user_id,title,description,category,location,budget,deadline,status,runner_id,created_at`).eq("id",taskId).maybeSingle();if(taskError)throw taskError;if(!task){showNotFound();return}
     currentTask=task;ownerProfile=null;runnerProfile=null;taskAttachments=[];taskApplications=[];applicantProfiles={};myApplication=null;
-    renderTask();renderRunner();renderTimeline();renderActions();showContent();
+    renderTask();renderRunner();renderTimeline();renderActions();renderDisputeAction();showContent();
     const myApplicationPromise=loadMyApplication(task.id);
     const applicationsPromise=loadTaskApplications(task.id);
     const profilesPromise=(async()=>{const profileIds=[task.user_id,task.runner_id].filter(Boolean);if(!profileIds.length)return;const{data:profiles,error:profileError}=await supabaseClient.from("profiles").select(`id,username,full_name,location,avatar_url,xp,reputation`).in("id",profileIds);if(profileError){console.warn("Profile load error:",profileError);return}ownerProfile=profiles?.find(profile=>profile.id===task.user_id)||null;runnerProfile=profiles?.find(profile=>profile.id===task.runner_id)||null})();
     const attachmentsPromise=(async()=>{const{data:attachments,error:attachmentError}=await supabaseClient.from("task_attachments").select(`id,task_id,user_id,file_name,file_path,file_size,mime_type,created_at`).eq("task_id",task.id).order("created_at",{ascending:true});if(attachmentError){console.warn("Attachment load error:",attachmentError);return}taskAttachments=attachments||[]})();
     await Promise.all([myApplicationPromise,applicationsPromise,profilesPromise,attachmentsPromise]);
-    renderPoster();renderRunner();renderActions();renderAttachments().catch(error=>console.warn("Attachment rendering error:",error));
+    renderPoster();renderRunner();renderActions();renderDisputeAction();renderAttachments().catch(error=>console.warn("Attachment rendering error:",error));
   }catch(error){console.error("Task details error:",error);showError(error?.message||"We couldn't load this task. Please try again.")}finally{isLoading=false}
 }
 
