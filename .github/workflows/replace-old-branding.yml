@@ -22,12 +22,15 @@ jobs:
         run: |
           set -e
 
-          files=$(git grep -Il -e 'OOULink' -e 'Ooulink' -e 'ooulink' -e 'OOULINK' || true)
+          files=$(git grep -Il -e 'OOULink' -e 'Ooulink' -e 'ooulink' -e 'OOULINK' -- ':!.github/workflows/replace-old-branding.yml' || true)
 
           if [ -z "$files" ]; then
             echo "No old branding references found."
             exit 0
           fi
+
+          echo "Files to update:"
+          printf '%s\n' "$files"
 
           while IFS= read -r file; do
             [ -z "$file" ] && continue
