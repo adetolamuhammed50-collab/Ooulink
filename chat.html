@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Chat - OOULink</title>
+  <title>Chat - StudTask</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; }
@@ -218,11 +218,11 @@
       if (normalized.length > 1000) return { allowed: false, reason: "Message is too long. Please keep it under 1,000 characters." };
       for (const word of blockedWords) {
         if (new RegExp(`(^|[^a-z])${word}([^a-z]|$)`, "i").test(normalized)) {
-          return { allowed: false, reason: "Please keep the chat respectful. That language isn't allowed on OOULink." };
+          return { allowed: false, reason: "Please keep the chat respectful. That language isn't allowed on StudTask." };
         }
       }
       if (containsContactInfo(text)) {
-        return { allowed: false, reason: "For your safety, phone numbers, bank/account numbers and WhatsApp/contact details cannot be shared in OOULink chat." };
+        return { allowed: false, reason: "For your safety, phone numbers, bank/account numbers and WhatsApp/contact details cannot be shared in StudTask chat." };
       }
       return { allowed: true, reason: "" };
     }
@@ -242,7 +242,7 @@
       moderationBlocked = true;
       const temporary = details.ban_type === "temporary";
       const until = temporary && details.banned_until ? new Date(details.banned_until).toLocaleString() : null;
-      document.body.innerHTML = `<div class="restricted"><div class="restricted-box"><div class="restricted-icon">🚫</div><h2>OOULink Account Restricted</h2><p>Your account is currently ${temporary ? "temporarily" : "permanently"} restricted and cannot use chat.</p>${until ? `<p><strong>Restriction ends:</strong><br>${escapeHTML(until)}</p>` : ""}${details.ban_reason ? `<p><strong>Reason:</strong><br>${escapeHTML(details.ban_reason)}</p>` : ""}<button class="logout-btn" onclick="logoutModerated()">LOG OUT</button></div></div>`;
+      document.body.innerHTML = `<div class="restricted"><div class="restricted-box"><div class="restricted-icon">🚫</div><h2>StudTask Account Restricted</h2><p>Your account is currently ${temporary ? "temporarily" : "permanently"} restricted and cannot use chat.</p>${until ? `<p><strong>Restriction ends:</strong><br>${escapeHTML(until)}</p>` : ""}${details.ban_reason ? `<p><strong>Reason:</strong><br>${escapeHTML(details.ban_reason)}</p>` : ""}<button class="logout-btn" onclick="logoutModerated()">LOG OUT</button></div></div>`;
     }
 
     async function logoutModerated() {
@@ -281,7 +281,7 @@
 
     async function loadOtherUserProfile() {
       const { data } = await supabaseClient.from("profiles").select("id,full_name,username,avatar_url").eq("id", otherUserId).maybeSingle();
-      const name = data?.full_name || data?.username || "OOULink User";
+      const name = data?.full_name || data?.username || "StudTask User";
       personName.textContent = name;
       personHandle.textContent = data?.username ? "@" + data.username : "Tap to view profile";
       chatPerson.href = "profile.html?id=" + encodeURIComponent(otherUserId);
@@ -436,7 +436,7 @@
 
     function startRealtime() {
       if (!currentTask || !currentUser || realtimeChannel) return;
-      realtimeChannel = supabaseClient.channel("ooulink-chat-" + currentTask.id)
+      realtimeChannel = supabaseClient.channel("StudTask-chat-" + currentTask.id)
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `task_id=eq.${currentTask.id}` }, async payload => {
           const message = payload.new;
           if (!message || message.task_id !== currentTask.id) return;
@@ -557,8 +557,8 @@
         const failed = { ...pendingMessage, status: "failed", retryText: text };
         await renderMessage(failed, { attachments: [] });
         const errorText = error?.message || "Message could not be sent. Please try again.";
-        if (errorText.includes("OOULINK_RATE_LIMITED")) showBlockedMessage(errorText.split("OOULINK_RATE_LIMITED:")[1] || "You are sending messages too quickly.");
-        else if (errorText.includes("OOULINK_ACCOUNT_BANNED")) {
+        if (errorText.includes("STUDTASK_RATE_LIMITED")) showBlockedMessage(errorText.split("STUDTASK_RATE_LIMITED:")[1] || "You are sending messages too quickly.");
+        else if (errorText.includes("STUDTASK_ACCOUNT_BANNED")) {
           showBlockedMessage("Your account is currently restricted.");
           await checkModeration();
         } else showBlockedMessage(errorText);
