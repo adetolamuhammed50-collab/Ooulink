@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Recently Viewed — StudTask</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f7f6;color:#17221c;padding-bottom:78px}
+button,a{font:inherit}
+.wrap,main{width:100%;max-width:480px;margin:auto}
+header{background:#fff;border-bottom:1px solid #e5eae7;padding:14px 16px;position:sticky;top:0;z-index:20}
+.head{display:flex;align-items:center;gap:12px}.back{color:#16834b;text-decoration:none;font-weight:800;font-size:14px;padding:7px 4px}.logo{font-size:21px;font-weight:800;color:#16834b}.sub{font-size:12px;color:#777;margin-top:2px}
+main{padding:15px 14px 22px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}.count{font-size:13px;color:#66716b;font-weight:700}.clear{border:1px solid #dce3df;background:#fff;border-radius:10px;padding:8px 10px;font-size:11px;font-weight:800;color:#d33;cursor:pointer}
+.task{background:#fff;border:1px solid #e4e9e6;border-radius:16px;padding:15px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.035)}.tasktop{display:flex;justify-content:space-between;gap:8px}.badge{font-size:10px;background:#e8f6ee;color:#16834b;border-radius:20px;padding:5px 8px;font-weight:800}.budget{font-weight:800;color:#16834b;font-size:15px}.task h3{font-size:16px;margin:10px 0 6px}.desc{font-size:12px;color:#68736d;line-height:1.45;margin:0 0 11px}.meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.meta span{font-size:10px;color:#68736d;background:#f3f6f4;border-radius:8px;padding:6px 7px}.expired{color:#b42318!important;background:#fff0ef!important}.view{width:100%;border:0;background:#16834b;color:#fff;padding:11px;border-radius:10px;font-weight:800;cursor:pointer;text-decoration:none;text-align:center;display:block}
+.empty{text-align:center;background:#fff;border-radius:16px;padding:38px 20px;color:#68736d;border:1px solid #e4e9e6}.empty b{display:block;color:#26332b;font-size:16px;margin-bottom:6px}.empty p{font-size:12px;line-height:1.5;margin:0 0 15px}.find{display:inline-block;background:#16834b;color:#fff;text-decoration:none;padding:11px 16px;border-radius:10px;font-size:12px;font-weight:800}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid #e1e7e3;height:70px;display:flex;justify-content:center;z-index:30}.navin{width:100%;max-width:480px;display:flex;justify-content:space-around;align-items:center;padding:5px 6px}.navin a{flex:1;max-width:92px;text-decoration:none;color:#69736d;font-size:10px;text-align:center;padding:6px 4px;border-radius:13px;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700}.navin a span{width:34px;height:28px;display:grid;place-items:center;font-size:19px;line-height:1}.navin a.active{color:#16834b;background:#f0f7f3}
+button,a{transition:transform .16s ease,box-shadow .16s ease,background-color .16s ease,opacity .16s ease}button:active,a:active{transform:scale(.96)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="head"><a class="back" href="profile.html">← Back</a><div><div class="logo">StudTask</div><div class="sub">Tasks you recently viewed</div></div></div></div></header>
+<main>
+<div class="topbar"><div class="count" id="count">Loading...</div><button class="clear" id="clearBtn" type="button">Clear history</button></div>
+<div id="tasks"></div>
+</main>
+<nav aria-label="Main navigation"><div class="navin"><a href="index.html"><span>⌂</span>Home</a><a href="my-tasks.html"><span>✓</span>My Tasks</a><a href="post-task.html"><span>＋</span>Post</a><a href="alerts.html"><span>🔔</span>Alerts</a><a href="profile.html" class="active"><span>♙</span>Profile</a></div></nav>
+<script>
+const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const STORAGE_KEY = "studtask_recent_tasks";
+const MAX_RECENT = 20;
+const tasksBox = document.getElementById("tasks");
+const count = document.getElementById("count");
+const clearBtn = document.getElementById("clearBtn");
+
+function esc(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    }[character]));
+}
+
+function getRecentIds() {
+    try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(value) ? value.filter(item => typeof item === "string").slice(0, MAX_RECENT) : [];
+    } catch {
+        return [];
+    }
+}
+
+function formatMoney(value) {
+    return `₦${Number(value || 0).toLocaleString()}`;
+}
+
+function formatDeadline(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "No deadline";
+    return date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+}
+
+function renderEmpty(message = "Tasks you open will appear here.") {
+    count.textContent = "0 recently viewed";
+    tasksBox.innerHTML = `<div class="empty"><b>Recently Viewed</b><p>${esc(message)}</p><a class="find" href="find-tasks.html">Find Tasks</a></div>`;
+}
+
+async function loadRecentTasks() {
+    const ids = getRecentIds();
+    if (!ids.length) {
+        renderEmpty();
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .from("tasks")
+        .select("id,title,description,category,location,budget,deadline,status,moderation_status")
+        .in("id", ids);
+
+    if (error) {
+        renderEmpty("We could not load your recent tasks. Please try again.");
+        return;
+    }
+
+    const byId = new Map((data || []).map(task => [task.id, task]));
+    const tasks = ids.map(id => byId.get(id)).filter(Boolean);
+
+    if (!tasks.length) {
+        renderEmpty("Your recent tasks are no longer available.");
+        return;
+    }
+
+    count.textContent = `${tasks.length} recently viewed`;
+    tasksBox.innerHTML = tasks.map(task => {
+        const expired = task.deadline && new Date(task.deadline).getTime() < Date.now();
+        const unavailable = task.status !== "open" || task.moderation_status !== "approved" || expired;
+        return `<article class="task">
+            <div class="tasktop"><span class="badge">${esc(task.category || "Task")}</span><span class="budget">${formatMoney(task.budget)}</span></div>
+            <h3>${esc(task.title)}</h3>
+            <p class="desc">${esc(task.description || "No description")}</p>
+            <div class="meta">
+                <span>📍 ${esc(task.location || "No location")}</span>
+                <span class="${expired ? "expired" : ""}">⏰ ${esc(formatDeadline(task.deadline))}</span>
+                ${unavailable ? "<span>Unavailable</span>" : ""}
+            </div>
+            <a class="view" href="task-details.html?id=${encodeURIComponent(task.id)}">View Task</a>
+        </article>`;
+    }).join("");
+}
+
+clearBtn.addEventListener("click", () => {
+    if (!getRecentIds().length) return;
+    localStorage.removeItem(STORAGE_KEY);
+    renderEmpty();
+});
+
+loadRecentTasks();
+</script>
+</body>
+</html>
