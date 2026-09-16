@@ -2,6 +2,8 @@ name: Integrate Onboarding
 on:
   push:
     branches: [main]
+permissions:
+  contents: write
 jobs:
   integrate:
     runs-on: ubuntu-latest
