@@ -2,89 +2,83 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat - StudTask</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Chat - OOULink</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    body { margin: 0; font-family: Arial, sans-serif; background: #f5f7fb; color: #111827; padding-bottom: 158px; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f5f7fb; color: #111827; padding-bottom: 160px; }
     .app { width: 100%; max-width: 480px; min-height: 100vh; margin: 0 auto; background: #f5f7fb; }
     .header { position: sticky; top: 0; z-index: 20; background: #16834b; color: #fff; padding: 12px 16px 15px; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
-    .back { display: inline-flex; align-items: center; gap: 5px; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 8px 10px; margin: -6px 0 5px -10px; border-radius: 10px; transition: transform .16s ease, background .18s ease, box-shadow .18s ease; -webkit-tap-highlight-color: transparent; }
-    .back:hover { background: rgba(255,255,255,.12); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .back { display: inline-flex; align-items: center; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 8px 10px; margin: -6px 0 5px -10px; border-radius: 10px; transition: transform .16s ease, background .18s ease; }
+    .back:hover { background: rgba(255,255,255,.12); }
     .back:active { transform: scale(.95); }
-    .back:focus-visible { outline: 3px solid rgba(255,255,255,.35); outline-offset: 2px; }
-    .chat-person { display: flex; align-items: center; gap: 11px; min-width: 0; color: #fff; text-decoration: none; border-radius: 14px; padding: 7px; margin-left: -7px; transition: transform .16s ease, background .18s ease; -webkit-tap-highlight-color: transparent; }
+    .chat-person { display: flex; align-items: center; gap: 11px; min-width: 0; color: #fff; text-decoration: none; border-radius: 14px; padding: 7px; margin-left: -7px; }
     .chat-person:hover { background: rgba(255,255,255,.1); }
-    .chat-person:active { transform: scale(.98); }
-    .chat-person:focus-visible { outline: 3px solid rgba(255,255,255,.35); outline-offset: 2px; }
     .avatar { width: 48px; height: 48px; flex: none; border-radius: 50%; object-fit: cover; background: rgba(255,255,255,.18); border: 2px solid rgba(255,255,255,.72); display: grid; place-items: center; overflow: hidden; font-size: 18px; font-weight: 800; }
-    .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
     .person-info { min-width: 0; flex: 1; }
-    .person-name { margin: 0; font-size: 16px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .person-handle { margin-top: 3px; font-size: 11px; color: rgba(255,255,255,.78); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .person-name, .person-handle { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .person-name { font-size: 16px; font-weight: 800; }
+    .person-handle { margin-top: 3px; font-size: 11px; color: rgba(255,255,255,.78); }
     .profile-hint { flex: none; font-size: 10px; font-weight: 700; color: rgba(255,255,255,.82); }
-    .task-title { margin: 8px 0 0; padding-left: 66px; font-size: 13px; font-weight: 700; line-height: 1.3; word-break: break-word; color: rgba(255,255,255,.88); }
-    .realtime-status { margin: 5px 0 0; padding-left: 66px; font-size: 10px; color: rgba(255,255,255,.76); }
+    .task-title, .realtime-status { padding-left: 66px; word-break: break-word; }
+    .task-title { margin-top: 8px; font-size: 13px; font-weight: 700; line-height: 1.3; }
+    .realtime-status { margin-top: 5px; font-size: 10px; color: rgba(255,255,255,.76); }
     .realtime-status.connected { color: #dcfce7; }
     .realtime-status.warning { color: #fef3c7; }
     .content { padding-bottom: 12px; }
     .files-section { margin: 12px; padding: 14px; background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
     .files-title { margin-bottom: 10px; font-size: 16px; font-weight: 700; }
-    .file-card { padding: 11px; margin-bottom: 9px; background: #fafafa; border: 1px solid #e5e7eb; border-radius: 10px; transition: transform .16s ease, box-shadow .18s ease, background .18s ease; }
+    .file-card { padding: 11px; margin-bottom: 9px; background: #fafafa; border: 1px solid #e5e7eb; border-radius: 10px; }
     .file-card:last-child { margin-bottom: 0; }
-    .file-card:hover { background: #fff; box-shadow: 0 5px 14px rgba(0,0,0,.06); }
-    .file-card:active { transform: scale(.99); }
     .file-name { font-size: 14px; font-weight: 700; word-break: break-word; }
     .file-size { margin-top: 3px; color: #6b7280; font-size: 11px; }
-    .pdf-button { display: block; margin-top: 9px; padding: 10px; background: #16834b; color: #fff; border-radius: 8px; text-align: center; text-decoration: none; font-size: 13px; font-weight: 700; transition: transform .16s ease, box-shadow .18s ease, filter .18s ease; -webkit-tap-highlight-color: transparent; }
-    .pdf-button:hover { filter: brightness(1.03); box-shadow: 0 5px 14px rgba(22,131,75,.2); }
-    .pdf-button:active { transform: scale(.97); }
-    .pdf-button:focus-visible { outline: 3px solid rgba(22,131,75,.22); outline-offset: 2px; }
+    .pdf-button, .attachment-link { display: block; margin-top: 9px; padding: 10px; background: #16834b; color: #fff; border-radius: 8px; text-align: center; text-decoration: none; font-size: 13px; font-weight: 700; }
     .no-files, .file-error { padding: 8px; color: #6b7280; font-size: 13px; text-align: center; }
     .file-error { color: #dc2626; }
-    .messages { display: flex; flex-direction: column; gap: 10px; min-height: 300px; padding: 15px 12px; overflow-wrap: anywhere; }
+    .messages { display: flex; flex-direction: column; gap: 8px; min-height: 300px; padding: 15px 12px; overflow-wrap: anywhere; }
     .loading, .empty, .error { padding: 40px 15px; color: #6b7280; text-align: center; }
     .error { color: #dc2626; }
+    .date-separator { display: flex; align-items: center; gap: 9px; margin: 12px 0 4px; color: #9ca3af; font-size: 10px; font-weight: 700; }
+    .date-separator::before, .date-separator::after { content: ""; height: 1px; flex: 1; background: #e5e7eb; }
     .message-row { display: flex; animation: messageIn .2s ease both; }
     .message-row.mine { justify-content: flex-end; }
     .message-row.theirs { justify-content: flex-start; }
-    .bubble { max-width: 78%; padding: 10px 13px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+    .message-wrap { max-width: 82%; }
+    .bubble { padding: 10px 13px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
     .mine .bubble { background: #16834b; color: #fff; border-bottom-right-radius: 4px; }
     .theirs .bubble { background: #fff; color: #111827; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px; }
-    .time { margin-top: 4px; font-size: 10px; opacity: .7; text-align: right; }
+    .message-meta { display: flex; align-items: center; justify-content: flex-end; gap: 5px; margin-top: 4px; font-size: 10px; opacity: .72; }
+    .message-status.failed { color: #dc2626; }
+    .retry-btn { border: 0; background: transparent; color: #dc2626; font-size: 10px; font-weight: 700; padding: 0; cursor: pointer; }
+    .message-attachment { margin-top: 8px; overflow: hidden; border-radius: 10px; background: rgba(0,0,0,.08); }
+    .message-attachment img { display: block; width: 100%; max-height: 240px; object-fit: cover; }
+    .attachment-link { margin: 0; border-radius: 0; background: rgba(0,0,0,.14); }
     .blocked-message { display: none; margin: 0 10px 8px; padding: 10px 12px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; color: #9a3412; font-size: 12px; line-height: 1.4; }
-    .composer { position: fixed; left: 50%; bottom: 74px; z-index: 40; display: flex; width: 100%; max-width: 480px; gap: 8px; padding: 10px; background: rgba(255,255,255,.97); border-top: 1px solid #e5e7eb; box-shadow: 0 -4px 14px rgba(0,0,0,.05); transform: translateX(-50%); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-    .composer input { flex: 1; min-width: 0; padding: 11px 14px; border: 1px solid #d1d5db; border-radius: 22px; outline: none; background: #fff; font-size: 14px; transition: border-color .18s ease, box-shadow .18s ease; }
-    .composer input:focus { border-color: #16834b; box-shadow: 0 0 0 3px rgba(22,131,75,.1); }
-    .composer input:disabled { background: #f3f4f6; }
-    .send-btn { flex: none; min-width: 74px; border: 0; border-radius: 22px; background: #16834b; color: #fff; padding: 0 18px; font-weight: 700; cursor: pointer; transition: transform .16s ease, box-shadow .18s ease, filter .18s ease, opacity .16s ease; -webkit-tap-highlight-color: transparent; }
-    .send-btn:hover:not(:disabled) { filter: brightness(1.03); box-shadow: 0 5px 14px rgba(22,131,75,.2); }
-    .send-btn:active:not(:disabled) { transform: scale(.95); }
-    .send-btn:focus-visible { outline: 3px solid rgba(22,131,75,.22); outline-offset: 2px; }
-    .send-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .selected-file { display: none; margin: 0 10px 8px; padding: 9px 11px; background: #eef8f2; border: 1px solid #ccebd8; border-radius: 10px; font-size: 12px; }
+    .selected-file strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .remove-file { float: right; border: 0; background: transparent; color: #dc2626; font-weight: 700; cursor: pointer; }
+    .composer { position: fixed; left: 50%; bottom: 74px; z-index: 40; display: flex; flex-wrap: wrap; width: 100%; max-width: 480px; gap: 8px; padding: 10px; background: rgba(255,255,255,.97); border-top: 1px solid #e5e7eb; box-shadow: 0 -4px 14px rgba(0,0,0,.05); transform: translateX(-50%); backdrop-filter: blur(12px); }
+    .composer input[type="text"] { flex: 1; min-width: 0; padding: 11px 14px; border: 1px solid #d1d5db; border-radius: 22px; outline: none; background: #fff; font-size: 14px; }
+    .composer input[type="text"]:focus { border-color: #16834b; box-shadow: 0 0 0 3px rgba(22,131,75,.1); }
+    .attach-btn { width: 44px; flex: none; border: 1px solid #d1d5db; border-radius: 50%; background: #fff; color: #16834b; font-size: 18px; cursor: pointer; }
+    .send-btn { flex: none; min-width: 74px; border: 0; border-radius: 22px; background: #16834b; color: #fff; padding: 0 18px; font-weight: 700; cursor: pointer; }
+    .send-btn:disabled, .attach-btn:disabled { opacity: .5; cursor: not-allowed; }
     .restricted { position: fixed; inset: 0; z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,.62); }
     .restricted-box { width: 100%; max-width: 420px; padding: 28px 22px; background: #fff; border-radius: 20px; text-align: center; }
     .restricted-icon { font-size: 48px; }
     .restricted-box h2 { margin: 12px 0 8px; }
     .restricted-box p { color: #4b5563; font-size: 14px; line-height: 1.5; }
-    .logout-btn { width: 100%; padding: 14px; border: 0; border-radius: 12px; background: #16834b; color: #fff; font-weight: 700; cursor: pointer; transition: transform .16s ease, box-shadow .18s ease, filter .18s ease; }
-    .logout-btn:hover { filter: brightness(1.03); box-shadow: 0 5px 14px rgba(22,131,75,.2); }
-    .logout-btn:active { transform: scale(.97); }
-    .skeleton { height: 48px; border-radius: 14px; background: linear-gradient(90deg,#fff 25%,#edf1f5 50%,#fff 75%); background-size: 200% 100%; animation: shine 1.2s infinite; }
-    .nav { position: fixed; left: 50%; bottom: 0; z-index: 50; display: flex; width: 100%; max-width: 480px; height: 74px; padding: 7px 8px calc(7px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.96); border-top: 1px solid #e5e7eb; box-shadow: 0 -5px 18px rgba(0,0,0,.08); transform: translateX(-50%); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
-    .nav-link { position: relative; display: flex; flex: 1; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 3px; margin: 0 2px; padding: 7px 4px; border: 0; border-radius: 13px; color: #6b7280; background: transparent; text-decoration: none; font-size: 10px; font-weight: 700; cursor: pointer; transition: transform .16s ease, color .18s ease, background .18s ease, box-shadow .18s ease; -webkit-tap-highlight-color: transparent; user-select: none; }
-    .nav-link:hover { color: #16834b; background: #f3f9f5; box-shadow: 0 4px 12px rgba(22,131,75,.08); }
-    .nav-link:active { transform: scale(.92); }
-    .nav-link:focus-visible { outline: 3px solid rgba(22,131,75,.22); outline-offset: 1px; }
-    .nav-link.active { color: #16834b; background: #eef8f2; box-shadow: 0 4px 12px rgba(22,131,75,.1); }
+    .logout-btn { width: 100%; padding: 14px; border: 0; border-radius: 12px; background: #16834b; color: #fff; font-weight: 700; cursor: pointer; }
+    .nav { position: fixed; left: 50%; bottom: 0; z-index: 50; display: flex; width: 100%; max-width: 480px; height: 74px; padding: 7px 8px calc(7px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.96); border-top: 1px solid #e5e7eb; box-shadow: 0 -5px 18px rgba(0,0,0,.08); transform: translateX(-50%); backdrop-filter: blur(14px); }
+    .nav-link { position: relative; display: flex; flex: 1; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 3px; margin: 0 2px; padding: 7px 4px; border-radius: 13px; color: #6b7280; background: transparent; text-decoration: none; font-size: 10px; font-weight: 700; }
+    .nav-link.active { color: #16834b; background: #eef8f2; }
     .nav-link.active::before { content: ""; position: absolute; top: 2px; left: 50%; width: 24px; height: 3px; border-radius: 4px; background: #16834b; transform: translateX(-50%); }
-    .nav-icon { display: grid; place-items: center; min-height: 24px; font-size: 20px; line-height: 1; transition: transform .16s ease; }
-    .nav-link:hover .nav-icon, .nav-link:active .nav-icon, .nav-link.active .nav-icon { transform: translateY(-1px) scale(1.05); }
+    .nav-icon { display: grid; place-items: center; min-height: 24px; font-size: 20px; }
     @keyframes messageIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes shine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
   </style>
 </head>
 <body>
@@ -110,20 +104,27 @@
       </section>
       <div id="messages" class="messages"><div class="loading">Loading chat...</div></div>
       <div id="blockedMessage" class="blocked-message"></div>
+      <div id="selectedFile" class="selected-file">
+        <button id="removeFile" class="remove-file" type="button">REMOVE</button>
+        <strong id="selectedFileName"></strong>
+        <span id="selectedFileInfo"></span>
+      </div>
     </div>
   </main>
 
   <form id="composer" class="composer">
+    <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" hidden>
+    <button id="attachBtn" class="attach-btn" type="button" aria-label="Attach a file" title="Attach a file">📎</button>
     <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" maxlength="1000">
     <button id="sendBtn" class="send-btn" type="submit">Send</button>
   </form>
 
   <nav class="nav" aria-label="Main navigation">
-    <a class="nav-link" href="index.html" aria-label="Home"><span class="nav-icon">⌂</span><span>Home</span></a>
-    <a class="nav-link" href="my-tasks.html" aria-label="My Tasks"><span class="nav-icon">✓</span><span>My Tasks</span></a>
-    <a class="nav-link" href="post-task.html" aria-label="Post a Task"><span class="nav-icon">＋</span><span>Post</span></a>
-    <a class="nav-link" href="alerts.html" aria-label="Alerts"><span class="nav-icon">🔔</span><span>Alerts</span></a>
-    <a class="nav-link" href="profile.html" aria-label="Profile"><span class="nav-icon">♙</span><span>Profile</span></a>
+    <a class="nav-link" href="index.html"><span class="nav-icon">⌂</span><span>Home</span></a>
+    <a class="nav-link" href="my-tasks.html"><span class="nav-icon">✓</span><span>My Tasks</span></a>
+    <a class="nav-link" href="post-task.html"><span class="nav-icon">＋</span><span>Post</span></a>
+    <a class="nav-link" href="alerts.html"><span class="nav-icon">🔔</span><span>Alerts</span></a>
+    <a class="nav-link" href="profile.html"><span class="nav-icon">♙</span><span>Profile</span></a>
   </nav>
 
   <script>
@@ -136,14 +137,13 @@
     let otherUserId = null;
     let realtimeChannel = null;
     let sending = false;
+    let selectedFile = null;
     let lastSentText = "";
     let lastSentAt = 0;
     let blockedTimer = null;
     let moderationBlocked = false;
 
-    const params = new URLSearchParams(location.search);
-    const taskId = params.get("id");
-
+    const taskId = new URLSearchParams(location.search).get("id");
     const messagesBox = document.getElementById("messages");
     const taskTitle = document.getElementById("taskTitle");
     const realtimeStatus = document.getElementById("realtimeStatus");
@@ -151,6 +151,12 @@
     const composer = document.getElementById("composer");
     const messageInput = document.getElementById("messageInput");
     const sendBtn = document.getElementById("sendBtn");
+    const attachBtn = document.getElementById("attachBtn");
+    const fileInput = document.getElementById("fileInput");
+    const selectedFileBox = document.getElementById("selectedFile");
+    const selectedFileName = document.getElementById("selectedFileName");
+    const selectedFileInfo = document.getElementById("selectedFileInfo");
+    const removeFile = document.getElementById("removeFile");
     const blockedMessage = document.getElementById("blockedMessage");
     const chatPerson = document.getElementById("chatPerson");
     const personAvatar = document.getElementById("personAvatar");
@@ -158,16 +164,26 @@
     const personHandle = document.getElementById("personHandle");
 
     function escapeHTML(value) {
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+      return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
     function formatTime(value) {
       return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function dateKey(value) {
+      const date = new Date(value);
+      return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    }
+
+    function formatDateLabel(value) {
+      const date = new Date(value);
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+      if (dateKey(date) === dateKey(today)) return "Today";
+      if (dateKey(date) === dateKey(yesterday)) return "Yesterday";
+      return date.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" });
     }
 
     function formatFileSize(bytes) {
@@ -193,19 +209,21 @@
       const digitsOnly = normalized.replace(/[\s().+\-]/g, "");
       if (/(?:234|0)(?:70|80|81|90|91)\d{8}/.test(digitsOnly)) return true;
       if (/\d{10,}/.test(digitsOnly)) return true;
-      if (/\b(?:account|acct|account\s*no|account\s*number)\b[\s:#-]*\d{8,}/i.test(text)) return true;
-      return false;
+      return /\b(?:account|acct|account\s*no|account\s*number)\b[\s:#-]*\d{8,}/i.test(text);
     }
 
     function validateMessage(text) {
       const normalized = normalizeForCheck(text);
-      if (!normalized.trim()) return { allowed: false, reason: "Please type a message." };
+      if (!normalized.trim()) return { allowed: false, reason: "Please type a message or attach a file." };
       if (normalized.length > 1000) return { allowed: false, reason: "Message is too long. Please keep it under 1,000 characters." };
       for (const word of blockedWords) {
-        const pattern = new RegExp(`(^|[^a-z])${word}([^a-z]|$)`, "i");
-        if (pattern.test(normalized)) return { allowed: false, reason: "Please keep the chat respectful. That language isn't allowed on StudTask." };
+        if (new RegExp(`(^|[^a-z])${word}([^a-z]|$)`, "i").test(normalized)) {
+          return { allowed: false, reason: "Please keep the chat respectful. That language isn't allowed on OOULink." };
+        }
       }
-      if (containsContactInfo(text)) return { allowed: false, reason: "For your safety, phone numbers, bank/account numbers and WhatsApp/contact details cannot be shared in StudTask chat." };
+      if (containsContactInfo(text)) {
+        return { allowed: false, reason: "For your safety, phone numbers, bank/account numbers and WhatsApp/contact details cannot be shared in OOULink chat." };
+      }
       return { allowed: true, reason: "" };
     }
 
@@ -224,18 +242,7 @@
       moderationBlocked = true;
       const temporary = details.ban_type === "temporary";
       const until = temporary && details.banned_until ? new Date(details.banned_until).toLocaleString() : null;
-      document.body.innerHTML = `
-        <div class="restricted">
-          <div class="restricted-box">
-            <div class="restricted-icon">🚫</div>
-            <h2>StudTask Account Restricted</h2>
-            <p>Your account is currently ${temporary ? "temporarily" : "permanently"} restricted and cannot use chat.</p>
-            ${until ? `<p><strong>Restriction ends:</strong><br>${escapeHTML(until)}</p>` : ""}
-            ${details.ban_reason ? `<p><strong>Reason:</strong><br>${escapeHTML(details.ban_reason)}</p>` : ""}
-            <p>If you believe this action was made in error, contact StudTask support.</p>
-            <button class="logout-btn" onclick="logoutModerated()">LOG OUT</button>
-          </div>
-        </div>`;
+      document.body.innerHTML = `<div class="restricted"><div class="restricted-box"><div class="restricted-icon">🚫</div><h2>OOULink Account Restricted</h2><p>Your account is currently ${temporary ? "temporarily" : "permanently"} restricted and cannot use chat.</p>${until ? `<p><strong>Restriction ends:</strong><br>${escapeHTML(until)}</p>` : ""}${details.ban_reason ? `<p><strong>Reason:</strong><br>${escapeHTML(details.ban_reason)}</p>` : ""}<button class="logout-btn" onclick="logoutModerated()">LOG OUT</button></div></div>`;
     }
 
     async function logoutModerated() {
@@ -249,11 +256,7 @@
         location.href = "login.html";
         return false;
       }
-      const { data, error } = await supabaseClient
-        .from("user_moderation")
-        .select("status,ban_type,banned_until,ban_reason")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
+      const { data, error } = await supabaseClient.from("user_moderation").select("status,ban_type,banned_until,ban_reason").eq("user_id", session.user.id).maybeSingle();
       if (error) return true;
       if (data?.status === "banned") {
         const active = data.ban_type === "permanent" || (data.ban_type === "temporary" && data.banned_until && new Date(data.banned_until) > new Date());
@@ -267,11 +270,7 @@
 
     async function loadTask() {
       if (!taskId) throw new Error("No chat task was specified.");
-      const { data, error } = await supabaseClient
-        .from("tasks")
-        .select("id,user_id,runner_id,title,status")
-        .eq("id", taskId)
-        .single();
+      const { data, error } = await supabaseClient.from("tasks").select("id,user_id,runner_id,title,status").eq("id", taskId).single();
       if (error || !data) throw new Error("Task could not be found.");
       currentTask = data;
       if (!currentTask.runner_id) throw new Error("This task has not been accepted yet.");
@@ -281,46 +280,26 @@
     }
 
     async function loadOtherUserProfile() {
-      const { data, error } = await supabaseClient
-        .from("profiles")
-        .select("id,full_name,username,avatar_url")
-        .eq("id", otherUserId)
-        .maybeSingle();
-
-      if (error) {
-        console.warn("Chat profile loading error:", error);
-      }
-
-      const name = data?.full_name || data?.username || "StudTask User";
-      const username = data?.username ? "@" + data.username : "Tap to view profile";
+      const { data } = await supabaseClient.from("profiles").select("id,full_name,username,avatar_url").eq("id", otherUserId).maybeSingle();
+      const name = data?.full_name || data?.username || "OOULink User";
       personName.textContent = name;
-      personHandle.textContent = username;
+      personHandle.textContent = data?.username ? "@" + data.username : "Tap to view profile";
       chatPerson.href = "profile.html?id=" + encodeURIComponent(otherUserId);
-      chatPerson.setAttribute("aria-label", "View " + name + " profile");
-
       const fallback = document.createElement("span");
       fallback.textContent = name.trim().charAt(0).toUpperCase() || "U";
       personAvatar.replaceChildren(fallback);
-
       if (data?.avatar_url) {
         const image = document.createElement("img");
         image.src = data.avatar_url;
         image.alt = name + " profile picture";
-        image.loading = "lazy";
-        image.onerror = () => {
-          personAvatar.replaceChildren(fallback);
-        };
+        image.onerror = () => personAvatar.replaceChildren(fallback);
         personAvatar.replaceChildren(image);
       }
     }
 
     async function loadTaskFiles() {
       filesContainer.innerHTML = '<div class="loading">Loading files...</div>';
-      const { data: files, error } = await supabaseClient
-        .from("task_attachments")
-        .select("id,file_name,file_path,file_size,mime_type,created_at")
-        .eq("task_id", currentTask.id)
-        .order("created_at", { ascending: true });
+      const { data: files, error } = await supabaseClient.from("task_attachments").select("id,file_name,file_path,file_size,mime_type,created_at").eq("task_id", currentTask.id).order("created_at", { ascending: true });
       if (error) {
         filesContainer.innerHTML = '<div class="file-error">Unable to load files.</div>';
         return;
@@ -352,37 +331,101 @@
       }
     }
 
-    function renderMessage(message) {
+    async function loadMessageAttachments(messageId) {
+      const { data, error } = await supabaseClient.from("message_attachments").select("id,file_name,file_path,file_size,mime_type,created_at").eq("message_id", messageId).order("created_at", { ascending: true });
+      if (error) return [];
+      const results = [];
+      for (const attachment of data || []) {
+        const { data: signed } = await supabaseClient.storage.from("ChatFiles").createSignedUrl(attachment.file_path, 600);
+        if (signed?.signedUrl) results.push({ ...attachment, signedUrl: signed.signedUrl });
+      }
+      return results;
+    }
+
+    function createAttachmentElement(attachment) {
+      const box = document.createElement("div");
+      box.className = "message-attachment";
+      if (attachment.mime_type.startsWith("image/")) {
+        const image = document.createElement("img");
+        image.src = attachment.signedUrl;
+        image.alt = attachment.file_name;
+        image.loading = "lazy";
+        box.appendChild(image);
+      }
+      const link = document.createElement("a");
+      link.className = "attachment-link";
+      link.href = attachment.signedUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = `📎 ${attachment.file_name} · ${formatFileSize(attachment.file_size)}`;
+      box.appendChild(link);
+      return box;
+    }
+
+    function addDateSeparator(value) {
+      const separator = document.createElement("div");
+      separator.className = "date-separator";
+      separator.textContent = formatDateLabel(value);
+      messagesBox.appendChild(separator);
+    }
+
+    async function renderMessage(message, options = {}) {
       if (!message || !currentUser) return;
       if (document.querySelector(`[data-message-id="${CSS.escape(String(message.id))}"]`)) return;
+      if (options.dateSeparator !== false) {
+        const previous = messagesBox.querySelector(".message-row:last-of-type");
+        const previousDate = previous?.dataset.createdAt;
+        if (!previousDate || dateKey(previousDate) !== dateKey(message.created_at)) addDateSeparator(message.created_at);
+      }
       const mine = message.sender_id === currentUser.id;
       const row = document.createElement("div");
       row.className = mine ? "message-row mine" : "message-row theirs";
       row.dataset.messageId = message.id;
+      row.dataset.createdAt = message.created_at || new Date().toISOString();
+      const wrap = document.createElement("div");
+      wrap.className = "message-wrap";
       const bubble = document.createElement("div");
       bubble.className = "bubble";
-      bubble.textContent = message.message;
-      const time = document.createElement("div");
-      time.className = "time";
-      time.textContent = formatTime(message.created_at);
-      bubble.appendChild(time);
-      row.appendChild(bubble);
+      if (message.message && message.message !== "📎 Attachment") {
+        const text = document.createElement("div");
+        text.textContent = message.message;
+        bubble.appendChild(text);
+      }
+      const attachments = options.attachments || await loadMessageAttachments(message.id);
+      for (const attachment of attachments) bubble.appendChild(createAttachmentElement(attachment));
+      const meta = document.createElement("div");
+      meta.className = "message-meta";
+      const time = document.createElement("span");
+      time.textContent = message.created_at ? formatTime(message.created_at) : "Sending...";
+      meta.appendChild(time);
+      if (message.status === "failed") {
+        const retry = document.createElement("button");
+        retry.className = "retry-btn";
+        retry.type = "button";
+        retry.textContent = "RETRY";
+        retry.onclick = () => retryMessage(message.retryText || "");
+        meta.appendChild(retry);
+      } else if (message.status === "pending") {
+        meta.appendChild(Object.assign(document.createElement("span"), { className: "message-status", textContent: "Sending..." }));
+      } else if (mine) {
+        meta.appendChild(Object.assign(document.createElement("span"), { className: "message-status", textContent: message.is_read ? "✓✓ Read" : "✓ Sent" }));
+      }
+      bubble.appendChild(meta);
+      wrap.appendChild(bubble);
+      row.appendChild(wrap);
       messagesBox.appendChild(row);
+      return row;
     }
 
     async function loadMessages() {
-      const { data, error } = await supabaseClient
-        .from("messages")
-        .select("id,task_id,sender_id,receiver_id,message,is_read,created_at")
-        .eq("task_id", currentTask.id)
-        .order("created_at", { ascending: true });
+      const { data, error } = await supabaseClient.from("messages").select("id,task_id,sender_id,receiver_id,message,is_read,created_at").eq("task_id", currentTask.id).order("created_at", { ascending: true });
       if (error) {
         messagesBox.innerHTML = '<div class="error">Unable to load messages.</div>';
         return;
       }
       messagesBox.innerHTML = "";
       if (!data?.length) messagesBox.innerHTML = '<div class="empty">No messages yet. Start the conversation.</div>';
-      for (const message of data || []) renderMessage(message);
+      for (const message of data || []) await renderMessage(message);
       scrollToBottom();
       const unread = (data || []).filter(message => message.receiver_id === currentUser.id && !message.is_read).map(message => message.id);
       if (unread.length) {
@@ -393,100 +436,155 @@
 
     function startRealtime() {
       if (!currentTask || !currentUser || realtimeChannel) return;
-      realtimeChannel = supabaseClient
-        .channel("studtask-chat-" + currentTask.id)
+      realtimeChannel = supabaseClient.channel("ooulink-chat-" + currentTask.id)
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `task_id=eq.${currentTask.id}` }, async payload => {
           const message = payload.new;
           if (!message || message.task_id !== currentTask.id) return;
           if (message.sender_id !== currentUser.id && message.receiver_id !== currentUser.id) return;
-          renderMessage(message);
+          await renderMessage(message);
           scrollToBottom();
           if (message.receiver_id === currentUser.id && !message.is_read) {
-            const { error } = await supabaseClient.from("messages").update({ is_read: true }).eq("id", message.id);
-            if (error) console.warn("Read update error:", error);
+            await supabaseClient.from("messages").update({ is_read: true }).eq("id", message.id);
           }
         })
         .subscribe(status => {
           if (status === "SUBSCRIBED") {
             realtimeStatus.textContent = "🟢 Live chat connected";
             realtimeStatus.className = "realtime-status connected";
-          } else if (status === "CHANNEL_ERROR") {
-            realtimeStatus.textContent = "⚠️ Live chat connection error";
-            realtimeStatus.className = "realtime-status warning";
-          } else if (status === "TIMED_OUT") {
-            realtimeStatus.textContent = "⚠️ Live chat connection timed out";
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            realtimeStatus.textContent = "⚠️ Live chat connection issue";
             realtimeStatus.className = "realtime-status warning";
           }
         });
+    }
+
+    function showSelectedFile(file) {
+      selectedFile = file;
+      selectedFileName.textContent = "📎 " + file.name;
+      selectedFileInfo.textContent = `${file.type || "File"} · ${formatFileSize(file.size)}`;
+      selectedFileBox.style.display = "block";
+    }
+
+    function clearSelectedFile() {
+      selectedFile = null;
+      fileInput.value = "";
+      selectedFileBox.style.display = "none";
+    }
+
+    async function uploadChatFile(file) {
+      const extension = file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "file";
+      const path = `${currentTask.id}/${currentUser.id}/${crypto.randomUUID()}.${extension}`;
+      const { error } = await supabaseClient.storage.from("ChatFiles").upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      return path;
+    }
+
+    async function insertMessageRecord(text, attachmentInfo) {
+      const messageText = text || (attachmentInfo ? "📎 Attachment" : "");
+      const { data, error } = await supabaseClient.from("messages").insert({ task_id: currentTask.id, sender_id: currentUser.id, receiver_id: otherUserId, message: messageText }).select("id,task_id,sender_id,receiver_id,message,is_read,created_at").single();
+      if (error) throw error;
+      if (attachmentInfo) {
+        const { error: attachmentError } = await supabaseClient.from("message_attachments").insert({ message_id: data.id, task_id: currentTask.id, uploader_id: currentUser.id, file_name: attachmentInfo.file.name, file_path: attachmentInfo.path, mime_type: attachmentInfo.file.type, file_size: attachmentInfo.file.size });
+        if (attachmentError) {
+          await supabaseClient.storage.from("ChatFiles").remove([attachmentInfo.path]);
+          throw attachmentError;
+        }
+      }
+      return data;
+    }
+
+    function clearPendingMessage(id) {
+      const row = document.querySelector(`[data-message-id="${CSS.escape(String(id))}"]`);
+      if (row) row.remove();
+    }
+
+    async function retryMessage(text) {
+      if (!text) return;
+      messageInput.value = text;
+      await sendMessage();
     }
 
     async function sendMessage() {
       if (sending || !currentTask || !otherUserId || !currentUser) return;
       const text = messageInput.value.trim();
-      if (!text) return;
-      const validation = validateMessage(text);
-      if (!validation.allowed) {
-        showBlockedMessage(validation.reason);
-        return;
+      if (!text && !selectedFile) return;
+      if (text) {
+        const validation = validateMessage(text);
+        if (!validation.allowed) {
+          showBlockedMessage(validation.reason);
+          return;
+        }
       }
       const now = Date.now();
       if (now - lastSentAt < 900) {
-        showBlockedMessage("⚡ Please slow down and wait a moment before sending again.");
+        showBlockedMessage("⚡ Please wait a moment before sending again.");
         return;
       }
-      if (text === lastSentText && now - lastSentAt < 10000) {
+      if (text && text === lastSentText && now - lastSentAt < 10000 && !selectedFile) {
         showBlockedMessage("⚡ That message was already sent. Please type something new.");
         return;
       }
+
       sending = true;
       sendBtn.disabled = true;
-      const originalText = sendBtn.textContent;
-      sendBtn.textContent = "Sending...";
+      attachBtn.disabled = true;
+      const fileToSend = selectedFile;
+      const pendingId = "pending-" + crypto.randomUUID();
+      const pendingMessage = { id: pendingId, sender_id: currentUser.id, message: text || "📎 Attachment", created_at: new Date().toISOString(), status: "pending" };
+      await renderMessage(pendingMessage, { attachments: [] });
+      scrollToBottom();
+
       try {
-        const { data, error } = await supabaseClient
-          .from("messages")
-          .insert({ task_id: currentTask.id, sender_id: currentUser.id, receiver_id: otherUserId, message: text })
-          .select("id,task_id,sender_id,receiver_id,message,is_read,created_at")
-          .single();
-        if (error) {
-          const errorText = error.message || "";
-          if (errorText.includes("OOULINK_RATE_LIMITED")) {
-            showBlockedMessage(errorText.split("OOULINK_RATE_LIMITED:")[1] || "You are sending messages too quickly. Please wait before sending another message.");
-          } else if (errorText.includes("OOULINK_ACCOUNT_BANNED")) {
-            showBlockedMessage("Your account is currently restricted.");
-            await checkModeration();
-          } else {
-            showBlockedMessage("Message could not be sent. Please try again.");
-          }
-          return;
+        let attachmentInfo = null;
+        if (fileToSend) {
+          if (fileToSend.size > 5 * 1024 * 1024) throw new Error("That file is too large. The maximum size is 5 MB.");
+          const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+          if (!allowed.includes(fileToSend.type)) throw new Error("Only JPG, PNG, WEBP images and PDF files are allowed.");
+          const path = await uploadChatFile(fileToSend);
+          attachmentInfo = { file: fileToSend, path };
         }
+        const data = await insertMessageRecord(text, attachmentInfo);
+        clearPendingMessage(pendingId);
+        await renderMessage(data);
         lastSentText = text;
         lastSentAt = Date.now();
-        if (data) {
-          renderMessage(data);
-          scrollToBottom();
-        }
         messageInput.value = "";
-        const { error: notificationError } = await supabaseClient.from("notifications").insert({
-          user_id: otherUserId,
-          task_id: currentTask.id,
-          type: "new_message",
-          title: "New message",
-          message: `You received a new message about "${currentTask.title}".`
-        });
-        if (notificationError) console.warn("Notification error:", notificationError);
+        clearSelectedFile();
+        await supabaseClient.from("notifications").insert({ user_id: otherUserId, task_id: currentTask.id, type: "new_message", title: "New message", message: `You received a new message about "${currentTask.title}".` });
+        scrollToBottom();
+      } catch (error) {
+        clearPendingMessage(pendingId);
+        const failed = { ...pendingMessage, status: "failed", retryText: text };
+        await renderMessage(failed, { attachments: [] });
+        const errorText = error?.message || "Message could not be sent. Please try again.";
+        if (errorText.includes("OOULINK_RATE_LIMITED")) showBlockedMessage(errorText.split("OOULINK_RATE_LIMITED:")[1] || "You are sending messages too quickly.");
+        else if (errorText.includes("OOULINK_ACCOUNT_BANNED")) {
+          showBlockedMessage("Your account is currently restricted.");
+          await checkModeration();
+        } else showBlockedMessage(errorText);
       } finally {
         sendBtn.disabled = false;
-        sendBtn.textContent = originalText;
+        attachBtn.disabled = false;
         sending = false;
       }
     }
 
+    attachBtn.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        showBlockedMessage("That file is too large. The maximum size is 5 MB.");
+        clearSelectedFile();
+        return;
+      }
+      showSelectedFile(file);
+    });
+    removeFile.addEventListener("click", clearSelectedFile);
     composer.addEventListener("submit", event => {
       event.preventDefault();
       sendMessage();
     });
-
     messageInput.addEventListener("keydown", event => {
       if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
@@ -512,6 +610,7 @@
         messagesBox.innerHTML = `<div class="error">❌ ${escapeHTML(error.message || "Unable to load chat.")}</div>`;
         messageInput.disabled = true;
         sendBtn.disabled = true;
+        attachBtn.disabled = true;
       }
     }
 
@@ -521,5 +620,5 @@
 
     startChat();
   </script>
-<script src="block.js"></script></body>
+</body>
 </html>
