@@ -19,7 +19,6 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
 
           task_file = Path("task-details.html")
           task_text = task_file.read_text(encoding="utf-8")
@@ -47,15 +46,7 @@ jobs:
               if anchor not in task_text:
                   raise SystemExit("Could not find loadTask anchor in task-details.html")
               task_text = task_text.replace(anchor, function + anchor, 1)
-
-              assignment_pattern = r"currentTask\s*=\s*data\s*;?"
-              match = re.search(assignment_pattern, task_text)
-              if not match:
-                  raise SystemExit("Could not find currentTask assignment in task-details.html")
-
-              assignment = match.group(0)
-              replacement = assignment + "\n  recordRecentlyViewedTask(currentTask.id);"
-              task_text = task_text[:match.start()] + replacement + task_text[match.end():]
+              task_text = task_text.replace(anchor + "\n", anchor + "\n  recordRecentlyViewedTask(taskId);\n", 1)
               task_file.write_text(task_text, encoding="utf-8")
 
           profile_file = Path("profile.html")
