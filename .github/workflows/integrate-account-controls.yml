@@ -1,6 +1,10 @@
 name: Integrate Account Controls
 
 on:
+  push:
+    paths:
+      - ".github/workflows/integrate-account-controls.yml"
+      - ".github/account-controls-trigger"
   workflow_dispatch:
 
 permissions:
@@ -20,19 +24,18 @@ jobs:
 
           path = Path("profile.html")
           text = path.read_text(encoding="utf-8")
-
           marker = '<a href="account-controls.html"'
+
           if marker not in text:
               button = '<a href="account-controls.html" class="btn blue" style="display:block;text-align:center;margin-top:9px">⚙️ ACCOUNT CONTROLS</a>'
               anchor = '<a href="users.html" class="btn blue"'
-              if anchor in text:
-                  text = text.replace(anchor, button + anchor, 1)
-              else:
+              if anchor not in text:
                   raise SystemExit("Could not find a safe insertion point in profile.html")
+              text = text.replace(anchor, button + anchor, 1)
               path.write_text(text, encoding="utf-8")
           PY
 
-      - name: Commit changes
+      - name: Commit profile integration
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -40,10 +43,10 @@ jobs:
           git diff --cached --quiet || git commit -m "Add account controls to profile"
           git push
 
-      - name: Remove temporary workflow
+      - name: Remove temporary workflow and trigger file
         if: success()
         run: |
-          rm -f .github/workflows/integrate-account-controls.yml
-          git add .github/workflows/integrate-account-controls.yml
-          git diff --cached --quiet || git commit -m "Remove temporary account controls workflow"
+          rm -f .github/workflows/integrate-account-controls.yml .github/account-controls-trigger
+          git add -A
+          git diff --cached --quiet || git commit -m "Remove temporary account controls integration"
           git push
