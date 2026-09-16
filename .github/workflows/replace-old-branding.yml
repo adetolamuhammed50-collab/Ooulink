@@ -1,0 +1,46 @@
+name: Replace old branding
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  replace-branding:
+    if: "!contains(github.event.head_commit.message, 'Replace old branding')"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Replace old product-name references
+        shell: bash
+        run: |
+          set -e
+
+          files=$(git grep -Il -e 'OOULink' -e 'Ooulink' -e 'ooulink' -e 'OOULINK' || true)
+
+          if [ -z "$files" ]; then
+            echo "No old branding references found."
+            exit 0
+          fi
+
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            perl -0pi -e 's/OOULink/StudTask/g; s/Ooulink/StudTask/g; s/ooulink/StudTask/g; s/OOULINK/STUDTASK/g' "$file"
+          done <<< "$files"
+
+          if git diff --quiet; then
+            echo "No changes required."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Replace old branding with StudTask"
+          git push
