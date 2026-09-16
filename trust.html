@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Trust & Reputation - StudTask</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f7fb;color:#172033;padding-bottom:30px}
+a,button{touch-action:manipulation}
+.wrap{max-width:480px;margin:auto;padding:18px 15px}
+.back{color:#16834b;text-decoration:none;font-size:14px}
+.top{margin:0 0 16px}
+.top h1{font-size:27px;margin-top:11px}
+.sub{color:#687386;font-size:13px;margin-top:5px;line-height:1.4}
+.card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 5px 18px rgba(0,0,0,.06);margin-bottom:12px}
+.identity{text-align:center}
+.avatar{width:84px;height:84px;margin:0 auto 12px;border-radius:50%;background:#eaf7ef;color:#16834b;display:flex;align-items:center;justify-content:center;font-size:34px;overflow:hidden;border:3px solid #fff;box-shadow:0 0 0 2px #d9eee2}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.name{font-size:22px;font-weight:800;word-break:break-word}
+.username{font-size:12px;color:#687386;margin-top:5px}
+.badge{display:inline-block;margin-top:9px;padding:6px 10px;border-radius:99px;background:#f1f3f6;color:#697386;font-size:11px;font-weight:800}
+.badge.verified{background:#eaf7ef;color:#16834b}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:18px}
+.stat{background:#f7f9fb;border-radius:13px;text-align:center;padding:14px 5px}
+.stat b{display:block;font-size:20px}
+.stat span{display:block;font-size:10px;color:#758094;margin-top:3px}
+.section-title{font-size:15px;font-weight:800;margin-bottom:11px}
+.rating{display:flex;justify-content:space-between;align-items:center;padding:13px;background:#fffaf0;border:1px solid #f3e4bf;border-radius:14px}
+.rating-score{font-size:26px;font-weight:800}
+.stars{color:#f0a500;font-size:20px;letter-spacing:1px}
+.rating-text{font-size:10px;color:#8b7750;margin-top:4px}
+.row{padding:12px 0;border-top:1px solid #e8edf2;display:flex;justify-content:space-between;gap:12px;font-size:12px}
+.row:first-of-type{border-top:0}
+.row span{color:#687386}
+.row b{text-align:right}
+.progress{height:9px;background:#edf1f5;border-radius:99px;overflow:hidden;margin-top:10px}
+.progress div{height:100%;width:0;background:#16834b;border-radius:99px;transition:width .3s}
+.note{font-size:10px;color:#8993a3;line-height:1.5;margin-top:9px}
+.loading{text-align:center;padding:45px 10px;color:#687386}
+.error{background:#fff1f1;color:#c62828;border-radius:12px;padding:13px;font-size:12px}
+.hidden{display:none!important}
+.btn{display:block;width:100%;border:0;border-radius:11px;padding:12px;background:#16834b;color:#fff;text-align:center;text-decoration:none;font-size:12px;font-weight:800;margin-top:10px}
+.btn.secondary{background:#eef4ff;color:#2563eb}
+button:active,a:active{transform:scale(.97)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+<a class="back" href="javascript:history.back()">← Back</a>
+<h1>Trust & Reputation</h1>
+<p class="sub">A transparent summary of completed work, cancellations, reviews, and profile verification.</p>
+</div>
+<div id="loading" class="card loading">Loading trust profile...</div>
+<div id="content" class="hidden">
+<div class="card identity">
+<div class="avatar" id="avatar">👤</div>
+<div class="name" id="name">StudTask User</div>
+<div class="username" id="username">@username</div>
+<div class="badge" id="verifiedBadge">🛡️ Not verified</div>
+<div class="stats">
+<div class="stat"><b id="completed">0</b><span>Tasks completed</span></div>
+<div class="stat"><b id="cancelled">0</b><span>Tasks cancelled</span></div>
+<div class="stat"><b id="rate">0%</b><span>Completion rate</span></div>
+<div class="stat"><b id="reviews">0</b><span>Reviews received</span></div>
+</div>
+</div>
+<div class="card">
+<div class="section-title">⭐ Review rating</div>
+<div class="rating">
+<div><div class="rating-score" id="ratingScore">New</div><div class="rating-text" id="ratingText">No completed review history yet.</div></div>
+<div class="stars" id="stars">☆☆☆☆☆</div>
+</div>
+</div>
+<div class="card">
+<div class="section-title">📊 Reliability</div>
+<div class="row"><span>Completed tasks</span><b id="completed2">0</b></div>
+<div class="row"><span>Cancelled tasks</span><b id="cancelled2">0</b></div>
+<div class="row"><span>Rejected outcomes</span><b id="rejected">0</b></div>
+<div class="row"><span>Closed task outcomes</span><b id="closed">0</b></div>
+<div class="row"><span>Completion rate</span><b id="rate2">0%</b></div>
+<div class="progress"><div id="rateBar"></div></div>
+<p class="note">Completion rate is calculated from completed, cancelled, and rejected task outcomes involving this user.</p>
+</div>
+<div class="card">
+<div class="section-title">🛡️ Verification</div>
+<div class="row"><span>Student identity</span><b id="verificationText">Not verified</b></div>
+<p class="note">Verification status is based on the StudTask profile verification process.</p>
+</div>
+<a class="btn" id="profileLink" href="profile.html">View profile</a>
+</div>
+<div id="error" class="error hidden"></div>
+</div>
+<script>
+const SUPABASE_URL="https://dthvdxgxesomltlruogp.supabase.co";
+const SUPABASE_KEY="sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+function esc(value){return String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[char]));}
+function stars(value){const rounded=Math.max(0,Math.min(5,Math.round(Number(value)||0)));return "★".repeat(rounded)+"☆".repeat(5-rounded);}
+function showAvatar(url){const box=$("avatar");box.innerHTML="";if(!url){box.textContent="👤";return;}const image=document.createElement("img");image.src=url;image.alt="Profile picture";image.onerror=()=>box.textContent="👤";box.appendChild(image);}
+async function load(){
+try{
+const {data:{user}}=await supabaseClient.auth.getUser();
+if(!user) throw new Error("Please log in to view trust information.");
+const params=new URLSearchParams(location.search);
+const targetId=params.get("user")||user.id;
+if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(targetId)) throw new Error("Invalid user profile.");
+const [{data:profile,error:profileError},{data:trust,error:trustError}]=await Promise.all([
+ supabaseClient.from("profiles").select("id,username,full_name,avatar_url").eq("id",targetId).maybeSingle(),
+ supabaseClient.rpc("get_user_trust_stats",{p_user_id:targetId})
+]);
+if(profileError) throw profileError;
+if(trustError) throw trustError;
+if(!profile) throw new Error("Profile not found.");
+const stats=Array.isArray(trust)?trust[0]:trust;
+if(!stats) throw new Error("Trust information is unavailable.");
+$("name").textContent=profile.full_name||profile.username||"StudTask User";
+$("username").textContent=profile.username?"@"+profile.username:"Username not set";
+showAvatar(profile.avatar_url);
+const verified=!!stats.verified;
+$("verifiedBadge").textContent=verified?"🛡️ Verified profile":"🛡️ Not verified";
+$("verifiedBadge").className="badge"+(verified?" verified":"");
+$("verificationText").textContent=verified?"Verified":"Not verified";
+const completed=Number(stats.completed_tasks)||0;
+const cancelled=Number(stats.cancelled_tasks)||0;
+const rejected=Number(stats.rejected_tasks)||0;
+const closed=Number(stats.closed_tasks)||0;
+const rate=Number(stats.completion_rate)||0;
+const reviewCount=Number(stats.review_count)||0;
+const average=Number(stats.average_rating)||0;
+$("completed").textContent=completed;
+$("cancelled").textContent=cancelled;
+$("rate").textContent=rate+"%";
+$("reviews").textContent=reviewCount;
+$("completed2").textContent=completed;
+$("cancelled2").textContent=cancelled;
+$("rejected").textContent=rejected;
+$("closed").textContent=closed;
+$("rate2").textContent=rate+"%";
+$("rateBar").style.width=Math.min(100,Math.max(0,rate))+"%";
+$("ratingScore").textContent=reviewCount?average.toFixed(1)+" / 5":"New";
+$("ratingText").textContent=reviewCount?reviewCount+" review"+(reviewCount===1?"":"s")+" received":"No completed review history yet.";
+$("stars").textContent=stars(average);
+$("profileLink").href="profile.html?user="+encodeURIComponent(targetId);
+$("loading").classList.add("hidden");
+$("content").classList.remove("hidden");
+}catch(error){
+$("loading").classList.add("hidden");
+$("error").textContent=error?.message||"Could not load trust information.";
+$("error").classList.remove("hidden");
+}}
+load();
+</script>
+</body>
+</html>
