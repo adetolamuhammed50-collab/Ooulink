@@ -1,8 +1,5 @@
 name: Integrate Saved Tasks
-on:
-  push:
-    paths:
-      - .github/workflows/integrate-saved-tasks.yml
+on: push
 jobs:
   integrate:
     runs-on: ubuntu-latest
@@ -11,83 +8,87 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Integrate saved task controls
+        shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
+
           p = Path('task-details.html')
           s = p.read_text()
+
           if 'data-saved-task-button' not in s:
               marker = '<section class="hero">'
-              insert = '''<section class="section" data-saved-task-section style="margin-bottom:12px"><button class="action-btn secondary-btn" type="button" id="saveTaskBtn" data-saved-task-button>🔖 Save Task</button><div class="safety-note">Save this task to find it quickly later.</div></section>\n'''
+              insert = '<section class="section" data-saved-task-section style="margin-bottom:12px"><button class="action-btn secondary-btn" type="button" id="saveTaskBtn" data-saved-task-button>🔖 Save Task</button><div class="safety-note">Save this task to find it quickly later.</div></section>\n'
               if marker not in s:
                   raise SystemExit('task-details hero marker not found')
               s = s.replace(marker, insert + marker, 1)
+
               marker2 = 'async function loadTask(){'
               fn = '''async function setupSavedTaskButton(){
-  const button = document.getElementById("saveTaskBtn");
-  if (!button || !currentUser || !currentTask) return;
-  const { data, error } = await supabaseClient.rpc("is_task_saved", { p_task_id: currentTask.id });
-  if (error) {
-    console.error("Saved task check error:", error);
-    return;
-  }
-  let saved = data === true;
-  const update = () => {
-    button.textContent = saved ? "🔖 Saved Task" : "🔖 Save Task";
-    button.classList.toggle("saved", saved);
-  };
-  update();
-  button.onclick = async () => {
-    button.disabled = true;
-    try {
-      const { error: actionError } = saved
-        ? await supabaseClient.rpc("unsave_task", { p_task_id: currentTask.id })
-        : await supabaseClient.rpc("save_task", { p_task_id: currentTask.id });
-      if (actionError) throw actionError;
-      saved = !saved;
-      update();
-      showToast(saved ? "Task saved." : "Task removed from Saved.");
-    } catch (error) {
-      console.error("Saved task action error:", error);
-      showToast(error?.message || "Could not update saved task.");
-    } finally {
-      button.disabled = false;
-    }
-  };
-}
+              const button = document.getElementById("saveTaskBtn");
+              if (!button || !currentUser || !currentTask) return;
+              const { data, error } = await supabaseClient.rpc("is_task_saved", { p_task_id: currentTask.id });
+              if (error) {
+                console.error("Saved task check error:", error);
+                return;
+              }
+              let saved = data === true;
+              const update = () => {
+                button.textContent = saved ? "🔖 Saved Task" : "🔖 Save Task";
+                button.classList.toggle("saved", saved);
+              };
+              update();
+              button.onclick = async () => {
+                button.disabled = true;
+                try {
+                  const { error: actionError } = saved
+                    ? await supabaseClient.rpc("unsave_task", { p_task_id: currentTask.id })
+                    : await supabaseClient.rpc("save_task", { p_task_id: currentTask.id });
+                  if (actionError) throw actionError;
+                  saved = !saved;
+                  update();
+                  showToast(saved ? "Task saved." : "Task removed from Saved.");
+                } catch (error) {
+                  console.error("Saved task action error:", error);
+                  showToast(error?.message || "Could not update saved task.");
+                } finally {
+                  button.disabled = false;
+                }
+              };
+            }
 
-'''
+            '''
               if marker2 not in s:
                   raise SystemExit('loadTask marker not found')
               s = s.replace(marker2, fn + marker2, 1)
-              for needle in ['renderActions();', 'renderTrustAction();']:
-                  if needle in s and 'setupSavedTaskButton();' not in s:
-                      s = s.replace(needle, needle + 'setupSavedTaskButton();', 1)
-                      break
+              if 'setupSavedTaskButton();' not in s:
+                  if 'renderActions();' in s:
+                      s = s.replace('renderActions();', 'renderActions();setupSavedTaskButton();', 1)
+                  else:
+                      raise SystemExit('renderActions marker not found')
               p.write_text(s)
 
           p = Path('profile.html')
           s = p.read_text()
           if 'saved-tasks.html' not in s:
-              markers = ['Achievements', 'View Trust & Reputation', 'trust.html']
-              anchor = None
-              for m in markers:
-                  if m in s:
-                      anchor = m
-                      break
-              if not anchor:
+              marker = 'trust.html'
+              idx = s.find(marker)
+              if idx < 0:
+                  marker = 'Achievements'
+                  idx = s.find(marker)
+              if idx < 0:
                   raise SystemExit('profile anchor not found')
-              idx = s.find(anchor)
               start = s.rfind('<', 0, idx)
               link = '<a href="saved-tasks.html" style="display:block;text-decoration:none;text-align:center;margin:12px 0;padding:13px;border-radius:12px;background:#ecfdf3;color:#15803d;font-weight:800">🔖 SAVED TASKS</a>'
               s = s[:start] + link + s[start:]
               p.write_text(s)
           PY
       - name: Commit changes
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add task-details.html profile.html
-          git diff --cached --quiet && exit 0
+          if git diff --cached --quiet; then exit 0; fi
           git commit -m "Integrate Saved Tasks UI"
           git push
