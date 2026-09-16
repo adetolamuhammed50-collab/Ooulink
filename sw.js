@@ -1,4 +1,4 @@
-const CACHE_NAME = "studtask-v1";
+const CACHE_NAME = "studtask-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -27,20 +27,48 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
+async function updateCache(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok && new URL(request.url).origin === self.location.origin) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    return null;
+  }
+}
+
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        if (response.ok && new URL(event.request.url).origin === self.location.origin) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      caches.match(event.request).then(async cached => {
+        const networkPromise = updateCache(event.request);
+        if (cached) {
+          event.waitUntil(networkPromise);
+          return cached;
         }
-        return response;
+        const network = await networkPromise;
+        return network || caches.match("./offline.html");
       })
-      .catch(() =>
-        caches.match(event.request).then(cached => cached || caches.match("./offline.html"))
-      )
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request).then(async cached => {
+      const networkPromise = updateCache(event.request);
+      if (cached) {
+        event.waitUntil(networkPromise);
+        return cached;
+      }
+      return (await networkPromise) || caches.match("./offline.html");
+    })
   );
 });
