@@ -192,10 +192,29 @@
     }, 100);
   };
 
+  const loadNotifications = () => {
+    const path = location.pathname.toLowerCase();
+
+    if (path.endsWith("/admin.html") || path.endsWith("/admin")) {
+      return;
+    }
+
+    if (document.querySelector('script[data-studtask-notifications="true"]')) {
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "notifications.js";
+    script.dataset.studtaskNotifications = "true";
+    script.defer = true;
+    document.head.appendChild(script);
+  };
+
   const init = () => {
     add();
     addSignupTerms();
     openVerify();
+    loadNotifications();
   };
 
   if (document.readyState === "loading") {
