@@ -192,9 +192,154 @@
     }, 100);
   };
 
+  const speedUpProfile = () => {
+    if (!location.pathname.endsWith("/profile.html") && !location.pathname.endsWith("/profile")) {
+      return;
+    }
+
+    if (typeof window.loadProfile !== "function") {
+      return;
+    }
+
+    window.loadProfile = async id => {
+      const p = await window.getProfile(id);
+      if (!p) {
+        throw new Error("Profile could not be found.");
+      }
+
+      window.currentProfile = p;
+      $("profileName").textContent = p.full_name || "StudTask User";
+      $("profileUsername").textContent = p.username ? "@" + p.username : "Username not set";
+      $("profileLocation").textContent = p.location || "Location not set";
+      window.showAvatar(p.avatar_url);
+      $("fullName").value = p.full_name || "";
+
+      window.stats.xp = Math.max(0, Number(p.xp) || 0);
+      window.updateLevel(window.stats.xp);
+      window.updateCompletion(p);
+
+      const universityPromise = window.isOwnProfile
+        ? window.supabaseClient
+            .from("universities")
+            .select("id,name,short_name")
+            .eq("is_active", true)
+            .order("name")
+        : Promise.resolve({ data: [], error: null });
+
+      const campusPromise = p.campus_id
+        ? window.supabaseClient
+            .from("campuses")
+            .select("id,name")
+            .eq("id", p.campus_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null, error: null });
+
+      const postedPromise = window.supabaseClient
+        .from("tasks")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", id);
+
+      const completedPromise = window.supabaseClient
+        .from("tasks")
+        .select("id", { count: "exact", head: true })
+        .eq("runner_id", id)
+        .eq("status", "completed");
+
+      const reviewsPromise = window.supabaseClient
+        .from("reviews")
+        .select("id,task_id,reviewer_id,rating,note,created_at")
+        .eq("reviewee_id", id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      const reviewCountPromise = window.supabaseClient
+        .from("reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("reviewee_id", id);
+
+      const verificationPromise = window.isOwnProfile
+        ? window.supabaseClient
+            .from("profile_verifications")
+            .select("id,status,submitted_at,reviewed_at,reviewer_note,matric_number,course")
+            .eq("user_id", id)
+            .maybeSingle()
+        : Promise.resolve({ data: null, error: null });
+
+      const [universityResult, campusResult, postedResult, completedResult, reviewsResult, reviewCountResult, verificationResult] = await Promise.all([
+        universityPromise,
+        campusPromise,
+        postedPromise,
+        completedPromise,
+        reviewsPromise,
+        reviewCountPromise,
+        verificationPromise
+      ]);
+
+      window.universities = universityResult.error ? [] : universityResult.data || [];
+
+      if (window.isOwnProfile) {
+        window.setUniOptions(p.university_id);
+        await window.loadCampuses($("university").value, p.campus_id);
+      }
+
+      let universityName = p.university_other || "";
+      if (!universityName && p.university_id) {
+        const university = window.universities.find(item => item.id === p.university_id);
+        universityName = university?.name || "University not set";
+      }
+      $("profileUniversity").textContent = universityName ? "🎓 " + universityName : "University not set";
+
+      let campusName = p.campus_other || "";
+      if (!campusName && campusResult.data?.name) {
+        campusName = campusResult.data.name;
+      }
+      $("profileCampus").textContent = campusName ? "🏫 " + campusName : "Campus not set";
+
+      window.stats.posted = postedResult.error ? 0 : postedResult.count || 0;
+      window.stats.completed = completedResult.error ? 0 : completedResult.count || 0;
+      $("postedCount").textContent = window.stats.posted;
+      $("completedCount").textContent = window.stats.completed;
+
+      const reviews = reviewsResult.error ? [] : reviewsResult.data || [];
+      window.stats.reviews = reviewCountResult.error ? reviews.length : reviewCountResult.count || 0;
+      $("reviewCount").textContent = window.stats.reviews;
+
+      if (reviewsResult.error) {
+        $("reviewsList").innerHTML = '<div class="empty">Reviews could not be loaded.</div>';
+      } else if (reviews.length) {
+        window.stats.reputation = reviews.reduce((sum, review) => sum + (Number(review.rating) || 0), 0) / reviews.length;
+        $("repScore").textContent = window.stats.reputation.toFixed(1) + "/5";
+        $("repStars").textContent = window.stars(window.stats.reputation);
+        $("repText").textContent = `Based on ${window.stats.reviews} review${window.stats.reviews === 1 ? "" : "s"}.`;
+        $("reviewTrustIcon").textContent = "✓";
+        $("reviewTrustText").textContent = `${window.stats.reviews} review${window.stats.reviews === 1 ? "" : "s"} received.`;
+        $("reviewsList").innerHTML = reviews.map(review => `
+          <div class="review">
+            <div class="rtop">
+              <span class="rating">${window.stars(review.rating)}</span>
+              <span class="date">${window.esc(window.date(review.created_at))}</span>
+            </div>
+            ${review.note ? `<div class="note">${window.esc(review.note)}</div>` : ""}
+          </div>
+        `).join("");
+      } else {
+        window.stats.reputation = 0;
+        $("repScore").textContent = "New";
+        $("repStars").textContent = "☆☆☆☆☆";
+        $("repText").textContent = "Complete tasks and receive reviews to build your reputation.";
+        $("reviewsList").innerHTML = '<div class="empty">No reviews yet.</div>';
+      }
+
+      window.verificationData = window.isOwnProfile && !verificationResult.error ? verificationResult.data || null : null;
+      window.updateVerification(window.verificationData);
+      window.updateAchievements();
+    };
+  };
+
   const init = () => {
     add();
     addSignupTerms();
+    speedUpProfile();
     openVerify();
   };
 
