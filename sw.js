@@ -1,4 +1,4 @@
-const CACHE_NAME = "studtask-v12";
+const CACHE_NAME = "studtask-v13";
 const THIRD_PARTY_CACHE = "studtask-third-party-v2";
 const APP_SHELL = [
   "./",
@@ -9,6 +9,7 @@ const APP_SHELL = [
   "./logo.svg",
   "./icon.svg",
   "./brand.js",
+  "./notifications.js",
   "./sw.js"
 ];
 
