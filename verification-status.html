@@ -173,7 +173,7 @@
         </section>
 
         <a class="button green" href="profile.html">← RETURN TO PROFILE</a>
-        ${record?.status === "rejected" || !record ? '<a class="button blue" href="profile.html">🛡️ SUBMIT / UPDATE VERIFICATION</a>' : ''}
+        ${record?.status === "rejected" || !record ? '<a class="button blue" href="profile.html?verify=1">🛡️ SUBMIT / UPDATE VERIFICATION</a>' : ''}
       `;
     }
 
