@@ -5,9 +5,7 @@
   const REFERRAL_STORAGE_KEY = "studtask_referral_code";
   const REFERRAL_PATTERN = /^STUD-[A-F0-9]{8}$/i;
 
-  if (!supabaseClient) {
-    return;
-  }
+  if (!supabaseClient) return;
 
   function getReferralCode() {
     const code = localStorage.getItem(REFERRAL_STORAGE_KEY);
@@ -16,55 +14,18 @@
 
   function rememberReferralCode() {
     const code = new URLSearchParams(window.location.search).get("ref");
-
-    if (!code || !REFERRAL_PATTERN.test(code)) {
-      return;
+    if (code && REFERRAL_PATTERN.test(code)) {
+      localStorage.setItem(REFERRAL_STORAGE_KEY, code.toUpperCase());
     }
-
-    localStorage.setItem(REFERRAL_STORAGE_KEY, code.toUpperCase());
   }
 
-  function attachReferralToSignup() {
-    if (!window.location.pathname.endsWith("/signup.html") && !window.location.pathname.endsWith("/signup")) {
-      return;
-    }
-
-    if (typeof supabaseClient.auth.signUp !== "function") {
-      return;
-    }
-
-    const originalSignUp = supabaseClient.auth.signUp.bind(supabaseClient.auth);
-
-    supabaseClient.auth.signUp = credentials => {
-      const code = getReferralCode();
-
-      if (!code || !credentials || typeof credentials !== "object") {
-        return originalSignUp(credentials);
-      }
-
-      return originalSignUp({
-        ...credentials,
-        options: {
-          ...(credentials.options || {}),
-          data: {
-            ...(credentials.options?.data || {}),
-            referral_code: code
-          }
-        }
-      });
-    };
-  }
+  window.studTaskReferralCode = getReferralCode;
 
   async function claimReferral(user) {
-    if (!user) {
-      return;
-    }
+    if (!user) return;
 
     const code = getReferralCode();
-
-    if (!code) {
-      return;
-    }
+    if (!code) return;
 
     const { data: referrer, error: referrerError } = await supabaseClient
       .from("profiles")
@@ -72,21 +33,14 @@
       .eq("referral_code", code)
       .maybeSingle();
 
-    if (referrerError || !referrer || referrer.id === user.id) {
-      if (referrer?.id === user.id) {
-        localStorage.removeItem(REFERRAL_STORAGE_KEY);
-      }
-      return;
-    }
+    if (referrerError || !referrer || referrer.id === user.id) return;
 
-    const { error } = await supabaseClient
-      .from("referrals")
-      .insert({
-        referrer_id: referrer.id,
-        referred_user_id: user.id,
-        referral_code: code,
-        status: "registered"
-      });
+    const { error } = await supabaseClient.from("referrals").insert({
+      referrer_id: referrer.id,
+      referred_user_id: user.id,
+      referral_code: code,
+      status: "registered"
+    });
 
     if (!error || error.code === "23505") {
       localStorage.removeItem(REFERRAL_STORAGE_KEY);
@@ -94,7 +48,6 @@
   }
 
   rememberReferralCode();
-  attachReferralToSignup();
 
   supabaseClient.auth.getSession().then(({ data }) => {
     claimReferral(data?.session?.user || null);
@@ -115,6 +68,10 @@
         message.className = "message success";
       }
     };
-    new MutationObserver(fixSignupMessage).observe(document.body, { subtree: true, childList: true, characterData: true });
+    new MutationObserver(fixSignupMessage).observe(document.body, {
+      subtree: true,
+      childList: true,
+      characterData: true
+    });
   }
 })();
