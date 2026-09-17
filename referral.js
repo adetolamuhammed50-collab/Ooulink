@@ -9,6 +9,11 @@
     return;
   }
 
+  function getReferralCode() {
+    const code = localStorage.getItem(REFERRAL_STORAGE_KEY);
+    return code && REFERRAL_PATTERN.test(code) ? code.toUpperCase() : null;
+  }
+
   function rememberReferralCode() {
     const code = new URLSearchParams(window.location.search).get("ref");
 
@@ -19,14 +24,45 @@
     localStorage.setItem(REFERRAL_STORAGE_KEY, code.toUpperCase());
   }
 
+  function attachReferralToSignup() {
+    if (!window.location.pathname.endsWith("/signup.html") && !window.location.pathname.endsWith("/signup")) {
+      return;
+    }
+
+    if (typeof supabaseClient.auth.signUp !== "function") {
+      return;
+    }
+
+    const originalSignUp = supabaseClient.auth.signUp.bind(supabaseClient.auth);
+
+    supabaseClient.auth.signUp = credentials => {
+      const code = getReferralCode();
+
+      if (!code || !credentials || typeof credentials !== "object") {
+        return originalSignUp(credentials);
+      }
+
+      return originalSignUp({
+        ...credentials,
+        options: {
+          ...(credentials.options || {}),
+          data: {
+            ...(credentials.options?.data || {}),
+            referral_code: code
+          }
+        }
+      });
+    };
+  }
+
   async function claimReferral(user) {
     if (!user) {
       return;
     }
 
-    const code = localStorage.getItem(REFERRAL_STORAGE_KEY);
+    const code = getReferralCode();
 
-    if (!code || !REFERRAL_PATTERN.test(code)) {
+    if (!code) {
       return;
     }
 
@@ -58,6 +94,7 @@
   }
 
   rememberReferralCode();
+  attachReferralToSignup();
 
   supabaseClient.auth.getSession().then(({ data }) => {
     claimReferral(data?.session?.user || null);
