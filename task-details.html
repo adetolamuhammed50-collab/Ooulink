@@ -391,11 +391,11 @@ function renderCancellationAction() {
   if (status === "open" && isPoster) {
     allowed = true;
     label = "Cancel Task";
-    note = "Cancelling will return the reserved task funds to your available wallet balance.";
+    note = "Cancelling will end the task. Future payment handling will follow StudTask's rules when financial features are officially enabled.";
   } else if ((status === "accepted" || status === "in_progress") && isRunner) {
     allowed = true;
     label = "Cancel Task";
-    note = "Cancelling will end the task and return the reserved task funds to the poster.";
+    note = "Cancelling will end the task. Future payment handling will follow StudTask's rules when financial features are officially enabled.";
   }
 
   if (!allowed || document.getElementById("cancelTaskBtn")) {
@@ -470,7 +470,7 @@ function renderDisputeAction() {
 
   const note = document.createElement("div");
   note.className = "safety-note";
-  note.textContent = "Use a dispute when there is a serious task or payment disagreement that cannot be resolved normally.";
+  note.textContent = "Use a dispute when there is a serious task disagreement that cannot be resolved normally.";
 
   box.appendChild(button);
   box.appendChild(note);
