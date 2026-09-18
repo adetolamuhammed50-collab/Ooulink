@@ -5,17 +5,476 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Post a Task - StudTask</title>
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;font-family:Arial,sans-serif;background:#f5f7f6;color:#17221c;padding-bottom:78px}button,a,select,input,textarea{font:inherit}button,a{transition:transform .16s ease,box-shadow .16s ease,background-color .16s ease,opacity .16s ease}button:active,a:active{transform:scale(.96)}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(22,131,75,.2);outline-offset:2px}.wrap,main{width:100%;max-width:480px;margin:auto}header{background:#fff;border-bottom:1px solid #e5eae7;padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.025)}.head{display:flex;align-items:center;gap:12px}.back{color:#16834b;text-decoration:none;font-weight:800;font-size:14px;padding:7px 4px;border-radius:9px}.logo{font-size:21px;font-weight:800;color:#16834b}.sub{font-size:12px;color:#777;margin-top:2px}main{padding:18px 14px 24px}.card{background:#fff;border:1px solid #e4e9e6;border-radius:16px;padding:17px;box-shadow:0 2px 8px rgba(0,0,0,.035)}.intro{font-size:13px;color:#68736d;line-height:1.5;margin:0 0 18px}label{display:block;font-size:12px;color:#59655f;font-weight:800;margin:0 0 6px}input,textarea,select{width:100%;border:1px solid #dce3df;border-radius:11px;padding:12px 13px;background:#fafcfa;color:#17221c;font-size:14px;outline:0;margin-bottom:16px;min-height:43px;transition:border-color .16s,box-shadow .16s,background-color .16s}input:focus,textarea:focus,select:focus{border-color:#16834b;box-shadow:0 0 0 3px rgba(22,131,75,.07);background:#fff}textarea{min-height:120px;resize:vertical;line-height:1.45}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.context{display:flex;flex-wrap:wrap;gap:7px;margin:-4px 0 16px}.context span{font-size:10px;color:#59655f;background:#f1f5f3;border-radius:9px;padding:7px 8px}.context strong{color:#16834b}.attachment-box{border:2px dashed #cfd8d2;border-radius:14px;padding:15px;margin-bottom:18px;background:#fafcfb}.attachment-title{font-size:13px;font-weight:800;margin-bottom:5px}.attachment-help{color:#6b756f;font-size:11px;line-height:1.5;margin-bottom:11px}.file-input{width:100%;margin:0;padding:9px;border:1px solid #d9dfdb;border-radius:10px;background:#fff;min-height:auto}.selected-files{margin-top:11px}.file-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;margin-top:7px;background:#f0f8f3;border-radius:10px;font-size:12px}.file-info{min-width:0}.file-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.file-size{color:#6b756f;font-size:10px;margin-top:3px}.remove-file{border:0;background:#fee2e2;color:#b91c1c;border-radius:8px;padding:7px 9px;font-size:11px;cursor:pointer;flex-shrink:0}.post-button{width:100%;border:0;border-radius:12px;padding:14px;background:#16834b;color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 3px 8px rgba(22,131,75,.16)}.post-button:hover{background:#137544;box-shadow:0 5px 12px rgba(22,131,75,.2)}.post-button:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}.note{margin-top:13px;padding:12px;background:#f0f8f3;border-radius:10px;color:#416050;font-size:11px;line-height:1.5}.wallet-note{margin:0 0 16px;padding:12px;background:#eef9f2;border-radius:11px;color:#365746;font-size:11px;line-height:1.5}.wallet-note b{color:#16834b}.wallet-note a{color:#16834b;font-weight:800;text-decoration:none}nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid #e1e7e3;height:70px;display:flex;justify-content:center;z-index:30;box-shadow:0 -4px 18px rgba(0,0,0,.05)}.navin{width:100%;max-width:480px;display:flex;justify-content:space-around;align-items:center;padding:5px 6px}.navin a{position:relative;flex:1;max-width:92px;text-decoration:none;color:#69736d;font-size:10px;text-align:center;padding:6px 4px;border-radius:13px;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700}.navin a span{width:34px;height:28px;display:grid;place-items:center;font-size:19px;line-height:1;border-radius:10px;transition:transform .16s ease,background-color .16s ease}.navin a:active span{transform:scale(.86)}.navin a.active{color:#16834b;background:#f0f7f3}.navin a.active span{background:#e1f3e9}.navin a.active::after{content:"";position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:#16834b}.moderation-overlay{position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px;z-index:99999}.moderation-box{width:100%;max-width:420px;background:#fff;border-radius:20px;padding:28px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}.moderation-icon{font-size:48px;margin-bottom:12px}.moderation-box h2{font-size:23px;margin-bottom:10px;color:#17201b}.moderation-box p{font-size:14px;line-height:1.6;color:#5f6963;margin-bottom:10px}.moderation-reason{background:#fff4f4;border-radius:12px;padding:12px;margin:15px 0;color:#8b2020!important;text-align:left}.moderation-logout{width:100%;border:0;border-radius:12px;padding:14px;background:#16834b;color:#fff;font-weight:700;font-size:15px;margin-top:8px}.moderation-small{font-size:12px!important;color:#7b847f!important;margin-top:12px!important}@media(min-width:481px){body{background:#eef2ef}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f7f6;color:#17221c;padding-bottom:78px}
+button,a,select,input,textarea{font:inherit}
+button,a{transition:transform .16s ease,box-shadow .16s ease,background-color .16s ease,opacity .16s ease}
+button:active,a:active{transform:scale(.96)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(22,131,75,.2);outline-offset:2px}
+.wrap,main{width:100%;max-width:480px;margin:auto}
+header{background:#fff;border-bottom:1px solid #e5eae7;padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.025)}
+.head{display:flex;align-items:center;gap:12px}
+.back{color:#16834b;text-decoration:none;font-weight:800;font-size:14px;padding:7px 4px;border-radius:9px}
+.logo{font-size:21px;font-weight:800;color:#16834b}
+.sub{font-size:12px;color:#777;margin-top:2px}
+main{padding:18px 14px 24px}
+.card{background:#fff;border:1px solid #e4e9e6;border-radius:16px;padding:17px;box-shadow:0 2px 8px rgba(0,0,0,.035)}
+.intro{font-size:13px;color:#68736d;line-height:1.5;margin:0 0 18px}
+label{display:block;font-size:12px;color:#59655f;font-weight:800;margin:0 0 6px}
+input,textarea,select{width:100%;border:1px solid #dce3df;border-radius:11px;padding:12px 13px;background:#fafcfa;color:#17221c;font-size:14px;outline:0;margin-bottom:16px;min-height:43px;transition:border-color .16s,box-shadow .16s,background-color .16s}
+input:focus,textarea:focus,select:focus{border-color:#16834b;box-shadow:0 0 0 3px rgba(22,131,75,.07);background:#fff}
+textarea{min-height:120px;resize:vertical;line-height:1.45}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.context{display:flex;flex-wrap:wrap;gap:7px;margin:-4px 0 16px}
+.context span{font-size:10px;color:#59655f;background:#f1f5f3;border-radius:9px;padding:7px 8px}
+.context strong{color:#16834b}
+.attachment-box{border:2px dashed #cfd8d2;border-radius:14px;padding:15px;margin-bottom:18px;background:#fafcfb}
+.attachment-title{font-size:13px;font-weight:800;margin-bottom:5px}
+.attachment-help{color:#6b756f;font-size:11px;line-height:1.5;margin-bottom:11px}
+.file-input{width:100%;margin:0;padding:9px;border:1px solid #d9dfdb;border-radius:10px;background:#fff;min-height:auto}
+.selected-files{margin-top:11px}
+.file-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;margin-top:7px;background:#f0f8f3;border-radius:10px;font-size:12px}
+.file-info{min-width:0}
+.file-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-size{color:#6b756f;font-size:10px;margin-top:3px}
+.remove-file{border:0;background:#fee2e2;color:#b91c1c;border-radius:8px;padding:7px 9px;font-size:11px;cursor:pointer;flex-shrink:0}
+.post-button{width:100%;border:0;border-radius:12px;padding:14px;background:#16834b;color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 3px 8px rgba(22,131,75,.16)}
+.post-button:hover{background:#137544;box-shadow:0 5px 12px rgba(22,131,75,.2)}
+.post-button:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.note{margin-top:13px;padding:12px;background:#f0f8f3;border-radius:10px;color:#416050;font-size:11px;line-height:1.5}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid #e1e7e3;height:70px;display:flex;justify-content:center;z-index:30;box-shadow:0 -4px 18px rgba(0,0,0,.05)}
+.navin{width:100%;max-width:480px;display:flex;justify-content:space-around;align-items:center;padding:5px 6px}
+.navin a{position:relative;flex:1;max-width:92px;text-decoration:none;color:#69736d;font-size:10px;text-align:center;padding:6px 4px;border-radius:13px;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700}
+.navin a span{width:34px;height:28px;display:grid;place-items:center;font-size:19px;line-height:1;border-radius:10px;transition:transform .16s ease,background-color .16s ease}
+.navin a:active span{transform:scale(.86)}
+.navin a.active{color:#16834b;background:#f0f7f3}
+.navin a.active span{background:#e1f3e9}
+.navin a.active::after{content:"";position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:#16834b}
+.moderation-overlay{position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px;z-index:99999}
+.moderation-box{width:100%;max-width:420px;background:#fff;border-radius:20px;padding:28px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.moderation-icon{font-size:48px;margin-bottom:12px}
+.moderation-box h2{font-size:23px;margin-bottom:10px;color:#17201b}
+.moderation-box p{font-size:14px;line-height:1.6;color:#5f6963;margin-bottom:10px}
+.moderation-reason{background:#fff4f4;border-radius:12px;padding:12px;margin:15px 0;color:#8b2020!important;text-align:left}
+.moderation-logout{width:100%;border:0;border-radius:12px;padding:14px;background:#16834b;color:#fff;font-weight:700;font-size:15px;margin-top:8px}
+.moderation-small{font-size:12px!important;color:#7b847f!important;margin-top:12px!important}
+@media(min-width:481px){body{background:#eef2ef}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div id="app"><header><div class="wrap"><div class="head"><a class="back" href="index.html">← Back</a><div><div class="logo">StudTask</div><div class="sub">Post a task for students and campuses</div></div></div></div></header><main><div class="card"><p class="intro">Tell students what you need done. Your task will be reviewed before it becomes visible to other users.</p><div class="context" id="taskContext"></div><div class="wallet-note">Task budget is reserved from your available wallet balance when you post. <a href="wallet.html">Open Wallet</a></div><label for="title">What do you need done?</label><input type="text" id="title" placeholder="e.g. Print & Deliver Assignment" maxlength="120"><label for="description">Describe the task</label><textarea id="description" placeholder="Give runners enough information to understand what you need..." maxlength="3000"></textarea><label for="category">Category</label><select id="category"><option value="">Select a category</option><option>Errands</option><option>Physical Help</option><option>Digital Work</option><option>Creative Skills</option><option>Academic Support</option><option>Campus Services</option><option>Other</option></select><label for="location">Where should it be done?</label><input type="text" id="location" placeholder="e.g. Main Campus" maxlength="150"><div class="row"><div><label for="budget">Budget (₦)</label><input type="number" id="budget" placeholder="1000" min="1" step="1" inputmode="numeric"></div><div><label for="deadline">Deadline</label><input type="datetime-local" id="deadline"></div></div><label>Attach PDF files</label><div class="attachment-box"><div class="attachment-title">📎 Add task files</div><div class="attachment-help">Add PDFs that runners need for the task.<br>Maximum 10 MB per PDF.</div><input type="file" id="taskFiles" class="file-input" accept="application/pdf,.pdf" multiple><div id="selectedFiles" class="selected-files"></div></div><button class="post-button" id="postButton" type="button">POST TASK</button><div class="note">🛡️ New tasks are reviewed before they become visible to other users. You'll be able to see your task in My Tasks while it is awaiting approval.</div></div></main></div>
+<div id="app"><header><div class="wrap"><div class="head"><a class="back" href="index.html">← Back</a><div><div class="logo">StudTask</div><div class="sub">Post a task for students and campuses</div></div></div></div></header><main><div class="card"><p class="intro">Tell students what you need done. Your task will be reviewed before it becomes visible to other users.</p><div class="context" id="taskContext"></div><label for="title">What do you need done?</label><input type="text" id="title" placeholder="e.g. Print & Deliver Assignment" maxlength="120"><label for="description">Describe the task</label><textarea id="description" placeholder="Give runners enough information to understand what you need..." maxlength="3000"></textarea><label for="category">Category</label><select id="category"><option value="">Select a category</option><option>Errands</option><option>Physical Help</option><option>Digital Work</option><option>Creative Skills</option><option>Academic Support</option><option>Campus Services</option><option>Other</option></select><label for="location">Where should it be done?</label><input type="text" id="location" placeholder="e.g. Main Campus" maxlength="150"><div class="row"><div><label for="budget">Budget (₦)</label><input type="number" id="budget" placeholder="1000" min="1" step="1" inputmode="numeric"></div><div><label for="deadline">Deadline</label><input type="datetime-local" id="deadline"></div></div><label>Attach PDF files</label><div class="attachment-box"><div class="attachment-title">📎 Add task files</div><div class="attachment-help">Add PDFs that runners need for the task.<br>Maximum 10 MB per PDF.</div><input type="file" id="taskFiles" class="file-input" accept="application/pdf,.pdf" multiple><div id="selectedFiles" class="selected-files"></div></div><button class="post-button" id="postButton" type="button">POST TASK</button><div class="note">🛡️ New tasks are reviewed before they become visible to other users. You'll be able to see your task in My Tasks while it is awaiting approval.</div></div></main></div>
 <nav aria-label="Main navigation"><div class="navin"><a href="index.html"><span>⌂</span>Home</a><a href="my-tasks.html"><span>✓</span>My Tasks</a><a href="post-task.html" class="active"><span>＋</span>Post</a><a href="alerts.html"><span>🔔</span>Alerts</a><a href="profile.html"><span>♙</span>Profile</a></div></nav>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
-const SUPABASE_URL="https://dthvdxgxesomltlruogp.supabase.co",SUPABASE_KEY="sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr",supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);let moderationBlocked=false,selectedFiles=[],currentUser=null,profileData=null;const fileInput=document.getElementById("taskFiles"),selectedFilesContainer=document.getElementById("selectedFiles"),button=document.getElementById("postButton"),locationInput=document.getElementById("location"),taskContext=document.getElementById("taskContext");
-function escapeHTML(v){return String(v??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}function showModerationScreen(d){if(moderationBlocked)return;moderationBlocked=true;const temporary=d.ban_type==="temporary",end=temporary&&d.banned_until?new Date(d.banned_until).toLocaleString():null;document.body.innerHTML=`<div class="moderation-overlay"><div class="moderation-box"><div class="moderation-icon">🚫</div><h2>StudTask Account Restricted</h2><p>Your account is currently ${temporary?"temporarily":"permanently"} restricted and you cannot post tasks.</p>${temporary&&end?`<p><strong>Restriction ends:</strong><br>${escapeHTML(end)}</p>`:""}${d.ban_reason?`<p class="moderation-reason"><strong>Reason:</strong><br>${escapeHTML(d.ban_reason)}</p>`:""}<p>Please follow StudTask's rules. If you believe this action was made in error, contact StudTask support.</p><button class="moderation-logout" type="button" onclick="logoutModerated()">LOG OUT</button>${temporary?'<p class="moderation-small">Your access will automatically return after the temporary restriction expires.</p>':""}</div></div>`}async function logoutModerated(){await supabaseClient.auth.signOut();location.href="login.html"}async function getSession(){const{data,error}=await supabaseClient.auth.getSession();if(error)throw error;if(!data.session){location.href="login.html";return null}currentUser=data.session.user;return data.session}async function checkModeration(session){if(!session)return false;const{data,error}=await supabaseClient.from("user_moderation").select("status,ban_type,banned_until,ban_reason").eq("user_id",session.user.id).maybeSingle();if(error){console.error("Moderation check failed:",error);return true}if(data?.status==="banned"){const active=data.ban_type==="permanent"||(data.ban_type==="temporary"&&data.banned_until&&new Date(data.banned_until).getTime()>Date.now());if(active){showModerationScreen(data);return false}}return true}async function loadProfileContext(session){const{data,error}=await supabaseClient.from("profiles").select("university_id,university_other,campus_id,campus_other,location,university:universities(id,name,short_name),campus:campuses(id,name)").eq("id",session.user.id).maybeSingle();if(error){console.error("Profile context error:",error);return}profileData=data;const universityName=data?.university?.name||data?.university_other||"University not set",campusName=data?.campus?.name||data?.campus_other||"Campus not set";taskContext.innerHTML=`<span>University: <strong>${escapeHTML(universityName)}</strong></span><span>Campus: <strong>${escapeHTML(campusName)}</strong></span>`;if(!locationInput.value&&data?.location)locationInput.value=data.location}function formatFileSize(b){if(b<1024)return b+" B";if(b<1048576)return(b/1024).toFixed(1)+" KB";return(b/1048576).toFixed(1)+" MB"}function renderSelectedFiles(){selectedFilesContainer.innerHTML="";selectedFiles.forEach((file,index)=>{const item=document.createElement("div");item.className="file-item";item.innerHTML=`<div class="file-info"><div class="file-name">📄 ${escapeHTML(file.name)}</div><div class="file-size">${formatFileSize(file.size)}</div></div><button type="button" class="remove-file">Remove</button>`;item.querySelector("button").addEventListener("click",()=>{selectedFiles.splice(index,1);renderSelectedFiles()});selectedFilesContainer.appendChild(item)})}fileInput.addEventListener("change",()=>{for(const file of Array.from(fileInput.files)){const isPDF=file.type==="application/pdf"||file.name.toLowerCase().endsWith(".pdf");if(!isPDF){alert(`"${file.name}" is not a PDF.\n\nOnly PDF files are allowed.`);continue}if(file.size>10*1024*1024){alert(`"${file.name}" is larger than 10 MB.\n\nMaximum file size is 10 MB.`);continue}if(selectedFiles.length>=5){alert("You can attach up to 5 PDF files.");break}if(selectedFiles.some(existing=>existing.name===file.name&&existing.size===file.size))continue;selectedFiles.push(file)}fileInput.value="";renderSelectedFiles()});
-async function postTask(){if(button.disabled)return;let session;try{session=await getSession();if(!session||!(await checkModeration(session)))return}catch(error){console.error("Pre-post check error:",error);alert(error.message||"Could not verify your account.");return}const title=document.getElementById("title").value.trim(),description=document.getElementById("description").value.trim(),category=document.getElementById("category").value,taskLocation=locationInput.value.trim(),budgetValue=document.getElementById("budget").value,deadlineValue=document.getElementById("deadline").value,budget=Number(budgetValue),deadline=deadlineValue?new Date(deadlineValue):null;if(!title||!description||!category||!taskLocation||!budgetValue||!deadlineValue){alert("Please fill in all the task details.");return}if(!Number.isFinite(budget)||budget<=0){alert("Please enter a valid budget greater than ₦0.");return}if(!deadline||Number.isNaN(deadline.getTime())||deadline.getTime()<=Date.now()){alert("Please choose a future deadline.");return}button.disabled=true;button.textContent="CHECKING WALLET...";let createdTask=null,uploadedPaths=[];try{const{data:taskId,error}=await supabaseClient.rpc("create_task_with_funding",{p_title:title,p_description:description,p_category:category,p_location:taskLocation,p_budget:budget,p_deadline:deadline.toISOString(),p_university_id:profileData?.university_id||null,p_university_other:profileData?.university_other||null,p_campus_id:profileData?.campus_id||null,p_campus_other:profileData?.campus_other||null});if(error){if(error.message?.includes("INSUFFICIENT_BALANCE")){throw new Error("INSUFFICIENT_BALANCE")}throw new Error("Could not fund and create task:\n"+error.message)}if(!taskId)throw new Error("Could not create task.");const{data:task,error:taskError}=await supabaseClient.from("tasks").select("*").eq("id",taskId).single();if(taskError||!task)throw new Error(taskError?.message||"Task was created but could not be loaded.");createdTask=task;const{error:xpError}=await supabaseClient.rpc("award_task_xp",{target_task_id:createdTask.id,target_reward_type:"task_posted"});if(xpError)console.error("Task posting XP error:",xpError);for(let i=0;i<selectedFiles.length;i++){const file=selectedFiles[i];button.textContent=`UPLOADING FILE ${i+1}/${selectedFiles.length}...`;const safeFileName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");const uniqueName=Date.now()+"_"+Math.random().toString(36).substring(2,10)+"_"+safeFileName;const filePath=`${createdTask.id}/${session.user.id}/${uniqueName}`;const{error:uploadError}=await supabaseClient.storage.from("TaskFiles").upload(filePath,file,{contentType:"application/pdf",upsert:false});if(uploadError)throw new Error(`Could not upload "${file.name}":\n${uploadError.message}`);uploadedPaths.push(filePath);const{error:attachmentError}=await supabaseClient.from("task_attachments").insert({task_id:createdTask.id,user_id:session.user.id,file_name:file.name,file_path:filePath,file_size:file.size,mime_type:"application/pdf"});if(attachmentError)throw new Error(`Could not save attachment "${file.name}":\n${attachmentError.message}`)}const{error:notificationError}=await supabaseClient.from("notifications").insert({user_id:session.user.id,task_id:createdTask.id,type:"task_posted",title:"Task submitted for review",message:`Your task "${createdTask.title}" was submitted and is awaiting admin approval.`});if(notificationError)console.error("Notification creation error:",notificationError);alert(selectedFiles.length?"Task submitted for review! 🎉\n\nYour PDF files were attached successfully.\n\nYour task will become visible to other users after admin approval.":"Task submitted for review! 🎉\n\nYour task will become visible to other users after admin approval.");location.href="my-tasks.html"}catch(error){console.error("Post task error:",error);if(error.message==="INSUFFICIENT_BALANCE"){alert("Insufficient wallet balance.\n\nYour task budget is ₦"+budget.toLocaleString("en-NG")+". Deposit enough funds into your wallet before posting this task.");location.href="wallet.html";return}if(createdTask){try{if(uploadedPaths.length)await supabaseClient.storage.from("TaskFiles").remove(uploadedPaths);await supabaseClient.from("task_attachments").delete().eq("task_id",createdTask.id).eq("user_id",session.user.id);await supabaseClient.from("tasks").delete().eq("id",createdTask.id).eq("user_id",session.user.id).is("runner_id",null)}catch(cleanupError){console.error("Post task cleanup error:",cleanupError)}}alert("Something went wrong.\n\n"+(error.message||"Could not post task."));button.disabled=false;button.textContent="POST TASK"}}button.addEventListener("click",postTask);document.addEventListener("DOMContentLoaded",async()=>{try{const session=await getSession();if(session&&await checkModeration(session))await loadProfileContext(session)}catch(error){console.error("Page initialization error:",error)}});
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://dthvdxgxesomltlruogp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let moderationBlocked = false;
+let selectedFiles = [];
+let currentUser = null;
+let profileData = null;
+
+const fileInput = document.getElementById("taskFiles");
+const selectedFilesContainer = document.getElementById("selectedFiles");
+const button = document.getElementById("postButton");
+const locationInput = document.getElementById("location");
+const taskContext = document.getElementById("taskContext");
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  }[character]));
+}
+
+function showModerationScreen(data) {
+  if (moderationBlocked) return;
+
+  moderationBlocked = true;
+
+  const temporary = data.ban_type === "temporary";
+  const end = temporary && data.banned_until
+    ? new Date(data.banned_until).toLocaleString()
+    : null;
+
+  document.body.innerHTML = `
+    <div class="moderation-overlay">
+      <div class="moderation-box">
+        <div class="moderation-icon">🚫</div>
+        <h2>StudTask Account Restricted</h2>
+        <p>Your account is currently ${temporary ? "temporarily" : "permanently"} restricted and you cannot post tasks.</p>
+        ${temporary && end ? `<p><strong>Restriction ends:</strong><br>${escapeHTML(end)}</p>` : ""}
+        ${data.ban_reason ? `<p class="moderation-reason"><strong>Reason:</strong><br>${escapeHTML(data.ban_reason)}</p>` : ""}
+        <p>Please follow StudTask's rules. If you believe this action was made in error, contact StudTask support.</p>
+        <button class="moderation-logout" type="button" onclick="logoutModerated()">LOG OUT</button>
+        ${temporary ? '<p class="moderation-small">Your access will automatically return after the temporary restriction expires.</p>' : ""}
+      </div>
+    </div>
+  `;
+}
+
+async function logoutModerated() {
+  await supabaseClient.auth.signOut();
+  location.href = "login.html";
+}
+
+async function getSession() {
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error) throw error;
+
+  if (!data.session) {
+    location.href = "login.html";
+    return null;
+  }
+
+  currentUser = data.session.user;
+  return data.session;
+}
+
+async function checkModeration(session) {
+  if (!session) return false;
+
+  const { data, error } = await supabaseClient
+    .from("user_moderation")
+    .select("status,ban_type,banned_until,ban_reason")
+    .eq("user_id", session.user.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Moderation check failed:", error);
+    return true;
+  }
+
+  if (data?.status === "banned") {
+    const active =
+      data.ban_type === "permanent" ||
+      (data.ban_type === "temporary" &&
+        data.banned_until &&
+        new Date(data.banned_until).getTime() > Date.now());
+
+    if (active) {
+      showModerationScreen(data);
+      return false;
+    }
+  }
+
+  return true;
+}
+
+async function loadProfileContext(session) {
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("university_id,university_other,campus_id,campus_other,location,university:universities(id,name,short_name),campus:campuses(id,name)")
+    .eq("id", session.user.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Profile context error:", error);
+    return;
+  }
+
+  profileData = data;
+
+  const universityName =
+    data?.university?.name ||
+    data?.university_other ||
+    "University not set";
+
+  const campusName =
+    data?.campus?.name ||
+    data?.campus_other ||
+    "Campus not set";
+
+  taskContext.innerHTML = `
+    <span>University: <strong>${escapeHTML(universityName)}</strong></span>
+    <span>Campus: <strong>${escapeHTML(campusName)}</strong></span>
+  `;
+
+  if (!locationInput.value && data?.location) {
+    locationInput.value = data.location;
+  }
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / 1048576).toFixed(1) + " MB";
+}
+
+function renderSelectedFiles() {
+  selectedFilesContainer.innerHTML = "";
+
+  selectedFiles.forEach((file, index) => {
+    const item = document.createElement("div");
+    item.className = "file-item";
+
+    item.innerHTML = `
+      <div class="file-info">
+        <div class="file-name">📄 ${escapeHTML(file.name)}</div>
+        <div class="file-size">${formatFileSize(file.size)}</div>
+      </div>
+      <button type="button" class="remove-file">Remove</button>
+    `;
+
+    item.querySelector("button").addEventListener("click", () => {
+      selectedFiles.splice(index, 1);
+      renderSelectedFiles();
+    });
+
+    selectedFilesContainer.appendChild(item);
+  });
+}
+
+fileInput.addEventListener("change", () => {
+  for (const file of Array.from(fileInput.files)) {
+    const isPDF =
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf");
+
+    if (!isPDF) {
+      alert(`"${file.name}" is not a PDF.\n\nOnly PDF files are allowed.`);
+      continue;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert(`"${file.name}" is larger than 10 MB.\n\nMaximum file size is 10 MB.`);
+      continue;
+    }
+
+    if (selectedFiles.length >= 5) {
+      alert("You can attach up to 5 PDF files.");
+      break;
+    }
+
+    if (selectedFiles.some(existing =>
+      existing.name === file.name && existing.size === file.size
+    )) {
+      continue;
+    }
+
+    selectedFiles.push(file);
+  }
+
+  fileInput.value = "";
+  renderSelectedFiles();
+});
+
+async function postTask() {
+  if (button.disabled) return;
+
+  let session;
+
+  try {
+    session = await getSession();
+
+    if (!session || !(await checkModeration(session))) {
+      return;
+    }
+  } catch (error) {
+    console.error("Pre-post check error:", error);
+    alert(error.message || "Could not verify your account.");
+    return;
+  }
+
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const category = document.getElementById("category").value;
+  const taskLocation = locationInput.value.trim();
+  const budgetValue = document.getElementById("budget").value;
+  const deadlineValue = document.getElementById("deadline").value;
+
+  const budget = Number(budgetValue);
+  const deadline = deadlineValue ? new Date(deadlineValue) : null;
+
+  if (!title || !description || !category || !taskLocation || !budgetValue || !deadlineValue) {
+    alert("Please fill in all the task details.");
+    return;
+  }
+
+  if (!Number.isFinite(budget) || budget <= 0) {
+    alert("Please enter a valid budget greater than ₦0.");
+    return;
+  }
+
+  if (!deadline || Number.isNaN(deadline.getTime()) || deadline.getTime() <= Date.now()) {
+    alert("Please choose a future deadline.");
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "POSTING...";
+
+  let createdTask = null;
+  const uploadedPaths = [];
+
+  try {
+    const { data: task, error: taskError } = await supabaseClient
+      .from("tasks")
+      .insert({
+        user_id: session.user.id,
+        title,
+        description,
+        category,
+        location: taskLocation,
+        budget,
+        deadline: deadline.toISOString(),
+        runner_id: null,
+        status: "open",
+        moderation_status: "pending",
+        moderation_note: null,
+        university_id: profileData?.university_id || null,
+        university_other: profileData?.university_other || null,
+        campus_id: profileData?.campus_id || null,
+        campus_other: profileData?.campus_other || null
+      })
+      .select("*")
+      .single();
+
+    if (taskError || !task) {
+      throw new Error(taskError?.message || "Could not create task.");
+    }
+
+    createdTask = task;
+
+    const { error: xpError } = await supabaseClient.rpc("award_task_xp", {
+      target_task_id: createdTask.id,
+      target_reward_type: "task_posted"
+    });
+
+    if (xpError) {
+      console.error("Task posting XP error:", xpError);
+    }
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i];
+
+      button.textContent = `UPLOADING FILE ${i + 1}/${selectedFiles.length}...`;
+
+      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const uniqueName =
+        Date.now() + "_" +
+        Math.random().toString(36).substring(2, 10) +
+        "_" +
+        safeFileName;
+
+      const filePath =
+        `${createdTask.id}/${session.user.id}/${uniqueName}`;
+
+      const { error: uploadError } = await supabaseClient
+        .storage
+        .from("TaskFiles")
+        .upload(filePath, file, {
+          contentType: "application/pdf",
+          upsert: false
+        });
+
+      if (uploadError) {
+        throw new Error(
+          `Could not upload "${file.name}":\n${uploadError.message}`
+        );
+      }
+
+      uploadedPaths.push(filePath);
+
+      const { error: attachmentError } = await supabaseClient
+        .from("task_attachments")
+        .insert({
+          task_id: createdTask.id,
+          user_id: session.user.id,
+          file_name: file.name,
+          file_path: filePath,
+          file_size: file.size,
+          mime_type: "application/pdf"
+        });
+
+      if (attachmentError) {
+        throw new Error(
+          `Could not save attachment "${file.name}":\n${attachmentError.message}`
+        );
+      }
+    }
+
+    const { error: notificationError } = await supabaseClient
+      .from("notifications")
+      .insert({
+        user_id: session.user.id,
+        task_id: createdTask.id,
+        type: "task_posted",
+        title: "Task submitted for review",
+        message:
+          `Your task "${createdTask.title}" was submitted and is awaiting admin approval.`
+      });
+
+    if (notificationError) {
+      console.error("Notification creation error:", notificationError);
+    }
+
+    alert(
+      selectedFiles.length
+        ? "Task submitted for review! 🎉\n\nYour PDF files were attached successfully.\n\nYour task will become visible to other users after admin approval."
+        : "Task submitted for review! 🎉\n\nYour task will become visible to other users after admin approval."
+    );
+
+    location.href = "my-tasks.html";
+  } catch (error) {
+    console.error("Post task error:", error);
+
+    if (createdTask) {
+      try {
+        if (uploadedPaths.length) {
+          await supabaseClient.storage
+            .from("TaskFiles")
+            .remove(uploadedPaths);
+        }
+
+        await supabaseClient
+          .from("task_attachments")
+          .delete()
+          .eq("task_id", createdTask.id)
+          .eq("user_id", session.user.id);
+
+        await supabaseClient
+          .from("tasks")
+          .delete()
+          .eq("id", createdTask.id)
+          .eq("user_id", session.user.id)
+          .is("runner_id", null);
+      } catch (cleanupError) {
+        console.error("Post task cleanup error:", cleanupError);
+      }
+    }
+
+    alert(
+      "Something went wrong.\n\n" +
+      (error.message || "Could not post task.")
+    );
+
+    button.disabled = false;
+    button.textContent = "POST TASK";
+  }
+}
+
+button.addEventListener("click", postTask);
+
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const session = await getSession();
+
+    if (session && await checkModeration(session)) {
+      await loadProfileContext(session);
+    }
+  } catch (error) {
+    console.error("Page initialization error:", error);
+  }
+});
 </script>
-<script src="post-again.js"></script>  <script src="brand.js"></script>
+<script src="post-again.js"></script>
+<script src="brand.js"></script>
 </body>
 </html>
