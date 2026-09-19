@@ -3,31 +3,296 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Wallet - StudTask</title>
+<title>Test Wallet - StudTask</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#172033}
-.wrap{width:100%;max-width:480px;margin:auto;padding:24px 16px}
-.card{background:#fff;border-radius:20px;padding:22px;box-shadow:0 5px 18px rgba(0,0,0,.06);margin-top:16px}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#172033;padding-bottom:78px}
+.wrap{width:100%;max-width:480px;margin:auto;padding:18px 15px}
 .back{color:#16834b;text-decoration:none;font-size:14px;font-weight:700}
-h1{font-size:27px;margin:16px 0 6px}
+.top{margin-bottom:14px}
+.top h1{font-size:27px;margin:12px 0 5px}
 .sub{color:#687386;font-size:13px;line-height:1.5}
-.notice{margin-top:18px;padding:14px;border-radius:13px;background:#eef9f2;color:#365746;font-size:12px;line-height:1.55}
-.button{display:block;margin-top:16px;text-align:center;background:#16834b;color:#fff;border-radius:12px;padding:13px;font-size:12px;font-weight:800;text-decoration:none}
+.badge{display:inline-block;margin-top:8px;background:#fff2c9;color:#735600;border-radius:999px;padding:6px 9px;font-size:10px;font-weight:800;letter-spacing:.4px}
+.card{background:#fff;border-radius:20px;padding:18px;box-shadow:0 5px 18px rgba(0,0,0,.06);margin-bottom:14px}
+.balance{background:#16834b;color:#fff}
+.small{font-size:10px;opacity:.82;font-weight:800;letter-spacing:.6px}
+.amount{font-size:32px;font-weight:900;margin-top:6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}
+.mini{background:rgba(255,255,255,.14);padding:10px;border-radius:11px}
+.mini b{display:block;font-size:15px;margin-top:3px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.btn{border:0;border-radius:11px;padding:12px;font-weight:800;font-size:12px;cursor:pointer}
+.green{background:#16834b;color:#fff}
+.light{background:#eef9f2;color:#16834b}
+.muted{background:#f1f3f6;color:#687386}
+.danger{background:#fff0f0;color:#b42318}
+.title{font-size:15px;font-weight:800;margin-bottom:10px}
+.note{font-size:11px;color:#687386;line-height:1.5}
+.status{font-size:11px;margin-top:9px;color:#687386;line-height:1.45}
+.tx{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid #edf0f3}
+.tx:first-child{border-top:0}
+.tx b{font-size:12px}
+.tx p{font-size:10px;color:#8993a3;margin-top:3px}
+.plus{color:#16834b;font-weight:800}
+.minus{color:#c62828;font-weight:800}
+.empty{text-align:center;color:#8993a3;font-size:11px;padding:15px}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #e7ebef;display:grid;grid-template-columns:repeat(5,1fr);z-index:20}
+.nav a{text-decoration:none;color:#687386;text-align:center;font-size:9px;padding:8px 2px;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.nav-icon{font-size:17px;line-height:18px;margin-bottom:2px}
+.active{color:#16834b!important;font-weight:800}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center;padding:10px;z-index:50}
+.modal.show{display:flex}
+.sheet{width:100%;max-width:480px;background:#fff;border-radius:20px;padding:18px}
+.close{float:right;border:0;background:#f1f3f5;border-radius:50%;width:32px;height:32px;font-size:18px}
+.input{width:100%;padding:12px;border:1px solid #dce2e8;border-radius:10px;font-size:14px;outline:0;margin:10px 0}
+.warn{background:#fff7df;color:#735600;padding:11px;border-radius:10px;font-size:10px;line-height:1.5;margin-top:10px}
 </style>
 </head>
 <body>
 <main class="wrap">
+<div class="top">
 <a class="back" href="profile.html">← Back to Profile</a>
-<section class="card">
-<h1>Wallet</h1>
-<p class="sub">Financial features are not currently available on StudTask.</p>
-<div class="notice">
-Wallet balances, deposits, withdrawals, task funding and payment settlement are disabled until StudTask officially enables financial features.
+<h1>Test Wallet</h1>
+<p class="sub">A simulated wallet for testing the StudTask money flow.</p>
+<span class="badge">TEST / DEMO MONEY ONLY</span>
 </div>
-<a class="button" href="profile.html">RETURN TO PROFILE</a>
+
+<section class="card balance">
+<div class="small">TEST AVAILABLE BALANCE</div>
+<div class="amount" id="available">₦0.00</div>
+<div class="grid">
+<div class="mini"><div class="small">RESERVED</div><b id="locked">₦0.00</b></div>
+<div class="mini"><div class="small">WITHDRAWABLE</div><b id="withdrawable">₦0.00</b></div>
+</div>
+</section>
+
+<section class="card">
+<div class="actions">
+<button class="btn light" onclick="openDeposit()">＋ ADD TEST FUNDS</button>
+<button class="btn muted" onclick="openWithdraw()">WITHDRAW TEST FUNDS</button>
+</div>
+<div class="actions" style="margin-top:9px">
+<button class="btn light" onclick="openFundTask()">FUND TEST TASK</button>
+<button class="btn green" onclick="releaseTask()">RELEASE TEST PAYMENT</button>
+</div>
+<div class="status" id="status"></div>
+</section>
+
+<section class="card">
+<div class="title">Test flow</div>
+<p class="note">Add simulated funds → reserve funds for a test task → simulate task completion → release the test payment to the withdrawable balance.</p>
+<div class="warn">This page does not use Supabase wallet balances, payment providers, deposits, withdrawals, escrow, or real-money settlement. Test data is stored only in this browser.</div>
+</section>
+
+<section class="card">
+<div class="title">Test transactions</div>
+<div id="transactions"><div class="empty">No test transactions yet.</div></div>
+<button class="btn danger" style="width:100%;margin-top:12px" onclick="resetTestWallet()">RESET TEST WALLET</button>
 </section>
 </main>
+
+<nav class="nav">
+<a href="index.html"><span class="nav-icon">⌂</span>Home</a>
+<a href="my-tasks.html"><span class="nav-icon">✓</span>My Tasks</a>
+<a href="post-task.html"><span class="nav-icon">＋</span>Post</a>
+<a href="alerts.html"><span class="nav-icon">🔔</span>Alerts</a>
+<a href="profile.html" class="active"><span class="nav-icon">♙</span>Profile</a>
+</nav>
+
+<div class="modal" id="modal">
+<div class="sheet">
+<button class="close" onclick="closeModal()">×</button>
+<h2 id="modalTitle">Add test funds</h2>
+<p class="note" id="modalNote" style="margin-top:8px">Enter an amount for the simulated transaction.</p>
+<input class="input" id="amount" type="number" min="1" step="1" placeholder="Amount in ₦">
+<button class="btn green" style="width:100%" id="modalButton" onclick="submitModal()">CONFIRM TEST ACTION</button>
+<div class="status" id="modalStatus"></div>
+</div>
+</div>
+
+<script>
+const STORAGE_KEY = "studtask_test_wallet_v1";
+
+let wallet = {
+  available: 0,
+  locked: 0,
+  withdrawable: 0,
+  transactions: []
+};
+
+let modalMode = "deposit";
+
+function money(value) {
+  return "₦" + Number(value || 0).toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function loadWallet() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (saved && typeof saved === "object") {
+      wallet = {
+        available: Number(saved.available) || 0,
+        locked: Number(saved.locked) || 0,
+        withdrawable: Number(saved.withdrawable) || 0,
+        transactions: Array.isArray(saved.transactions) ? saved.transactions : []
+      };
+    }
+  } catch (error) {
+    console.warn("Could not load test wallet.", error);
+  }
+  render();
+}
+
+function saveWallet() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(wallet));
+  render();
+}
+
+function addTransaction(type, amount, description) {
+  wallet.transactions.unshift({
+    type,
+    amount: Number(amount),
+    description,
+    createdAt: new Date().toISOString()
+  });
+  wallet.transactions = wallet.transactions.slice(0, 50);
+}
+
+function render() {
+  document.getElementById("available").textContent = money(wallet.available);
+  document.getElementById("locked").textContent = money(wallet.locked);
+  document.getElementById("withdrawable").textContent = money(wallet.withdrawable);
+
+  const box = document.getElementById("transactions");
+
+  if (!wallet.transactions.length) {
+    box.innerHTML = '<div class="empty">No test transactions yet.</div>';
+    return;
+  }
+
+  box.innerHTML = wallet.transactions.map(transaction => {
+    const positive = transaction.type === "credit" || transaction.type === "release";
+    const sign = positive ? "+" : "-";
+    const cls = positive ? "plus" : "minus";
+    const date = new Date(transaction.createdAt).toLocaleString();
+
+    return '<div class="tx">' +
+      '<div><b>' + escapeHtml(transaction.description) + '</b><p>' + escapeHtml(date) + '</p></div>' +
+      '<div class="' + cls + '">' + sign + money(transaction.amount) + '</div>' +
+      '</div>';
+  }).join("");
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function openDeposit() {
+  modalMode = "deposit";
+  openModal("Add test funds", "Enter an amount to simulate a successful test deposit.", "ADD TEST FUNDS");
+}
+
+function openWithdraw() {
+  modalMode = "withdraw";
+  openModal("Withdraw test funds", "This only simulates a withdrawal. No real money leaves the account.", "WITHDRAW TEST FUNDS");
+}
+
+function openFundTask() {
+  modalMode = "fund";
+  openModal("Fund a test task", "Reserve part of your test balance for a simulated task.", "FUND TEST TASK");
+}
+
+function openModal(title, note, buttonText) {
+  document.getElementById("modalTitle").textContent = title;
+  document.getElementById("modalNote").textContent = note;
+  document.getElementById("modalButton").textContent = buttonText;
+  document.getElementById("amount").value = "";
+  document.getElementById("modalStatus").textContent = "";
+  document.getElementById("modal").classList.add("show");
+  document.getElementById("amount").focus();
+}
+
+function closeModal() {
+  document.getElementById("modal").classList.remove("show");
+}
+
+function submitModal() {
+  const amount = Number(document.getElementById("amount").value);
+  const status = document.getElementById("modalStatus");
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    status.textContent = "Enter a valid test amount.";
+    return;
+  }
+
+  if (modalMode === "deposit") {
+    wallet.available += amount;
+    addTransaction("credit", amount, "Test funds added");
+    status.textContent = "Test funds added successfully.";
+  } else if (modalMode === "withdraw") {
+    if (amount > wallet.withdrawable) {
+      status.textContent = "Insufficient withdrawable test funds.";
+      return;
+    }
+
+    wallet.withdrawable -= amount;
+    addTransaction("debit", amount, "Test withdrawal");
+    status.textContent = "Test withdrawal completed.";
+  } else if (modalMode === "fund") {
+    if (amount > wallet.available) {
+      status.textContent = "Insufficient available test balance.";
+      return;
+    }
+
+    wallet.available -= amount;
+    wallet.locked += amount;
+    addTransaction("debit", amount, "Test task funding reserved");
+    status.textContent = "Test task funded and amount reserved.";
+  }
+
+  saveWallet();
+  setTimeout(closeModal, 650);
+}
+
+function releaseTask() {
+  if (wallet.locked <= 0) {
+    document.getElementById("status").textContent = "No funded test task is waiting for release.";
+    return;
+  }
+
+  const amount = wallet.locked;
+  wallet.locked = 0;
+  wallet.withdrawable += amount;
+  addTransaction("release", amount, "Test task payment released to runner");
+  saveWallet();
+  document.getElementById("status").textContent = money(amount) + " released to the test withdrawable balance.";
+}
+
+function resetTestWallet() {
+  const confirmed = window.confirm("Reset all test wallet data on this device?");
+  if (!confirmed) return;
+
+  wallet = {
+    available: 0,
+    locked: 0,
+    withdrawable: 0,
+    transactions: []
+  };
+
+  saveWallet();
+  document.getElementById("status").textContent = "Test wallet reset.";
+}
+
+loadWallet();
+</script>
 <script src="brand.js"></script>
 </body>
 </html>
