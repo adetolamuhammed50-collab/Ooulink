@@ -553,8 +553,8 @@ function recordRecentlyViewedTask(taskId) {
 }
 
 async function loadTask(){
-  recordRecentlyViewedTask(taskId);
-  const taskId=getTaskId();if(!taskId){showNotFound();return}
+  const taskId=getTaskId();
+  recordRecentlyViewedTask(taskId);if(!taskId){showNotFound();return}
   showLoading(true);isLoading=true;
   try{
     const{data:userData,error:userError}=await supabaseClient.auth.getUser();if(userError)console.warn("Auth check:",userError);currentUser=userData?.user||null;
