@@ -1,4 +1,4 @@
-const CACHE_NAME = "studtask-v13";
+const CACHE_NAME = "studtask-v14";
 const THIRD_PARTY_CACHE = "studtask-third-party-v2";
 const APP_SHELL = [
   "./",
