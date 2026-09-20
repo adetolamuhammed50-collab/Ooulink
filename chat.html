@@ -27,6 +27,12 @@
     .task-title { margin-top: 8px; font-size: 13px; font-weight: 700; line-height: 1.3; }
     .realtime-status { margin-top: 5px; font-size: 10px; color: rgba(255,255,255,.76); }
     .realtime-status.connected { color: #dcfce7; }
+    .typing-indicator { display: none; padding-left: 66px; margin-top: 4px; font-size: 11px; color: rgba(255,255,255,.86); min-height: 16px; }
+    .typing-dots { display: inline-flex; align-items: center; gap: 3px; margin-left: 3px; vertical-align: middle; }
+    .typing-dots i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; animation: typingDot 1s infinite ease-in-out; }
+    .typing-dots i:nth-child(2) { animation-delay: .15s; }
+    .typing-dots i:nth-child(3) { animation-delay: .3s; }
+    @keyframes typingDot { 0%, 60%, 100% { opacity: .35; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-2px); } }
     .realtime-status.warning { color: #fef3c7; }
     .content { padding-bottom: 12px; }
     .files-section { margin: 12px; padding: 14px; background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
@@ -95,6 +101,7 @@
       </a>
       <div id="taskTitle" class="task-title">Loading task...</div>
       <div id="realtimeStatus" class="realtime-status">Connecting to live chat...</div>
+      <div id="typingIndicator" class="typing-indicator" aria-live="polite">Typing<span class="typing-dots"><i></i><i></i><i></i></span></div>
     </header>
 
     <div class="content">
@@ -136,6 +143,10 @@
     let currentTask = null;
     let otherUserId = null;
     let realtimeChannel = null;
+    let realtimeConnected = false;
+    let typingTimer = null;
+    let typingHideTimer = null;
+    let isTypingBroadcasting = false;
     let sending = false;
     let selectedFile = null;
     let lastSentText = "";
@@ -147,6 +158,7 @@
     const messagesBox = document.getElementById("messages");
     const taskTitle = document.getElementById("taskTitle");
     const realtimeStatus = document.getElementById("realtimeStatus");
+    const typingIndicator = document.getElementById("typingIndicator");
     const filesContainer = document.getElementById("filesContainer");
     const composer = document.getElementById("composer");
     const messageInput = document.getElementById("messageInput");
@@ -434,9 +446,52 @@
       }
     }
 
+    function setTypingIndicator(show) {
+      clearTimeout(typingHideTimer);
+      if (show) {
+        typingIndicator.style.display = "block";
+        typingHideTimer = setTimeout(() => setTypingIndicator(false), 1800);
+      } else {
+        typingIndicator.style.display = "none";
+      }
+    }
+
+    async function broadcastTyping(typing) {
+      if (!realtimeChannel || !realtimeConnected || !currentUser) return;
+      if (typing === isTypingBroadcasting) return;
+      isTypingBroadcasting = typing;
+      try {
+        await realtimeChannel.send({ type: "broadcast", event: "typing", payload: { user_id: currentUser.id, typing: !!typing } });
+      } catch (error) {
+        console.warn("Typing broadcast failed:", error);
+      }
+    }
+
+    function handleTypingInput() {
+      if (!messageInput.value.trim()) {
+        clearTimeout(typingTimer);
+        broadcastTyping(false);
+        return;
+      }
+      broadcastTyping(true);
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(() => broadcastTyping(false), 1000);
+    }
+
+    function stopTyping() {
+      clearTimeout(typingTimer);
+      broadcastTyping(false);
+    }
+
     function startRealtime() {
       if (!currentTask || !currentUser || realtimeChannel) return;
-      realtimeChannel = supabaseClient.channel("StudTask-chat-" + currentTask.id)
+      realtimeChannel = supabaseClient.channel("StudTask-chat-" + currentTask.id, { config: { private: true } })
+        .on("broadcast", { event: "typing" }, payload => {
+          const data = payload?.payload;
+          if (!data || data.user_id === currentUser.id || data.user_id !== otherUserId) return;
+          if (data.typing) setTypingIndicator(true);
+          else setTypingIndicator(false);
+        })
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `task_id=eq.${currentTask.id}` }, async payload => {
           const message = payload.new;
           if (!message || message.task_id !== currentTask.id) return;
@@ -449,9 +504,11 @@
         })
         .subscribe(status => {
           if (status === "SUBSCRIBED") {
+            realtimeConnected = true;
             realtimeStatus.textContent = "🟢 Live chat connected";
             realtimeStatus.className = "realtime-status connected";
           } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            realtimeConnected = false;
             realtimeStatus.textContent = "⚠️ Live chat connection issue";
             realtimeStatus.className = "realtime-status warning";
           }
@@ -543,6 +600,7 @@
         lastSentText = text;
         lastSentAt = Date.now();
         messageInput.value = "";
+        stopTyping();
         clearSelectedFile();
         await supabaseClient.from("notifications").insert({ user_id: otherUserId, task_id: currentTask.id, type: "new_message", title: "New message", message: `You received a new message about "${currentTask.title}".` });
         scrollToBottom();
@@ -578,6 +636,8 @@
       event.preventDefault();
       sendMessage();
     });
+    messageInput.addEventListener("input", handleTypingInput);
+    messageInput.addEventListener("blur", stopTyping);
     messageInput.addEventListener("keydown", event => {
       if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
@@ -608,6 +668,7 @@
     }
 
     window.addEventListener("beforeunload", () => {
+      stopTyping();
       if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
     });
 
