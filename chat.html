@@ -520,7 +520,7 @@
         showBlockedMessage("⚡ Please wait a moment before sending again.");
         return;
       }
-      if (text && text === lastSentText && now - lastSentAt < 10000 && !selectedFile) {
+      if (text && text === lastSentText && now - lastSentAt < 30000 && !selectedFile) {
         showBlockedMessage("⚡ That message was already sent. Please type something new.");
         return;
       }
@@ -529,11 +529,6 @@
       sendBtn.disabled = true;
       attachBtn.disabled = true;
       const fileToSend = selectedFile;
-      const pendingId = "pending-" + crypto.randomUUID();
-      const pendingMessage = { id: pendingId, sender_id: currentUser.id, message: text || "📎 Attachment", created_at: new Date().toISOString(), status: "pending" };
-      await renderMessage(pendingMessage, { attachments: [] });
-      scrollToBottom();
-
       try {
         let attachmentInfo = null;
         if (fileToSend) {
@@ -544,7 +539,6 @@
           attachmentInfo = { file: fileToSend, path };
         }
         const data = await insertMessageRecord(text, attachmentInfo);
-        clearPendingMessage(pendingId);
         await renderMessage(data);
         lastSentText = text;
         lastSentAt = Date.now();
@@ -553,8 +547,7 @@
         await supabaseClient.from("notifications").insert({ user_id: otherUserId, task_id: currentTask.id, type: "new_message", title: "New message", message: `You received a new message about "${currentTask.title}".` });
         scrollToBottom();
       } catch (error) {
-        clearPendingMessage(pendingId);
-        const failed = { ...pendingMessage, status: "failed", retryText: text };
+        const failed = { id: "failed-" + crypto.randomUUID(), sender_id: currentUser.id, message: text || "📎 Attachment", created_at: new Date().toISOString(), status: "failed", retryText: text };
         await renderMessage(failed, { attachments: [] });
         const errorText = error?.message || "Message could not be sent. Please try again.";
         if (errorText.includes("STUDTASK_RATE_LIMITED")) showBlockedMessage(errorText.split("STUDTASK_RATE_LIMITED:")[1] || "You are sending messages too quickly.");
