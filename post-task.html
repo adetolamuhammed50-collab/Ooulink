@@ -314,30 +314,34 @@ async function postTask() {
   const uploadedPaths = [];
 
   try {
-    const { data: task, error: taskError } = await supabaseClient
+    const { data: createdTaskId, error: taskError } = await supabaseClient.rpc("create_task_with_funding", {
+      p_title: title,
+      p_description: description,
+      p_category: category,
+      p_location: taskLocation,
+      p_budget: budget,
+      p_deadline: deadline.toISOString(),
+      p_university_id: profileData?.university_id || null,
+      p_university_other: profileData?.university_other || null,
+      p_campus_id: profileData?.campus_id || null,
+      p_campus_other: profileData?.campus_other || null
+    });
+
+    if (taskError || !createdTaskId) {
+      if (taskError?.message === "INSUFFICIENT_BALANCE" || taskError?.code === "P0001" && taskError?.message?.includes("INSUFFICIENT_BALANCE")) {
+        throw new Error("INSUFFICIENT_BALANCE");
+      }
+      throw new Error(taskError?.message || "Could not create and fund task.");
+    }
+
+    const { data: task, error: loadTaskError } = await supabaseClient
       .from("tasks")
-      .insert({
-        user_id: session.user.id,
-        title,
-        description,
-        category,
-        location: taskLocation,
-        budget,
-        deadline: deadline.toISOString(),
-        runner_id: null,
-        status: "open",
-        moderation_status: "pending",
-        moderation_note: null,
-        university_id: profileData?.university_id || null,
-        university_other: profileData?.university_other || null,
-        campus_id: profileData?.campus_id || null,
-        campus_other: profileData?.campus_other || null
-      })
       .select("*")
+      .eq("id", createdTaskId)
       .single();
 
-    if (taskError || !task) {
-      throw new Error(taskError?.message || "Could not create task.");
+    if (loadTaskError || !task) {
+      throw new Error(loadTaskError?.message || "Task was funded but could not be loaded.");
     }
 
     createdTask = task;
