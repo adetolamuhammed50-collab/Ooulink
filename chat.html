@@ -144,6 +144,8 @@
     let otherUserId = null;
     let realtimeChannel = null;
     let realtimeConnected = false;
+    let realtimeReconnectTimer = null;
+    let realtimeReconnectAttempts = 0;
     let typingTimer = null;
     let typingHideTimer = null;
     let isTypingBroadcasting = false;
@@ -483,34 +485,104 @@
       broadcastTyping(false);
     }
 
+    async function stopRealtime() {
+      if (realtimeReconnectTimer) {
+        clearTimeout(realtimeReconnectTimer);
+        realtimeReconnectTimer = null;
+      }
+
+      if (realtimeChannel) {
+        try {
+          await supabaseClient.removeChannel(realtimeChannel);
+        } catch (error) {
+          console.warn("Live chat channel cleanup failed:", error);
+        }
+        realtimeChannel = null;
+      }
+
+      realtimeConnected = false;
+    }
+
+    function scheduleRealtimeReconnect() {
+      if (!currentTask || !currentUser || realtimeReconnectTimer) return;
+
+      const delay = Math.min(1000 * Math.pow(2, realtimeReconnectAttempts), 10000);
+      realtimeReconnectAttempts = Math.min(realtimeReconnectAttempts + 1, 4);
+
+      realtimeReconnectTimer = setTimeout(() => {
+        realtimeReconnectTimer = null;
+        startRealtime();
+      }, delay);
+    }
+
     function startRealtime() {
       if (!currentTask || !currentUser || realtimeChannel) return;
-      realtimeChannel = supabaseClient.channel("StudTask-chat-" + currentTask.id, { config: { private: true } })
+
+      realtimeStatus.textContent = "Connecting to live chat...";
+      realtimeStatus.className = "realtime-status";
+
+      realtimeChannel = supabaseClient
+        .channel("StudTask-chat-" + currentTask.id)
         .on("broadcast", { event: "typing" }, payload => {
           const data = payload?.payload;
+
           if (!data || data.user_id === currentUser.id || data.user_id !== otherUserId) return;
+
           if (data.typing) setTypingIndicator(true);
           else setTypingIndicator(false);
         })
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `task_id=eq.${currentTask.id}` }, async payload => {
-          const message = payload.new;
-          if (!message || message.task_id !== currentTask.id) return;
-          if (message.sender_id !== currentUser.id && message.receiver_id !== currentUser.id) return;
-          await renderMessage(message);
-          scrollToBottom();
-          if (message.receiver_id === currentUser.id && !message.is_read) {
-            await supabaseClient.from("messages").update({ is_read: true }).eq("id", message.id);
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+            filter: `task_id=eq.${currentTask.id}`
+          },
+          async payload => {
+            const message = payload.new;
+
+            if (!message || message.task_id !== currentTask.id) return;
+            if (message.sender_id !== currentUser.id && message.receiver_id !== currentUser.id) return;
+
+            const existing = document.querySelector(`[data-message-id="${CSS.escape(String(message.id))}"]`);
+
+            if (!existing) {
+              await renderMessage(message);
+              scrollToBottom();
+            }
+
+            if (message.receiver_id === currentUser.id && !message.is_read) {
+              await supabaseClient
+                .from("messages")
+                .update({ is_read: true })
+                .eq("id", message.id)
+                .eq("receiver_id", currentUser.id);
+            }
           }
-        })
+        )
         .subscribe(status => {
           if (status === "SUBSCRIBED") {
             realtimeConnected = true;
+            realtimeReconnectAttempts = 0;
             realtimeStatus.textContent = "🟢 Live chat connected";
             realtimeStatus.className = "realtime-status connected";
-          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-            realtimeConnected = false;
-            realtimeStatus.textContent = "⚠️ Live chat connection issue";
+            return;
+          }
+
+          realtimeConnected = false;
+
+          if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+            realtimeStatus.textContent = "⚠️ Reconnecting live chat...";
             realtimeStatus.className = "realtime-status warning";
+
+            if (realtimeChannel) {
+              const failedChannel = realtimeChannel;
+              realtimeChannel = null;
+              supabaseClient.removeChannel(failedChannel).catch(() => {});
+            }
+
+            scheduleRealtimeReconnect();
           }
         });
     }
