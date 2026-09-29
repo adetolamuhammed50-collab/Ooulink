@@ -13,9 +13,47 @@
   let currentUserId = null;
 
   function getNotificationDots() {
+    const existing = Array.from(
+      document.querySelectorAll("#notificationDot, #dot, .notification-dot")
+    );
+
+    document.querySelectorAll('a[href="alerts.html"]').forEach(link => {
+      if (!link.querySelector(".notification-dot")) {
+        const dot = document.createElement("span");
+        dot.className = "notification-dot";
+        dot.setAttribute("aria-hidden", "true");
+        link.style.position = "relative";
+        link.appendChild(dot);
+      }
+    });
+
     return Array.from(
       document.querySelectorAll("#notificationDot, #dot, .notification-dot")
     );
+  }
+
+  function ensureNotificationDotStyles() {
+    if (document.getElementById("studtaskNotificationDotStyles")) return;
+
+    const style = document.createElement("style");
+    style.id = "studtaskNotificationDotStyles";
+    style.textContent = `
+      .notification-dot {
+        position: absolute;
+        top: 2px;
+        right: 8px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ef4444;
+        border: 2px solid #fff;
+        box-sizing: border-box;
+        display: none;
+        z-index: 2;
+        pointer-events: none;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   function setNotificationDot(hasUnread) {
@@ -258,6 +296,9 @@
   async function subscribeToNotifications(userId) {
     if (!userId) return;
 
+    ensureNotificationDotStyles();
+    getNotificationDots();
+
     if (notificationsChannel) {
       await notificationSupabase.removeChannel(notificationsChannel);
       notificationsChannel = null;
@@ -291,6 +332,8 @@
   }
 
   async function initializeNotifications() {
+    ensureNotificationDotStyles();
+    getNotificationDots();
     const { data, error } = await notificationSupabase.auth.getSession();
 
     if (error || !data.session) {
@@ -302,6 +345,8 @@
     await updateNotificationDot();
     await subscribeToNotifications(currentUserId);
   }
+
+  ensureNotificationDotStyles();
 
   notificationSupabase.auth.onAuthStateChange((event, session) => {
     if (event === "SIGNED_OUT") {
