@@ -11,6 +11,8 @@
 
   let notificationsChannel = null;
   let currentUserId = null;
+  let reconnectTimer = null;
+  let reconnectAttempts = 0;
 
   function getNotificationDots() {
     const existing = Array.from(
@@ -293,6 +295,18 @@
     window.setTimeout(removePopup, 6000);
   }
 
+  function scheduleNotificationReconnect() {
+    if (!currentUserId || reconnectTimer) return;
+
+    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000);
+    reconnectAttempts = Math.min(reconnectAttempts + 1, 4);
+
+    reconnectTimer = window.setTimeout(() => {
+      reconnectTimer = null;
+      subscribeToNotifications(currentUserId);
+    }, delay);
+  }
+
   async function subscribeToNotifications(userId) {
     if (!userId) return;
 
@@ -326,7 +340,19 @@
       )
       .subscribe(status => {
         if (status === "SUBSCRIBED") {
+          reconnectAttempts = 0;
           updateNotificationDot();
+          return;
+        }
+
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          if (notificationsChannel) {
+            const failedChannel = notificationsChannel;
+            notificationsChannel = null;
+            notificationSupabase.removeChannel(failedChannel).catch(() => {});
+          }
+
+          scheduleNotificationReconnect();
         }
       });
   }
@@ -353,6 +379,11 @@
       currentUserId = null;
       setNotificationDot(false);
       removePopup();
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+
       if (notificationsChannel) {
         notificationSupabase.removeChannel(notificationsChannel);
         notificationsChannel = null;
