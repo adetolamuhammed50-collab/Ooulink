@@ -547,7 +547,21 @@
 
       list.forEach(notification => notification.is_read = true);
       await updateDot();
-      render();
+
+      const group = alerts.querySelector(".group.open");
+      if (group) {
+        group.classList.remove("has-unread");
+
+        const badge = group.querySelector(".badge");
+        if (badge) {
+          badge.textContent = "0";
+          badge.style.display = "none";
+        }
+
+        group.querySelectorAll(".note.unread").forEach(note => {
+          note.classList.remove("unread");
+        });
+      }
     }
 
     function openChat(id) {
