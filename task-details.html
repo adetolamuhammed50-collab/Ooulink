@@ -286,12 +286,57 @@ async function renderReviewSection(){
 }
 
 async function deleteTask(){
-  if(!currentUser||!currentTask){showToast("Please try again.");return}
-  if(!isOwner()){showToast("Only the task poster can delete this task.");return}
-  if(normalizeStatus(currentTask.status)!=="open"||currentTask.runner_id){showToast("Only an open task with no assigned runner can be deleted.");return}
-  if(!window.confirm("Delete this task permanently? This cannot be undone."))return;
-  const button=$("deleteTaskBtn");if(button){button.disabled=true;button.textContent="Deleting..."}
-  try{const{error}=await supabaseClient.from("tasks").delete().eq("id",currentTask.id).eq("user_id",currentUser.id).eq("status","open").is("runner_id",null);if(error)throw error;showToast("Task deleted.");setTimeout(()=>{window.location.href="my-tasks.html"},700)}catch(error){console.error("Delete task error:",error);if(button){button.disabled=false;button.textContent="🗑 Delete Task"}showToast(error?.message||"Could not delete this task.")}
+  if(!currentUser||!currentTask){
+    showToast("Please try again.");
+    return;
+  }
+
+  if(!isOwner()){
+    showToast("Only the task poster can delete this task.");
+    return;
+  }
+
+  if(normalizeStatus(currentTask.status)!=="open"||currentTask.runner_id){
+    showToast("Only an open task with no assigned runner can be deleted.");
+    return;
+  }
+
+  if(!window.confirm("Delete this task permanently? Any locked task funds will be refunded automatically. This cannot be undone.")){
+    return;
+  }
+
+  const button=$("deleteTaskBtn");
+
+  if(button){
+    button.disabled=true;
+    button.textContent="Deleting...";
+  }
+
+  try{
+    const{data,error}=await supabaseClient.rpc("delete_task",{
+      p_task_id:currentTask.id
+    });
+
+    if(error){
+      throw error;
+    }
+
+    if(data!==true){
+      throw new Error("Task deletion could not be completed.");
+    }
+
+    showToast("Task deleted and any locked funds were refunded.");
+    setTimeout(()=>{window.location.href="my-tasks.html"},700);
+  }catch(error){
+    console.error("Delete task error:",error);
+
+    if(button){
+      button.disabled=false;
+      button.textContent="🗑 Delete Task";
+    }
+
+    showToast(error?.message||"Could not delete this task.");
+  }
 }
 
 async function reportTask(){
