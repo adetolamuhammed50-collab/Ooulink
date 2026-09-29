@@ -155,6 +155,7 @@
     let lastSentAt = 0;
     let blockedTimer = null;
     let moderationBlocked = false;
+    const renderingMessageIds = new Set();
 
     const taskId = new URLSearchParams(location.search).get("id");
     const messagesBox = document.getElementById("messages");
@@ -384,8 +385,16 @@
     }
 
     async function renderMessage(message, options = {}) {
-      if (!message || !currentUser) return;
-      if (document.querySelector(`[data-message-id="${CSS.escape(String(message.id))}"]`)) return;
+      if (!message || !currentUser) return null;
+
+      const messageId = String(message.id || "");
+      if (!messageId) return null;
+
+      if (document.querySelector(`[data-message-id="${CSS.escape(messageId)}"]`) || renderingMessageIds.has(messageId)) {
+        return null;
+      }
+
+      renderingMessageIds.add(messageId);
       if (options.dateSeparator !== false) {
         const previous = messagesBox.querySelector(".message-row:last-of-type");
         const previousDate = previous?.dataset.createdAt;
@@ -428,6 +437,7 @@
       wrap.appendChild(bubble);
       row.appendChild(wrap);
       messagesBox.appendChild(row);
+      renderingMessageIds.delete(messageId);
       return row;
     }
 
@@ -566,6 +576,19 @@
             realtimeConnected = true;
             realtimeReconnectAttempts = 0;
             realtimeStatus.textContent = "🟢 Live chat connected";
+
+            supabaseClient
+              .from("messages")
+              .select("id,task_id,sender_id,receiver_id,message,is_read,created_at")
+              .eq("task_id", currentTask.id)
+              .order("created_at", { ascending: true })
+              .then(async ({ data }) => {
+                for (const message of data || []) {
+                  await renderMessage(message);
+                }
+                if (data?.length) scrollToBottom();
+              })
+              .catch(error => console.warn("Live chat sync failed:", error));
             realtimeStatus.className = "realtime-status connected";
             return;
           }
