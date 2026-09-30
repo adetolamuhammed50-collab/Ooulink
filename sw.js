@@ -1,4 +1,4 @@
-const CACHE_NAME = "studtask-v14";
+const CACHE_NAME = "studtask-v15";
 const THIRD_PARTY_CACHE = "studtask-third-party-v2";
 const APP_SHELL = [
   "./",
@@ -95,16 +95,7 @@ self.addEventListener("fetch", event => {
 
   if (event.request.mode === "navigate") {
     event.respondWith(
-      caches.match(event.request).then(async oldResponse => {
-        const networkResponse = updateCache(event.request);
-
-        if (oldResponse) {
-          event.waitUntil(networkResponse);
-          return oldResponse;
-        }
-
-        return await networkResponse || caches.match("./offline.html");
-      })
+      updateCache(event.request).then(response => response || caches.match(event.request) || caches.match("./offline.html"))
     );
     return;
   }
