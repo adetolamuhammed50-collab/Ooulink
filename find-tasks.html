@@ -301,63 +301,8 @@ function campusLabel(task) {
 
 function matches(task) {
     if (task.status !== "open" || task.moderation_status !== "approved" || expired(task.deadline)) return false;
-
-    const query = searchInput.value.trim().toLowerCase();
-    if (query) {
-        const searchable = [
-            task.title,
-            task.description,
-            task.location,
-            task.category,
-            task.university?.name,
-            task.university?.short_name,
-            task.university_other,
-            task.campus?.name,
-            task.campus_other
-        ].join(" ").toLowerCase();
-        if (!searchable.includes(query)) return false;
-    }
-
-    if (scope.value === "university" && profileData?.university_id) {
-        if (task.university_id !== profileData.university_id) return false;
-    }
-
-    if (scope.value === "campus" && profileData?.campus_id) {
-        if (task.campus_id !== profileData.campus_id) return false;
-    }
-
-    if (scope.value === "location" && profileData?.location) {
-        if (String(task.location || "").toLowerCase() !== String(profileData.location).toLowerCase()) return false;
-    }
-
-    if (category.value !== "all" && String(task.category || "") !== category.value) return false;
-    if (universityFilter.value !== "all" && String(task.university_id || "") !== universityFilter.value) return false;
-    if (campusFilter.value !== "all" && String(task.campus_id || "") !== campusFilter.value) return false;
-
-    const locationQuery = locationFilter.value.trim().toLowerCase();
-    if (locationQuery && !String(task.location || "").toLowerCase().includes(locationQuery)) return false;
-
-    const budget = budgetValue(task);
-    if (minBudget.value && budget < Number(minBudget.value)) return false;
-    if (maxBudget.value && budget > Number(maxBudget.value)) return false;
-
-    if (deadlineFilter.value !== "all" && task.deadline) {
-        const deadline = new Date(task.deadline).getTime();
-        const now = Date.now();
-        if (deadlineFilter.value === "today") {
-            const today = new Date();
-            const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-            const end = start + 86400000;
-            if (deadline < start || deadline >= end) return false;
-        } else {
-            const days = Number(deadlineFilter.value);
-            if (deadline > now + days * 86400000) return false;
-        }
-    }
-
     return true;
 }
-
 function sortTasks(tasks) {
     const selectedSort = sort.value;
     return tasks.sort((a, b) => {
@@ -483,72 +428,33 @@ async function loadCampusFilters(universityId = "all") {
 
 async function loadTasks(reset = false) {
     if (loading) return;
-
-    if (reset) {
-        page = 0;
-        hasMore = true;
-        allTasks = [];
-        tasksBox.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
-    }
-
+    if (reset) { page = 0; hasMore = true; allTasks = []; tasksBox.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>'; }
     if (!hasMore) return;
-
-    loading = true;
-    loadMore.disabled = true;
-    loadMore.textContent = "Loading...";
-
-    const from = page * PAGE_SIZE;
-    const to = from + PAGE_SIZE - 1;
-
-    const { data, error } = await supabaseClient
-        .from("tasks")
-        .select(`
-            id,
-            title,
-            description,
-            location,
-            category,
-            budget,
-            deadline,
-            created_at,
-            status,
-            moderation_status,
-            university_id,
-            university_other,
-            campus_id,
-            campus_other,
-            university:universities(id,name,short_name),
-            campus:campuses(id,name)
-        `)
-        .eq("status", "open")
-        .eq("moderation_status", "approved")
-        .order("created_at", { ascending: false })
-        .range(from, to);
-
-    if (error) {
-        tasksBox.innerHTML = `<div class="empty"><b>Couldn't load tasks</b><span>${esc(error.message)}</span></div>`;
-        loading = false;
-        loadMore.disabled = false;
-        loadMore.textContent = "Load more tasks";
-        return;
-    }
-
-    const fresh = (data || []).filter(task =>
-        task.status === "open" &&
-        task.moderation_status === "approved" &&
-        !expired(task.deadline)
-    );
-
-    allTasks = allTasks.concat(fresh);
-    hasMore = (data || []).length === PAGE_SIZE;
-    page += 1;
-
-    render();
-    loading = false;
-    loadMore.disabled = false;
-    loadMore.textContent = hasMore ? "Load more tasks" : "All tasks loaded";
+    loading = true; loadMore.disabled = true; loadMore.textContent = "Loading...";
+    const from = page * PAGE_SIZE, to = from + PAGE_SIZE - 1;
+    let query = supabaseClient.from("tasks").select(`id,title,description,location,category,budget,deadline,created_at,status,moderation_status,university_id,university_other,campus_id,campus_other,university:universities(id,name,short_name),campus:campuses(id,name)`).eq("status","open").eq("moderation_status","approved");
+    const q = searchInput.value.trim();
+    if (q) { const safe = q.replace(/[%_]/g,"\\$&").replace(/,/g," "); query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%,location.ilike.%${safe}%,category.ilike.%${safe}%`); }
+    if (scope.value === "university" && profileData?.university_id) query = query.eq("university_id",profileData.university_id);
+    if (scope.value === "campus" && profileData?.campus_id) query = query.eq("campus_id",profileData.campus_id);
+    if (scope.value === "location" && profileData?.location) query = query.ilike("location",profileData.location);
+    if (category.value !== "all") query = query.eq("category",category.value);
+    if (universityFilter.value !== "all") query = query.eq("university_id",universityFilter.value);
+    if (campusFilter.value !== "all") query = query.eq("campus_id",campusFilter.value);
+    const loc = locationFilter.value.trim(); if (loc) query = query.ilike("location",`%${loc}%`);
+    if (minBudget.value) query = query.gte("budget",Number(minBudget.value));
+    if (maxBudget.value) query = query.lte("budget",Number(maxBudget.value));
+    if (deadlineFilter.value === "today") { const d=new Date(),s=new Date(d.getFullYear(),d.getMonth(),d.getDate()).toISOString(),e=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1).toISOString(); query=query.gte("deadline",s).lt("deadline",e); }
+    else if (deadlineFilter.value !== "all") query=query.lte("deadline",new Date(Date.now()+Number(deadlineFilter.value)*86400000).toISOString()).gte("deadline",new Date().toISOString());
+    if (sort.value === "highest") query=query.order("budget",{ascending:false}).order("created_at",{ascending:false});
+    else if (sort.value === "lowest") query=query.order("budget",{ascending:true}).order("created_at",{ascending:false});
+    else if (sort.value === "deadline") query=query.order("deadline",{ascending:true,nullsFirst:false}).order("created_at",{ascending:false});
+    else query=query.order("created_at",{ascending:false});
+    const {data,error}=await query.range(from,to);
+    if(error){tasksBox.innerHTML=`<div class="empty"><b>Couldn't load tasks</b><span>${esc(error.message)}</span></div>`;loading=false;loadMore.disabled=false;loadMore.textContent="Load more tasks";return;}
+    const fresh=(data||[]).filter(task=>task.status==="open"&&task.moderation_status==="approved"&&!expired(task.deadline));
+    allTasks=allTasks.concat(fresh); hasMore=(data||[]).length===PAGE_SIZE; page+=1; render(); loading=false; loadMore.disabled=false; loadMore.textContent=hasMore?"Load more tasks":"All tasks loaded";
 }
-
 function applyFilters() {
     saveFilters();
     renderChips();
