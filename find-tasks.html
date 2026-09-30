@@ -58,7 +58,7 @@ main{padding:0 14px 22px}
 .meta span{font-size:10px;color:#68736d;background:#f3f6f4;border-radius:8px;padding:6px 7px}
 .deadline{color:#d47700!important;background:#fff4df!important}
 .expired{opacity:.65}
-.view{width:100%;border:0;background:#16834b;color:#fff;padding:11px;border-radius:10px;font-weight:800;cursor:pointer;box-shadow:0 3px 8px rgba(22,131,75,.16)}
+.save-card{border:1px solid #dce8e1;background:#f8fbf9;color:#16834b;padding:9px 10px;border-radius:10px;font-weight:800;font-size:11px;cursor:pointer;flex:1}.task-actions{display:flex;gap:7px;margin-top:8px}.save-card.saved{background:#e8f6ee}.save-card:disabled{opacity:.55}.view{width:100%;border:0;background:#16834b;color:#fff;padding:11px;border-radius:10px;font-weight:800;cursor:pointer;box-shadow:0 3px 8px rgba(22,131,75,.16)}
 .view:hover{background:#137544;box-shadow:0 5px 12px rgba(22,131,75,.2)}
 .load{width:100%;border:1px solid #16834b;background:#fff;color:#16834b;padding:12px;border-radius:11px;font-weight:800;margin:3px 0 14px;cursor:pointer}
 .load:disabled{opacity:.55;cursor:default}
@@ -360,10 +360,11 @@ function render() {
                 <span>📍 ${esc(task.location || "Location not set")}</span>
                 <span class="${deadlineClass(task.deadline)}">⏰ ${esc(deadlineText(task.deadline))}</span>
             </div>
-            <button class="view" type="button" data-task-id="${esc(task.id)}">View Task</button>
+            <div class="task-actions"><button class="view" type="button" data-task-id="${esc(task.id)}">View Task</button><button class="save-card" type="button" data-save-id="${esc(task.id)}">🔖 Save</button></div>
         </article>`;
     }).join("");
 
+    tasksBox.querySelectorAll("[data-save-id]").forEach(button => { button.addEventListener("click", async event => { event.stopPropagation(); if (!currentUser) { location.href="login.html"; return; } const b=event.currentTarget; const id=b.dataset.saveId; b.disabled=true; try { const {data,error}=await supabaseClient.rpc("is_task_saved",{p_task_id:id}); if(error) throw error; const saved=data===true; const action=saved?"unsave_task":"save_task"; const {error:actionError}=await supabaseClient.rpc(action,{p_task_id:id}); if(actionError) throw actionError; b.classList.toggle("saved",!saved); b.textContent=!saved?"🔖 Saved":"🔖 Save"; } catch(error){ console.error("Quick save error:",error); } finally { b.disabled=false; } }); });
     tasksBox.querySelectorAll("[data-task-id]").forEach(button => {
         button.addEventListener("click", event => {
             const id = event.currentTarget.dataset.taskId;
