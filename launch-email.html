@@ -88,7 +88,7 @@ async function sendLaunch(){
   const button=$("sendBtn");button.disabled=true;button.textContent="SENDING...";
   $("result").className="status";$("result").textContent="Sending through Brevo...";
   try{
-    const r=await fetch(SUPABASE_URL+"/functions/v1/send-waitlist-email",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token,"apikey":SUPABASE_KEY},body:JSON.stringify({status:status==="all"?null:status,senderEmail,senderName:$("senderName").value.trim()||"StudTask",subject,htmlContent,textContent})});
+    const r=await fetch(SUPABASE_URL+"/functions/v1/send-waitlist-email",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token,"apikey":SUPABASE_KEY},body:JSON.stringify({all:status==="all",status:status==="all"?null:status,senderEmail,senderName:$("senderName").value.trim()||"StudTask",subject,htmlContent,textContent})});
     const data=await r.json().catch(()=>({}));
     if(!r.ok)throw new Error(data?.error||("Send failed ("+r.status+")."));
     $("result").textContent="Sent: "+(data.sent||0)+" · Failed: "+(data.failed||0);
