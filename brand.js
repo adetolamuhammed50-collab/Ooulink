@@ -172,6 +172,19 @@
     modal.addEventListener("click", e => { if (e.target === modal) modal.style.display = "none"; });
   };
 
+  const addLaunchEmailButton = () => {
+    const path = location.pathname.toLowerCase();
+    if (!path.endsWith("/admin.html") && !path.endsWith("/admin")) return;
+    if (document.getElementById("studtaskLaunchEmailButton")) return;
+    const button = document.createElement("button");
+    button.id = "studtaskLaunchEmailButton";
+    button.type = "button";
+    button.textContent = "✉️ LAUNCH EMAIL";
+    button.style.cssText = "position:fixed;right:14px;bottom:14px;z-index:9997;border:0;border-radius:14px;padding:13px 15px;background:linear-gradient(135deg,#2563eb,#4f7df3);color:#fff;font:800 12px Arial,sans-serif;box-shadow:0 10px 25px #2563eb44;cursor:pointer";
+    button.addEventListener("click", () => { window.location.href = "launch-email.html"; });
+    document.body.appendChild(button);
+  };
+
   const init = () => {
     add();
     addSignupTerms();
