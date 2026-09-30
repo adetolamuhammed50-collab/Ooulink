@@ -10,6 +10,7 @@ const APP_SHELL = [
   "./icon.svg",
   "./brand.js",
   "./notifications.js",
+  "./push-notifications.js",
   "./sw.js"
 ];
 
