@@ -190,6 +190,7 @@
     addSignupTerms();
     openVerify();
     loadNotifications();
+    addLaunchEmailButton();
 
   };
 
