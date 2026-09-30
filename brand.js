@@ -177,7 +177,7 @@
     addSignupTerms();
     openVerify();
     loadNotifications();
-    addAdminWaitlist();
+
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
