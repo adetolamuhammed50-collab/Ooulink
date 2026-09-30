@@ -185,13 +185,25 @@
     document.body.appendChild(button);
   };
 
+  const recordDailyActivity = async () => {
+    try {
+      if (!window.supabase?.createClient) return;
+      const client = window.supabase.createClient("https://dthvdxgxesomltlruogp.supabase.co", "sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr");
+      const { data } = await client.auth.getSession();
+      if (!data?.session?.user?.id) return;
+      const now = new Date();
+      const activityDate = now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
+      await client.rpc("record_daily_activity", { p_activity_date: activityDate });
+    } catch (_) {}
+  };
+
   const init = () => {
     add();
     addSignupTerms();
     openVerify();
     loadNotifications();
     addLaunchEmailButton();
-
+    recordDailyActivity();
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
