@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StudTask Launch Email</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7f5;font-family:Arial,sans-serif;color:#17231d}.wrap{max-width:720px;margin:auto;padding:16px}.head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.logo{font-size:24px;font-weight:900;color:#16834b}.muted{color:#667085;font-size:13px}.card{background:#fff;border:1px solid #e1e8e3;border-radius:17px;padding:16px;margin-bottom:13px;box-shadow:0 4px 15px #0000000a}.label{font-size:11px;font-weight:900;color:#667085;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}input,select,textarea{width:100%;border:1px solid #d7dee8;border-radius:11px;padding:11px;font:inherit;background:#fff}textarea{min-height:210px;resize:vertical;line-height:1.5}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;background:#16834b;color:#fff}.btn.secondary{background:#eaf1ed;color:#17231d}.btn:disabled{opacity:.55}.stats{display:flex;gap:8px;flex-wrap:wrap}.pill{background:#eef6f1;border-radius:999px;padding:8px 11px;font-size:12px;font-weight:800}.actions{display:flex;gap:8px;flex-wrap:wrap}.status{padding:11px;border-radius:11px;background:#f1f5f9;font-size:13px;white-space:pre-wrap}.danger{background:#fff0f0;color:#a21d1d}@media(max-width:480px){.row{grid-template-columns:1fr}.actions{flex-direction:column}.btn{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head"><div><div class="logo">StudTask Launch Email</div><div class="muted">Send a controlled Brevo announcement to waitlist users.</div></div><button class="btn secondary" onclick="location.href='admin.html'">← ADMIN</button></div>
+  <div id="authStatus" class="card">Checking administrator access...</div>
+  <div id="app" style="display:none">
+    <div class="card">
+      <div class="label">Recipients</div>
+      <div class="row">
+        <select id="status"><option value="new">New waitlist users</option><option value="contacted">Contacted users</option><option value="invited">Invited users</option><option value="all">All waitlist users</option></select>
+        <input id="senderEmail" type="email" placeholder="Verified Brevo sender email">
+      </div>
+      <div class="muted" style="margin-top:7px">Only users matching the selected status will be emailed. Successful sends are marked Invited.</div>
+      <div class="stats" style="margin-top:10px"><span class="pill" id="count">Loading...</span></div>
+    </div>
+    <div class="card">
+      <div class="label">Sender name</div>
+      <input id="senderName" value="StudTask">
+    </div>
+    <div class="card">
+      <div class="label">Subject</div>
+      <input id="subject" value="StudTask is launching soon">
+    </div>
+    <div class="card">
+      <div class="label">HTML email</div>
+      <textarea id="htmlContent"><!doctype html><html><body style="font-family:Arial,sans-serif;line-height:1.6;color:#17231d"><div style="max-width:600px;margin:auto;padding:28px"><h1 style="color:#16834b">StudTask is launching soon.</h1><p>Hi {{params.name}},</p><p>We're getting ready to launch StudTask — a student-to-student marketplace for everyday tasks.</p><p>You'll be among the first people we notify when early access opens.</p><p><strong>Connect. Get things done. Earn.</strong></p><p>— The StudTask Team</p></div></body></html></textarea>
+    </div>
+    <div class="card">
+      <div class="label">Plain-text fallback</div>
+      <textarea id="textContent" style="min-height:120px">Hi {{params.name}},
+
+We're getting ready to launch StudTask — a student-to-student marketplace for everyday tasks.
+
+You'll be among the first people we notify when early access opens.
+
+Connect. Get things done. Earn.
+
+— The StudTask Team</textarea>
+    </div>
+    <div class="card">
+      <div class="actions"><button id="sendBtn" class="btn" onclick="sendLaunch()">SEND LAUNCH EMAIL</button><button class="btn secondary" onclick="loadWaitlist()">REFRESH COUNT</button></div>
+      <div id="result" class="status" style="margin-top:10px">Ready.</div>
+    </div>
+  </div>
+</div>
+<script>
+const SUPABASE_URL="https://dthvdxgxesomltlruogp.supabase.co",SUPABASE_KEY="sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr",client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let session=null,isAdmin=false,rows=[];
+const $=id=>document.getElementById(id);
+async function init(){
+  const {data,error}=await client.auth.getSession();
+  if(error||!data?.session){location.href="login.html";return}
+  session=data.session;
+  const {data:admin,error:ae}=await client.from("admin_users").select("user_id").eq("user_id",session.user.id).maybeSingle();
+  if(ae||!admin){$("authStatus").className="card danger";$("authStatus").textContent="Administrator access required.";return}
+  isAdmin=true;$("authStatus").style.display="none";$("app").style.display="block";await loadWaitlist();
+}
+async function loadWaitlist(){
+  if(!isAdmin)return;
+  const {data,error}=await client.from("waitlist_signups").select("id,email,contact_status").order("created_at",{ascending:true});
+  if(error){$("count").textContent="Could not load waitlist: "+error.message;return}
+  rows=data||[];updateCount();
+}
+function updateCount(){
+  const filter=$("status").value;
+  const n=rows.filter(x=>filter==="all"||x.contact_status===filter).length;
+  $("count").textContent=n+" matching recipient"+(n===1?"":"s");
+}
+$("status").addEventListener("change",updateCount);
+async function sendLaunch(){
+  if(!isAdmin||!session)return;
+  const senderEmail=$("senderEmail").value.trim(),subject=$("subject").value.trim(),htmlContent=$("htmlContent").value,textContent=$("textContent").value;
+  const status=$("status").value;
+  if(!senderEmail||!subject||!htmlContent){$("result").className="status danger";$("result").textContent="Sender email, subject and HTML content are required.";return}
+  const matching=rows.filter(x=>status==="all"||x.contact_status===status);
+  if(!matching.length){$("result").className="status danger";$("result").textContent="There are no matching recipients.";return}
+  if(!confirm("Send this launch email to "+matching.length+" recipient"+(matching.length===1?"":"s")+"?"))return;
+  const button=$("sendBtn");button.disabled=true;button.textContent="SENDING...";
+  $("result").className="status";$("result").textContent="Sending through Brevo...";
+  try{
+    const r=await fetch(SUPABASE_URL+"/functions/v1/send-waitlist-email",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token,"apikey":SUPABASE_KEY},body:JSON.stringify({status:status==="all"?null:status,senderEmail,senderName:$("senderName").value.trim()||"StudTask",subject,htmlContent,textContent})});
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(data?.error||("Send failed ("+r.status+")."));
+    $("result").textContent="Sent: "+(data.sent||0)+" · Failed: "+(data.failed||0);
+    await loadWaitlist();
+  }catch(error){$("result").className="status danger";$("result").textContent=error.message||"Could not send launch email."}
+  finally{button.disabled=false;button.textContent="SEND LAUNCH EMAIL"}
+}
+init();
+</script>
+<script src="brand.js"></script>
+</body>
+</html>
