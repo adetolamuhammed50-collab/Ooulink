@@ -77,7 +77,11 @@ nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);back
 @media(min-width:481px){body{background:#eef2ef}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
-</head>
+<style>
+.quick-apply-btn{flex:1;border:0;background:#16834b;color:#fff;padding:10px 8px;border-radius:10px;font-size:11px;font-weight:800}.quick-apply-btn:disabled{opacity:.6}
+.quick-apply-modal{position:fixed;inset:0;background:rgba(15,25,19,.58);display:none;align-items:flex-end;justify-content:center;padding:14px;z-index:999}
+.quick-apply-modal.show{display:flex}.quick-apply-sheet{width:100%;max-width:480px;background:#fff;border-radius:20px;padding:18px;box-shadow:0 18px 50px rgba(0,0,0,.2)}.quick-apply-sheet h3{margin:0 0 5px;font-size:18px}.quick-apply-task{font-size:11px;color:#68736d;margin-bottom:13px}.quick-apply-sheet textarea{width:100%;min-height:105px;resize:vertical;border:1px solid #dfe6e1;border-radius:12px;padding:11px;font:inherit;font-size:12px;outline:none}.quick-apply-sheet textarea:focus{border-color:#16834b;box-shadow:0 0 0 3px rgba(22,131,75,.08)}.quick-apply-actions{display:flex;gap:8px;margin-top:10px}.quick-apply-actions button{flex:1;border:0;border-radius:11px;padding:11px;font-weight:800}.quick-apply-cancel{background:#f1f4f2;color:#4f5b54}.quick-apply-submit{background:#16834b;color:#fff}.quick-apply-note{font-size:10px;color:#758078;line-height:1.4;margin-top:8px}
+</style></head>
 <body>
 <div id="app">
 <header>
@@ -360,12 +364,21 @@ function render() {
                 <span>📍 ${esc(task.location || "Location not set")}</span>
                 <span class="${deadlineClass(task.deadline)}">⏰ ${esc(deadlineText(task.deadline))}</span>
             </div>
-            <div class="task-actions"><button class="view" type="button" data-task-id="${esc(task.id)}">View Task</button><button class="save-card" type="button" data-save-id="${esc(task.id)}">🔖 Save</button></div>
+            <div class="task-actions"><button class="view" type="button" data-task-id="${esc(task.id)}">View Task</button><button class="quick-apply-btn" type="button" data-quick-apply-id="${esc(task.id)}">⚡ Apply</button><button class="save-card" type="button" data-save-id="${esc(task.id)}">🔖 Save</button></div>
         </article>`;
     }).join("");
 
-    tasksBox.querySelectorAll("[data-save-id]").forEach(button => { button.addEventListener("click", async event => { event.stopPropagation(); if (!currentUser) { location.href="login.html"; return; } const b=event.currentTarget; const id=b.dataset.saveId; b.disabled=true; try { const {data,error}=await supabaseClient.rpc("is_task_saved",{p_task_id:id}); if(error) throw error; const saved=data===true; const action=saved?"unsave_task":"save_task"; const {error:actionError}=await supabaseClient.rpc(action,{p_task_id:id}); if(actionError) throw actionError; b.classList.toggle("saved",!saved); b.textContent=!saved?"🔖 Saved":"🔖 Save"; } catch(error){ console.error("Quick save error:",error); } finally { b.disabled=false; } }); });
-    tasksBox.querySelectorAll("[data-task-id]").forEach(button => {
+    const quickApplyModal=document.getElementById("quickApplyModal"),quickApplyTask=document.getElementById("quickApplyTask"),quickApplyMessage=document.getElementById("quickApplyMessage"),quickApplySubmit=document.getElementById("quickApplySubmit");let quickApplyTaskId=null;
+function closeQuickApply(){quickApplyTaskId=null;quickApplyModal.classList.remove("show");quickApplyMessage.value="";quickApplySubmit.disabled=false;quickApplySubmit.textContent="Send Application";}
+function openQuickApply(task){if(!currentUser){location.href="login.html";return}if(!task)return;if(task.user_id===currentUser.id){alert("You cannot apply for your own task.");return}quickApplyTaskId=task.id;quickApplyTask.textContent=task.title||"Task";quickApplyModal.classList.add("show");setTimeout(()=>quickApplyMessage.focus(),80);}
+async function submitQuickApply(){if(!quickApplyTaskId||!currentUser)return;const message=quickApplyMessage.value.trim();if(message.length<5){quickApplyMessage.focus();return}const task=allTasks.find(item=>item.id===quickApplyTaskId);if(!task){closeQuickApply();return}quickApplySubmit.disabled=true;quickApplySubmit.textContent="Applying...";try{const{data:existing,error:existingError}=await supabaseClient.from("task_applications").select("id,status").eq("task_id",task.id).eq("runner_id",currentUser.id).maybeSingle();if(existingError)throw existingError;if(existing&&["pending","selected"].includes(String(existing.status||"").toLowerCase())){alert("You have already applied for this task.");closeQuickApply();return}const{error}=await supabaseClient.from("task_applications").insert({task_id:task.id,runner_id:currentUser.id,status:"pending",message});if(error)throw error;try{await supabaseClient.from("notifications").insert({user_id:task.user_id,task_id:task.id,type:"application",title:"New Task Application",message:"Someone applied for your task: "+task.title})}catch(notificationError){console.warn("Quick apply notification error:",notificationError)}closeQuickApply();const button=document.querySelector(`[data-quick-apply-id="${CSS.escape(task.id)}"]`);if(button){button.textContent="✓ Applied";button.disabled=true;button.classList.add("saved")} }catch(error){console.error("Quick apply error:",error);quickApplySubmit.disabled=false;quickApplySubmit.textContent="Send Application";if(error?.message?.includes("STUDTASK_RATE_LIMITED"))alert("⚡ Slow down — you can submit a maximum of 3 applications every 2 minutes. Please wait before applying again.");else if(error?.code==="23505")alert("You have already applied for this task.");else alert(error?.message||"Could not apply for this task.");}}
+tasksBox.querySelectorAll("[data-save-id]").forEach(button => { button.addEventListener("click", async event => { event.stopPropagation(); if (!currentUser) { location.href="login.html"; return; } const b=event.currentTarget; const id=b.dataset.saveId; b.disabled=true; try { const {data,error}=await supabaseClient.rpc("is_task_saved",{p_task_id:id}); if(error) throw error; const saved=data===true; const action=saved?"unsave_task":"save_task"; const {error:actionError}=await supabaseClient.rpc(action,{p_task_id:id}); if(actionError) throw actionError; b.classList.toggle("saved",!saved); b.textContent=!saved?"🔖 Saved":"🔖 Save"; } catch(error){ console.error("Quick save error:",error); } finally { b.disabled=false; } }); });
+    tasksBox.querySelectorAll("[data-quick-apply-id]").forEach(button=>{button.addEventListener("click",event=>{event.stopPropagation();const task=allTasks.find(item=>item.id===button.dataset.quickApplyId);openQuickApply(task)})});
+document.getElementById("quickApplyCancel").addEventListener("click",closeQuickApply);
+quickApplyModal.addEventListener("click",event=>{if(event.target===quickApplyModal)closeQuickApply()});
+document.getElementById("quickApplySubmit").addEventListener("click",submitQuickApply);
+quickApplyMessage.addEventListener("input",()=>{quickApplySubmit.disabled=quickApplyMessage.value.trim().length<5});
+tasksBox.querySelectorAll("[data-task-id]").forEach(button => {
         button.addEventListener("click", event => {
             const id = event.currentTarget.dataset.taskId;
             event.currentTarget.animate([
