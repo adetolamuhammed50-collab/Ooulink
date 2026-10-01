@@ -76,7 +76,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);back
 .navin a.active::after{content:"";position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:#16834b}
 @media(min-width:481px){body{background:#eef2ef}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-</style>
+ .urgency{font-weight:800!important}.urgency-critical{color:#b42318!important;background:#fdecec!important}.urgency-soon{color:#b45309!important;background:#fff3df!important}.urgency-normal{color:#16834b!important;background:#e8f6ee!important}.urgency-date{color:#59655f!important;background:#f1f4f2!important}</style>
 <style>
 .quick-apply-btn{flex:1;border:0;background:#16834b;color:#fff;padding:10px 8px;border-radius:10px;font-size:11px;font-weight:800}.quick-apply-btn:disabled{opacity:.6}
 .quick-apply-modal{position:fixed;inset:0;background:rgba(15,25,19,.58);display:none;align-items:flex-end;justify-content:center;padding:14px;z-index:999}
@@ -276,6 +276,7 @@ function deadlineClass(value) {
     return expired(value) ? "" : "deadline";
 }
 
+function urgencyInfo(value){if(!value)return{label:"No deadline",className:"urgency-date"};const ms=new Date(value)-Date.now(),hours=ms/3600000;if(ms<=0)return{label:"Expired",className:"urgency-critical"};if(hours<=24)return{label:"🔥 Due within 24h",className:"urgency-critical"};if(hours<=72)return{label:"⚡ Due within 3 days",className:"urgency-soon"};if(hours<=168)return{label:"⏳ Due this week",className:"urgency-normal"};return{label:"Due "+formatDate(value),className:"urgency-date"}}
 function deadlineText(value) {
     if (!value) return "Deadline not set";
     const date = new Date(value);
@@ -362,7 +363,7 @@ function render() {
             <div class="meta">
                 <span>🎓 ${esc(campusLabel(task))}</span>
                 <span>📍 ${esc(task.location || "Location not set")}</span>
-                <span class="${deadlineClass(task.deadline)}">⏰ ${esc(deadlineText(task.deadline))}</span>
+                <span class="urgency ${urgencyInfo(task.deadline).className}">⏰ ${esc(urgencyInfo(task.deadline).label)}</span>
             </div>
             <div class="task-actions"><button class="view" type="button" data-task-id="${esc(task.id)}">View Task</button><button class="quick-apply-btn" type="button" data-quick-apply-id="${esc(task.id)}">⚡ Apply</button><button class="save-card" type="button" data-save-id="${esc(task.id)}">🔖 Save</button></div>
         </article>`;
