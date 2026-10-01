@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StudTask Priority</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#f4f7ff,#f8fdf9 48%,#fff8f2);font-family:Arial,sans-serif;color:#17231d}.wrap{max-width:760px;margin:auto;padding:16px}.head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.logo{font-size:24px;font-weight:900;color:#16834b}.tag{font-size:12px;color:#6b7280;margin-top:3px}.btn{border:0;border-radius:12px;padding:10px 13px;font-weight:800;cursor:pointer;background:#eef2f7;color:#263238}.btn.green{background:#16834b;color:#fff}.card{background:#fff;border:1px solid #e3e8e5;border-radius:17px;padding:16px;margin-bottom:12px;box-shadow:0 4px 15px #1e293b0d}.hero{background:linear-gradient(135deg,#0f6f40,#16834b);color:#fff;border:0}.hero h1{margin:0 0 5px;font-size:24px}.hero p{margin:0;opacity:.9;line-height:1.5;font-size:13px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{background:#f8faf9;border:1px solid #e5eaf0;border-radius:14px;padding:13px}.label{font-size:10px;color:#667085;font-weight:800;text-transform:uppercase}.num{font-size:24px;font-weight:900;margin-top:5px}.priority{display:flex;gap:11px;align-items:flex-start}.dot{width:11px;height:11px;border-radius:50%;margin-top:5px;flex:none}.red{background:#dc2626}.amber{background:#d97706}.greenDot{background:#16a34a}.title{font-size:15px;font-weight:900}.muted{font-size:12px;color:#667085;line-height:1.5;margin-top:3px}.pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:900;margin-top:8px;background:#dcfce7;color:#166534}.pill.open{background:#fef3c7;color:#92400e}.list{display:flex;flex-direction:column;gap:12px}.loading{text-align:center;padding:30px;color:#667085}.error{background:#fee2e2;color:#991b1b;padding:12px;border-radius:12px;font-size:13px}.back{display:block;text-align:center;color:#2563eb;text-decoration:none;font-weight:800;padding:12px}@media(max-width:480px){.wrap{padding:13px}.head{align-items:flex-start}.grid{grid-template-columns:1fr 1fr}.btn{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="head"><div><div class="logo">StudTask Priority</div><div class="tag">Launch-readiness control page</div></div><button class="btn" id="refresh" type="button">↻ Refresh</button></div>
+<div id="app" class="loading">Checking administrator access...</div>
+<a class="back" href="admin.html">← Back to Admin</a>
+</div>
+<script>
+const SUPABASE_URL="https://dthvdxgxesomltlruogp.supabase.co";
+const SUPABASE_KEY="sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const n=v=>Number(v||0).toLocaleString("en-NG");
+async function load(){
+ const app=document.getElementById("app"),btn=document.getElementById("refresh");
+ btn.disabled=true;
+ try{
+  const {data:{session},error:se}=await sb.auth.getSession();
+  if(se)throw se;
+  if(!session){location.href="login.html";return}
+  const {data:admin,error:ae}=await sb.from("admin_users").select("user_id").eq("user_id",session.user.id).maybeSingle();
+  if(ae)throw ae;
+  if(!admin){app.innerHTML='<div class="error"><b>Access denied.</b><br>This page is for StudTask administrators.</div>';return}
+  const [users,tasks,reports,disputes,withdrawals,deposits,safety,wallets]=await Promise.all([
+   sb.from("profiles").select("id",{count:"exact",head:true}),
+   sb.from("tasks").select("id,status"),
+   sb.from("reports").select("id,status"),
+   sb.from("task_disputes").select("id,status"),
+   sb.from("withdrawal_requests").select("id,status"),
+   sb.from("deposit_requests").select("id,status"),
+   sb.from("safety_flags").select("id,status"),
+   sb.from("wallets").select("available_balance,locked_balance,withdrawable_balance")
+  ]);
+  const results=[users,tasks,reports,disputes,withdrawals,deposits,safety,wallets];
+  const failed=results.find(x=>x.error);if(failed)throw failed.error;
+  const ts=tasks.data||[],rs=reports.data||[],ds=disputes.data||[],ws=withdrawals.data||[],deps=deposits.data||[],sf=safety.data||[],wal=wallets.data||[];
+  const active=ts.filter(x=>["open","accepted","in_progress","awaiting_verification"].includes(x.status)).length;
+  const openReports=rs.filter(x=>!["resolved","dismissed"].includes(String(x.status||"").toLowerCase())).length;
+  const openDisputes=ds.filter(x=>!["resolved","closed"].includes(String(x.status||"").toLowerCase())).length;
+  const pendingW=ws.filter(x=>["pending","processing"].includes(x.status)).length;
+  const pendingD=deps.filter(x=>x.status==="pending").length;
+  const openSafety=sf.filter(x=>x.status==="open").length;
+  const available=wal.reduce((a,x)=>a+Number(x.available_balance||0),0);
+  const locked=wal.reduce((a,x)=>a+Number(x.locked_balance||0),0);
+  const withdrawable=wal.reduce((a,x)=>a+Number(x.withdrawable_balance||0),0);
+  app.innerHTML=`
+   <div class="card hero"><h1>What needs attention now</h1><p>This page is read-only. It surfaces live operational signals without changing financial or moderation data.</p></div>
+   <div class="grid">
+    <div class="stat"><div class="label">Users</div><div class="num">${n(users.count)}</div></div>
+    <div class="stat"><div class="label">Active tasks</div><div class="num">${n(active)}</div></div>
+    <div class="stat"><div class="label">Open disputes</div><div class="num">${n(openDisputes)}</div></div>
+    <div class="stat"><div class="label">Pending deposits</div><div class="num">${n(pendingD)}</div></div>
+   </div>
+   <div class="card"><div class="title">Priority queue</div><div class="list" style="margin-top:13px">
+    <div class="priority"><span class="dot ${openDisputes?"red":"greenDot"}"></span><div><div class="title">Dispute resolution</div><div class="muted">${openDisputes?openDisputes+" open dispute(s) require admin review.":"No open disputes."}</div><span class="pill ${openDisputes?"open":""}">${openDisputes?"ACTION NEEDED":"CLEAR"}</span></div></div>
+    <div class="priority"><span class="dot ${pendingD?"amber":"greenDot"}"></span><div><div class="title">Deposit reconciliation</div><div class="muted">${pendingD?pendingD+" deposit request(s) are still pending.":"No pending deposit requests."}</div><span class="pill ${pendingD?"open":""}">${pendingD?"CHECK":"CLEAR"}</span></div></div>
+    <div class="priority"><span class="dot ${pendingW?"amber":"greenDot"}"></span><div><div class="title">Withdrawal queue</div><div class="muted">${pendingW?pendingW+" withdrawal(s) are pending or processing.":"Withdrawal queue is clear."}</div><span class="pill ${pendingW?"open":""}">${pendingW?"CHECK":"CLEAR"}</span></div></div>
+    <div class="priority"><span class="dot ${openSafety?"red":"greenDot"}"></span><div><div class="title">Safety review</div><div class="muted">${openSafety?openSafety+" automated safety flag(s) are open.":"No open automated safety flags."}</div><span class="pill ${openSafety?"open":""}">${openSafety?"ACTION NEEDED":"CLEAR"}</span></div></div>
+    <div class="priority"><span class="dot ${openReports?"amber":"greenDot"}"></span><div><div class="title">Reports</div><div class="muted">${openReports?openReports+" report(s) are unresolved.":"No unresolved reports."}</div><span class="pill ${openReports?"open":""}">${openReports?"CHECK":"CLEAR"}</span></div></div>
+   </div></div>
+   <div class="card"><div class="title">Wallet snapshot</div><div class="muted">Live aggregate balances across wallets.</div><div class="grid" style="margin-top:12px">
+    <div class="stat"><div class="label">Available</div><div class="num">₦${n(available)}</div></div>
+    <div class="stat"><div class="label">Locked</div><div class="num">₦${n(locked)}</div></div>
+    <div class="stat"><div class="label">Withdrawable</div><div class="num">₦${n(withdrawable)}</div></div>
+   </div></div>
+   <div class="card"><div class="title">Next engineering priority</div><div class="muted">Complete the full accounting reconciliation and payment edge-case audit before treating financial flows as launch-ready. The current operational queue is separate from that engineering work.</div></div>
+  `;
+ }catch(e){app.innerHTML='<div class="error"><b>Could not load priority data.</b><br>'+esc(e.message||"Unknown error")+'</div>'}
+ finally{btn.disabled=false}
+}
+document.getElementById("refresh").addEventListener("click",load);
+load();
+</script>
+</body>
+</html>
