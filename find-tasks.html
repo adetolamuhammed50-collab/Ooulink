@@ -76,7 +76,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);back
 .navin a.active::after{content:"";position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:#16834b}
 @media(min-width:481px){body{background:#eef2ef}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
- .urgency{font-weight:800!important}.urgency-critical{color:#b42318!important;background:#fdecec!important}.urgency-soon{color:#b45309!important;background:#fff3df!important}.urgency-normal{color:#16834b!important;background:#e8f6ee!important}.urgency-date{color:#59655f!important;background:#f1f4f2!important}</style>
+ .urgency{font-weight:800!important}.urgency-critical{color:#b42318!important;background:#fdecec!important}.urgency-soon{color:#b45309!important;background:#fff3df!important}.urgency-normal{color:#16834b!important;background:#e8f6ee!important}.urgency-date{color:#59655f!important;background:#f1f4f2!important}<style>.search-wrap{position:relative}.search-suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #e3e8e5;border-radius:14px;box-shadow:0 12px 28px rgba(0,0,0,.1);z-index:50;overflow:hidden;display:none}.search-suggestions.show{display:block}.suggestion{width:100%;border:0;background:#fff;text-align:left;padding:11px 13px;display:block;cursor:pointer;border-bottom:1px solid #eef1ef}.suggestion:last-child{border-bottom:0}.suggestion:hover{background:#f5faf7}.suggestion b{display:block;font-size:12px;color:#172033}.suggestion span{display:block;font-size:10px;color:#758078;margin-top:3px}</style></style>
 <style>
 .quick-apply-btn{flex:1;border:0;background:#16834b;color:#fff;padding:10px 8px;border-radius:10px;font-size:11px;font-weight:800}.quick-apply-btn:disabled{opacity:.6}
 .quick-apply-modal{position:fixed;inset:0;background:rgba(15,25,19,.58);display:none;align-items:flex-end;justify-content:center;padding:14px;z-index:999}
@@ -93,9 +93,9 @@ nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);back
 <div class="sub">Find tasks from students and campuses</div>
 </div>
 </div>
-<div class="search">
+<div class="search search-wrap">
 <input id="searchInput" placeholder="Search tasks, skills, locations..." autocomplete="off">
-<button class="clear" id="clearSearch" aria-label="Clear search">×</button>
+<button class="clear" id="clearSearch" aria-label="Clear search">×</button><div class="search-suggestions" id="searchSuggestions" role="listbox"></div>
 </div>
 <div class="filters">
 <select id="scope" aria-label="Task scope">
@@ -573,12 +573,19 @@ newBar.onclick = async () => {
 searchInput.addEventListener("input", () => {
     clearSearch.style.display = searchInput.value ? "block" : "none";
     applyFilters();
+    showSearchSuggestions();
+});
+
+document.addEventListener("click", event => {
+    if (!event.target.closest(".search-wrap")) hideSearchSuggestions();
 });
 
 clearSearch.onclick = () => {
     searchInput.value = "";
     clearSearch.style.display = "none";
+    hideSearchSuggestions();
     applyFilters();
+    loadTasks(true);
 };
 
 scope.addEventListener("change", applyFilters);
