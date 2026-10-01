@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Campus Leaderboard - StudTask</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#f5f7fb;color:#172033;padding-bottom:30px}.wrap{max-width:480px;margin:auto;padding:18px 15px}.back{color:#16834b;text-decoration:none;font-size:14px}.top{margin-bottom:16px}.top h1{font-size:27px;margin-top:11px}.sub{color:#687386;font-size:13px;margin-top:5px}.card{background:#fff;border-radius:20px;padding:16px;box-shadow:0 5px 18px rgba(0,0,0,.06);margin-bottom:12px}.label{display:block;font-size:10px;font-weight:800;margin-bottom:6px;color:#687386}.select{width:100%;padding:11px;border:1px solid #dce2e8;border-radius:10px;background:#fff;font-size:13px;outline:0}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.tab{border:0;border-radius:10px;padding:11px;font-size:11px;font-weight:800;background:#f1f3f5;color:#687386}.tab.active{background:#16834b;color:#fff}.note{font-size:10px;color:#8993a3;margin-top:9px;line-height:1.4}.loading,.empty{text-align:center;padding:30px 10px;color:#687386;font-size:12px}.error{background:#fff0f0;color:#c62828;padding:12px;border-radius:11px;font-size:11px}.rows{display:grid;gap:8px}.row{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:10px;border:1px solid #e7ebef;border-radius:14px;padding:10px;background:#fff}.row.me{border-color:#16834b;background:#f3fbf6}.rank{font-size:15px;font-weight:900;text-align:center;color:#687386}.top3 .rank{font-size:20px}.person{min-width:0}.username{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fullname{font-size:9px;color:#8993a3;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.score{text-align:right}.score b{display:block;font-size:14px;color:#16834b}.score span{font-size:8px;color:#8993a3}.you{display:inline-block;margin-left:5px;padding:2px 5px;border-radius:99px;background:#eaf7ef;color:#16834b;font-size:7px;font-weight:800;vertical-align:middle}.refresh{width:100%;border:0;border-radius:10px;padding:11px;background:#eef9f2;color:#16834b;font-size:11px;font-weight:800;margin-top:10px}.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><a class="back" href="profile.html">← Back to Profile</a><h1>🏆 Campus Leaderboard</h1><p class="sub">See how students are progressing on StudTask.</p></div>
+<div class="card">
+<label class="label">CAMPUS</label>
+<select class="select" id="campusSelect"><option value="">Loading campuses...</option></select>
+<div class="tabs"><button class="tab active" id="xpTab" onclick="setMetric('xp')">⚡ XP</button><button class="tab" id="completedTab" onclick="setMetric('completed')">🏃 Completed</button></div>
+<div class="note">All-time rankings. Leaderboards use XP or completed tasks only; no wallet balances or earnings are shown.</div>
+</div>
+<div class="card"><div id="state" class="loading">Loading leaderboard...</div><div id="rows" class="rows hidden"></div><button class="refresh" onclick="loadLeaderboard()">↻ REFRESH</button></div>
+</div>
+<script>
+const SUPABASE_URL="https://dthvdxgxesomltlruogp.supabase.co",SUPABASE_KEY="sb_publishable_rpHsazbgtLck-E8784JHYA_q5WMGinr",supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let currentUser=null,currentMetric="xp";
+const $=id=>document.getElementById(id);
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
+function setMetric(m){currentMetric=m;$("xpTab").classList.toggle("active",m==="xp");$("completedTab").classList.toggle("active",m==="completed");loadLeaderboard()}
+function medal(n){return n===1?"🥇":n===2?"🥈":n===3?"🥉":n}
+async function loadCampuses(profileCampus){
+ const r=await supabaseClient.from("campuses").select("id,name").eq("is_active",true).order("name");
+ if(r.error)throw r.error;
+ $("campusSelect").innerHTML=(r.data||[]).map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join("");
+ if(profileCampus&&r.data?.some(c=>c.id===profileCampus))$("campusSelect").value=profileCampus;
+ if(!$("campusSelect").value&&r.data?.length)$("campusSelect").value=r.data[0].id;
+}
+async function loadLeaderboard(){
+ const campusId=$("campusSelect").value;
+ if(!campusId)return;
+ $("state").className="loading";$("state").textContent="Loading leaderboard...";$("rows").classList.add("hidden");
+ const r=await supabaseClient.rpc("get_campus_leaderboard",{p_campus_id:campusId,p_metric:currentMetric,p_limit:50});
+ if(r.error){$("state").className="error";$("state").textContent=r.error.message||"Could not load leaderboard.";return}
+ const list=r.data||[];
+ if(!list.length){$("state").className="empty";$("state").textContent="No ranked students on this campus yet.";return}
+ $("state").classList.add("hidden");$("rows").classList.remove("hidden");
+ const label=currentMetric==="xp"?"XP":"completed";
+ $("rows").innerHTML=list.map(x=>{
+   const me=x.user_id===currentUser.id,name=x.username?"@"+x.username:(x.full_name||"StudTask User");
+   const sub=x.username&&x.full_name?x.full_name:"";
+   const value=currentMetric==="xp"?Number(x.xp)||0:Number(x.completed_tasks)||0;
+   return '<div class="row '+(me?"me ":"")+(x.rank<=3?"top3":"")+'"><div class="rank">'+medal(Number(x.rank))+'</div><div class="person"><div class="username">'+esc(name)+(me?'<span class="you">YOU</span>':"")+'</div><div class="fullname">'+esc(sub)+'</div></div><div class="score"><b>'+value.toLocaleString()+'</b><span>'+label+'</span></div></div>'
+ }).join("");
+}
+async function init(){
+ const s=await supabaseClient.auth.getSession();
+ if(!s.data?.session){location.href="index.html";return}
+ currentUser=s.data.session.user;
+ const p=await supabaseClient.from("profiles").select("campus_id").eq("id",currentUser.id).maybeSingle();
+ await loadCampuses(p.data?.campus_id||null);
+ await loadLeaderboard();
+}
+init().catch(e=>{$("state").className="error";$("state").textContent=e.message||"Something went wrong."});
+</script>
+</body>
+</html>
