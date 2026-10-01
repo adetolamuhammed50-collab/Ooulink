@@ -61,6 +61,7 @@
   async function render() {
     const host = document.getElementById("studtaskPushSettings");
     if (!host) return;
+    if (window.isOwnProfile === false) { host.remove(); return; }
     host.innerHTML = '<div style="padding:15px;border:1px solid #dfe7e2;border-radius:14px;background:#fff"><b>🔔 Push Notifications</b><p style="margin:7px 0;color:#667085;font-size:12px;line-height:1.5">Get StudTask alerts even when the app is not open.</p><button id="studtaskPushButton" type="button" style="border:0;border-radius:10px;padding:11px 14px;background:#16834b;color:#fff;font-weight:800">Checking...</button><div id="studtaskPushStatus" style="margin-top:8px;font-size:11px;color:#667085"></div></div>';
     const button = document.getElementById("studtaskPushButton"), status = document.getElementById("studtaskPushStatus");
     const registration = await navigator.serviceWorker.ready;
