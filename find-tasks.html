@@ -446,7 +446,7 @@ async function loadTasks(reset = false) {
     if (!hasMore) return;
     loading = true; loadMore.disabled = true; loadMore.textContent = "Loading...";
     const from = page * PAGE_SIZE, to = from + PAGE_SIZE - 1;
-    let query = supabaseClient.from("tasks").select(`id,title,description,location,category,budget,deadline,created_at,status,moderation_status,university_id,university_other,campus_id,campus_other,university:universities(id,name,short_name),campus:campuses(id,name)`).eq("status","open").eq("moderation_status","approved");
+    let query = supabaseClient.from("tasks").select(`id,user_id,title,description,location,category,budget,deadline,created_at,status,moderation_status,university_id,university_other,campus_id,campus_other,university:universities(id,name,short_name),campus:campuses(id,name)`).eq("status","open").eq("moderation_status","approved");
     const q = searchInput.value.trim();
     if (q) { const safe = q.replace(/[%_]/g,"\\$&").replace(/,/g," "); query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%,location.ilike.%${safe}%,category.ilike.%${safe}%`); }
     if (scope.value === "university" && profileData?.university_id) query = query.eq("university_id",profileData.university_id);
