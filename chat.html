@@ -23,6 +23,8 @@
     .person-name { font-size: 16px; font-weight: 800; }
     .person-handle { margin-top: 3px; font-size: 11px; color: rgba(255,255,255,.78); }
     .profile-hint { flex: none; font-size: 10px; font-weight: 700; color: rgba(255,255,255,.82); }
+    .task-context { margin-top: 10px; padding: 9px 11px; border-radius: 12px; background: rgba(255,255,255,.12); font-size: 11px; line-height: 1.35; }
+    .task-context a { color: #fff; text-decoration: none; font-weight: 800; }
     .task-title, .realtime-status { padding-left: 66px; word-break: break-word; }
     .task-title { margin-top: 8px; font-size: 13px; font-weight: 700; line-height: 1.3; }
     .realtime-status { margin-top: 5px; font-size: 10px; color: rgba(255,255,255,.76); }
@@ -56,6 +58,12 @@
     .bubble { padding: 10px 13px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
     .mine .bubble { background: #16834b; color: #fff; border-bottom-right-radius: 4px; }
     .theirs .bubble { background: #fff; color: #111827; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px; }
+    .reply-bar { display: none; margin-bottom: 7px; padding: 7px 10px; border-left: 3px solid #16834b; background: #eef8f2; border-radius: 8px; font-size: 11px; color: #4b5563; }
+    .reply-bar strong { display: block; color: #16834b; margin-bottom: 2px; }
+    .reply-action { border: 0; background: transparent; color: #16834b; font-size: 10px; font-weight: 800; cursor: pointer; padding: 0; }
+    .composer-reply { display: none; width: 100%; padding: 7px 10px; border-left: 3px solid #16834b; background: #eef8f2; border-radius: 8px; font-size: 11px; }
+    .composer-reply strong { display: block; color: #16834b; }
+    .cancel-reply { float: right; border: 0; background: transparent; color: #dc2626; font-weight: 700; }
     .message-meta { display: flex; align-items: center; justify-content: flex-end; gap: 5px; margin-top: 4px; font-size: 10px; opacity: .72; }
     .message-status.failed { color: #dc2626; }
     .retry-btn { border: 0; background: transparent; color: #dc2626; font-size: 10px; font-weight: 700; padding: 0; cursor: pointer; }
@@ -99,7 +107,7 @@
         </span>
         <span class="profile-hint">PROFILE ›</span>
       </a>
-      <div id="taskTitle" class="task-title">Loading task...</div>
+      <div id="taskTitle" class="task-title">Loading task...</div><div id="taskContext" class="task-context">Loading task context...</div>
       <div id="realtimeStatus" class="realtime-status">Connecting to live chat...</div>
       <div id="typingIndicator" class="typing-indicator" aria-live="polite">Typing<span class="typing-dots"><i></i><i></i><i></i></span></div>
     </header>
@@ -119,7 +127,7 @@
     </div>
   </main>
 
-  <form id="composer" class="composer">
+  <form id="composer" class="composer"><div id="composerReply" class="composer-reply"><button id="cancelReply" class="cancel-reply" type="button">CANCEL</button><strong id="replyTargetName"></strong><span id="replyTargetText"></span></div>
     <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" hidden>
     <button id="attachBtn" class="attach-btn" type="button" aria-label="Attach a file" title="Attach a file">📎</button>
     <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" maxlength="1000">
@@ -155,11 +163,17 @@
     let lastSentAt = 0;
     let blockedTimer = null;
     let moderationBlocked = false;
+    let replyTarget = null;
     const renderingMessageIds = new Set();
 
     const taskId = new URLSearchParams(location.search).get("id");
     const messagesBox = document.getElementById("messages");
     const taskTitle = document.getElementById("taskTitle");
+    const taskContext = document.getElementById("taskContext");
+    const composerReply = document.getElementById("composerReply");
+    const replyTargetName = document.getElementById("replyTargetName");
+    const replyTargetText = document.getElementById("replyTargetText");
+    const cancelReply = document.getElementById("cancelReply");
     const realtimeStatus = document.getElementById("realtimeStatus");
     const typingIndicator = document.getElementById("typingIndicator");
     const filesContainer = document.getElementById("filesContainer");
@@ -288,6 +302,8 @@
       const { data, error } = await supabaseClient.from("tasks").select("id,user_id,runner_id,title,status").eq("id", taskId).single();
       if (error || !data) throw new Error("Task could not be found.");
       currentTask = data;
+      taskTitle.textContent = currentTask.title || "Task chat";
+      taskContext.innerHTML = `<a href="task-details.html?id=${encodeURIComponent(currentTask.id)}">📌 Open task details</a> · Status: ${escapeHTML(String(currentTask.status || "").replaceAll("_"," "))}`;
       if (!currentTask.runner_id) throw new Error("This task has not been accepted yet.");
       if (currentUser.id !== currentTask.user_id && currentUser.id !== currentTask.runner_id) throw new Error("You are not part of this task.");
       otherUserId = currentUser.id === currentTask.user_id ? currentTask.runner_id : currentTask.user_id;
@@ -377,6 +393,10 @@
       return box;
     }
 
+    function beginReply(message, displayText, displayName){replyTarget={id:message.id,text:String(displayText||"").slice(0,180),name:displayName||"Message"};replyTargetName.textContent="Replying to "+replyTarget.name;replyTargetText.textContent=replyTarget.text||"Attachment";composerReply.style.display="block";messageInput.focus()}
+function clearReply(){replyTarget=null;composerReply.style.display="none";replyTargetName.textContent="";replyTargetText.textContent=""}
+async function getReplyPreview(id){if(!id)return null;const{data}=await supabaseClient.from("messages").select("id,sender_id,message").eq("id",id).maybeSingle();return data||null}
+
     function addDateSeparator(value) {
       const separator = document.createElement("div");
       separator.className = "date-separator";
@@ -409,6 +429,7 @@
       wrap.className = "message-wrap";
       const bubble = document.createElement("div");
       bubble.className = "bubble";
+      if (message.reply_to_id) { const reply=await getReplyPreview(message.reply_to_id); if(reply){const q=document.createElement("div");q.className="reply-bar";const rn=document.createElement("strong");rn.textContent=reply.sender_id===currentUser.id?"You":"Message";const rt=document.createElement("span");rt.textContent=reply.message||"Attachment";q.append(rn,rt);bubble.appendChild(q)}}
       if (message.message && message.message !== "📎 Attachment") {
         const text = document.createElement("div");
         text.textContent = message.message;
@@ -421,6 +442,7 @@
       const time = document.createElement("span");
       time.textContent = message.created_at ? formatTime(message.created_at) : "Sending...";
       meta.appendChild(time);
+      const replyBtn=document.createElement("button"); replyBtn.type="button"; replyBtn.className="reply-action"; replyBtn.textContent="Reply"; replyBtn.onclick=()=>beginReply(message,message.message,message.sender_id===currentUser.id?"You":personName.textContent); meta.appendChild(replyBtn);
       if (message.status === "failed") {
         const retry = document.createElement("button");
         retry.className = "retry-btn";
@@ -442,7 +464,7 @@
     }
 
     async function loadMessages() {
-      const { data, error } = await supabaseClient.from("messages").select("id,task_id,sender_id,receiver_id,message,is_read,created_at").eq("task_id", currentTask.id).order("created_at", { ascending: true });
+      const { data, error } = await supabaseClient.from("messages").select("id,task_id,sender_id,receiver_id,message,is_read,reply_to_id,created_at").eq("task_id", currentTask.id).order("created_at", { ascending: true });
       if (error) {
         messagesBox.innerHTML = '<div class="error">Unable to load messages.</div>';
         return;
@@ -633,7 +655,7 @@
 
     async function insertMessageRecord(text, attachmentInfo) {
       const messageText = text || (attachmentInfo ? "📎 Attachment" : "");
-      const { data, error } = await supabaseClient.from("messages").insert({ task_id: currentTask.id, sender_id: currentUser.id, receiver_id: otherUserId, message: messageText }).select("id,task_id,sender_id,receiver_id,message,is_read,created_at").single();
+      const { data, error } = await supabaseClient.from("messages").insert({ task_id: currentTask.id, sender_id: currentUser.id, receiver_id: otherUserId, message: messageText, reply_to_id: replyTarget?.id || null }).select("id,task_id,sender_id,receiver_id,message,is_read,created_at").single();
       if (error) throw error;
       if (attachmentInfo) {
         const { error: attachmentError } = await supabaseClient.from("message_attachments").insert({ message_id: data.id, task_id: currentTask.id, uploader_id: currentUser.id, file_name: attachmentInfo.file.name, file_path: attachmentInfo.path, mime_type: attachmentInfo.file.type, file_size: attachmentInfo.file.size });
@@ -697,6 +719,7 @@
         messageInput.value = "";
         stopTyping();
         clearSelectedFile();
+        clearReply();
         await supabaseClient.from("notifications").insert({ user_id: otherUserId, task_id: currentTask.id, type: "new_message", title: "New message", message: `You received a new message about "${currentTask.title}".` });
         scrollToBottom();
       } catch (error) {
@@ -727,6 +750,7 @@
       showSelectedFile(file);
     });
     removeFile.addEventListener("click", clearSelectedFile);
+    cancelReply.addEventListener("click", clearReply);
     composer.addEventListener("submit", event => {
       event.preventDefault();
       sendMessage();
