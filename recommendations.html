@@ -20,7 +20,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);back
 <body>
 <main class="wrap">
 <div class="top"><a class="back" href="find-tasks.html">← Find Tasks</a><div><div class="title">For You</div><div class="sub">Tasks matched to your StudTask profile</div></div></div>
-<div class="card info"><b>How recommendations work</b>We prioritize tasks that match your university, campus, location and categories you have saved before. Only current, approved, open tasks are shown.</div>
+<div class="card info"><b>How recommendations work</b>We prioritize current, approved tasks using your university, campus, location, task interests, previous applications, completed work and typical budget range. Your recommendations update as your activity changes.</div>
 <div id="content"><div class="loading">Finding tasks for you...</div></div>
 </main>
 <nav aria-label="Main navigation"><div class="navin"><a href="index.html"><span>⌂</span>Home</a><a href="my-tasks.html"><span>✓</span>My Tasks</a><a href="post-task.html"><span>＋</span>Post</a><a href="alerts.html"><span>🔔</span>Alerts</a><a href="profile.html"><span>♙</span>Profile</a></div></nav>
@@ -32,33 +32,15 @@ const content=document.getElementById("content");
 function esc(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function money(value){return "₦"+Number(value||0).toLocaleString();}
 function deadline(value){const d=new Date(value);return d.toLocaleDateString(undefined,{day:"numeric",month:"short"})+" • "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});}
-function reason(parts){return parts.filter(Boolean).join(" • ");}
 async function load(){
  try{
   const {data:userData,error:userError}=await supabaseClient.auth.getUser();
   if(userError||!userData?.user){content.innerHTML='<div class="empty"><b>Log in to get recommendations</b>Your profile helps StudTask find relevant tasks for you.<a href="login.html">Log In</a></div>';return;}
-  const userId=userData.user.id;
-  const [{data:profile,error:profileError},{data:saved,error:savedError}]=await Promise.all([
-   supabaseClient.from("profiles").select("university_id,campus_id,location").eq("id",userId).maybeSingle(),
-   supabaseClient.from("saved_tasks").select("task_id,tasks(category)").eq("user_id",userId)
-  ]);
-  if(profileError)throw profileError;
-  if(savedError)throw savedError;
-  const categoryScores={};
-  (saved||[]).forEach(row=>{const category=row.tasks?.category;if(category)categoryScores[category]=(categoryScores[category]||0)+1;});
-  const {data:tasks,error:taskError}=await supabaseClient.from("tasks").select("id,title,description,category,location,budget,deadline,university_id,campus_id").eq("status","open").eq("moderation_status","approved").gte("deadline",new Date().toISOString()).order("created_at",{ascending:false}).limit(60);
-  if(taskError)throw taskError;
-  const scored=(tasks||[]).map(task=>{
-   let score=0;const reasons=[];
-   if(profile?.university_id&&task.university_id===profile.university_id){score+=40;reasons.push("Your university");}
-   if(profile?.campus_id&&task.campus_id===profile.campus_id){score+=30;reasons.push("Your campus");}
-   if(profile?.location&&task.location&&task.location.trim().toLowerCase()===profile.location.trim().toLowerCase()){score+=15;reasons.push("Your location");}
-   const categoryScore=categoryScores[task.category]||0;
-   if(categoryScore){score+=Math.min(15,categoryScore*5);reasons.push("Similar to saved tasks");}
-   return {...task,score,reasons};
-  }).filter(task=>task.score>0).sort((a,b)=>b.score-a.score||new Date(a.deadline)-new Date(b.deadline)).slice(0,12);
-  if(!scored.length){content.innerHTML='<div class="empty"><b>No strong matches yet</b>Complete your university, campus and location details, or save a few tasks so recommendations can learn what interests you.<a href="find-tasks.html">Browse All Tasks</a></div>';return;}
-  content.innerHTML=scored.map(task=>`<article class="card"><div class="tasktop"><span class="badge">${esc(task.category||"Other")}</span><span class="budget">${money(task.budget)}</span></div><h3>${esc(task.title)}</h3><p class="desc">${esc(task.description||"")}</p><div class="meta"><span>📍 ${esc(task.location||"Location not set")}</span><span>⏰ ${esc(deadline(task.deadline))}</span></div><div class="reason">Recommended because: ${esc(reason(task.reasons))}</div><a class="view" href="task-details.html?id=${encodeURIComponent(task.id)}">View Task</a></article>`).join("");
+  const {data:tasks,error}=await supabaseClient.rpc("get_smart_task_recommendations",{p_limit:12});
+  if(error)throw error;
+  const list=tasks||[];
+  if(!list.length){content.innerHTML='<div class="empty"><b>No strong matches yet</b>Save tasks or apply for a few tasks so StudTask can learn what interests you. Completing your profile with your university, campus and location also improves matching.<a href="find-tasks.html">Browse All Tasks</a></div>';return;}
+  content.innerHTML=list.map(task=>`<article class="card"><div class="tasktop"><span class="badge">${esc(task.category||"Other")}</span><span class="budget">${money(task.budget)}</span></div><h3>${esc(task.title)}</h3><p class="desc">${esc((task.description||"").slice(0,220))}${(task.description||"").length>220?"…":""}</p><div class="meta"><span>📍 ${esc(task.location||"Location not set")}</span><span>⏰ ${esc(deadline(task.deadline))}</span></div><div class="reason">✨ Recommended because: ${esc((task.reasons||[]).join(" • "))}</div><a class="view" href="task-details.html?id=${encodeURIComponent(task.id)}">View Task</a></article>`).join("");
  }catch(error){console.error(error);content.innerHTML=`<div class="empty"><b>Could not load recommendations</b><span>${esc(error.message||"Please try again.")}</span><a href="find-tasks.html">Browse All Tasks</a></div>`;}
 }
 load();
