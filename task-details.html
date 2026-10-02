@@ -656,7 +656,7 @@ $("backBtn").addEventListener("click",()=>{if(history.length>1)history.back();el
 $("retryBtn").addEventListener("click",()=>initializePage());
 $("backHomeBtn").addEventListener("click",()=>window.location.href="index.html");
 
-document.addEventListener("DOMContentLoaded",()=>{checkModeration().then(allowed=>{if(allowed)initializePage()})});
+document.addEventListener("DOMContentLoaded",()=>{setupTaskSharing();checkModeration().then(allowed=>{if(allowed)initializePage()})});
 </script>
 </div>
 <script src="application-form.js"></script>  <script src="notifications.js"></script>
