@@ -39,7 +39,7 @@ async function loadLeaderboard(){
  if(!campusId)return;
  $("state").className="loading";$("state").textContent="Loading leaderboard...";$("rows").classList.add("hidden");
  const r=await supabaseClient.rpc("get_campus_leaderboard",{p_campus_id:campusId,p_metric:currentMetric,p_limit:50});
- if(r.error){$("state").className="error";$("state").textContent=r.error.message||"Could not load leaderboard.";return}
+ if(r.error){$("state").className="error";$("state").textContent=r."Something went wrong. Please try again."||"Could not load leaderboard.";return}
  const list=r.data||[];
  if(!list.length){$("state").className="empty";$("state").textContent="No ranked students on this campus yet.";return}
  $("state").classList.add("hidden");$("rows").classList.remove("hidden");
@@ -59,7 +59,7 @@ async function init(){
  await loadCampuses(p.data?.campus_id||null);
  await loadLeaderboard();
 }
-init().catch(e=>{$("state").className="error";$("state").textContent=e.message||"Something went wrong."});
+init().catch(e=>{$("state").className="error";$("state").textContent="Something went wrong. Please try again."||"Something went wrong."});
 </script>
 </body>
 </html>
