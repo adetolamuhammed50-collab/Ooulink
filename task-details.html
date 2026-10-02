@@ -212,7 +212,7 @@ async function submitForVerification(){
  const note=window.prompt("Add a short completion note (optional):","");if(note===null)return;
  const input=document.createElement("input");input.type="file";input.accept="image/jpeg,image/png,image/webp,application/pdf";input.multiple=true;
  const files=await new Promise(resolve=>{input.onchange=()=>resolve(Array.from(input.files||[]));input.click()});if(files.length>3){showToast("You can attach up to 3 proof files.");return}if(files.some(f=>f.size>5*1024*1024)){showToast("Each proof file must be 5MB or smaller.");return}if(!String(note||"").trim()&&!files.length){showToast("Add a note or attach at least one proof file.");return}
- const button=$("submitVerificationBtn");if(button){button.disabled=true;button.textContent="Submitting..."}try{const{data:proofId,error}=await supabaseClient.rpc("submit_completion_proof",{p_task_id:currentTask.id,p_note:String(note||"").trim()});if(error)throw error;for(const file of files){const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");const path=`${currentTask.id}/completion-proof/${currentUser.id}/${proofId}-${Date.now()}-${safe}`;const up=await supabaseClient.storage.from("TaskFiles").upload(path,file,{upsert:false,contentType:file.type});if(up.error)throw up.error;const meta=await supabaseClient.from("task_completion_proof_files").insert({proof_id:proofId,task_id:currentTask.id,runner_id:currentUser.id,file_name:file.name,file_path:path,file_size:file.size,mime_type:file.type});if(meta.error)throw meta.error}const{error:finalizeError}=await supabaseClient.rpc("finalize_completion_proof",{p_proof_id:proofId});if(finalizeError)throw finalizeError;await notifyUser(currentTask.user_id,currentTask.id,"verification","Completion Proof Submitted","Your runner submitted completion proof for: "+currentTask.title);showToast("Completion proof submitted.");await loadTask()}catch(error){console.error("Completion proof error:",error);if(button){button.disabled=false;button.textContent="✓ Submit Completion Proof"}showToast(error?.message||"Could not submit completion proof.")}}
+ const button=$("submitVerificationBtn");if(button){button.disabled=true;button.textContent="Submitting..."}try{const{data:proofId,error}=await supabaseClient.rpc("submit_completion_proof",{p_task_id:currentTask.id,p_note:String(note||"").trim()});if(error)throw error;for(const file of files){const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");const path=`${currentTask.id}/completion-proof/${currentUser.id}/${proofId}-${Date.now()}-${safe}`;const up=await supabaseClient.storage.from("TaskFiles").upload(path,file,{upsert:false,contentType:file.type});if(up.error)throw up.error;const meta=await supabaseClient.from("task_completion_proof_files").insert({proof_id:proofId,task_id:currentTask.id,runner_id:currentUser.id,file_name:file.name,file_path:path,file_size:file.size,mime_type:file.type});if(meta.error)throw meta.error}const{error:finalizeError}=await supabaseClient.rpc("finalize_completion_proof",{p_proof_id:proofId});if(finalizeError)throw finalizeError;await notifyUser(currentTask.user_id,currentTask.id,"verification","Completion Proof Submitted","Your runner submitted completion proof for: "+currentTask.title);showToast("Completion proof submitted.");await loadTask()}catch(error){console.error("Completion proof error:",error);if(button){button.disabled=false;button.textContent="✓ Submit Completion Proof"}showToast("Something went wrong. Please try again."||"Could not submit completion proof.")}}
 function renderTimeline(){
   const status=normalizeStatus(currentTask.status);
   const items=[{title:"Task posted",text:`Posted ${formatDateTime(currentTask.created_at)}`}];
@@ -252,7 +252,7 @@ async function startTask(){
   if(!isRunner()){showToast("Only the assigned runner can start this task.");return}
   if(normalizeStatus(currentTask.status)!=="accepted"){showToast("This task cannot be started right now.");return}
   const button=$("startTaskBtn");if(button){button.disabled=true;button.textContent="Starting..."}
-  try{const{error}=await supabaseClient.from("tasks").update({status:"in_progress"}).eq("id",currentTask.id).eq("runner_id",currentUser.id).eq("status","accepted");if(error)throw error;showToast("Task started.");await loadTask()}catch(error){console.error("Start task error:",error);if(button){button.disabled=false;button.textContent="▶ Start Task"}showToast(error?.message||"Could not start the task.")}
+  try{const{error}=await supabaseClient.from("tasks").update({status:"in_progress"}).eq("id",currentTask.id).eq("runner_id",currentUser.id).eq("status","accepted");if(error)throw error;showToast("Task started.");await loadTask()}catch(error){console.error("Start task error:",error);if(button){button.disabled=false;button.textContent="▶ Start Task"}showToast("Something went wrong. Please try again."||"Could not start the task.")}
 }
 
 
@@ -262,7 +262,7 @@ async function completeTask(){
   if(normalizeStatus(currentTask.status)!=="awaiting_verification"){showToast("This task is not awaiting verification.");return}
   if(!window.confirm("Approve this task and mark it as completed?"))return;
   const button=$("completeTaskBtn");const runnerId=currentTask.runner_id;if(button){button.disabled=true;button.textContent="Completing..."}
-  try{const{error}=await supabaseClient.from("tasks").update({status:"completed"}).eq("id",currentTask.id).eq("user_id",currentUser.id).eq("runner_id",runnerId).eq("status","awaiting_verification");if(error)throw error;await notifyUser(runnerId,currentTask.id,"task","Task Completed","Your task submission was approved and marked completed: "+currentTask.title);showToast("Task completed successfully.");try{const{error:xpError}=await supabaseClient.rpc("award_task_xp",{target_task_id:currentTask.id,target_reward_type:"task_completed"});if(xpError)console.error("Task completion XP error:",xpError)}catch(xpError){console.error("Task completion XP exception:",xpError)}await loadTask()}catch(error){console.error("Complete task error:",error);if(button){button.disabled=false;button.textContent="✓ Approve & Complete"}showToast(error?.message||"Could not complete the task.")}
+  try{const{error}=await supabaseClient.from("tasks").update({status:"completed"}).eq("id",currentTask.id).eq("user_id",currentUser.id).eq("runner_id",runnerId).eq("status","awaiting_verification");if(error)throw error;await notifyUser(runnerId,currentTask.id,"task","Task Completed","Your task submission was approved and marked completed: "+currentTask.title);showToast("Task completed successfully.");try{const{error:xpError}=await supabaseClient.rpc("award_task_xp",{target_task_id:currentTask.id,target_reward_type:"task_completed"});if(xpError)console.error("Task completion XP error:",xpError)}catch(xpError){console.error("Task completion XP exception:",xpError)}await loadTask()}catch(error){console.error("Complete task error:",error);if(button){button.disabled=false;button.textContent="✓ Approve & Complete"}showToast("Something went wrong. Please try again."||"Could not complete the task.")}
 }
 
 function renderReviewStars(rating){const value=Math.max(0,Math.min(5,Number(rating)||0));return "★".repeat(value)+"☆".repeat(5-value)}
@@ -274,7 +274,7 @@ async function submitReview(){
   const revieweeId=isOwner()?currentTask.runner_id:currentTask.user_id;if(!revieweeId||revieweeId===currentUser.id){showToast("This review cannot be submitted.");return}
   if(!selectedReviewRating){showToast("Please choose a rating.");return}
   const noteElement=$("reviewNote");const note=noteElement?noteElement.value.trim():"";const button=$("submitReviewBtn");if(button){button.disabled=true;button.textContent="Submitting..."}
-  try{const{data,error}=await supabaseClient.from("reviews").insert({task_id:currentTask.id,reviewer_id:currentUser.id,reviewee_id:revieweeId,rating:selectedReviewRating,note:note||null}).select("id,rating,note,created_at").single();if(error){if(error.code==="23505"){showToast("You have already reviewed this person.");await renderReviewSection();return}throw error}showToast("Review submitted. ⭐");selectedReviewRating=0;renderSubmittedReview(data)}catch(error){console.error("Submit review error:",error);if(button){button.disabled=false;button.textContent="Submit Review"}showToast(error?.message||"Could not submit your review.")}
+  try{const{data,error}=await supabaseClient.from("reviews").insert({task_id:currentTask.id,reviewer_id:currentUser.id,reviewee_id:revieweeId,rating:selectedReviewRating,note:note||null}).select("id,rating,note,created_at").single();if(error){if(error.code==="23505"){showToast("You have already reviewed this person.");await renderReviewSection();return}throw error}showToast("Review submitted. ⭐");selectedReviewRating=0;renderSubmittedReview(data)}catch(error){console.error("Submit review error:",error);if(button){button.disabled=false;button.textContent="Submit Review"}showToast("Something went wrong. Please try again."||"Could not submit your review.")}
 }
 function renderSubmittedReview(review){const box=$("reviewContent");if(!box||!review)return;box.innerHTML=`<div class="review-card"><div class="review-title">⭐ Your Review</div><div class="review-stars">${renderReviewStars(review.rating)}</div>${review.note?`<div class="review-existing">${escapeHtml(review.note)}</div>`:`<div class="review-existing">You left a ${Number(review.rating)}/5 rating.</div>`}</div>`}
 function selectReviewRating(rating){selectedReviewRating=Number(rating);document.querySelectorAll(".rating-btn").forEach(button=>button.classList.toggle("selected",Number(button.dataset.rating)===selectedReviewRating))}
@@ -338,7 +338,7 @@ async function deleteTask(){
       button.textContent="🗑 Delete Task";
     }
 
-    showToast(error?.message||"Could not delete this task.");
+    showToast("Something went wrong. Please try again."||"Could not delete this task.");
   }
 }
 
@@ -349,7 +349,7 @@ async function reportTask(){
   const reportedUserId=isOwner()?currentTask.runner_id:currentTask.user_id;if(!reportedUserId||reportedUserId===currentUser.id){showToast("This report cannot be submitted.");return}
   const reason=window.prompt("Why are you reporting this task or user?");if(!reason||!reason.trim())return;
   const details=window.prompt("Add more details if needed. You can leave this blank.")||"";
-  try{const{error}=await supabaseClient.from("reports").insert({task_id:currentTask.id,reporter_id:currentUser.id,reported_user_id:reportedUserId,reason:reason.trim(),details:details.trim()});if(error)throw error;showToast("Report submitted. Thank you.")}catch(error){console.error("Report error:",error);showToast(error?.message||"Could not submit the report.")}
+  try{const{error}=await supabaseClient.from("reports").insert({task_id:currentTask.id,reporter_id:currentUser.id,reported_user_id:reportedUserId,reason:reason.trim(),details:details.trim()});if(error)throw error;showToast("Report submitted. Thank you.")}catch(error){console.error("Report error:",error);showToast("Something went wrong. Please try again."||"Could not submit the report.")}
 }
 
 function renderActions(){
@@ -390,7 +390,7 @@ async function applyForTask(){
   if(normalizeStatus(currentTask.status)!=="open"){showToast("This task is no longer accepting applications.");return}
   if(myApplication&&normalizeStatus(myApplication.status)==="pending"){showToast("You have already applied.");return}
   const button=$("applyBtn");if(button){button.disabled=true;button.textContent="Applying..."}
-  try{const{error}=await supabaseClient.from("task_applications").insert({task_id:currentTask.id,runner_id:currentUser.id,status:"pending"});if(error)throw error;myApplication={task_id:currentTask.id,runner_id:currentUser.id,status:"pending"};await notifyUser(currentTask.user_id,currentTask.id,"application","New Task Application","Someone applied for your task: "+currentTask.title);showToast("Application sent successfully.");renderActions()}catch(error){console.error("Apply for task error:",error);if(button){button.disabled=false;button.textContent="Apply for Task"}if(error?.message?.includes("STUDTASK_RATE_LIMITED"))showToast("⚡ Slow down — you can submit a maximum of 3 applications every 2 minutes. Please wait before applying again.");else showToast(error?.message||"Could not apply for this task.")}
+  try{const{error}=await supabaseClient.from("task_applications").insert({task_id:currentTask.id,runner_id:currentUser.id,status:"pending"});if(error)throw error;myApplication={task_id:currentTask.id,runner_id:currentUser.id,status:"pending"};await notifyUser(currentTask.user_id,currentTask.id,"application","New Task Application","Someone applied for your task: "+currentTask.title);showToast("Application sent successfully.");renderActions()}catch(error){console.error("Apply for task error:",error);if(button){button.disabled=false;button.textContent="Apply for Task"}if("Something went wrong. Please try again."?.includes("STUDTASK_RATE_LIMITED"))showToast("⚡ Slow down — you can submit a maximum of 3 applications every 2 minutes. Please wait before applying again.");else showToast("Something went wrong. Please try again."||"Could not apply for this task.")}
 }
 
 async function selectRunner(applicationId){
@@ -401,7 +401,7 @@ async function selectRunner(applicationId){
   const application=taskApplications.find(item=>item.id===applicationId);if(!application||normalizeStatus(application.status)!=="pending"){showToast("This application is no longer available.");return}
   if(!window.confirm("Select this student as the runner for this task?"))return;
   const buttons=document.querySelectorAll(".select-runner-btn");buttons.forEach(button=>{button.disabled=true;button.textContent="Selecting..."});
-  try{const{data,error}=await supabaseClient.rpc("select_task_runner",{target_task_id:currentTask.id,target_application_id:applicationId});if(error)throw error;if(data!==true)throw new Error("Runner selection could not be completed.");await notifyUser(application.runner_id,currentTask.id,"task","You Were Selected","You were selected as the runner for: "+currentTask.title);showToast("Runner selected successfully.");await loadTask()}catch(error){console.error("Select runner error:",error);showToast(error?.message||"Could not select this runner.");buttons.forEach(button=>{button.disabled=false;button.textContent="Select Runner"})}
+  try{const{data,error}=await supabaseClient.rpc("select_task_runner",{target_task_id:currentTask.id,target_application_id:applicationId});if(error)throw error;if(data!==true)throw new Error("Runner selection could not be completed.");await notifyUser(application.runner_id,currentTask.id,"task","You Were Selected","You were selected as the runner for: "+currentTask.title);showToast("Runner selected successfully.");await loadTask()}catch(error){console.error("Select runner error:",error);showToast("Something went wrong. Please try again."||"Could not select this runner.");buttons.forEach(button=>{button.disabled=false;button.textContent="Select Runner"})}
 }
 
 async function loadMyApplication(taskId){
@@ -482,7 +482,7 @@ function renderCancellationAction() {
       await loadTask();
     } catch (error) {
       console.error("Cancel task error:", error);
-      showToast(error?.message || "Could not cancel this task.");
+      showToast("Something went wrong. Please try again." || "Could not cancel this task.");
       button.disabled = false;
       button.textContent = "✕ " + label;
     }
@@ -577,7 +577,7 @@ async function setupSavedTaskButton(){
         showToast(saved ? "Task saved." : "Task removed from Saved.");
       } catch (error) {
         console.error("Saved task action error:", error);
-        showToast(error?.message || "Could not update saved task.");
+        showToast("Something went wrong. Please try again." || "Could not update saved task.");
       } finally {
         button.disabled = false;
       }
@@ -615,7 +615,7 @@ async function loadTask(){
     const attachmentsPromise=(async()=>{const{data:attachments,error:attachmentError}=await supabaseClient.from("task_attachments").select(`id,task_id,user_id,file_name,file_path,file_size,mime_type,created_at`).eq("task_id",task.id).order("created_at",{ascending:true});if(attachmentError){console.warn("Attachment load error:",attachmentError);return}taskAttachments=attachments||[]})();
     await Promise.all([myApplicationPromise,applicationsPromise,profilesPromise,attachmentsPromise]);
     renderPoster();renderRunner();renderActions();renderDisputeAction();renderTrustAction();renderCompletionProof().catch(error=>console.warn("Completion proof rendering error:",error));renderAttachments().catch(error=>console.warn("Attachment rendering error:",error));
-  }catch(error){console.error("Task details error:",error);showError(error?.message||"We couldn't load this task. Please try again.")}finally{isLoading=false}
+  }catch(error){console.error("Task details error:",error);showError("Something went wrong. Please try again."||"We couldn't load this task. Please try again.")}finally{isLoading=false}
 }
 
 async function initializePage(){await loadTask()}
