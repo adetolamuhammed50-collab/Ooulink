@@ -42,7 +42,7 @@ async function load(){
   const list=tasks||[];
   if(!list.length){content.innerHTML='<div class="empty"><b>No strong matches yet</b>Save tasks or apply for a few tasks so StudTask can learn what interests you. Completing your profile with your university, campus and location also improves matching.<a href="find-tasks.html">Browse All Tasks</a></div>';return;}
   content.innerHTML=list.map(task=>`<article class="card"><div class="tasktop"><span class="badge">${esc(task.category||"Other")}</span><span class="budget">${money(task.budget)}</span></div><h3>${esc(task.title)}</h3><p class="desc">${esc((task.description||"").slice(0,220))}${(task.description||"").length>220?"…":""}</p><div class="meta"><span>📍 ${esc(task.location||"Location not set")}</span><span>⏰ ${esc(deadline(task.deadline))}</span></div><div class="reason">✨ Recommended because: ${esc((task.reasons||[]).join(" • "))}</div><a class="view" href="task-details.html?id=${encodeURIComponent(task.id)}">View Task</a></article>`).join("");
- }catch(error){console.error(error);content.innerHTML=`<div class="empty"><b>Could not load recommendations</b><span>${esc(error.message||"Please try again.")}</span><a href="find-tasks.html">Browse All Tasks</a></div>`;}
+ }catch(error){console.error(error);content.innerHTML=`<div class="empty"><b>Could not load recommendations</b><span>${esc("Something went wrong. Please try again."||"Please try again.")}</span><a href="find-tasks.html">Browse All Tasks</a></div>`;}
 }
 load();
 </script>
