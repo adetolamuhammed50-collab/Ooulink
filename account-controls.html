@@ -148,7 +148,7 @@
       const { error } = await supabaseClient.auth.updateUser({ password });
 
       if (error) {
-        setStatus(passwordStatus, error.message || "Could not update your password.", "error");
+        setStatus(passwordStatus, "Something went wrong. Please try again." || "Could not update your password.", "error");
       } else {
         document.getElementById("newPassword").value = "";
         document.getElementById("confirmPassword").value = "";
@@ -174,7 +174,7 @@
       const { error } = await supabaseClient.auth.updateUser({ email });
 
       if (error) {
-        setStatus(emailStatus, error.message || "Could not update your email.", "error");
+        setStatus(emailStatus, "Something went wrong. Please try again." || "Could not update your email.", "error");
       } else {
         document.getElementById("newEmail").value = "";
         setStatus(emailStatus, "Check your email for the confirmation link if confirmation is required.", "success");
@@ -190,7 +190,7 @@
       const { error } = await supabaseClient.auth.signOut({ scope: "global" });
 
       if (error) {
-        setStatus(sessionStatus, error.message || "Could not sign out everywhere.", "error");
+        setStatus(sessionStatus, "Something went wrong. Please try again." || "Could not sign out everywhere.", "error");
         signOutAllButton.disabled = false;
         signOutAllButton.textContent = "SIGN OUT EVERYWHERE";
         return;
@@ -236,7 +236,7 @@
         .insert({ user_id: user.id, reason: "User requested account deletion." });
 
       if (error) {
-        setStatus(deleteStatus, error.message || "Could not submit the deletion request.", "error");
+        setStatus(deleteStatus, "Something went wrong. Please try again." || "Could not submit the deletion request.", "error");
       } else {
         setStatus(deleteStatus, "Deletion request submitted. Your account remains active until the request is reviewed.", "success");
       }
