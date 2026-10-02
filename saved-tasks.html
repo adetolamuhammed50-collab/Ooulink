@@ -34,13 +34,13 @@ function render(tasks){
  if(!tasks.length){list.innerHTML='<div class="empty"><div class="empty-icon">🔖</div><h2>No saved tasks</h2><p>When you save an available task, it will appear here.</p><a class="primary" href="find-tasks.html">Find Tasks</a></div>';return}
  list.innerHTML=tasks.map(task=>`<article class="card" data-id="${esc(task.id)}"><div class="top"><span class="category">${esc(task.category||"Task")}</span><span class="budget">${money(task.budget)}</span></div><h3>${esc(task.title)}</h3><div class="desc">${esc(task.description||"No description provided.")}</div><div class="meta"><span>📍 ${esc(task.location||"Location not specified")}</span><span>⏳ ${date(task.deadline)}</span></div><button class="remove" type="button" data-remove="${esc(task.id)}">Remove from Saved</button></article>`).join("");
  list.querySelectorAll("[data-id]").forEach(card=>card.addEventListener("click",event=>{if(event.target.closest("[data-remove]"))return;location.href="task-details.html?id="+encodeURIComponent(card.dataset.id)}));
- list.querySelectorAll("[data-remove]").forEach(button=>button.addEventListener("click",async event=>{event.stopPropagation();button.disabled=true;button.textContent="Removing...";const{error}=await supabaseClient.rpc("unsave_task",{p_task_id:button.dataset.remove});if(error){button.disabled=false;button.textContent="Remove from Saved";alert(error.message);return}await loadSaved()}));
+ list.querySelectorAll("[data-remove]").forEach(button=>button.addEventListener("click",async event=>{event.stopPropagation();button.disabled=true;button.textContent="Removing...";const{error}=await supabaseClient.rpc("unsave_task",{p_task_id:button.dataset.remove});if(error){button.disabled=false;button.textContent="Remove from Saved";alert("Something went wrong. Please try again.");return}await loadSaved()}));
 }
 async function loadSaved(){
  const{data:{session}}=await supabaseClient.auth.getSession();
  if(!session){location.href="login.html";return}
  const{data,error}=await supabaseClient.from("saved_tasks").select("task_id,created_at,tasks(id,title,description,category,location,budget,deadline,status,moderation_status)").eq("user_id",session.user.id).order("created_at",{ascending:false});
- if(error){list.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><h2>Couldn\'t load saved tasks</h2><p>'+esc(error.message)+'</p></div>';return}
+ if(error){list.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><h2>Couldn\'t load saved tasks</h2><p>'+esc("Something went wrong. Please try again.")+'</p></div>';return}
  const tasks=(data||[]).map(row=>row.tasks).filter(task=>task&&task.status==="open"&&task.moderation_status==="approved"&&new Date(task.deadline)>=new Date());
  render(tasks);
 }
