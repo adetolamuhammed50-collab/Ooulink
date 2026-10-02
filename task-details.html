@@ -405,7 +405,7 @@ async function selectRunner(applicationId){
     const{data,error}=await supabaseClient.rpc("select_task_runner",{target_task_id:currentTask.id,target_application_id:applicationId});
     if(error)throw error;
     if(data!==true)throw new Error("Runner selection could not be completed.");
-    await notifyUser(application.runner_id,currentTask.id,"task","You Were Selected","You were selected as the runner for: "+currentTask.title);
+    try{await notifyUser(application.runner_id,currentTask.id,"task","You Were Selected","You were selected as the runner for: "+currentTask.title)}catch(notificationError){console.warn("Runner notification failed after successful selection:",notificationError)}
     showToast("Runner selected successfully.");
     await loadTask();
   }catch(error){
