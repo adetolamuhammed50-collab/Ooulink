@@ -129,7 +129,7 @@ form.addEventListener("submit", async (event) => {
       window.location.href = "index.html";
     }, 700);
   } catch (error) {
-    showMessage(error.message || "Login failed. Please try again.", "error");
+    showMessage("Something went wrong. Please try again." || "Login failed. Please try again.", "error");
   } finally {
     button.disabled = false;
     button.textContent = "LOG IN";
@@ -160,7 +160,7 @@ forgotButton.addEventListener("click", async () => {
 
     showMessage("If an account exists for that email, a password reset link has been sent. Check your inbox and spam folder.", "success");
   } catch (error) {
-    showMessage(error.message || "Could not send the password reset email. Please try again.", "error");
+    showMessage("Something went wrong. Please try again." || "Could not send the password reset email. Please try again.", "error");
   } finally {
     forgotButton.disabled = false;
     forgotButton.textContent = "Forgot password?";
