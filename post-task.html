@@ -278,7 +278,7 @@ async function postTask() {
     }
   } catch (error) {
     console.error("Pre-post check error:", error);
-    alert(error.message || "Could not verify your account.");
+    alert("Something went wrong. Please try again." || "Could not verify your account.");
     return;
   }
 
@@ -456,7 +456,7 @@ async function postTask() {
 
     alert(
       "Something went wrong.\n\n" +
-      (error.message || "Could not post task.")
+      ("Something went wrong. Please try again." || "Could not post task.")
     );
 
     button.disabled = false;
