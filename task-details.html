@@ -411,7 +411,12 @@ async function selectRunner(applicationId){
   }catch(error){
     console.error("Select runner error:",error);
     buttons.forEach(button=>{button.disabled=false;button.textContent="Select Runner"});
-    const message=String(error?.message||"").toUpperCase();
+    const message=String(error?.message||error?.details||error?.hint||error||"").toUpperCase();
+    if(message.includes("42501")||message.includes("PERMISSION DENIED")||message.includes("NOT AUTHORIZED")||message.includes("FORBIDDEN")){
+      showToast("Runner selection is blocked by your current account permissions. Please refresh your session and try again.");
+    } else if(message.includes("PGRST")||message.includes("FUNCTION")||message.includes("RPC")){
+      showToast("Runner selection service is unavailable. Please refresh and try again.");
+    }
     if(message.includes("NOT_TASK_OWNER"))showToast("Only the task poster can select a runner.");
     else if(message.includes("TASK_NOT_OPEN"))showToast("This task is no longer accepting applicants.");
     else if(message.includes("TASK_NOT_APPROVED"))showToast("This task is not approved for runner selection yet.");
