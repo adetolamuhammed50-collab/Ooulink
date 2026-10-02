@@ -407,7 +407,12 @@ async function selectRunner(applicationId){
     if(data!==true)throw new Error("Runner selection could not be completed.");
     try{await notifyUser(application.runner_id,currentTask.id,"task","You Were Selected","You were selected as the runner for: "+currentTask.title)}catch(notificationError){console.warn("Runner notification failed after successful selection:",notificationError)}
     showToast("Runner selected successfully.");
-    await loadTask();
+    try{
+      await loadTask();
+    }catch(refreshError){
+      console.error("Runner selected, but task refresh failed:",refreshError);
+      showToast("Runner selected successfully. Refresh the page to see the updated task.");
+    }
   }catch(error){
     console.error("Select runner error:",error);
     buttons.forEach(button=>{button.disabled=false;button.textContent="Select Runner"});
