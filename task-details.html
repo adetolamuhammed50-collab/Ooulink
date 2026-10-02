@@ -401,7 +401,30 @@ async function selectRunner(applicationId){
   const application=taskApplications.find(item=>item.id===applicationId);if(!application||normalizeStatus(application.status)!=="pending"){showToast("This application is no longer available.");return}
   if(!window.confirm("Select this student as the runner for this task?"))return;
   const buttons=document.querySelectorAll(".select-runner-btn");buttons.forEach(button=>{button.disabled=true;button.textContent="Selecting..."});
-  try{const{data,error}=await supabaseClient.rpc("select_task_runner",{target_task_id:currentTask.id,target_application_id:applicationId});if(error)throw error;if(data!==true)throw new Error("Runner selection could not be completed.");await notifyUser(application.runner_id,currentTask.id,"task","You Were Selected","You were selected as the runner for: "+currentTask.title);showToast("Runner selected successfully.");await loadTask()}catch(error){console.error("Select runner error:",error);showToast("Something went wrong. Please try again."||"Could not select this runner.");buttons.forEach(button=>{button.disabled=false;button.textContent="Select Runner"})}
+  try{
+    const{data,error}=await supabaseClient.rpc("select_task_runner",{target_task_id:currentTask.id,target_application_id:applicationId});
+    if(error)throw error;
+    if(data!==true)throw new Error("Runner selection could not be completed.");
+    await notifyUser(application.runner_id,currentTask.id,"task","You Were Selected","You were selected as the runner for: "+currentTask.title);
+    showToast("Runner selected successfully.");
+    await loadTask();
+  }catch(error){
+    console.error("Select runner error:",error);
+    buttons.forEach(button=>{button.disabled=false;button.textContent="Select Runner"});
+    const message=String(error?.message||"").toUpperCase();
+    if(message.includes("NOT_TASK_OWNER"))showToast("Only the task poster can select a runner.");
+    else if(message.includes("TASK_NOT_OPEN"))showToast("This task is no longer accepting applicants.");
+    else if(message.includes("TASK_NOT_APPROVED"))showToast("This task is not approved for runner selection yet.");
+    else if(message.includes("TASK_DEADLINE_PASSED"))showToast("This task deadline has passed.");
+    else if(message.includes("APPLICATION_NOT_FOUND"))showToast("That application could not be found.");
+    else if(message.includes("APPLICATION_NOT_PENDING"))showToast("That application is no longer available.");
+    else if(message.includes("TASK_PAYMENT_NOT_FOUND"))showToast("This task is missing its payment record.");
+    else if(message.includes("TASK_PAYMENT_NOT_LOCKED"))showToast("This task is not ready for runner selection yet.");
+    else if(message.includes("TASK_PAYMENT_INTEGRITY_FAILED"))showToast("The task payment does not match the task.");
+    else if(message.includes("TASK_SELECTION_CONFLICT"))showToast("Another runner selection happened first. Refresh and try again.");
+    else if(message.includes("AUTH_REQUIRED"))showToast("Your session expired. Please log in again.");
+    else showToast("Could not select this runner. Please try again.");
+  }
 }
 
 async function loadMyApplication(taskId){
