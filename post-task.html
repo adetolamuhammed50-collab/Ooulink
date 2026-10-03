@@ -148,7 +148,8 @@ async function checkModeration(session) {
 
   if (error) {
     console.error("Moderation check failed:", error);
-    return true;
+    alert("We couldn't verify your account status. Please try again.");
+    return false;
   }
 
   if (data?.status === "banned") {
