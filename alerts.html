@@ -428,7 +428,7 @@
         .eq("user_id", session.user.id)
         .maybeSingle();
 
-      if (error) return true;
+      if (error) { console.error("Moderation check failed:", error); alert("We couldn't verify your account status. Please try again."); return false; }
 
       if (data?.status === "banned") {
         const activeBan = data.ban_type === "permanent" ||
